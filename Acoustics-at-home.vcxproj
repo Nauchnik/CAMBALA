@@ -44,6 +44,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>D:\Programming\alglib-3.9.0.cpp.gpl\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -56,6 +57,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>D:\Programming\alglib-3.9.0.cpp.gpl\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -64,7 +66,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\alglib-3.9.0.cpp.gpl\src\alglibinternal.cpp" />
+    <ClCompile Include="..\alglib-3.9.0.cpp.gpl\src\alglibmisc.cpp" />
+    <ClCompile Include="..\alglib-3.9.0.cpp.gpl\src\ap.cpp" />
+    <ClCompile Include="..\alglib-3.9.0.cpp.gpl\src\dataanalysis.cpp" />
+    <ClCompile Include="..\alglib-3.9.0.cpp.gpl\src\diffequations.cpp" />
+    <ClCompile Include="..\alglib-3.9.0.cpp.gpl\src\fasttransforms.cpp" />
+    <ClCompile Include="..\alglib-3.9.0.cpp.gpl\src\integration.cpp" />
+    <ClCompile Include="..\alglib-3.9.0.cpp.gpl\src\interpolation.cpp" />
+    <ClCompile Include="..\alglib-3.9.0.cpp.gpl\src\linalg.cpp" />
+    <ClCompile Include="..\alglib-3.9.0.cpp.gpl\src\optimization.cpp" />
+    <ClCompile Include="..\alglib-3.9.0.cpp.gpl\src\solvers.cpp" />
+    <ClCompile Include="..\alglib-3.9.0.cpp.gpl\src\specialfunctions.cpp" />
+    <ClCompile Include="..\alglib-3.9.0.cpp.gpl\src\statistics.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\alglibinternal.h" />
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\alglibmisc.h" />
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\ap.h" />
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\dataanalysis.h" />
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\diffequations.h" />
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\fasttransforms.h" />
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\integration.h" />
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\interpolation.h" />
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\linalg.h" />
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\optimization.h" />
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\solvers.h" />
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\specialfunctions.h" />
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\statistics.h" />
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

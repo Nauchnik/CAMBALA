@@ -8,6 +8,11 @@
 
 #include <iostream>
 #include <vector>
+#include <sstream>
+#include <fstream>
+#include <chrono>
+#include "linalg.h"
+
 using namespace std;
 
 // layer data 
@@ -82,6 +87,78 @@ vector<double> calc_chanel_mods_wave_numbers( double &depth_step,
 	
 	// make tridiagonal matrix and find its eigenvalues in given interval
 	// ...
+	stringstream sstream;
+	// calculate eigenvalues and eigenvectors
+	int n=2000;
+	double from = -0.001, to = 0.001; // interval for eigenvalues
+	
+	sstream << "n : " << n << endl;
+	alglib::real_2d_array A, eigenvectors; // V - собств вектор
+	alglib::real_1d_array eigenvalues; // Lm -собств знач
+	A.setlength(n,n);
+	eigenvectors.setlength(n,n);
+	eigenvalues.setlength(n);
+	
+	// fill matrix by zeros
+	for ( int i=0; i < n; i++ )
+		for ( int j=0; j < n; j++ )
+			A[i][j] = 0.0;
+	
+	// fill tridiagonal matrix
+	// make Dirichlet case matrix
+	// На главной диагонали стоят числа -2/(h^2), на под- и над- диагоналях стоят числа 1/(h^2).
+	double h = 2.0;
+	for ( int i=0; i < n; i++ ) {
+		A[i][i] = -2/pow(h,2);
+		if ( i != n-1 ) {
+			A[i+1][i] = 1/pow(h,2);
+			A[i][i+1] = 1/pow(h,2);
+		}
+	}
+	
+	sstream << "A :" << endl;
+	sstream << "first diagonal above main :" << endl;
+	for ( int i=0; i < n-1; i++ )
+		sstream << A[i][i+1] << " ";
+	sstream << endl;
+	
+	sstream << "main diagonal :" << endl;
+	for ( int i=0; i < n; i++ )
+		sstream << A[i][i] << " ";
+	sstream << endl;
+	
+	sstream << "first diagonal below main :" << endl;
+	for ( int i=0; i < n-1; i++ )
+		sstream << A[i+1][i] << " ";
+	sstream << endl;
+	
+	sstream << "interval : (" << from << ", " << to << "]" << endl;
+	alglib::ae_int_t eigen_count = 0;
+	//alglib::smatrixevd(A,n,1,0,eigenvalues,eigenvectors);
+	chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+	alglib::smatrixevdr( A, n, 1, 0, from, to, eigen_count, eigenvalues, eigenvectors); // bisection method
+	chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+
+	sstream << "solving time : " << time_span.count() << endl;
+	sstream << "eigenvalues count in interval : " << eigen_count << endl; 
+	//cout << "eigenvalues count : " << eigenvalues.length() << endl;
+
+	for ( int i=0; i < eigenvalues.length(); i++ ) {
+		sstream << "eigenvalue # " << i << " : " << eigenvalues[i] << endl;
+		sstream << "eigenvector # " << i << " : " << endl;
+		for ( int j=0; j < n; j++ )
+			sstream << eigenvectors[i][j] << " ";
+		if ( i < eigenvalues.length() - 1 ) 
+			sstream << endl;
+	}
+	
+	ofstream ofile( "out" );
+	ofile << sstream.str();
+	ofile.close();
+	sstream.clear(); sstream.str("");
+
+	cout << "finding eigenvalues done" << endl;
 
 	// fill vector wave_numbers
 	// test filling
@@ -103,7 +180,7 @@ vector<double> calc_wave_numbers_richardson( layer  &cur_layer, // info about cu
 	// call function
 	vector<double> channel_mods_wave_numbers, sound_velocity, density, point_indexes;
 	// fill vectors sound_velocity, density, point_indexes
-	unsigned channel_mods_iterations = 10; // test filling
+	unsigned channel_mods_iterations = 1; // test filling
 	double cur_depth_step;
 	for ( unsigned i = 0; i < channel_mods_iterations; i++ ) {
 		cur_depth_step = initial_depth_step + i*0.1;
