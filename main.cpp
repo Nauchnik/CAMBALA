@@ -90,7 +90,7 @@ vector<double> calc_chanel_mods_wave_numbers( double &depth_step,
 	stringstream sstream;
 	// calculate eigenvalues and eigenvectors
 	int n=2000;
-	double from = -0.001, to = 0.001; // interval for eigenvalues
+	double from = 0, to = 0.01; // interval for eigenvalues
 	
 	sstream << "n : " << n << endl;
 	alglib::real_2d_array A, eigenvectors; // V - собств вектор
@@ -136,7 +136,7 @@ vector<double> calc_chanel_mods_wave_numbers( double &depth_step,
 	alglib::ae_int_t eigen_count = 0;
 	//alglib::smatrixevd(A,n,1,0,eigenvalues,eigenvectors);
 	chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-	alglib::smatrixevdr( A, n, 1, 0, from, to, eigen_count, eigenvalues, eigenvectors); // bisection method
+	alglib::smatrixevdr( A, n, 0, 0, from, to, eigen_count, eigenvalues, eigenvectors); // bisection method
 	chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	
@@ -146,11 +146,11 @@ vector<double> calc_chanel_mods_wave_numbers( double &depth_step,
 
 	for ( int i=0; i < eigenvalues.length(); i++ ) {
 		sstream << "eigenvalue # " << i << " : " << eigenvalues[i] << endl;
-		sstream << "eigenvector # " << i << " : " << endl;
+		/*sstream << "eigenvector # " << i << " : " << endl;
 		for ( int j=0; j < n; j++ )
 			sstream << eigenvectors[i][j] << " ";
 		if ( i < eigenvalues.length() - 1 ) 
-			sstream << endl;
+			sstream << endl;*/
 	}
 	
 	ofstream ofile( "out" );

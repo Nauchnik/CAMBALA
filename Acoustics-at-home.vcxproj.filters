@@ -39,25 +39,28 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\alglibinternal.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\alglibmisc.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\ap.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\linalg.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\stdafx.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\integration.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\linalg.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\specialfunctions.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Makefile" />
   </ItemGroup>
 </Project>

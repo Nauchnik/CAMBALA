@@ -83,6 +83,9 @@
     <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\specialfunctions.h" />
     <ClInclude Include="..\alglib-3.9.0.cpp.gpl\src\stdafx.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Makefile" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
