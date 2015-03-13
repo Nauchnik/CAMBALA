@@ -139,7 +139,7 @@ vector<double> calc_chanel_mods_wave_numbers( double &depth_step,
 	alglib::smatrixevdr( A, n, 1, 0, from, to, eigen_count, eigenvalues, eigenvectors); // bisection method
 	chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-
+	
 	sstream << "solving time : " << time_span.count() << endl;
 	sstream << "eigenvalues count in interval : " << eigen_count << endl; 
 	//cout << "eigenvalues count : " << eigenvalues.length() << endl;
