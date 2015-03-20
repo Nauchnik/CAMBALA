@@ -11,7 +11,7 @@
 #include <sstream>
 #include <fstream>
 #include <chrono>
-#include "../alglib/linalg.h"
+#include "linalg.h"
 
 using namespace std;
 
@@ -25,46 +25,216 @@ struct layer
 	double dend;         // density at the end of a layer
 };
 
-// data of corresponding function output
-struct eigenfunctions_velocities
-{
-	vector<double> eigenfunctions;
-	vector<double> velocities;
-};
 
-// prototypes of functions
-vector<double> calc_chanel_mods_wave_numbers( double &depth_step, double &freq, vector<double> &sound_velocity,
-											  vector<double> &density, vector<double> &point_indexes );
-vector<double> calc_wave_numbers_richardson( layer  &cur_layer, double &initial_depth_step, double &freq );
-eigenfunctions_velocities calc_eigenfunctions_velocities( layer  &cur_layer, double &initial_depth_step,
-														  double &freq, double &wave_number );
+
+
+vector<double> compute_trapped_modes(double &omeg, vector<double> &c, vector<double> &rho, vector<int> &interface_idcs, vector<double> &meshsizes);
+
+
 int main( int argc, char **argv )
 {
-	layer  cur_layer;
-	double initial_depth_step;
-	double freq;
-	double wave_number;
 
-	// test filling
-	initial_depth_step = 2.0;
-	freq = 0.1;
-	cur_layer.cbeg = 0.2;
-	cur_layer.cend = 0.8;
-	cur_layer.dbeg = 0.5;
-	cur_layer.dend = 0.9;
-	for ( unsigned i=0; i < 5; i++ )
-		cur_layer.zend.push_back( i );
-	//
+	double freq = 50;
+    double c_w = 1500;
+    double c_b = 2000;
+    double rho_w = 1;
+    double rho_b = 2;
+    double dz = 1;
+    int nz = 201;
+    int ib = 90;    //at POINT = 89 we have water, at POINT = 90 we have bottom
+                    //   ii = 89,                  at ii = 90
 
-	vector<double> cur_wave_numbers;
-	eigenfunctions_velocities cur_eigenfunc_veloc;
-	cur_wave_numbers = calc_wave_numbers_richardson( cur_layer, initial_depth_step, freq );
-	cout << "calc_wave_numbers_richardson() done" << endl;
-	cur_eigenfunc_veloc = calc_eigenfunctions_velocities( cur_layer, initial_depth_step, freq, wave_number );
-	cout << "calc_eigenfunctions_velocities() done" << endl;
+    double omeg = 2*3.141592653589793*freq;
+
+    vector<double> input_c;
+    vector<double> input_rho;
+    vector<double> input_mesh { dz,dz };
+    vector<int> input_interf_idcs { ib };
+    vector<double> out_wnum;
+
+    for ( int ii = 0; ii<nz; ii++ ){
+        if (ii<ib){                   //
+            input_c.push_back(c_w);
+            input_rho.push_back(rho_w);
+        }
+        else {
+            input_c.push_back(c_b);
+            input_rho.push_back(rho_b);
+        }
+
+    }
+
+    cout << "freq = " << freq << endl;
+    cout << "omega = " << omeg << endl;
+
+    out_wnum = compute_trapped_modes(omeg, input_c, input_rho,input_interf_idcs, input_mesh);
+
+   for (int ii=0; ii<out_wnum.size();  ii++) {
+
+            cout << ii << "->" << out_wnum.at(ii) << endl;
+
+
+    }
 
 	return 0;
 }
+
+
+
+
+vector<double> compute_trapped_modes(           double &omeg, // sound frequency
+											  vector<double> &c,
+											  vector<double> &rho,
+											  vector<int> &interface_idcs,
+											  vector<double> &meshsizes)
+{
+	// prepare the three diagonals of the matrix to be passed to the EIG function
+    // for the c = c_j, j=0... N_points
+    // interfaces are at z = z_m,  interface_idcs = {m}, if empty then we have NO interfaces
+    // mesh size in the j-th layer is meshsizes.at(j); this vector has at least one element,
+    // for the k-th interface interface_idcs.at(k-1) we have meshsizes meshsizes.at(k-1) and meshsizes.at(k) below and above the interface respectively
+    // for c(interface_idcs.at(k-1)) the value of c is the one BELOW the k-th interface
+    //(i.e. for the water-bottom interface at the boundary we take the value from the bottom)
+
+
+	vector<double> md;
+	vector<double> ud;
+	vector<double> ld;
+
+    int N_points = c.size();
+    int layer_number = 0;
+    double dz = meshsizes.at(layer_number);
+    double dz_next = dz;
+    double q = 0;
+    double cp, cm, dp, dm, cmin, cmax, kappamax, kappamin;
+    int next_interface_idx;
+
+    if ( interface_idcs.size() > 0 )
+    {
+        next_interface_idx = interface_idcs.at(0)-1;
+    }
+    else
+    {
+        next_interface_idx = N_points;
+    }
+
+    cmin = c.at(0);
+    cmax = c.at(0);
+
+    for( int ii=0; ii < N_points; ii++ ){
+        if (c.at(ii) < cmin) { cmin = c.at(ii); }
+        if (c.at(ii) > cmax) { cmax = c.at(ii); }
+
+    }
+
+    kappamax = omeg/cmin;
+    kappamin = omeg/cmax;
+
+
+    for(int ii=0; ii < N_points-2; ii++ ){
+
+        // ordinary point
+
+
+        ud.push_back( 1/(dz*dz) );
+        ld.push_back( 1/(dz*dz) );
+        md.push_back(-2/(dz*dz)  + omeg*omeg/(c.at(ii+1)*c.at(ii+1)) );
+
+
+        // special case of the point at the interface
+
+        if (ii == next_interface_idx) {         //ii -- z(ii+1), z(0) = 0
+            layer_number = layer_number + 1;    // вообще ii=89 -- вода, в ii=90 -дно,
+                                                // здесь ii = 89 -- интерфейс, уже дно
+
+            cp = c.at(ii+1);
+            dp = rho.at(ii+1);
+            cm = c.at(ii);
+            dm = rho.at(ii);
+            q = 1/( dz_next*dm + dz*dp );
+
+            dz_next = meshsizes.at(layer_number);
+
+
+            ld.at(ii) = 2*q*dp/dz;
+            md.at(ii) = -2*q*( dz_next*dp + dz*dm )/(dz*dz_next) + omeg*omeg*q*( dz*dp*cp*cp + dz_next*dm*cm*cm )/( cp*cp*cm*cm ) ;
+            ud.at(ii) = 2*q*dm/dz_next;
+
+            if ( interface_idcs.size() > layer_number )
+            {
+                next_interface_idx = interface_idcs.at(layer_number) - 1;
+            }
+            else
+            {
+                next_interface_idx = N_points;
+            }
+
+            dz = dz_next;
+        }
+
+    }
+
+    // HERE WE CALL THE EIG ROUTINE!!!
+    //input: diagonals ld, md, ud + interval [0 k_max]
+    //output: wnumbers2 = wave numbers squared
+
+    alglib::real_2d_array A, eigenvectors; // V - собств вектор
+	alglib::real_1d_array eigenvalues; // Lm -собств знач
+	A.setlength(N_points-2,N_points-2);
+	eigenvectors.setlength(N_points-2,N_points-2);
+	eigenvalues.setlength(N_points-2);
+    alglib::ae_int_t eigen_count = 0;
+
+
+
+
+	// fill matrix by zeros
+	for (int ii=0; ii < N_points-2; ii++ )
+		for ( int jj=0; jj < N_points-2; jj++ )
+			A[ii][jj] = 0.0;
+
+
+	// fill tridiagonal matrix
+	// make Dirichlet case matrix
+	// На главной диагонали стоят числа -2/(h^2), на под- и над- диагоналях стоят числа 1/(h^2).
+	for ( int ii=0; ii < N_points-2; ii++ ) {
+		A[ii][ii] = md.at(ii);
+
+
+		if ( ii >0 ) {
+            A[ii][ii-1] = ld.at(ii);
+		}
+
+		if ( ii < N_points-3 ) {
+            A[ii][ii+1] = ud.at(ii);
+		}
+
+	}
+
+
+    ofstream myFile("thematrixdiags.txt");
+    for (int ii=0; ii<N_points-2; ii++){
+        myFile << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
+    }
+
+
+	vector<double> wnumbers;
+
+
+
+
+    //alglib::smatrixevdr( A, N_points-2, 0, 0, kappamin, kappamax, eigen_count, eigenvalues, eigenvectors); // CHECK CALL ARGUMENTS!
+    alglib::smatrixevdr( A, N_points-2, 0, 0, kappamin*kappamin, kappamax*kappamax, eigen_count, eigenvalues, eigenvectors); // CHECK CALL ARGUMENTS!
+
+    for (int ii=0; ii<eigen_count; ii++) {
+            wnumbers.push_back( sqrt(eigenvalues[eigen_count-ii-1]) );
+
+    }
+
+
+    return wnumbers;
+}
+
 
 /* function for calculating wave number of channel mods
 Функция для расчета волновых чисел канальных мод
@@ -77,6 +247,9 @@ f -- частота звука;
                      (точки, где заканчивается один слой и начинается другой). Длина M <=10.
 Работа: сформировать трехдиагональные матрицы, запустить солвер собственных значений для отрезка [omega/cmax omega/cmin].
 Выход: собственные значения kj^2 акустической спектральной задачи */
+
+/*
+
 vector<double> calc_chanel_mods_wave_numbers( double &depth_step,
 										      double &freq, // sound frequency
 											  vector<double> &sound_velocity,
@@ -90,7 +263,7 @@ vector<double> calc_chanel_mods_wave_numbers( double &depth_step,
 	stringstream sstream;
 	// calculate eigenvalues and eigenvectors
 	int n=2000;
-	double from = 0, to = 0.01; // interval for eigenvalues
+	double from = -0.001, to = 0.001; // interval for eigenvalues
 
 	sstream << "n : " << n << endl;
 	alglib::real_2d_array A, eigenvectors; // V - собств вектор
@@ -135,8 +308,8 @@ vector<double> calc_chanel_mods_wave_numbers( double &depth_step,
 	sstream << "interval : (" << from << ", " << to << "]" << endl;
 	alglib::ae_int_t eigen_count = 0;
 	//alglib::smatrixevd(A,n,1,0,eigenvalues,eigenvectors);
-	chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-	alglib::smatrixevdr( A, n, 0, 0, from, to, eigen_count, eigenvalues, eigenvectors); // bisection method
+    chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+	alglib::smatrixevdr( A, n, 1, 0, from, to, eigen_count, eigenvalues, eigenvectors); // bisection method
 	chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 
@@ -146,11 +319,11 @@ vector<double> calc_chanel_mods_wave_numbers( double &depth_step,
 
 	for ( int i=0; i < eigenvalues.length(); i++ ) {
 		sstream << "eigenvalue # " << i << " : " << eigenvalues[i] << endl;
-		/*sstream << "eigenvector # " << i << " : " << endl;
+		sstream << "eigenvector # " << i << " : " << endl;
 		for ( int j=0; j < n; j++ )
 			sstream << eigenvectors[i][j] << " ";
 		if ( i < eigenvalues.length() - 1 )
-			sstream << endl;*/
+			sstream << endl;
 	}
 
 	ofstream ofile( "out" );
@@ -170,56 +343,5 @@ vector<double> calc_chanel_mods_wave_numbers( double &depth_step,
 	return spectr_problem_eigenvalues;
 }
 
-// function for calculating wave numbers with Richardson extrapolation
-vector<double> calc_wave_numbers_richardson( layer  &cur_layer, // info about current layer
-									         double &initial_depth_step, // initial step of depth
-									         double &freq ) // sound frequency
-{
-	vector<double> wave_numbers;
 
-	// call function
-	vector<double> channel_mods_wave_numbers, sound_velocity, density, point_indexes;
-	// fill vectors sound_velocity, density, point_indexes
-	unsigned channel_mods_iterations = 1; // test filling
-	double cur_depth_step;
-	for ( unsigned i = 0; i < channel_mods_iterations; i++ ) {
-		cur_depth_step = initial_depth_step + i*0.1;
-		channel_mods_wave_numbers = calc_chanel_mods_wave_numbers( cur_depth_step, freq, sound_velocity, density, point_indexes );
-	}
-
-	// fill vector wave_number
-	// ...
-
-	return wave_numbers;
-}
-
-/* Function for calculating eigenfunctions and group velocities
-Функция для расчета собственных фуннкций и групповых скоростей:
-Вход:
-Как в функции (2) + значение волнового числа;
-Работа:
--- Найти собственные функции методом Рунге-Кутта или явно с помощью функций Эйри.
--- Проинтегрировать их и нормировать на 1.
--- Найти групповую скорость.
-Выход:
-собственная функции psij, нормированные на 1.
-групповая скорость моды.*/
-eigenfunctions_velocities calc_eigenfunctions_velocities( layer  &cur_layer,          // info about current layer
-									                      double &initial_depth_step, // initial step of depth
-									                      double &freq,               // sound frequency
-											              double &wave_number )       // value of a wave number
-{
-	eigenfunctions_velocities eigenfunc_veloc; // for output data
-
-	// fill eigenfunctions and velocities
-	// test filling
-	eigenfunc_veloc.eigenfunctions.resize(10);
-	for( unsigned i=0; i < eigenfunc_veloc.eigenfunctions.size(); i++ )
-		eigenfunc_veloc.eigenfunctions[i] = i;
-	eigenfunc_veloc.velocities.resize(10);
-	for( unsigned i=0; i < eigenfunc_veloc.velocities.size(); i++ )
-		eigenfunc_veloc.velocities[i] = i;
-
-	return eigenfunc_veloc;
-}
-
+*/
