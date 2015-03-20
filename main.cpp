@@ -48,8 +48,11 @@ int main( int argc, char **argv )
 
     vector<double> input_c;
     vector<double> input_rho;
-    vector<double> input_mesh { dz,dz };
-    vector<int> input_interf_idcs { ib };
+    vector<double> input_mesh;
+	input_mesh.push_back( dz );
+	input_mesh.push_back( dz );
+    vector<int> input_interf_idcs;
+	input_interf_idcs.push_back( ib );
     vector<double> out_wnum;
 
     for ( int ii = 0; ii<nz; ii++ ){
@@ -69,12 +72,8 @@ int main( int argc, char **argv )
 
     out_wnum = compute_trapped_modes(omeg, input_c, input_rho,input_interf_idcs, input_mesh);
 
-   for (int ii=0; ii<out_wnum.size();  ii++) {
-
-            cout << ii << "->" << out_wnum.at(ii) << endl;
-
-
-    }
+	for (unsigned ii=0; ii<out_wnum.size();  ii++)
+		cout << ii << "->" << out_wnum.at(ii) << endl;
 
 	return 0;
 }
@@ -160,7 +159,7 @@ vector<double> compute_trapped_modes(           double &omeg, // sound frequency
             md.at(ii) = -2*q*( dz_next*dp + dz*dm )/(dz*dz_next) + omeg*omeg*q*( dz*dp*cp*cp + dz_next*dm*cm*cm )/( cp*cp*cm*cm ) ;
             ud.at(ii) = 2*q*dm/dz_next;
 
-            if ( interface_idcs.size() > layer_number )
+            if ( interface_idcs.size() > (unsigned)layer_number )
             {
                 next_interface_idx = interface_idcs.at(layer_number) - 1;
             }
