@@ -12,7 +12,6 @@
 #include <fstream>
 #include <chrono>
 #include "linalg.h"
-#include "specialfunctions.h"
 
 using namespace std;
 
@@ -26,13 +25,14 @@ struct layer
 	double dend;         // density at the end of a layer
 };
 
+
+
+
 vector<double> compute_trapped_modes(double &omeg, vector<double> &c, vector<double> &rho, vector<int> &interface_idcs, vector<double> &meshsizes);
+
 
 int main( int argc, char **argv )
 {
-	
-	double ai, aip, bi, bip;
-	alglib::airy( 1.5, ai, aip, bi, bip );
 
 	double freq = 50;
     double c_w = 1500;
@@ -40,7 +40,7 @@ int main( int argc, char **argv )
     double rho_w = 1;
     double rho_b = 2;
     double dz = 1;
-    int nz = 501;
+    int nz = 201;
     int ib = 90;    //at POINT = 89 we have water, at POINT = 90 we have bottom
                     //   ii = 89,                  at ii = 90
 
@@ -48,8 +48,11 @@ int main( int argc, char **argv )
 
     vector<double> input_c;
     vector<double> input_rho;
-    vector<double> input_mesh { dz,dz };
-    vector<int> input_interf_idcs { ib };
+    vector<double> input_mesh;
+	input_mesh.push_back( dz );
+	input_mesh.push_back( dz );
+    vector<int> input_interf_idcs;
+	input_interf_idcs.push_back( ib );
     vector<double> out_wnum;
 
     for ( int ii = 0; ii<nz; ii++ ){
@@ -69,12 +72,8 @@ int main( int argc, char **argv )
 
     out_wnum = compute_trapped_modes(omeg, input_c, input_rho,input_interf_idcs, input_mesh);
 
-   for (int ii=0; ii<out_wnum.size();  ii++) {
-
-            cout << ii << "->" << out_wnum.at(ii) << endl;
-
-
-    }
+	for (unsigned ii=0; ii<out_wnum.size();  ii++)
+		cout << ii << "->" << out_wnum.at(ii) << endl;
 
 	return 0;
 }
@@ -160,7 +159,7 @@ vector<double> compute_trapped_modes(           double &omeg, // sound frequency
             md.at(ii) = -2*q*( dz_next*dp + dz*dm )/(dz*dz_next) + omeg*omeg*q*( dz*dp*cp*cp + dz_next*dm*cm*cm )/( cp*cp*cm*cm ) ;
             ud.at(ii) = 2*q*dm/dz_next;
 
-            if ( interface_idcs.size() > layer_number )
+            if ( interface_idcs.size() > (unsigned)layer_number )
             {
                 next_interface_idx = interface_idcs.at(layer_number) - 1;
             }
@@ -171,6 +170,7 @@ vector<double> compute_trapped_modes(           double &omeg, // sound frequency
 
             dz = dz_next;
         }
+
     }
 
     // HERE WE CALL THE EIG ROUTINE!!!
@@ -196,45 +196,25 @@ vector<double> compute_trapped_modes(           double &omeg, // sound frequency
 	// fill tridiagonal matrix
 	// make Dirichlet case matrix
 	// На главной диагонали стоят числа -2/(h^2), на под- и над- диагоналях стоят числа 1/(h^2).
-
-	// matrix is symmetrized: a_{j,j} = m_j; a_{j,j+1} = a_{j+1,j} = \sqrt(u_j*l_{j+1});
-
-
-	/*for ( int ii=0; ii < N_points-2; ii++ ) {
+	for ( int ii=0; ii < N_points-2; ii++ ) {
 		A[ii][ii] = md.at(ii);
 
 
 		if ( ii >0 ) {
             A[ii][ii-1] = ld.at(ii);
-            //A[ii-1][ii] = ld.at(ii);
 		}
 
 		if ( ii < N_points-3 ) {
             A[ii][ii+1] = ud.at(ii);
-            //A[ii+1][ii] = ud.at(ii);
 		}
 
-	}*/
-
-    for ( int ii=0; ii < N_points-3; ii++ ) {
-		A[ii][ii] = md.at(ii);
-        A[ii][ii+1] = sqrt(ud.at(ii)*ld.at(ii+1));
-        A[ii+1][ii] = A[ii][ii+1];
 	}
-    A[N_points-3][N_points-3] = md.at(N_points-3);
 
 
     ofstream myFile("thematrixdiags.txt");
     for (int ii=0; ii<N_points-2; ii++){
         myFile << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
     }
-
-    ofstream myFile1("thematrixdiags_A.txt");
-    myFile1 << "W" << "  " << A[1][1] << "  " << A[1][2] << endl;
-    for (int ii=1; ii<N_points-3; ii++){
-        myFile1 << A[ii][ii-1] << "  " << A[ii][ii] << "  " << A[ii][ii+1] << endl;
-    }
-    myFile1 << A[N_points-3][N_points-4] << "  " << A[N_points-3][N_points-3] << "  " << "W" << endl;
 
 
 	vector<double> wnumbers;
