@@ -11,6 +11,7 @@
 #include <sstream>
 #include <fstream>
 #include <chrono>
+#include <iomanip>
 #include "linalg.h"
 
 using namespace std;
@@ -81,12 +82,12 @@ int main( int argc, char **argv )
 */
     cout << "NEW: extrapolation" << endl;
 
-    vector<double> depths {90,500};
+    vector<double> depths {90,1500};
     vector<double> c1s  {1500,2000};
     vector<double> c2s  {1500,2000};
     vector<double> rhos  {1,2};
-    vector<unsigned> Ns_points  {90,410};
-    unsigned rord = 4;
+    vector<unsigned> Ns_points  {60,940};
+    unsigned rord = 3;
 
     out_wnum = compute_wnumbers_extrap(omeg,depths,c1s,c2s,rhos,Ns_points,1,rord);
 
@@ -148,6 +149,7 @@ the top of the first layer is z=0
     }
     else if (ordRich == 3){
         coeff_extrap.assign({0.5, -4, 4.5});
+        //coeff_extrap.assign({0.1, -0.6, 1.5});
     }
     else if (ordRich == 4){
         coeff_extrap.assign({-1/double(6),4,-13.5,32/double(3)});
@@ -259,6 +261,7 @@ vector<double> compute_wnumbers(           double &omeg, // sound frequency
 	vector<double> md;
 	vector<double> ud;
 	vector<double> ld;
+    vector<double> wnumbers;
 
     int N_points = c.size();
     unsigned layer_number = 0;
@@ -339,192 +342,52 @@ vector<double> compute_wnumbers(           double &omeg, // sound frequency
     //input: diagonals ld, md, ud + interval [0 k_max]
     //output: wnumbers2 = wave numbers squared
 
-    alglib::real_2d_array A, eigenvectors; // V - собств вектор
+    alglib::real_2d_array eigenvectors; // V - собств вектор
 	alglib::real_1d_array eigenvalues; // Lm -собств знач
-	A.setlength(N_points-2,N_points-2);
-	eigenvectors.setlength(N_points-2,N_points-2);
+	//eigenvectors.setlength(N_points-2,N_points-2);
 	eigenvalues.setlength(N_points-2);
     alglib::ae_int_t eigen_count = 0;
 
+    //new function !!!
+    alglib::real_1d_array main_diag, second_diag;
+    main_diag.setlength(N_points-2);
+    second_diag.setlength(N_points-3);
 
 
 
-	// fill matrix by zeros
-	for (int ii=0; ii < N_points-2; ii++ )
-		for ( int jj=0; jj < N_points-2; jj++ )
-			A[ii][jj] = 0.0;
 
-
-	// fill tridiagonal matrix
-	// make Dirichlet case matrix
-	// Ќа главной диагонали сто€т числа -2/(h^2), на под- и над- диагонал€х сто€т числа 1/(h^2).
-
-	// matrix is symmetrized: a_{j,j} = m_j; a_{j,j+1} = a_{j+1,j} = \sqrt(u_j*l_{j+1});
-
-
-	/*for ( int ii=0; ii < N_points-2; ii++ ) {
-		A[ii][ii] = md.at(ii);
-
-
-		if ( ii >0 ) {
-            A[ii][ii-1] = ld.at(ii);
-            //A[ii-1][ii] = ld.at(ii);
-		}
-
-		if ( ii < N_points-3 ) {
-            A[ii][ii+1] = ud.at(ii);
-            //A[ii+1][ii] = ud.at(ii);
-		}
-
-	}*/
 
     for ( int ii=0; ii < N_points-3; ii++ ) {
-		A[ii][ii] = md.at(ii);
-        A[ii][ii+1] = sqrt(ud.at(ii)*ld.at(ii+1));
-        A[ii+1][ii] = A[ii][ii+1];
+        second_diag[ii] = sqrt(ud.at(ii)*ld.at(ii+1));
+        main_diag[ii] = md.at(ii);
 	}
-    A[N_points-3][N_points-3] = md.at(N_points-3);
+    main_diag[N_points-3] = md.at(N_points-3);
 
 
     ofstream myFile("thematrixdiags.txt");
     for (int ii=0; ii<N_points-2; ii++){
-        myFile << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
+        myFile << std::fixed << std::setprecision(16) << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
     }
+    myFile.close();
 
-/*    ofstream myFile1("thematrixdiags_A.txt");
-    myFile1 << "W" << "  " << A[1][1] << "  " << A[1][2] << endl;
-    for (int ii=1; ii<N_points-3; ii++){
-        myFile1 << A[ii][ii-1] << "  " << A[ii][ii] << "  " << A[ii][ii+1] << endl;
+    ofstream myFile1("thematrixdiags_sym.txt");
+    for (int ii=0; ii<N_points-3; ii++){
+        myFile1 << std::fixed << std::setprecision(16) << main_diag[ii] << "  " << second_diag[ii] << endl;
     }
-    myFile1 << A[N_points-3][N_points-4] << "  " << A[N_points-3][N_points-3] << "  " << "W" << endl;
-*/
-
-	vector<double> wnumbers;
+    myFile1.close();
 
 
-
-
-    //alglib::smatrixevdr( A, N_points-2, 0, 0, kappamin, kappamax, eigen_count, eigenvalues, eigenvectors); // CHECK CALL ARGUMENTS!
-
-
-    alglib::smatrixevdr( A, N_points-2, 0, 0, kappamin*kappamin, kappamax*kappamax, eigen_count, eigenvalues, eigenvectors); // CHECK CALL ARGUMENTS!
+    alglib::smatrixtdevdr(main_diag,  second_diag,  N_points-2,  0, kappamin*kappamin,  kappamax*kappamax, eigen_count,eigenvectors);
 
     for (int ii=0; ii<eigen_count; ii++) {
-            wnumbers.push_back( sqrt(eigenvalues[eigen_count-ii-1]) );
-
+        wnumbers.push_back( sqrt(main_diag[eigen_count-ii-1]) );
     }
+
+
+
+
 
 
     return wnumbers;
 }
 
-
-/* function for calculating wave number of channel mods
-‘ункци€ дл€ расчета волновых чисел канальных мод
-¬ход:
-dz -- шаг по глубине;
-f -- частота звука;
-вектор c = (ci); -- скорости звука с шагом dz; ƒлина = N. «начени€ N -- "большие".
-вектор d = (di); -- плотности; ƒлина N.
-вектор m = (mj); -- индексы точек, где параметры среды терп€т разрыв
-                     (точки, где заканчиваетс€ один слой и начинаетс€ другой). ƒлина M <=10.
-–абота: сформировать трехдиагональные матрицы, запустить солвер собственных значений дл€ отрезка [omega/cmax omega/cmin].
-¬ыход: собственные значени€ kj^2 акустической спектральной задачи */
-
-/*
-
-vector<double> calc_chanel_mods_wave_numbers( double &depth_step,
-										      double &freq, // sound frequency
-											  vector<double> &sound_velocity,
-											  vector<double> &density,
-											  vector<double> &point_indexes )
-{
-	vector<double> spectr_problem_eigenvalues;
-
-	// make tridiagonal matrix and find its eigenvalues in given interval
-	// ...
-	stringstream sstream;
-	// calculate eigenvalues and eigenvectors
-	int n=2000;
-	double from = -0.001, to = 0.001; // interval for eigenvalues
-
-	sstream << "n : " << n << endl;
-	alglib::real_2d_array A, eigenvectors; // V - собств вектор
-	alglib::real_1d_array eigenvalues; // Lm -собств знач
-	A.setlength(n,n);
-	eigenvectors.setlength(n,n);
-	eigenvalues.setlength(n);
-
-	// fill matrix by zeros
-	for ( int i=0; i < n; i++ )
-		for ( int j=0; j < n; j++ )
-			A[i][j] = 0.0;
-
-	// fill tridiagonal matrix
-	// make Dirichlet case matrix
-	// Ќа главной диагонали сто€т числа -2/(h^2), на под- и над- диагонал€х сто€т числа 1/(h^2).
-	double h = 2.0;
-	for ( int i=0; i < n; i++ ) {
-		A[i][i] = -2/pow(h,2);
-		if ( i != n-1 ) {
-			A[i+1][i] = 1/pow(h,2);
-			A[i][i+1] = 1/pow(h,2);
-		}
-	}
-
-	sstream << "A :" << endl;
-	sstream << "first diagonal above main :" << endl;
-	for ( int i=0; i < n-1; i++ )
-		sstream << A[i][i+1] << " ";
-	sstream << endl;
-
-	sstream << "main diagonal :" << endl;
-	for ( int i=0; i < n; i++ )
-		sstream << A[i][i] << " ";
-	sstream << endl;
-
-	sstream << "first diagonal below main :" << endl;
-	for ( int i=0; i < n-1; i++ )
-		sstream << A[i+1][i] << " ";
-	sstream << endl;
-
-	sstream << "interval : (" << from << ", " << to << "]" << endl;
-	alglib::ae_int_t eigen_count = 0;
-	//alglib::smatrixevd(A,n,1,0,eigenvalues,eigenvectors);
-    chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-	alglib::smatrixevdr( A, n, 1, 0, from, to, eigen_count, eigenvalues, eigenvectors); // bisection method
-	chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-	chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-
-	sstream << "solving time : " << time_span.count() << endl;
-	sstream << "eigenvalues count in interval : " << eigen_count << endl;
-	//cout << "eigenvalues count : " << eigenvalues.length() << endl;
-
-	for ( int i=0; i < eigenvalues.length(); i++ ) {
-		sstream << "eigenvalue # " << i << " : " << eigenvalues[i] << endl;
-		sstream << "eigenvector # " << i << " : " << endl;
-		for ( int j=0; j < n; j++ )
-			sstream << eigenvectors[i][j] << " ";
-		if ( i < eigenvalues.length() - 1 )
-			sstream << endl;
-	}
-
-	ofstream ofile( "out" );
-	ofile << sstream.str();
-	ofile.close();
-	sstream.clear(); sstream.str("");
-
-	cout << "finding eigenvalues done" << endl;
-
-	// fill vector wave_numbers
-	// test filling
-	spectr_problem_eigenvalues.resize(10);
-	for( unsigned i=0; i < spectr_problem_eigenvalues.size(); i++ )
-		spectr_problem_eigenvalues[i] = i;
-	//
-
-	return spectr_problem_eigenvalues;
-}
-
-
-*/
