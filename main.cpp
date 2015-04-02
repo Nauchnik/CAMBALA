@@ -33,6 +33,11 @@ vector<double> compute_wnumbers(double &omeg, vector<double> &c, vector<double> 
 
 vector<double> compute_wnumbers_extrap(double &omeg, vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,vector<unsigned> &Ns_points, unsigned flOnlyTrapped,unsigned &ordRich);
 
+vector<double> compute_wnumbers_extrap_lin_dz(double &omeg, vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,vector<unsigned> &Ns_points, unsigned flOnlyTrapped,unsigned &ordRich);
+
+int compute_modal_grop_velocities( vector<double> &freqs, double deltaf, vector<double> &depths, vector<double> &c1s, vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, unsigned flOnlyTrapped, unsigned &ordRich, vector<vector<double>> &modal_group_velocities, vector<unsigned> &mode_numbers );
+
+
 int main( int argc, char **argv )
 {
 
@@ -82,14 +87,18 @@ int main( int argc, char **argv )
 */
     cout << "NEW: extrapolation" << endl;
 
-    vector<double> depths {90,1500};
+    vector<double> depths {90,600};
     vector<double> c1s  {1500,2000};
     vector<double> c2s  {1500,2000};
     vector<double> rhos  {1,2};
-    vector<unsigned> Ns_points  {60,940};
+    vector<unsigned> Ns_points  {180,1020};
     unsigned rord = 3;
+    vector<double> freqs {20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100};
+    vector<vector<double>> modal_group_velocities;
+    vector<unsigned> mode_numbers;
+    double deltaf = 0.5;
 
-    out_wnum = compute_wnumbers_extrap(omeg,depths,c1s,c2s,rhos,Ns_points,1,rord);
+    out_wnum = compute_wnumbers_extrap_lin_dz(omeg,depths,c1s,c2s,rhos,Ns_points,1,rord);
 
     cout << "Extrapolated ev:" << endl;
     for (unsigned ii=0; ii<out_wnum.size();  ii++) {
@@ -99,13 +108,110 @@ int main( int argc, char **argv )
 
     }
 
+
+
+    compute_modal_grop_velocities( freqs, deltaf, depths,c1s, c2s, rhos, Ns_points, 1, rord, modal_group_velocities, mode_numbers );
+
+    ofstream myFile("mgv.txt");
+//    for (int ii=0; ii<N_points-2; ii++){
+//        myFile << std::fixed << std::setprecision(16) << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
+//    }
+//
+
+    for (unsigned ii=0; ii<freqs.size();  ii++) {
+            cout << "f=" << freqs.at(ii) << endl;
+
+            for (unsigned jj=0; jj<mode_numbers.at(ii);  jj++) {
+
+            cout << modal_group_velocities[ii][jj] << endl;
+            myFile << std::fixed << std::setprecision(16) << modal_group_velocities[ii][jj] << "\t";
+
+            }
+            myFile << endl;
+
+
+
+
+    }
+
+    myFile.close();
 	return 0;
 
 
 }
 
 
+int compute_modal_grop_velocities(      vector<double> &freqs,
+                                        double deltaf,
+                                        vector<double> &depths,
+                                        vector<double> &c1s,
+                                        vector<double> &c2s,
+                                        vector<double> &rhos,
+                                        vector<unsigned> &Ns_points,
+                                        unsigned flOnlyTrapped,
+                                        unsigned &ordRich,
+                                        vector<vector<double>> &modal_group_velocities,
+                                        vector<unsigned> &mode_numbers
+                                        )
 
+{
+
+    mode_numbers.clear();
+    modal_group_velocities.clear();
+
+    vector<double> out_wnum1;
+    vector<double> out_wnum2;
+    vector<double> mgv_ii;
+    unsigned nwnum;
+    unsigned nfr = freqs.size();
+    double omeg1, omeg2;
+
+    for (unsigned ii=0; ii<nfr; ii++) {
+
+        out_wnum1.clear();
+        out_wnum2.clear();
+        mgv_ii.clear();
+
+        omeg1 = 2*3.141592653589793*(freqs.at(ii) + deltaf/2);
+        out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1,depths,c1s,c2s,rhos,Ns_points,1,ordRich);
+        nwnum = out_wnum1.size();
+
+        cout << "f=" << freqs.at(ii) << "Hz" << endl;
+
+        for (unsigned jj=0; jj < nwnum; jj++ )
+        {
+            cout << "k_" << jj+1 << "=" << out_wnum1.at(jj) << endl;
+        }
+
+        omeg2 = 2*3.141592653589793*(freqs.at(ii) - deltaf/2);
+        out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2,depths,c1s,c2s,rhos,Ns_points,1,ordRich);
+        nwnum = min(nwnum, out_wnum2.size());
+
+        for (unsigned jj=0; jj < nwnum; jj++ )
+        {
+            mgv_ii.push_back(  (omeg1 - omeg2)/(out_wnum1.at(jj) - out_wnum2.at(jj) )  );
+        }
+
+        modal_group_velocities.push_back( mgv_ii );
+        mode_numbers.push_back( nwnum );
+    }
+
+return 0;
+
+}
+
+
+/*
+
+General considerations:
+1) It is better to choose mesh in such a way that mesh size is the same for all z. This gives better accuracy!
+(the reason: if the diagonal elements in the upper and lower diagonals vary with row index j, then accuracy is crippled, the
+ closer are u_j to each other -- the better, ideally they should be equal)
+2) compute_wnumbers_extrap_lin_dz() makes the number of points within each layer a multiple of 12;
+it is better to set all the numbers to multiple of 12 in advance
+3) Richardson extrapolation of the order 3 gives reasonable accuracy
+
+*/
 
 vector<double> compute_wnumbers_extrap(       double &omeg, // sound frequency
 											  vector<double> &depths,
@@ -158,18 +264,18 @@ the top of the first layer is z=0
         ordRich = 3;
         coeff_extrap.assign({0.5, -4, 4.5});
     }
-
-    cout << "Richardson coeffs" << endl;
-    for (int ii=0; ii<coeff_extrap.size() ; ii++ ){
-        cout << coeff_extrap.at(ii) << endl;
-    }
+//
+//    cout << "Richardson coeffs" << endl;
+//    for (unsigned ii=0; ii<coeff_extrap.size() ; ii++ ){
+//        cout << coeff_extrap.at(ii) << endl;
+//    }
 
 
     vector<double> input_c;
     vector<double> input_rho;
     vector<double> input_mesh;
     vector<unsigned> input_interf_idcs;
-    vector<double> out_wnum;
+    vector<double> out_wnum2;
     vector<double> wnum_extrapR;
     double zc = 0;
     double zp = 0;
@@ -186,7 +292,7 @@ the top of the first layer is z=0
         input_rho.clear();
         input_interf_idcs.clear();
         input_mesh.clear();
-        out_wnum.clear();
+        out_wnum2.clear();
 
         input_c.push_back(0);
         input_rho.push_back(0);
@@ -216,29 +322,183 @@ the top of the first layer is z=0
 
         cout << "rr=" << rr << endl;
 
-        out_wnum = compute_wnumbers(omeg, input_c, input_rho,input_interf_idcs, input_mesh,flOnlyTrapped);
-        m_wnum = min(m_wnum, out_wnum.size() );
+        out_wnum2 = compute_wnumbers(omeg, input_c, input_rho,input_interf_idcs, input_mesh,flOnlyTrapped);
+        m_wnum = min(m_wnum, out_wnum2.size() );
 
         if (rr == 1) { wnum_extrapR.assign(m_wnum,0);}
 
 
         for (unsigned mm=0; mm<m_wnum; mm++ ) {
-            wnum_extrapR.at(mm) = wnum_extrapR.at(mm) + out_wnum.at(mm)*coeff_extrap.at(rr-1);
+            wnum_extrapR.at(mm) = wnum_extrapR.at(mm) + out_wnum2.at(mm)*coeff_extrap.at(rr-1);
         }
 
 
 
-            for (unsigned ii=0; ii<out_wnum.size();  ii++) {
+            for (unsigned ii=0; ii<out_wnum2.size();  ii++) {
 
-                cout << ii << "->" << out_wnum.at(ii) << endl;
+                cout << ii << "->" << sqrt(out_wnum2.at(ii)) << endl;
             }
 
     }
 
+for (unsigned mm=0; mm<m_wnum; mm++ ) {
+    wnum_extrapR.at(mm) = sqrt(wnum_extrapR.at(mm));
+}
 
 return wnum_extrapR;
 }
 
+
+
+vector<double> compute_wnumbers_extrap_lin_dz(       double &omeg, // sound frequency
+											  vector<double> &depths,
+											  vector<double> &c1s,
+											  vector<double> &c2s,
+											  vector<double> &rhos,
+											  vector<unsigned> &Ns_points,
+											  unsigned flOnlyTrapped,
+											  unsigned &ordRich)
+/*  subroutine for computing wavenumbers for a given waveguide structure
+    the computation is performed by the FD method for certain meshsize,
+    Richardson extrapolation is used to improve the
+
+
+Layer structure:
+
+depths_{i-1}----c=c1s_i--
+*
+*
+... <-Ns_points_i       rho = rhos_i
+*
+*
+depths_{i}------c=c2s_i--
+
+Other parameters:
+omeg -- cyclic frequency, omeg = 2*Pi*f;
+flOnlyTrapped -- flag to determine the mode subset: set to 0 to compute all propagating modes, i.e. such that k^2>=0, otherwise only trapped modes are computed
+ordRich -- order of the Richardson extrapolation;
+
+the top of the first layer is z=0
+	*/
+
+
+{
+
+
+
+    vector<double> input_c;
+    vector<double> input_rho;
+    vector<double> input_mesh;
+    vector<unsigned> input_interf_idcs;
+    vector<double> out_wnum2;
+    vector<double> wnum_extrapR;
+    double zc = 0;
+    double zp = 0;
+    double dz = 0;
+    unsigned m_wnum = 1000;
+
+    unsigned n_layers = depths.size();
+    unsigned n_points_total = 0;
+    unsigned n_points_layer = 0;
+
+    vector<double> coeff_extrap;
+    if (ordRich == 1) {
+        coeff_extrap.assign({1});
+    }
+    else if (ordRich == 2){
+        coeff_extrap.assign({ 1.333333333333333, -0.333333333333333});
+    }
+    else if (ordRich == 3){
+        coeff_extrap.assign({1.5, -0.6, 0.1});
+        //coeff_extrap.assign({0.1, -0.6, 1.5});
+    }
+    else if (ordRich == 4){
+       // coeff_extrap.assign({1.595325630252102, -0.788449059052564, 0.216346153846154, -0.023222725045691});
+        coeff_extrap.assign({1.6,  -0.8,   0.228571428571429,  -0.028571428571429});
+    }
+    else {
+        ordRich = 3;
+        coeff_extrap.assign({1.5, -0.6, 0.1});
+    }
+
+
+    // number of points in each layer is multiple of 12
+    // this allows us to use nz_ii = nz/ii, ii = 1,2,3,4
+    for (unsigned ii=0; ii < n_layers; ii++ ){
+        Ns_points.at(ii) = 12*(Ns_points.at(ii)/12);
+
+    }
+
+
+//    cout << "Richardson coeffs" << endl;
+//    for (int ii=0; ii<coeff_extrap.size() ; ii++ ){
+//        cout << coeff_extrap.at(ii) << endl;
+//    }
+
+// outer loop for Richardson coefficient rr
+    for (unsigned rr = 1; rr <= ordRich; rr++){
+
+        input_c.clear();
+        input_rho.clear();
+        input_interf_idcs.clear();
+        input_mesh.clear();
+        out_wnum2.clear();
+
+        input_c.push_back(0);
+        input_rho.push_back(0);
+        n_points_total = 1;
+        zp = 0;
+
+        for (unsigned ll = 0; ll<n_layers; ll++){
+            zc = depths.at(ll);
+            n_points_layer = Ns_points.at(ll)/rr;
+            dz = (zc - zp)/(  n_points_layer  );
+
+//            cout << "np=" << n_points_layer << "  " << "dz=" << dz <<endl;
+
+            input_mesh.push_back(  dz  );
+            input_c.at(n_points_total-1) = c1s.at(ll) ;
+            input_rho.at(n_points_total-1) = rhos.at(ll) ;
+
+            n_points_total = n_points_total + n_points_layer;
+
+            for (unsigned kk=1; kk<= n_points_layer; kk++) {
+                input_rho.push_back(rhos.at(ll));
+                input_c.push_back( c1s.at(ll) + (c2s.at(ll) - c1s.at(ll))*kk/n_points_layer );
+            }
+
+            if (ll < n_layers - 1) {
+                input_interf_idcs.push_back(n_points_total-1);
+            }
+            zp = zc;
+        }
+
+//        cout << "rr=" << rr << endl;
+
+        out_wnum2 = compute_wnumbers(omeg, input_c, input_rho,input_interf_idcs, input_mesh,flOnlyTrapped);
+        m_wnum = min(m_wnum, out_wnum2.size() );
+
+        if (rr == 1) { wnum_extrapR.assign(m_wnum,0);}
+
+
+        for (unsigned mm=0; mm<m_wnum; mm++ ) {
+            wnum_extrapR.at(mm) = wnum_extrapR.at(mm) + out_wnum2.at(mm)*coeff_extrap.at(rr-1);
+        }
+
+
+
+//            for (unsigned ii=0; ii<out_wnum2.size();  ii++) {
+//
+//                cout << ii << "->" << sqrt(out_wnum2.at(ii)) << endl;
+//            }
+//            cout << endl;
+    }
+
+for (unsigned mm=0; mm<m_wnum; mm++ ) {
+    wnum_extrapR.at(mm) = sqrt(wnum_extrapR.at(mm));
+}
+return wnum_extrapR;
+}
 
 
 vector<double> compute_wnumbers(           double &omeg, // sound frequency
@@ -261,12 +521,16 @@ vector<double> compute_wnumbers(           double &omeg, // sound frequency
 	vector<double> md;
 	vector<double> ud;
 	vector<double> ld;
-    vector<double> wnumbers;
+    vector<double> wnumbers2;
 
     int N_points = c.size();
     unsigned layer_number = 0;
     double dz = meshsizes.at(layer_number);
-    double dz_next = dz;
+    double dz_next = dz;//    ofstream myFile("thematrixdiags.txt");
+//    for (int ii=0; ii<N_points-2; ii++){
+//        myFile << std::fixed << std::setprecision(16) << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
+//    }
+//    myFile.close();
     double q = 0;
     double cp, cm, dp, dm, cmin, cmax, kappamax, kappamin;
     int next_interface_idx;
@@ -344,11 +608,9 @@ vector<double> compute_wnumbers(           double &omeg, // sound frequency
 
     alglib::real_2d_array eigenvectors; // V - собств вектор
 	alglib::real_1d_array eigenvalues; // Lm -собств знач
-	//eigenvectors.setlength(N_points-2,N_points-2);
 	eigenvalues.setlength(N_points-2);
     alglib::ae_int_t eigen_count = 0;
 
-    //new function !!!
     alglib::real_1d_array main_diag, second_diag;
     main_diag.setlength(N_points-2);
     second_diag.setlength(N_points-3);
@@ -364,23 +626,23 @@ vector<double> compute_wnumbers(           double &omeg, // sound frequency
     main_diag[N_points-3] = md.at(N_points-3);
 
 
-    ofstream myFile("thematrixdiags.txt");
-    for (int ii=0; ii<N_points-2; ii++){
-        myFile << std::fixed << std::setprecision(16) << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
-    }
-    myFile.close();
+//    ofstream myFile("thematrixdiags.txt");
+//    for (int ii=0; ii<N_points-2; ii++){
+//        myFile << std::fixed << std::setprecision(16) << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
+//    }
+//    myFile.close();
 
-    ofstream myFile1("thematrixdiags_sym.txt");
-    for (int ii=0; ii<N_points-3; ii++){
-        myFile1 << std::fixed << std::setprecision(16) << main_diag[ii] << "  " << second_diag[ii] << endl;
-    }
-    myFile1.close();
+//    ofstream myFile1("thematrixdiags_sym.txt");
+//    for (int ii=0; ii<N_points-3; ii++){
+//        myFile1 << std::fixed << std::setprecision(16) << main_diag[ii] << "  " << second_diag[ii] << endl;
+//    }
+//    myFile1.close();
 
 
     alglib::smatrixtdevdr(main_diag,  second_diag,  N_points-2,  0, kappamin*kappamin,  kappamax*kappamax, eigen_count,eigenvectors);
 
     for (int ii=0; ii<eigen_count; ii++) {
-        wnumbers.push_back( sqrt(main_diag[eigen_count-ii-1]) );
+        wnumbers2.push_back( main_diag[eigen_count-ii-1] );
     }
 
 
@@ -388,6 +650,6 @@ vector<double> compute_wnumbers(           double &omeg, // sound frequency
 
 
 
-    return wnumbers;
+    return wnumbers2;
 }
 
