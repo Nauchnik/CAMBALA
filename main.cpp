@@ -37,7 +37,7 @@ vector<double> compute_wnumbers_extrap_lin_dz(double &omeg, vector<double> &dept
 
 int compute_modal_grop_velocities( vector<double> &freqs, double deltaf, vector<double> &depths, vector<double> &c1s, vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, unsigned flOnlyTrapped, unsigned &ordRich, vector<vector<double>> &modal_group_velocities, vector<unsigned> &mode_numbers );
 
-double compute_modal_delays_residual( vector<double> &freqs, vector<double> &depths, vector<double> &c1s, vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, double R, vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
+double compute_modal_delays_residual_uniform( vector<double> &freqs, vector<double> &depths, vector<double> &c1s, vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, double R, vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
 
 
 
@@ -141,7 +141,52 @@ int main( int argc, char **argv )
     }
 
     myFile.close();
+
+
+    vector<vector<double>> modal_delays;
+    freqs.clear();
+    double buff;
+    vector<double> buffvect;
+    mode_numbers.clear();
+    string myLine;
+    double residual;
+
+
+    ifstream myFileSynth("dtimes_synth_1.txt"); // delays for R = 3500, cw = 1500, cb = 2000, rhow = 1, rhob = 2;
+    double R = 3500;
+    //stringstream myLineStream;
+
+
+    while ( getline(myFileSynth,myLine) ){
+
+        stringstream myLineStream(myLine);
+
+        myLineStream >> buff;
+        freqs.push_back(buff);
+        buffvect.clear();
+
+        while (!myLineStream.eof()) {
+            myLineStream >> buff;
+            buffvect.push_back(buff);
+            mode_numbers.push_back( buffvect.size() );
+        }
+
+
+
+        modal_delays.push_back(buffvect);
+    }
+
+
+    residual = compute_modal_delays_residual_uniform( freqs, depths,c1s, c2s, rhos, Ns_points, R, modal_delays, mode_numbers);
+    cout << "Residual is: " << residual << endl;
+
+    myFileSynth.close();
+
 	return 0;
+
+
+
+
 
 
 }
