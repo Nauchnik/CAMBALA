@@ -37,6 +37,12 @@ vector<double> compute_wnumbers_extrap_lin_dz(double &omeg, vector<double> &dept
 
 int compute_modal_grop_velocities( vector<double> &freqs, double deltaf, vector<double> &depths, vector<double> &c1s, vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, unsigned flOnlyTrapped, unsigned &ordRich, vector<vector<double>> &modal_group_velocities, vector<unsigned> &mode_numbers );
 
+double compute_modal_delays_residual( vector<double> &freqs, vector<double> &depths, vector<double> &c1s, vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, double R, vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
+
+
+
+
+
 
 int main( int argc, char **argv )
 {
@@ -138,6 +144,70 @@ int main( int argc, char **argv )
 	return 0;
 
 
+}
+
+/*
+
+A routine for computing delay residual.
+Arguments:
+1) Environment: five arrays of the same length: depth, c1s, c2s, rhos, Ns_points;
+(each entry describes one layer as described in the comments to compute_wnumbers_extrap() )
+
+2) Source-receive distance: R -- distance from the source to the receiver;
+
+3) Experimental data: modal delays:
+    -- experimental_mode_numbers: number of modes for each frequency in the recorded signal
+    -- experimental_delays: experimental_delays[ii][jj] is the delay of jj+1-th mode for the frequency freqs[ii]
+
+The routine computes the (uniform) residual (misfit) of experimental data and the "theoretical" delays for a given environment model.
+
+It should be used as follows: for a set of environment models the residual should be computed. The minimal value of the residual indicates
+the most "adequate" model.
+
+
+*/
+
+double compute_modal_delays_residual_uniform( vector<double> &freqs,
+                                     vector<double> &depths,
+                                     vector<double> &c1s,
+                                     vector<double> &c2s,
+                                     vector<double> &rhos,
+                                     vector<unsigned> &Ns_points,
+                                     double R,
+                                     vector<vector<double>> &experimental_delays,
+                                     vector<unsigned> &experimental_mode_numbers
+                                     )
+{
+    unsigned rord = 3;
+    unsigned flTrappedOnly = 1;
+    double deltaf = 0.5;
+    double residual = 0;
+    unsigned mnumb;
+    double mdelay;
+
+    vector<vector<double>> modal_group_velocities;
+    vector<unsigned> mode_numbers;
+
+    compute_modal_grop_velocities( freqs, deltaf, depths,c1s, c2s, rhos, Ns_points, flTrappedOnly, rord, modal_group_velocities, mode_numbers );
+
+    for (unsigned ii=0; ii<freqs.size();  ii++) {
+
+
+            mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii) );
+
+            for (unsigned jj=0; jj<mnumb;  jj++) {
+
+                    if (experimental_delays[ii][jj]>0) {
+                            mdelay =  R/modal_group_velocities[ii][jj];
+                            residual = residual + pow(experimental_delays[ii][jj]-mdelay,2);
+                    }
+
+            }
+    }
+
+residual = sqrt(residual);
+
+return residual;
 }
 
 
