@@ -46,7 +46,7 @@ double compute_modal_delays_residual_uniform( vector<double> &freqs, vector<doub
 
 int main( int argc, char **argv )
 {
-
+/*
 	double freq = 50;
     double c_w = 1500;
     double c_b = 2000;
@@ -82,7 +82,7 @@ int main( int argc, char **argv )
     cout << "freq = " << freq << endl;
     cout << "omega = " << omeg << endl;
 
-/*    out_wnum = compute_wnumbers(omeg, input_c, input_rho,input_interf_idcs, input_mesh,1);
+    out_wnum = compute_wnumbers(omeg, input_c, input_rho,input_interf_idcs, input_mesh,1);
 
    for (unsigned ii=0; ii<out_wnum.size();  ii++) {
 
@@ -90,7 +90,7 @@ int main( int argc, char **argv )
 
 
     }
-*/
+
     cout << "NEW: extrapolation" << endl;
 
     vector<double> depths {90,600};
@@ -142,18 +142,48 @@ int main( int argc, char **argv )
 
     myFile.close();
 
+*/
 
+    vector<double> depths {90,600};
+    vector<double> c1s  {1500,2000};
+    vector<double> c2s  {1500,2000};
+    vector<double> rhos  {1,2};
+    vector<unsigned> Ns_points  {180,1020};
+    unsigned rord = 3;
+    vector<vector<double>> modal_group_velocities;
+    vector<unsigned> mode_numbers;
     vector<vector<double>> modal_delays;
+    vector<double> freqs;
+
     freqs.clear();
     double buff;
     vector<double> buffvect;
     mode_numbers.clear();
     string myLine;
     double residual;
+    double R = 3500;
 
+    //SEARCH SPACE
+
+    double cb1 = 1600;
+    double cb2 = 2500;
+    double cbmin, cb_cur;
+    unsigned ncb = 9;
+
+    double rhob1 = 1;
+    double rhob2 = 3;
+    double rhobmin, rhob_cur;
+    unsigned nrhob = 2;
+
+    double R1 = 3000;
+    double R2 = 4000;
+    double Rmin, R_cur;
+    unsigned nR = 10;
+
+    double resmin = 10000;
 
     ifstream myFileSynth("dtimes_synth_1.txt"); // delays for R = 3500, cw = 1500, cb = 2000, rhow = 1, rhob = 2;
-    double R = 3500;
+
     //stringstream myLineStream;
 
 
@@ -175,12 +205,59 @@ int main( int argc, char **argv )
 
         modal_delays.push_back(buffvect);
     }
+    myFileSynth.close();
 
-
+    // sample call of the residual computation routine
     residual = compute_modal_delays_residual_uniform( freqs, depths,c1s, c2s, rhos, Ns_points, R, modal_delays, mode_numbers);
     cout << "Residual is: " << residual << endl;
 
-    myFileSynth.close();
+    // brute force minimum search
+
+    cout << "BRUTE FORCE MINIMUM SEARCH" << endl;
+    cout << "Search space:" << endl;
+    cout << cb1 << "< c_b <" << cb2 << ", step" << (cb2 - cb1)/ncb << endl;
+    cout << rhob1 << "< rho_b <" << rhob2 << ", step" << (rhob2 - rhob1)/nrhob << endl;
+    cout << R1 << "< Range <" << R2 << ", step" << (R2 - R1)/nR << endl;
+
+    for (unsigned ii=0; ii<=ncb; ii++) {
+
+        cb_cur = cb1 + ii*(cb2 - cb1)/ncb;
+        c1s.at(1) = cb_cur;
+        c2s.at(1) = cb_cur;
+
+        for (unsigned jj=0; jj<=nrhob; jj++) {
+
+            rhob_cur = rhob1 + jj*(rhob2 - rhob1)/nrhob;
+            rhos.at(1) = rhob_cur;
+
+            for (unsigned kk=0; kk<=nR; kk++) {
+
+                R_cur = R1 + kk*(R2 - R1)/nR;
+
+                residual = compute_modal_delays_residual_uniform( freqs, depths,c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
+
+                if (residual < resmin) {
+
+                    resmin = residual;
+                    cbmin = cb_cur;
+                    rhobmin = rhob_cur;
+                    Rmin = R_cur;
+                    cout << "New residual minimum:" << endl;
+                    cout << "err=" << resmin << ", parameters:" << endl;
+                    cout << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin <<  endl;
+
+                }
+
+
+            }
+        }
+    }
+
+    cout << "SEARCH ENDED!" << endl;
+    cout << "RESULTING VALUE:" << endl;
+    cout << "err=" << resmin << ", parameters:" << endl;
+    cout << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin <<  endl;
+
 
 	return 0;
 
@@ -291,12 +368,14 @@ int compute_modal_grop_velocities(      vector<double> &freqs,
         out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1,depths,c1s,c2s,rhos,Ns_points,1,ordRich);
         nwnum = out_wnum1.size();
 
+        /*
         cout << "f=" << freqs.at(ii) << "Hz" << endl;
 
         for (unsigned jj=0; jj < nwnum; jj++ )
         {
             cout << "k_" << jj+1 << "=" << out_wnum1.at(jj) << endl;
         }
+        */
 
         omeg2 = 2*3.141592653589793*(freqs.at(ii) - deltaf/2);
         out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2,depths,c1s,c2s,rhos,Ns_points,1,ordRich);
@@ -435,7 +514,7 @@ the top of the first layer is z=0
             zp = zc;
         }
 
-        cout << "rr=" << rr << endl;
+        //cout << "rr=" << rr << endl;
 
         out_wnum2 = compute_wnumbers(omeg, input_c, input_rho,input_interf_idcs, input_mesh,flOnlyTrapped);
         m_wnum = min(m_wnum, out_wnum2.size() );
@@ -448,12 +527,12 @@ the top of the first layer is z=0
         }
 
 
-
+        /*
             for (unsigned ii=0; ii<out_wnum2.size();  ii++) {
 
                 cout << ii << "->" << sqrt(out_wnum2.at(ii)) << endl;
             }
-
+        */
     }
 
 for (unsigned mm=0; mm<m_wnum; mm++ ) {
