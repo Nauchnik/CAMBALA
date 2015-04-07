@@ -166,9 +166,9 @@ int main( int argc, char **argv )
     //SEARCH SPACE
 
     double cb1 = 1600;
-    double cb2 = 2500;
+    double cb2 = 2600;
     double cbmin, cb_cur;
-    unsigned ncb = 9;
+    unsigned ncb = 10;
 
     double rhob1 = 1;
     double rhob2 = 3;
