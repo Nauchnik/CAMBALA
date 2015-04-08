@@ -18,22 +18,22 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\alglib\src\specialfunctions.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\alglib\src\ap.cpp">
+    <ClCompile Include="..\alglib\alglibinternal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\alglib\src\integration.cpp">
+    <ClCompile Include="..\alglib\alglibmisc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\alglib\src\alglibinternal.cpp">
+    <ClCompile Include="..\alglib\ap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\alglib\src\alglibmisc.cpp">
+    <ClCompile Include="..\alglib\integration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\alglib\src\linalg.cpp">
+    <ClCompile Include="..\alglib\linalg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\alglib\specialfunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,19 +41,22 @@
     <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\alglib\src\alglibinternal.h">
+    <ClInclude Include="..\alglib\alglibinternal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\alglib\src\alglibmisc.h">
+    <ClInclude Include="..\alglib\alglibmisc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\alglib\src\ap.h">
+    <ClInclude Include="..\alglib\ap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\alglib\src\integration.h">
+    <ClInclude Include="..\alglib\integration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\alglib\src\linalg.h">
+    <ClInclude Include="..\alglib\linalg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\alglib\specialfunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
