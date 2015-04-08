@@ -18,22 +18,22 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\alglib\alglibinternal.cpp">
+    <ClCompile Include="..\alglib\src\specialfunctions.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\alglib\src\ap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\alglib\alglibmisc.cpp">
+    <ClCompile Include="..\alglib\src\integration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\alglib\ap.cpp">
+    <ClCompile Include="..\alglib\src\alglibinternal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\alglib\integration.cpp">
+    <ClCompile Include="..\alglib\src\alglibmisc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\alglib\linalg.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\alglib\specialfunctions.cpp">
+    <ClCompile Include="..\alglib\src\linalg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,22 +41,19 @@
     <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\alglib\alglibinternal.h">
+    <ClInclude Include="..\alglib\src\alglibinternal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\alglib\alglibmisc.h">
+    <ClInclude Include="..\alglib\src\alglibmisc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\alglib\ap.h">
+    <ClInclude Include="..\alglib\src\ap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\alglib\integration.h">
+    <ClInclude Include="..\alglib\src\integration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\alglib\linalg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\alglib\specialfunctions.h">
+    <ClInclude Include="..\alglib\src\linalg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

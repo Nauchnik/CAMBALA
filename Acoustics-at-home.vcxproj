@@ -18,7 +18,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120_CTP_Nov2012</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -44,7 +44,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../alglib/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../alglib/src/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -66,24 +66,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\alglib\alglibinternal.cpp" />
-    <ClCompile Include="..\alglib\alglibmisc.cpp" />
-    <ClCompile Include="..\alglib\ap.cpp" />
-    <ClCompile Include="..\alglib\integration.cpp" />
-    <ClCompile Include="..\alglib\linalg.cpp" />
-    <ClCompile Include="..\alglib\specialfunctions.cpp" />
+    <ClCompile Include="..\alglib\src\alglibinternal.cpp" />
+    <ClCompile Include="..\alglib\src\alglibmisc.cpp" />
+    <ClCompile Include="..\alglib\src\ap.cpp" />
+    <ClCompile Include="..\alglib\src\integration.cpp" />
+    <ClCompile Include="..\alglib\src\linalg.cpp" />
+    <ClCompile Include="..\alglib\src\specialfunctions.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\alglib\alglibinternal.h" />
-    <ClInclude Include="..\alglib\alglibmisc.h" />
-    <ClInclude Include="..\alglib\ap.h" />
-    <ClInclude Include="..\alglib\integration.h" />
-    <ClInclude Include="..\alglib\linalg.h" />
-    <ClInclude Include="..\alglib\specialfunctions.h" />
+    <ClInclude Include="..\alglib\src\alglibinternal.h" />
+    <ClInclude Include="..\alglib\src\alglibmisc.h" />
+    <ClInclude Include="..\alglib\src\ap.h" />
+    <ClInclude Include="..\alglib\src\integration.h" />
+    <ClInclude Include="..\alglib\src\linalg.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

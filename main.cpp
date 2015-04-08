@@ -26,23 +26,11 @@ struct layer
 	double dend;         // density at the end of a layer
 };
 
-
-
-
 vector<double> compute_wnumbers(double &omeg, vector<double> &c, vector<double> &rho, vector<unsigned> &interface_idcs, vector<double> &meshsizes,unsigned flOnlyTrapped);
-
 vector<double> compute_wnumbers_extrap(double &omeg, vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,vector<unsigned> &Ns_points, unsigned flOnlyTrapped,unsigned &ordRich);
-
 vector<double> compute_wnumbers_extrap_lin_dz(double &omeg, vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,vector<unsigned> &Ns_points, unsigned flOnlyTrapped,unsigned &ordRich);
-
 int compute_modal_grop_velocities( vector<double> &freqs, double deltaf, vector<double> &depths, vector<double> &c1s, vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, unsigned flOnlyTrapped, unsigned &ordRich, vector<vector<double>> &modal_group_velocities, vector<unsigned> &mode_numbers );
-
 double compute_modal_delays_residual_uniform( vector<double> &freqs, vector<double> &depths, vector<double> &c1s, vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, double R, vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
-
-
-
-
-
 
 int main( int argc, char **argv )
 {
@@ -143,12 +131,12 @@ int main( int argc, char **argv )
     myFile.close();
 
 */
-
-    vector<double> depths {90,600};
-    vector<double> c1s  {1500,2000};
-    vector<double> c2s  {1500,2000};
-    vector<double> rhos  {1,2};
-    vector<unsigned> Ns_points  {180,1020};
+	
+	vector<double> depths{90,600};
+    vector<double> c1s{1500,2000};
+    vector<double> c2s{1500,2000};
+    vector<double> rhos{1,2};
+    vector<unsigned> Ns_points{180,1020};
     unsigned rord = 3;
     vector<vector<double>> modal_group_velocities;
     vector<unsigned> mode_numbers;
@@ -442,13 +430,16 @@ the top of the first layer is z=0
 {
     vector<double> coeff_extrap;
     if (ordRich == 1) {
-        coeff_extrap.assign({1});
+		int tmp_arr[] = {1};
+        coeff_extrap.assign(tmp_arr, tmp_arr + 1);
     }
     else if (ordRich == 2){
-        coeff_extrap.assign({-1,2});
+		int tmp_arr[] = {-1, 2};
+        coeff_extrap.assign(tmp_arr, tmp_arr + 2);
     }
     else if (ordRich == 3){
-        coeff_extrap.assign({0.5, -4, 4.5});
+		int tmp_arr[] = {0.5, -4, 4.5};
+        coeff_extrap.assign(tmp_arr, tmp_arr + 3);
         //coeff_extrap.assign({0.1, -0.6, 1.5});
     }
     else if (ordRich == 4){
