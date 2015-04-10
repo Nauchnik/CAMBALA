@@ -38,8 +38,8 @@ struct layer
 // data for sending to computing process in MPI mode
 struct computing_process_input_data
 {
-	unsigned ncb;
-	unsigned nrhob;
+	int ncb;
+	int nrhob;
 };
 
 vector<double> compute_wnumbers(double &omeg, vector<double> &c, vector<double> &rho, vector<unsigned> &interface_idcs, vector<double> &meshsizes,unsigned flOnlyTrapped);
@@ -193,8 +193,9 @@ int main(int argc, char **argv)
 #endif
 	
 	ifstream myFileSynth("dtimes_synth_1.txt"); // delays for R = 3500, cw = 1500, cb = 2000, rhow = 1, rhob = 2;
-
+	
 	while (getline(myFileSynth, myLine)){
+		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete window symbol for correct reading
 		stringstream myLineStream(myLine);
 		myLineStream >> buff;
 		freqs.push_back(buff);
@@ -212,14 +213,6 @@ int main(int argc, char **argv)
 
 	// sample call of the residual computation routine
 	residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R, modal_delays, mode_numbers);
-	cout << "Residual is: " << residual << endl;
-
-	// brute force minimum search
-	cout << "BRUTE FORCE MINIMUM SEARCH" << endl;
-	cout << "Search space:" << endl;
-	cout << cb1 << "< c_b <" << cb2 << ", step" << (cb2 - cb1) / ncb << endl;
-	cout << rhob1 << "< rho_b <" << rhob2 << ", step" << (rhob2 - rhob1) / nrhob << endl;
-	cout << R1 << "< Range <" << R2 << ", step" << (R2 - R1) / nR << endl;
 
 	/*omp_set_num_threads(8);
 	int tid;
@@ -228,6 +221,15 @@ int main(int argc, char **argv)
 	
 #ifndef _MPI
 	// sequential mode
+	cout << "Start residual is: " << residual << endl;
+
+	// brute force minimum search
+	cout << "BRUTE FORCE MINIMUM SEARCH" << endl;
+	cout << "Search space:" << endl;
+	cout << cb1 << "< c_b <" << cb2 << ", step" << (cb2 - cb1) / ncb << endl;
+	cout << rhob1 << "< rho_b <" << rhob2 << ", step" << (rhob2 - rhob1) / nrhob << endl;
+	cout << R1 << "< Range <" << R2 << ", step" << (R2 - R1) / nR << endl;
+
 	for (unsigned cur_ncb = 0; cur_ncb <= ncb; cur_ncb++) {
 		for (unsigned cur_nrhob = 0; cur_nrhob <= nrhob; cur_nrhob++) {
 			for (unsigned cur_nR = 0; cur_nR <= nR; cur_nR++)
@@ -255,13 +257,34 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-#else
-	double result_array[4];
-	double task_array[2];
-	computing_process_input_data cur_data;
 
+	// fix final time
+	t2 = std::chrono::high_resolution_clock::now();
+	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+
+	cout << "SEARCH ENDED!" << endl;
+	cout << "RESULTING VALUE:" << endl;
+	cout << "err=" << resmin << ", parameters:" << endl;
+	cout << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin <<  endl;
+	cout << "time " << time_span.count() << endl;
+
+#else
+	// MPI mode
+	double result_array[4];
+	int task_array[2];
+	computing_process_input_data cur_data;
+	
 	if ( rank == 0 ) {
-		// MPI mode
+		// sequential mode
+		cout << "Start residual is: " << residual << endl;
+
+		// brute force minimum search
+		cout << "BRUTE FORCE MINIMUM SEARCH" << endl;
+		cout << "Search space:" << endl;
+		cout << cb1 << "< c_b <" << cb2 << ", step" << (cb2 - cb1) / ncb << endl;
+		cout << rhob1 << "< rho_b <" << rhob2 << ", step" << (rhob2 - rhob1) / nrhob << endl;
+		cout << R1 << "< Range <" << R2 << ", step" << (R2 - R1) / nR << endl;
+
 		stringstream sstream_out;
 		sstream_out << "MPI control process" << std::endl;
 		std::chrono::high_resolution_clock::time_point t1, t2, finding_new_bkv_start_time, now_time;
@@ -270,8 +293,8 @@ int main(int argc, char **argv)
 		vector<computing_process_input_data> computing_process_input_data_vec;
 		for (unsigned cur_ncb = 0; cur_ncb <= ncb; cur_ncb++)
 			for (unsigned cur_nrhob = 0; cur_nrhob <= nrhob; cur_nrhob++) {
-				cur_data.ncb = cur_ncb;
-				cur_data.nrhob = cur_nrhob;
+				cur_data.ncb = (int)cur_ncb;
+				cur_data.nrhob = (int)cur_nrhob;
 				computing_process_input_data_vec.push_back(cur_data);
 			}
 
@@ -283,12 +306,13 @@ int main(int argc, char **argv)
 		}
 		
 		unsigned send_task_count = 0;
+		unsigned processed_task_count = 0;
 		
 		// sending first part of tasks
 		for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++) {
 			task_array[0] = computing_process_input_data_vec[send_task_count].ncb;
 			task_array[1] = computing_process_input_data_vec[send_task_count].nrhob;
-			MPI_Send(task_array, 2, MPI_UNSIGNED, computing_process_index, 0, MPI_COMM_WORLD);
+			MPI_Send(task_array, 2, MPI_INT, computing_process_index, 0, MPI_COMM_WORLD);
 			send_task_count++;
 		}
 		sstream_out << "send_task_count " << send_task_count << std::endl;
@@ -298,17 +322,19 @@ int main(int argc, char **argv)
 		ofile.close(); ofile.clear();
 		
 		// get results and send new tasks on idle computing processes
-		while (send_task_count < computing_process_input_data_vec.size()) {
+		while ( processed_task_count < computing_process_input_data_vec.size() ) {
 			MPI_Recv( result_array, 4, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
-			sstream_out << "recv residual " << residual << std::endl;
+			processed_task_count++;
+			/*sstream_out << "recv residual " << residual << std::endl;
 			sstream_out << "recv cb_cur "   << cb_cur   << std::endl;
 			sstream_out << "recv rhob_cur " << rhob_cur << std::endl;
 			sstream_out << "recv R_cur "    << R_cur    << std::endl;
+			*/
 			residual = result_array[0];
 			cb_cur   = result_array[1];
 			rhob_cur = result_array[2];
 			R_cur    = result_array[3];
-			
+
 			if (residual < resmin) {
 				resmin = residual;
 				cbmin = cb_cur;
@@ -317,20 +343,27 @@ int main(int argc, char **argv)
 				sstream_out << endl << "New residual minimum:" << endl;
 				sstream_out << "err=" << resmin << ", parameters:" << endl;
 				sstream_out << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin << endl;
-				
-				cout << "time from start" << MPI_Wtime() - mpi_start_time << " s" << endl;
+				sstream_out  << "time from start " << MPI_Wtime() - mpi_start_time << " s" << endl;
 			}
-			task_array[0] = computing_process_input_data_vec[send_task_count].ncb;
-			task_array[1] = computing_process_input_data_vec[send_task_count].nrhob;
-			MPI_Send( task_array, 2, MPI_UNSIGNED, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
-			send_task_count++;
-			sstream_out << "send_task_count " << send_task_count << std::endl;
+			// if free tasks for sending
+			if ( send_task_count < computing_process_input_data_vec.size() ) {
+				task_array[0] = computing_process_input_data_vec[send_task_count].ncb;
+				task_array[1] = computing_process_input_data_vec[send_task_count].nrhob;
+				MPI_Send( task_array, 2, MPI_INT, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
+				send_task_count++;
+				sstream_out << "send_task_count " << send_task_count << std::endl;
+			}
 			
 			ofile.open("mpi_out", std::ios_base::app);
 			ofile << sstream_out.rdbuf();
 			sstream_out.clear(); sstream_out.str("");
 			ofile.close(); ofile.clear();
 		}
+
+		// send stop-messages
+		task_array[0] = task_array[1] = -1;
+		for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++)
+			MPI_Send(task_array, 2, MPI_INT, computing_process_index, 0, MPI_COMM_WORLD);
 		
 		sstream_out << endl << "SEARCH ENDED!" << endl;
 		sstream_out << "RESULTING VALUE:" << endl;
@@ -342,45 +375,61 @@ int main(int argc, char **argv)
 		ofile << sstream_out.rdbuf();
 		sstream_out.clear(); sstream_out.str("");
 		ofile.close(); ofile.clear();
+
+		MPI_Finalize();
 	}
 	else if (rank > 0) {
-		MPI_Recv(task_array, 2, MPI_UNSIGNED, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-		unsigned cur_ncb   = task_array[0];
-		unsigned cur_nrhob = task_array[1];
+		double local_resmin = resmin;
+		double local_cbmin;
+		double local_rhobmin;
+		double local_Rmin;
 		
-		for (unsigned cur_nR = 0; cur_nR <= nR; cur_nR++)
-		{
-			cb_cur = cb1 + cur_ncb*(cb2 - cb1) / ncb;
-			c1s.at(1) = cb_cur;
-			c2s.at(1) = cb_cur;
-
-			rhob_cur = rhob1 + cur_nrhob *(rhob2 - rhob1) / nrhob;
-			rhos.at(1) = rhob_cur;
-
-			R_cur = R1 + cur_nR*(R2 - R1) / nR;
-
-			residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
+		for(;;) {
+			MPI_Recv(task_array, 2, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+			// if stop-message then finalize
+			if ( ( task_array[0] == -1 ) && ( task_array[1] == -1 ) ) {
+				MPI_Finalize();
+				break;
+			}
 			
-			result_array[0] = residual;
-			result_array[1] = cb_cur;
-			result_array[2] = rhob_cur;
-			result_array[3] = R_cur;
+			unsigned cur_ncb   = (unsigned)task_array[0];
+			unsigned cur_nrhob = (unsigned)task_array[1];
+			
+			if ( rank == 1 ) {
+				cout << "recv cur_ncb "   << cur_ncb   << endl;
+				cout << "recv cur_nrhob " << cur_nrhob << endl;
+			}
+			
+			for (unsigned cur_nR = 0; cur_nR <= nR; cur_nR++) {
+				cb_cur = cb1 + cur_ncb*(cb2 - cb1) / ncb;
+				c1s.at(1) = cb_cur;
+				c2s.at(1) = cb_cur;
+
+				rhob_cur = rhob1 + cur_nrhob *(rhob2 - rhob1) / nrhob;
+				rhos.at(1) = rhob_cur;
+
+				R_cur = R1 + cur_nR*(R2 - R1) / nR;
+
+				residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
+
+				if (residual < local_resmin) {
+					local_resmin  = residual;
+					local_cbmin   = cb_cur;
+					local_rhobmin = rhob_cur;
+					local_Rmin    = R_cur;
+				}
+			}
+			
+			// send current local minimum to the control process
+			result_array[0] = local_resmin;
+			result_array[1] = local_cbmin ;
+			result_array[2] = local_rhobmin;
+			result_array[3] = local_Rmin;
 			
 			MPI_Send(result_array, 4, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
 		}
 	}
 #endif
-	
-	// fix final time
-	t2 = std::chrono::high_resolution_clock::now();
-	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-	
-    cout << "SEARCH ENDED!" << endl;
-    cout << "RESULTING VALUE:" << endl;
-    cout << "err=" << resmin << ", parameters:" << endl;
-    cout << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin <<  endl;
-	cout << "time " << time_span.count() << endl;
-	
 	return 0;
 }
 

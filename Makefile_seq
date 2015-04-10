@@ -4,7 +4,7 @@ INCDIRS = -I${INC1}
 CPPFLAGS = -O3 -std=c++0x ${INCDIRS}
 
 pd-sat: main.o alglibinternal.o alglibmisc.o ap.o integration.o linalg.o specialfunctions.o
-	${CPP} ${CPPFLAGS} main.o alglibinternal.o alglibmisc.o ap.o integration.o linalg.o specialfunctions.o -o acoustics_client_app
+	${CPP} ${CPPFLAGS} main.o alglibinternal.o alglibmisc.o ap.o integration.o linalg.o specialfunctions.o -o acoustics_client_app_conseq
 	
 specialfunctions.o: ../alglib/specialfunctions.cpp 
 	${CPP} ${CPPFLAGS} ../alglib/specialfunctions.cpp -c
@@ -29,5 +29,5 @@ main.o: main.cpp
 	
 clean:
 	rm -rf *.o
-	rm acoustics_client_app
+	rm acoustics_client_app_conseq
 	clear
