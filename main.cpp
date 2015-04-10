@@ -199,8 +199,11 @@ int main( int argc, char **argv )
     cout << rhob1 << "< rho_b <" << rhob2 << ", step" << (rhob2 - rhob1)/nrhob << endl;
     cout << R1 << "< Range <" << R2 << ", step" << (R2 - R1)/nR << endl;
 	
+	omp_set_num_threads(8);
+	int tid;
+	
 #pragma omp parallel for private(cb_cur,rhob_cur,R_cur,residual) firstprivate(c1s,c2s,rhos)
-    for (unsigned ii=0; ii<=ncb; ii++) {
+    for (int ii=0; ii<=ncb; ii++) {
         cb_cur = cb1 + ii*(cb2 - cb1)/ncb;
         c1s.at(1) = cb_cur;
         c2s.at(1) = cb_cur;
@@ -214,15 +217,16 @@ int main( int argc, char **argv )
 
                 residual = compute_modal_delays_residual_uniform( freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers );
 
+				tid = omp_get_thread_num();
+				if ( tid == 0 )
                 if (residual < resmin) {
-					#pragma omp atomic
-                    resmin = residual;
-					#pragma omp atomic
-                    cbmin = cb_cur;
-					#pragma omp atomic
-					rhobmin = rhob_cur;
-					#pragma omp atomic
-					Rmin = R_cur;
+					//#pragma omp atomic
+					{
+						resmin = residual;
+						cbmin = cb_cur;
+						rhobmin = rhob_cur;
+						Rmin = R_cur;
+					}
                     cout << "New residual minimum:" << endl;
                     cout << "err=" << resmin << ", parameters:" << endl;
                     cout << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin <<  endl;
