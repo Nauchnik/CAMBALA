@@ -38,6 +38,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Makefile_seq" />
     <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>

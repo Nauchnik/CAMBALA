@@ -132,6 +132,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Makefile_seq" />
     <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>

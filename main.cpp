@@ -6,6 +6,10 @@
 // | Authors: Pavel Petrov, Oleg Zaikin                                                |
 // +-----------------------------------------------------------------------------------+
 
+#ifdef _MPI
+#include <mpi.h>
+#endif
+
 #define _USE_MATH_DEFINES
 
 #include <iostream>
@@ -31,223 +35,351 @@ struct layer
 	double dend;         // density at the end of a layer
 };
 
+// data for sending to computing process in MPI mode
+struct computing_process_input_data
+{
+	unsigned ncb;
+	unsigned nrhob;
+};
+
 vector<double> compute_wnumbers(double &omeg, vector<double> &c, vector<double> &rho, vector<unsigned> &interface_idcs, vector<double> &meshsizes,unsigned flOnlyTrapped);
 vector<double> compute_wnumbers_extrap(double &omeg, vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,vector<unsigned> &Ns_points, unsigned flOnlyTrapped,unsigned &ordRich);
 vector<double> compute_wnumbers_extrap_lin_dz(double &omeg, vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,vector<unsigned> &Ns_points, unsigned flOnlyTrapped,unsigned &ordRich);
 int compute_modal_grop_velocities( vector<double> &freqs, double deltaf, vector<double> &depths, vector<double> &c1s, vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, unsigned flOnlyTrapped, unsigned &ordRich, vector<vector<double>> &modal_group_velocities, vector<unsigned> &mode_numbers );
 double compute_modal_delays_residual_uniform( vector<double> &freqs, vector<double> &depths, vector<double> &c1s, vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, double R, vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
 
-int main( int argc, char **argv )
+int main(int argc, char **argv)
 {
-/*
-	double freq = 50;
-    double c_w = 1500;
-    double c_b = 2000;
-    double rho_w = 1;
-    double rho_b = 2;
-    double dz = 1;
-    unsigned nz = 501;
-    unsigned ib = 90;    //at POINT = 89 we have water, at POINT = 90 we have bottom
-                    //   ii = 89,                  at ii = 90
+	/*
+		double freq = 50;
+		double c_w = 1500;
+		double c_b = 2000;
+		double rho_w = 1;
+		double rho_b = 2;
+		double dz = 1;
+		unsigned nz = 501;
+		unsigned ib = 90;    //at POINT = 89 we have water, at POINT = 90 we have bottom
+		//   ii = 89,                  at ii = 90
 
-    cout.precision(15);
+		cout.precision(15);
 
-    double omeg = 2*M_PI*freq;
+		double omeg = 2*M_PI*freq;
 
-    vector<double> input_c;
-    vector<double> input_rho;
-    vector<double> input_mesh { dz,dz };
-    vector<unsigned> input_interf_idcs { ib };
-    vector<double> out_wnum;
+		vector<double> input_c;
+		vector<double> input_rho;
+		vector<double> input_mesh { dz,dz };
+		vector<unsigned> input_interf_idcs { ib };
+		vector<double> out_wnum;
 
-    for ( unsigned ii = 0; ii<nz; ii++ ){
-        if (ii<ib){                   //
-            input_c.push_back(c_w);
-            input_rho.push_back(rho_w);
-        }
-        else {
-            input_c.push_back(c_b);
-            input_rho.push_back(rho_b);
-        }
+		for ( unsigned ii = 0; ii<nz; ii++ ){
+		if (ii<ib){                   //
+		input_c.push_back(c_w);
+		input_rho.push_back(rho_w);
+		}
+		else {
+		input_c.push_back(c_b);
+		input_rho.push_back(rho_b);
+		}
 
-    }
+		}
 
-    cout << "freq = " << freq << endl;
-    cout << "omega = " << omeg << endl;
+		cout << "freq = " << freq << endl;
+		cout << "omega = " << omeg << endl;
 
-    out_wnum = compute_wnumbers(omeg, input_c, input_rho,input_interf_idcs, input_mesh,1);
+		out_wnum = compute_wnumbers(omeg, input_c, input_rho,input_interf_idcs, input_mesh,1);
 
-   for (unsigned ii=0; ii<out_wnum.size();  ii++) {
+		for (unsigned ii=0; ii<out_wnum.size();  ii++) {
 
-            cout << ii << "->" << out_wnum.at(ii) << endl;
-
-
-    }
-
-    cout << "NEW: extrapolation" << endl;
-
-    vector<double> depths {90,600};
-    vector<double> c1s  {1500,2000};
-    vector<double> c2s  {1500,2000};
-    vector<double> rhos  {1,2};
-    vector<unsigned> Ns_points  {180,1020};
-    unsigned rord = 3;
-    vector<double> freqs {20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100};
-    vector<vector<double>> modal_group_velocities;
-    vector<unsigned> mode_numbers;
-    double deltaf = 0.5;
-
-    out_wnum = compute_wnumbers_extrap_lin_dz(omeg,depths,c1s,c2s,rhos,Ns_points,1,rord);
-
-    cout << "Extrapolated ev:" << endl;
-    for (unsigned ii=0; ii<out_wnum.size();  ii++) {
-
-            cout << ii << "->" << out_wnum.at(ii) << endl;
+		cout << ii << "->" << out_wnum.at(ii) << endl;
 
 
-    }
+		}
 
-    compute_modal_grop_velocities( freqs, deltaf, depths,c1s, c2s, rhos, Ns_points, 1, rord, modal_group_velocities, mode_numbers );
+		cout << "NEW: extrapolation" << endl;
 
-    ofstream myFile("mgv.txt");
-//    for (int ii=0; ii<N_points-2; ii++){
-//        myFile << std::fixed << std::setprecision(16) << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
-//    }
-//
+		vector<double> depths {90,600};
+		vector<double> c1s  {1500,2000};
+		vector<double> c2s  {1500,2000};
+		vector<double> rhos  {1,2};
+		vector<unsigned> Ns_points  {180,1020};
+		unsigned rord = 3;
+		vector<double> freqs {20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100};
+		vector<vector<double>> modal_group_velocities;
+		vector<unsigned> mode_numbers;
+		double deltaf = 0.5;
 
-    for (unsigned ii=0; ii<freqs.size();  ii++) {
-            cout << "f=" << freqs.at(ii) << endl;
+		out_wnum = compute_wnumbers_extrap_lin_dz(omeg,depths,c1s,c2s,rhos,Ns_points,1,rord);
 
-            for (unsigned jj=0; jj<mode_numbers.at(ii);  jj++) {
+		cout << "Extrapolated ev:" << endl;
+		for (unsigned ii=0; ii<out_wnum.size();  ii++) {
 
-            cout << modal_group_velocities[ii][jj] << endl;
-            myFile << std::fixed << std::setprecision(16) << modal_group_velocities[ii][jj] << "\t";
+		cout << ii << "->" << out_wnum.at(ii) << endl;
 
-            }
-            myFile << endl;
-    }
 
-    myFile.close();
+		}
 
-*/
-	vector<double> depths{90,600};
-    vector<double> c1s{1500,2000};
-    vector<double> c2s{1500,2000};
-    vector<double> rhos{1,2};
-    vector<unsigned> Ns_points{180,1020};
-    unsigned rord = 3;
-    vector<vector<double>> modal_group_velocities;
-    vector<unsigned> mode_numbers;
-    vector<vector<double>> modal_delays;
-    vector<double> freqs;
+		compute_modal_grop_velocities( freqs, deltaf, depths,c1s, c2s, rhos, Ns_points, 1, rord, modal_group_velocities, mode_numbers );
 
-    freqs.clear();
-    double buff;
-    vector<double> buffvect;
-    mode_numbers.clear();
-    string myLine;
-    double residual;
-    double R = 3500;
+		ofstream myFile("mgv.txt");
+		//    for (int ii=0; ii<N_points-2; ii++){
+		//        myFile << std::fixed << std::setprecision(16) << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
+		//    }
+		//
 
-    //SEARCH SPACE
-    double cb1 = 1600;
-    double cb2 = 2600;
-    double cbmin, cb_cur;
-    unsigned ncb = 10;
+		for (unsigned ii=0; ii<freqs.size();  ii++) {
+		cout << "f=" << freqs.at(ii) << endl;
 
-    double rhob1 = 1;
-    double rhob2 = 3;
-    double rhobmin, rhob_cur;
-    unsigned nrhob = 2;
+		for (unsigned jj=0; jj<mode_numbers.at(ii);  jj++) {
 
-    double R1 = 3000;
-    double R2 = 4000;
-    double Rmin, R_cur;
-    unsigned nR = 10;
+		cout << modal_group_velocities[ii][jj] << endl;
+		myFile << std::fixed << std::setprecision(16) << modal_group_velocities[ii][jj] << "\t";
 
-    double resmin = 10000;
+		}
+		myFile << endl;
+		}
+
+		myFile.close();
+
+		*/
+	vector<double> depths{ 90, 600 };
+	vector<double> c1s{ 1500, 2000 };
+	vector<double> c2s{ 1500, 2000 };
+	vector<double> rhos{ 1, 2 };
+	vector<unsigned> Ns_points{ 180, 1020 };
+	unsigned rord = 3;
+	vector<vector<double>> modal_group_velocities;
+	vector<unsigned> mode_numbers;
+	vector<vector<double>> modal_delays;
+	vector<double> freqs;
+
+	freqs.clear();
+	double buff;
+	vector<double> buffvect;
+	mode_numbers.clear();
+	string myLine;
+	double residual;
+	double R = 3500;
+
+	//SEARCH SPACE
+	double cb1 = 1600;
+	double cb2 = 2600;
+	double cbmin, cb_cur;
+	unsigned ncb = 10;
+
+	double rhob1 = 1;
+	double rhob2 = 3;
+	double rhobmin, rhob_cur;
+	unsigned nrhob = 2;
+
+	double R1 = 3000;
+	double R2 = 4000;
+	double Rmin, R_cur;
+	unsigned nR = 10;
+
+	double resmin = 10000;
 
 	// fix start time 
 	chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+	chrono::high_resolution_clock::time_point t2;
+	chrono::duration<double> time_span;
+	
+#ifdef _MPI
+	int corecount, rank;
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &corecount);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Status status;
+	double mpi_start_time = MPI_Wtime();
+#endif
 	
 	ifstream myFileSynth("dtimes_synth_1.txt"); // delays for R = 3500, cw = 1500, cb = 2000, rhow = 1, rhob = 2;
 
-    while ( getline(myFileSynth,myLine) ){
-        stringstream myLineStream(myLine);
-        myLineStream >> buff;
-        freqs.push_back(buff);
-        buffvect.clear();
+	while (getline(myFileSynth, myLine)){
+		stringstream myLineStream(myLine);
+		myLineStream >> buff;
+		freqs.push_back(buff);
+		buffvect.clear();
 
-        while (!myLineStream.eof()) {
-            myLineStream >> buff;
-            buffvect.push_back(buff);
+		while (!myLineStream.eof()) {
+			myLineStream >> buff;
+			buffvect.push_back(buff);
 			mode_numbers.push_back((unsigned)buffvect.size());
-        }
+		}
 
-        modal_delays.push_back(buffvect);
-    }
-    myFileSynth.close();
+		modal_delays.push_back(buffvect);
+	}
+	myFileSynth.close();
 
-    // sample call of the residual computation routine
-    residual = compute_modal_delays_residual_uniform( freqs, depths,c1s, c2s, rhos, Ns_points, R, modal_delays, mode_numbers);
-    cout << "Residual is: " << residual << endl;
+	// sample call of the residual computation routine
+	residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R, modal_delays, mode_numbers);
+	cout << "Residual is: " << residual << endl;
 
-    // brute force minimum search
-    cout << "BRUTE FORCE MINIMUM SEARCH" << endl;
-    cout << "Search space:" << endl;
-    cout << cb1 << "< c_b <" << cb2 << ", step" << (cb2 - cb1)/ncb << endl;
-    cout << rhob1 << "< rho_b <" << rhob2 << ", step" << (rhob2 - rhob1)/nrhob << endl;
-    cout << R1 << "< Range <" << R2 << ", step" << (R2 - R1)/nR << endl;
-	
-	omp_set_num_threads(8);
+	// brute force minimum search
+	cout << "BRUTE FORCE MINIMUM SEARCH" << endl;
+	cout << "Search space:" << endl;
+	cout << cb1 << "< c_b <" << cb2 << ", step" << (cb2 - cb1) / ncb << endl;
+	cout << rhob1 << "< rho_b <" << rhob2 << ", step" << (rhob2 - rhob1) / nrhob << endl;
+	cout << R1 << "< Range <" << R2 << ", step" << (R2 - R1) / nR << endl;
+
+	/*omp_set_num_threads(8);
 	int tid;
+	#pragma omp parallel for private(cb_cur,rhob_cur,R_cur,residual) firstprivate(c1s,c2s,rhos)
+	*/
 	
-#pragma omp parallel for private(cb_cur,rhob_cur,R_cur,residual) firstprivate(c1s,c2s,rhos)
-    for (int ii=0; ii<=ncb; ii++) {
-        cb_cur = cb1 + ii*(cb2 - cb1)/ncb;
-        c1s.at(1) = cb_cur;
-        c2s.at(1) = cb_cur;
+#ifndef _MPI
+	// sequential mode
+	for (unsigned cur_ncb = 0; cur_ncb <= ncb; cur_ncb++) {
+		for (unsigned cur_nrhob = 0; cur_nrhob <= nrhob; cur_nrhob++) {
+			for (unsigned cur_nR = 0; cur_nR <= nR; cur_nR++)
+			{
+				cb_cur = cb1 + cur_ncb*(cb2 - cb1) / ncb;
+				c1s.at(1) = cb_cur;
+				c2s.at(1) = cb_cur;
 
-        for (unsigned jj=0; jj<=nrhob; jj++) {
-            rhob_cur = rhob1 + jj*(rhob2 - rhob1)/nrhob;
-            rhos.at(1) = rhob_cur;
+				rhob_cur = rhob1 + cur_nrhob *(rhob2 - rhob1) / nrhob;
+				rhos.at(1) = rhob_cur;
 
-            for (unsigned kk=0; kk<=nR; kk++) {
-                R_cur = R1 + kk*(R2 - R1)/nR;
+				R_cur = R1 + cur_nR*(R2 - R1) / nR;
 
-                residual = compute_modal_delays_residual_uniform( freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers );
+				residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
 
-				tid = omp_get_thread_num();
-				if ( tid == 0 )
-                if (residual < resmin) {
-					//#pragma omp atomic
-					{
-						resmin = residual;
-						cbmin = cb_cur;
-						rhobmin = rhob_cur;
-						Rmin = R_cur;
-					}
-                    cout << "New residual minimum:" << endl;
-                    cout << "err=" << resmin << ", parameters:" << endl;
-                    cout << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin <<  endl;
-                }
-            }
-        }
-    }
+				if (residual < resmin) {
+					resmin = residual;
+					cbmin = cb_cur;
+					rhobmin = rhob_cur;
+					Rmin = R_cur;
+					cout << "New residual minimum:" << endl;
+					cout << "err=" << resmin << ", parameters:" << endl;
+					cout << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin << endl;
+				}
+			}
+		}
+	}
+#else
+	double result_array[4];
+	double task_array[2];
+	computing_process_input_data cur_data;
 
+	if ( rank == 0 ) {
+		// MPI mode
+		stringstream sstream_out;
+		sstream_out << "MPI control process" << std::endl;
+		std::chrono::high_resolution_clock::time_point t1, t2, finding_new_bkv_start_time, now_time;
+		std::chrono::duration<double> time_span;
+		
+		vector<computing_process_input_data> computing_process_input_data_vec;
+		for (unsigned cur_ncb = 0; cur_ncb <= ncb; cur_ncb++)
+			for (unsigned cur_nrhob = 0; cur_nrhob <= nrhob; cur_nrhob++) {
+				cur_data.ncb = cur_ncb;
+				cur_data.nrhob = cur_nrhob;
+				computing_process_input_data_vec.push_back(cur_data);
+			}
+
+		sstream_out << "computing_process_input_data_vec.size() " << computing_process_input_data_vec.size() << std::endl;
+		if (computing_process_input_data_vec.size() < corecount) {
+			std::cerr << "computing_process_input_data_vec.size() < corecount" << std::endl;
+			std::cerr << computing_process_input_data_vec.size() << " < " << corecount << std::endl;
+			exit(1);
+		}
+		
+		unsigned send_task_count = 0;
+		
+		// sending first part of tasks
+		for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++) {
+			task_array[0] = computing_process_input_data_vec[send_task_count].ncb;
+			task_array[1] = computing_process_input_data_vec[send_task_count].nrhob;
+			MPI_Send(task_array, 2, MPI_UNSIGNED, computing_process_index, 0, MPI_COMM_WORLD);
+			send_task_count++;
+		}
+		sstream_out << "send_task_count " << send_task_count << std::endl;
+		std::ofstream ofile( "mpi_out" );
+		ofile << sstream_out.rdbuf();
+		sstream_out.clear(); sstream_out.str("");
+		ofile.close(); ofile.clear();
+		
+		// get results and send new tasks on idle computing processes
+		while (send_task_count < computing_process_input_data_vec.size()) {
+			MPI_Recv( result_array, 4, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
+			sstream_out << "recv residual " << residual << std::endl;
+			sstream_out << "recv cb_cur "   << cb_cur   << std::endl;
+			sstream_out << "recv rhob_cur " << rhob_cur << std::endl;
+			sstream_out << "recv R_cur "    << R_cur    << std::endl;
+			residual = result_array[0];
+			cb_cur   = result_array[1];
+			rhob_cur = result_array[2];
+			R_cur    = result_array[3];
+			
+			if (residual < resmin) {
+				resmin = residual;
+				cbmin = cb_cur;
+				rhobmin = rhob_cur;
+				Rmin = R_cur;
+				sstream_out << endl << "New residual minimum:" << endl;
+				sstream_out << "err=" << resmin << ", parameters:" << endl;
+				sstream_out << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin << endl;
+				
+				cout << "time from start" << MPI_Wtime() - mpi_start_time << " s" << endl;
+			}
+			task_array[0] = computing_process_input_data_vec[send_task_count].ncb;
+			task_array[1] = computing_process_input_data_vec[send_task_count].nrhob;
+			MPI_Send( task_array, 2, MPI_UNSIGNED, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
+			send_task_count++;
+			sstream_out << "send_task_count " << send_task_count << std::endl;
+			
+			ofile.open("mpi_out", std::ios_base::app);
+			ofile << sstream_out.rdbuf();
+			sstream_out.clear(); sstream_out.str("");
+			ofile.close(); ofile.clear();
+		}
+		
+		sstream_out << endl << "SEARCH ENDED!" << endl;
+		sstream_out << "RESULTING VALUE:" << endl;
+		sstream_out << "err=" << resmin << ", parameters:" << endl;
+		sstream_out << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin << endl;
+		sstream_out << "final time " << MPI_Wtime() - mpi_start_time << " s" << endl;
+
+		ofile.open("mpi_out", std::ios_base::app);
+		ofile << sstream_out.rdbuf();
+		sstream_out.clear(); sstream_out.str("");
+		ofile.close(); ofile.clear();
+	}
+	else if (rank > 0) {
+		MPI_Recv(task_array, 2, MPI_UNSIGNED, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		unsigned cur_ncb   = task_array[0];
+		unsigned cur_nrhob = task_array[1];
+		
+		for (unsigned cur_nR = 0; cur_nR <= nR; cur_nR++)
+		{
+			cb_cur = cb1 + cur_ncb*(cb2 - cb1) / ncb;
+			c1s.at(1) = cb_cur;
+			c2s.at(1) = cb_cur;
+
+			rhob_cur = rhob1 + cur_nrhob *(rhob2 - rhob1) / nrhob;
+			rhos.at(1) = rhob_cur;
+
+			R_cur = R1 + cur_nR*(R2 - R1) / nR;
+
+			residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
+			
+			result_array[0] = residual;
+			result_array[1] = cb_cur;
+			result_array[2] = rhob_cur;
+			result_array[3] = R_cur;
+			
+			MPI_Send(result_array, 4, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+		}
+	}
+#endif
+	
 	// fix final time
-	chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-	chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+	t2 = std::chrono::high_resolution_clock::now();
+	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	
     cout << "SEARCH ENDED!" << endl;
     cout << "RESULTING VALUE:" << endl;
     cout << "err=" << resmin << ", parameters:" << endl;
     cout << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin <<  endl;
 	cout << "time " << time_span.count() << endl;
-
-	ofstream out("out_time");
-	out << time_span.count() << " s";
-	out.close();
 	
 	return 0;
 }
@@ -770,4 +902,3 @@ vector<double> compute_wnumbers( double &omeg, // sound frequency
 
     return wnumbers2;
 }
-
