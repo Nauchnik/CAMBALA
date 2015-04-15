@@ -23,6 +23,8 @@
 #include <cmath>
 #include <omp.h>
 
+const double LOCAL_M_PI = 3.14159265358979323846;
+
 using namespace std;
 
 // layer data
@@ -63,7 +65,7 @@ int main(int argc, char **argv)
 
 		cout.precision(15);
 
-		double omeg = 2*M_PI*freq;
+		double omeg = 2*LOCAL_M_PI*freq;
 
 		vector<double> input_c;
 		vector<double> input_rho;
@@ -516,7 +518,7 @@ int compute_modal_grop_velocities(      vector<double> &freqs,
         out_wnum1.clear();
         out_wnum2.clear();
         mgv_ii.clear();
-        omeg1 = 2*M_PI*(freqs.at(ii) + deltaf/2);
+		omeg1 = 2*LOCAL_M_PI*(freqs.at(ii) + deltaf / 2);
         out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1,depths,c1s,c2s,rhos,Ns_points,1,ordRich);
 		nwnum = (unsigned)out_wnum1.size();
 
@@ -529,7 +531,7 @@ int compute_modal_grop_velocities(      vector<double> &freqs,
         }
         */
 
-		omeg2 = 2 *M_PI*(freqs.at(ii) - deltaf / 2);
+		omeg2 = 2*LOCAL_M_PI*(freqs.at(ii) - deltaf / 2);
         out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2,depths,c1s,c2s,rhos,Ns_points,1,ordRich);
         nwnum = min(nwnum, (unsigned)out_wnum2.size());
 
