@@ -19,9 +19,8 @@
 #include <chrono>
 #include <iomanip>
 #include <algorithm>
-#include "linalg.h"
 #include <cmath>
-#include <omp.h>
+#include "linalg.h"
 
 const double LOCAL_M_PI = 3.14159265358979323846;
 
@@ -42,7 +41,50 @@ struct computing_process_input_data
 {
 	int ncb;
 	int nrhob;
+	int nR;
 };
+
+template< typename T >
+bool next_cartesian(std::vector<T> &vii, std::vector<int> &index_arr, T &cur_vi)
+{
+	if (index_arr.size() == 0) { // init
+		index_arr.resize(vii.size());
+		//for( auto &x : index_arr )
+		//	x = 0;
+		for (std::vector<int> ::iterator it = index_arr.begin(); it != index_arr.end(); ++it)
+			*it = 0;
+	}
+	if (index_arr[0] == -1)
+		return false;
+	// get current value
+	cur_vi.resize(vii.size());
+	for (unsigned i = 0; i < index_arr.size(); ++i)
+		cur_vi[i] = vii[i][index_arr[i]];
+	// check if last iteration
+	bool IsLastValue = true;
+	for (unsigned i = 0; i < index_arr.size(); ++i) {
+		if (index_arr[i] != vii[i].size() - 1) {
+			IsLastValue = false;
+			break;
+		}
+	}
+	if (IsLastValue)
+		index_arr[0] = -1; // condition of stopping
+	else {
+		// find last changable row to increase its value
+		unsigned last_changable = (unsigned)index_arr.size() - 1;
+		while (last_changable != -1){
+			if (index_arr[last_changable] < vii[last_changable].size() - 1)
+				break;
+			--last_changable;
+		}
+		index_arr[last_changable]++;
+		for (unsigned i = last_changable + 1; i < index_arr.size(); ++i)
+			index_arr[i] = 0;
+	}
+
+	return true;
+}
 
 vector<double> compute_wnumbers(double &omeg, vector<double> &c, vector<double> &rho, vector<unsigned> &interface_idcs, vector<double> &meshsizes,unsigned flOnlyTrapped);
 vector<double> compute_wnumbers_extrap(double &omeg, vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,vector<unsigned> &Ns_points, unsigned flOnlyTrapped,unsigned &ordRich);
@@ -207,8 +249,8 @@ int main(int argc, char **argv)
 
     vector<double> depths;
     for (unsigned jj=1; jj<=n_layers_w; jj++ ){ depths.push_back( layer_thickness_w*jj ); }
-    depths.push_back( H );
-
+		depths.push_back( H );
+	
     vector<double> c1s ( n_layers_w+1, 1500) ;
     vector<double> c2s ( n_layers_w+1, 1500) ;
     vector<double> rhos( n_layers_w+1, 1);
@@ -216,34 +258,41 @@ int main(int argc, char **argv)
 	Ns_points.at(n_layers_w) = (unsigned)round(ppm*(H - h));
 
     // END TEST #2
-
-	double residual;
+	
+	double residual = 1e50; // start huge value
 	double R = 3500;
-
+	
 	//SEARCH SPACE
 	double cb1 = 1600;
-	double cb2 = 2600;
-	double cbmin = 1e50, cb_cur;
-	unsigned ncb = 10;
+	double cb2 = 3000;
+	double cb_min = 1e50, cb_cur;
+	unsigned ncb = 100;
 
 	double rhob1 = 1;
 	double rhob2 = 3;
-	double rhobmin = 1e50, rhob_cur;
-	unsigned nrhob = 2;
-
+	double rhob_min = 1e50, rhob_cur;
+	unsigned nrhob = 20;
+	
 	double R1 = 3000;
 	double R2 = 4000;
-	double Rmin = 1e50, R_cur;
-	unsigned nR = 10;
-
+	double R_min = 1e50, R_cur;
+	unsigned nR = 100;
+	
     double cw1 = 1400;
     double cw2 = 1500;
-    unsigned ncpl = 10; // search mesh within each water layer
+    unsigned ncpl = 1; // search mesh within each water layer
     vector<double> cws_cur ( n_layers_w, 1500);
+	vector<double> cws_min (n_layers_w, 1500);
 
+	if (argc == 2) {
+		ncpl = atoi(argv[1]);
+		cout << "ncpl " << ncpl << endl;
+	}
+	
 	unsigned N_total = (unsigned)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
-    double resmin = 10000;
-
+	cout << "N_total " << N_total << endl;
+    double res_min = 1e50;
+	
 	// fix start time
 	chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 	chrono::high_resolution_clock::time_point t2;
@@ -258,82 +307,73 @@ int main(int argc, char **argv)
 	double mpi_start_time = MPI_Wtime();
 #endif
 
+#ifndef _MPI
 	// sample call of the residual computation routine
 
-    // specify bottom parameters;
-    cb_cur = 2000;
-    rhob_cur = 2;
+	// specify bottom parameters;
+	cb_cur = 2000;
+	rhob_cur = 2;
 
-    // ... then specify sound speed in water
- /* // This is trivial hydrology, same as TEST #1
-    cws_cur.at(0) = 1500;
-    cws_cur.at(1) = 1500;
-    cws_cur.at(2) = 1500;
-    cws_cur.at(3) = 1500;
-    cws_cur.at(4) = 1500;
-*/
+	// ... then specify sound speed in water
+	// This is trivial hydrology, same as TEST #1
+	/*cws_cur.at(0) = 1500;
+	cws_cur.at(1) = 1500;
+	cws_cur.at(2) = 1500;
+	cws_cur.at(3) = 1500;
+	cws_cur.at(4) = 1500;*/
 
-    // TEST #2
+	// TEST #2
 
-    cws_cur.at(0) = 1490;
-    cws_cur.at(1) = 1480;
-    cws_cur.at(2) = 1470;
-    cws_cur.at(3) = 1455;
-    cws_cur.at(4) = 1455;
+	cws_cur.at(0) = 1490;
+	cws_cur.at(1) = 1480;
+	cws_cur.at(2) = 1470;
+	cws_cur.at(3) = 1455;
+	cws_cur.at(4) = 1455;
 
-    // and finally specify range
-    R_cur = 3500;
+	// and finally specify range
+	R_cur = 3500;
 
-    // The parameters are transformed into the arrays c1s, c2s, rhos
-/*
-    // TEST #1
-    c1s.at(1) = cb_cur;
-    c2s.at(1) = cb_cur;
-    rhos.at(1) = rhob_cur;*/
+	// The parameters are transformed into the arrays c1s, c2s, rhos
+	/*
+	// TEST #1
+	c1s.at(1) = cb_cur;
+	c2s.at(1) = cb_cur;
+	rhos.at(1) = rhob_cur;	*/
 
-    // TEST #2
+	// TEST #2
 
-    for (unsigned jj=0; jj<n_layers_w-1; jj++ ){
-        c1s.at(jj) = cws_cur.at(jj);
-        c2s.at(jj) = cws_cur.at(jj+1);
-        rhos.at(jj) = 1;
-    }
-    c1s.at(n_layers_w-1) = cws_cur.at(n_layers_w-1);
-    c2s.at(n_layers_w-1) = cws_cur.at(n_layers_w-1);
-    rhos.at(n_layers_w-1) = 1;
-    c1s.at(n_layers_w) = cb_cur;
-    c2s.at(n_layers_w) = cb_cur;
-    rhos.at(n_layers_w) = rhob_cur;
-    for (unsigned jj=0; jj<=n_layers_w; jj++ ){
-        cout << "Layer #" << jj+1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << endl;
-    }
+	for (unsigned jj = 0; jj<n_layers_w - 1; jj++){
+		c1s.at(jj) = cws_cur.at(jj);
+		c2s.at(jj) = cws_cur.at(jj + 1);
+		rhos.at(jj) = 1;
+	}
+	c1s.at(n_layers_w - 1) = cws_cur.at(n_layers_w - 1);
+	c2s.at(n_layers_w - 1) = cws_cur.at(n_layers_w - 1);
+	rhos.at(n_layers_w - 1) = 1;
+	c1s.at(n_layers_w) = cb_cur;
+	c2s.at(n_layers_w) = cb_cur;
+	rhos.at(n_layers_w) = rhob_cur;
+	for (unsigned jj = 0; jj <= n_layers_w; jj++){
+		cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << endl;
+	}
 
 	residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R, modal_delays, mode_numbers);
 
-#ifndef _MPI
 	// sequential mode
 	cout << "Start residual is: " << residual << endl;
-
+	
     // NEW: inverting for bottom halfspace parameters + sound speed in water!
-
-
-
-
 
 	//OLD: brute force minimum search -- single bottom layer + range!
 /*	cout << "BRUTE FORCE MINIMUM SEARCH" << endl;
 	cout << "Search space:" << endl;
-	cout << cb1 << "< c_b <" << cb2 << ", step" << (cb2 - cb1) / ncb << endl;
-	cout << rhob1 << "< rho_b <" << rhob2 << ", step" << (rhob2 - rhob1) / nrhob << endl;
-	cout << R1 << "< Range <" << R2 << ", step" << (R2 - R1) / nR << endl;
-
-
-
-
+	cout << cb1 << "< c_b <" << cb2 << ", step " << (cb2 - cb1) / ncb << endl;
+	cout << rhob1 << "< rho_b <" << rhob2 << ", step " << (rhob2 - rhob1) / nrhob << endl;
+	cout << R1 << "< Range <" << R2 << ", step " << (R2 - R1) / nR << endl;
+	
 	for (unsigned cur_ncb = 0; cur_ncb <= ncb; cur_ncb++) {
 		for (unsigned cur_nrhob = 0; cur_nrhob <= nrhob; cur_nrhob++) {
-			for (unsigned cur_nR = 0; cur_nR <= nR; cur_nR++)
-			{
+			for (unsigned cur_nR = 0; cur_nR <= nR; cur_nR++) {
 				cb_cur = cb1 + cur_ncb*(cb2 - cb1) / ncb;
 				c1s.at(1) = cb_cur;
 				c2s.at(1) = cb_cur;
@@ -364,16 +404,18 @@ int main(int argc, char **argv)
 
 	cout << "SEARCH ENDED!" << endl;
 	cout << "RESULTING VALUE:" << endl;
-	cout << "err=" << resmin << ", parameters:" << endl;
-	cout << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin <<  endl;
+	cout << "err=" << res_min << ", parameters:" << endl;
+	cout << "c_b=" << cb_min << ", rho_b=" << rhob_min << ", R=" << R_min <<  endl;
 	cout << "time " << time_span.count() << endl;
-
+	
 #else
 	// MPI mode
-	double result_array[4];
-	int task_array[2];
+	const int result_array_len = 9;
+	double result_array[result_array_len];
+	const int task_array_len = 3;
+	int task_array[task_array_len];
 	computing_process_input_data cur_data;
-
+	
 	if ( rank == 0 ) {
 		// sequential mode
 		cout << "Start residual is: " << residual << endl;
@@ -381,22 +423,25 @@ int main(int argc, char **argv)
 		// brute force minimum search
 		cout << "BRUTE FORCE MINIMUM SEARCH" << endl;
 		cout << "Search space:" << endl;
-		cout << cb1 << "< c_b <" << cb2 << ", step" << (cb2 - cb1) / ncb << endl;
-		cout << rhob1 << "< rho_b <" << rhob2 << ", step" << (rhob2 - rhob1) / nrhob << endl;
-		cout << R1 << "< Range <" << R2 << ", step" << (R2 - R1) / nR << endl;
-
+		cout << cb1 << "< c_b <" << cb2 << ", step " << (cb2 - cb1) / ncb << endl;
+		cout << R1 << "< Range <" << R2 << ", step " << (R2 - R1) / nR << endl;
+		cout << cw1 << "< cws <" << cw2 << " , step " << (cw2 - cw1) / ncpl << endl;
+		cout << rhob1 << "< rho_b <" << rhob2 << ", step " << (rhob2 - rhob1) / nrhob << endl;
+		
 		stringstream sstream_out;
 		sstream_out << "MPI control process" << std::endl;
 		std::chrono::high_resolution_clock::time_point t1, t2, finding_new_bkv_start_time, now_time;
 		std::chrono::duration<double> time_span;
 
 		vector<computing_process_input_data> computing_process_input_data_vec;
-		for (unsigned cur_ncb = 0; cur_ncb <= ncb; cur_ncb++)
-			for (unsigned cur_nrhob = 0; cur_nrhob <= nrhob; cur_nrhob++) {
-				cur_data.ncb = (int)cur_ncb;
-				cur_data.nrhob = (int)cur_nrhob;
-				computing_process_input_data_vec.push_back(cur_data);
-			}
+		for (int cur_ncb = 0; cur_ncb <= ncb; cur_ncb++)
+			for (int cur_nrhob = 0; cur_nrhob <= nrhob; cur_nrhob++)
+				for (int cur_nR = 0; cur_nR <= nR; cur_nR++) {
+					cur_data.ncb   = cur_ncb;
+					cur_data.nrhob = cur_nrhob;
+					cur_data.nR    = cur_nR;
+					computing_process_input_data_vec.push_back(cur_data);
+				}
 
 		sstream_out << "computing_process_input_data_vec.size() " << computing_process_input_data_vec.size() << std::endl;
 		if (computing_process_input_data_vec.size() < corecount) {
@@ -412,7 +457,8 @@ int main(int argc, char **argv)
 		for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++) {
 			task_array[0] = computing_process_input_data_vec[send_task_count].ncb;
 			task_array[1] = computing_process_input_data_vec[send_task_count].nrhob;
-			MPI_Send(task_array, 2, MPI_INT, computing_process_index, 0, MPI_COMM_WORLD);
+			task_array[2] = computing_process_input_data_vec[send_task_count].nR;
+			MPI_Send(task_array, task_array_len, MPI_INT, computing_process_index, 0, MPI_COMM_WORLD);
 			send_task_count++;
 		}
 		sstream_out << "send_task_count " << send_task_count << std::endl;
@@ -423,33 +469,45 @@ int main(int argc, char **argv)
 
 		// get results and send new tasks on idle computing processes
 		while ( processed_task_count < computing_process_input_data_vec.size() ) {
-			MPI_Recv( result_array, 4, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
+			MPI_Recv( result_array, result_array_len, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
 			processed_task_count++;
+			
+			residual   = result_array[0];
+			cb_cur     = result_array[1];
+			rhob_cur   = result_array[2];
+			R_cur      = result_array[3];
+			cws_cur[0] = result_array[4];
+			cws_cur[1] = result_array[5];
+			cws_cur[2] = result_array[6];
+			cws_cur[3] = result_array[7];
+			cws_cur[4] = result_array[8];
+			
 			/*sstream_out << "recv residual " << residual << std::endl;
 			sstream_out << "recv cb_cur "   << cb_cur   << std::endl;
 			sstream_out << "recv rhob_cur " << rhob_cur << std::endl;
-			sstream_out << "recv R_cur "    << R_cur    << std::endl;
-			*/
-			residual = result_array[0];
-			cb_cur   = result_array[1];
-			rhob_cur = result_array[2];
-			R_cur    = result_array[3];
-
-			if (residual < resmin) {
-				resmin = residual;
-				cbmin = cb_cur;
-				rhobmin = rhob_cur;
-				Rmin = R_cur;
+			sstream_out << "recv R_cur "    << R_cur    << std::endl;*/
+			
+			if (residual < res_min) {
+				res_min = residual;
+				cb_min = cb_cur;
+				rhob_min = rhob_cur;
+				R_min = R_cur;
+				cws_min = cws_cur;
 				sstream_out << endl << "New residual minimum:" << endl;
-				sstream_out << "err=" << resmin << ", parameters:" << endl;
-				sstream_out << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin << endl;
-				sstream_out  << "time from start " << MPI_Wtime() - mpi_start_time << " s" << endl;
+				sstream_out << "err=" << res_min << ", parameters:" << endl;
+				sstream_out << "c_b=" << cb_min << ", rho_b=" << rhob_min << ", R=" << R_min << endl;\
+				sstream_out << "cws_min :" << endl;
+				for ( auto &x : cws_min )
+					sstream_out << x << " ";
+				sstream_out << endl;
+				sstream_out << "time from start " << MPI_Wtime() - mpi_start_time << " s" << endl;
 			}
 			// if free tasks for sending
 			if ( send_task_count < computing_process_input_data_vec.size() ) {
 				task_array[0] = computing_process_input_data_vec[send_task_count].ncb;
 				task_array[1] = computing_process_input_data_vec[send_task_count].nrhob;
-				MPI_Send( task_array, 2, MPI_INT, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
+				task_array[2] = computing_process_input_data_vec[send_task_count].nR;
+				MPI_Send( task_array, task_array_len, MPI_INT, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
 				send_task_count++;
 				sstream_out << "send_task_count " << send_task_count << std::endl;
 			}
@@ -459,18 +517,22 @@ int main(int argc, char **argv)
 			sstream_out.clear(); sstream_out.str("");
 			ofile.close(); ofile.clear();
 		}
-
+		
 		// send stop-messages
-		task_array[0] = task_array[1] = -1;
+		task_array[0] = task_array[1] = task_array[2] = -1;
 		for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++)
-			MPI_Send(task_array, 2, MPI_INT, computing_process_index, 0, MPI_COMM_WORLD);
+			MPI_Send(task_array, task_array_len, MPI_INT, computing_process_index, 0, MPI_COMM_WORLD);
 
 		sstream_out << endl << "SEARCH ENDED!" << endl;
 		sstream_out << "RESULTING VALUE:" << endl;
-		sstream_out << "err=" << resmin << ", parameters:" << endl;
-		sstream_out << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin << endl;
+		sstream_out << "err=" << res_min << ", parameters:" << endl;
+		sstream_out << "c_b=" << cb_min << ", rho_b=" << rhob_min << ", R=" << R_min << endl;
+		sstream_out << "cws_min :" << endl;
+		for ( auto &x : cws_min )
+			sstream_out << x << " ";
+		sstream_out << endl;
 		sstream_out << "final time " << MPI_Wtime() - mpi_start_time << " s" << endl;
-
+		
 		ofile.open("mpi_out", std::ios_base::app);
 		ofile << sstream_out.rdbuf();
 		sstream_out.clear(); sstream_out.str("");
@@ -479,54 +541,89 @@ int main(int argc, char **argv)
 		MPI_Finalize();
 	}
 	else if (rank > 0) {
-		double local_resmin = resmin;
-		double local_cbmin;
-		double local_rhobmin;
-		double local_Rmin;
-
+		double local_res_min = res_min;
+		double local_cb_min;
+		double local_rhob_min;
+		double local_R_min;
+		vector<double> local_cws_min(n_layers_w, 1500);
+		
+		vector<vector<double>> cws_vii; // all variants for every depth
+		vector<int> index_arr;
+		vector<double> cws_vi;
+		vector<vector<double>> cws_all_cartesians;
+		for ( int ncpl_cur = 0; ncpl_cur <= ncpl; ncpl_cur++ )
+			cws_vi.push_back(cw1 + ncpl_cur*(cw2 - cw1) / ncpl);
+		if ( rank == 1 ) {
+			cout << "cws_vi" << endl;
+			for ( auto &x : cws_vi )
+				cout << x << " ";
+		}
+		for (unsigned i=0; i < n_layers_w; i++)
+			cws_vii.push_back(cws_vi);
+		while (next_cartesian(cws_vii, index_arr, cws_vi))
+			cws_all_cartesians.push_back(cws_vi);
+		
+		cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << endl;
+		
 		for(;;) {
-			MPI_Recv(task_array, 2, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+			MPI_Recv(task_array, task_array_len, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 			// if stop-message then finalize
-			if ( ( task_array[0] == -1 ) && ( task_array[1] == -1 ) ) {
+			if ( ( task_array[0] == -1 ) && ( task_array[1] == -1 ) && ( task_array[2] == -1 ) ) {
 				MPI_Finalize();
 				break;
 			}
 
-			unsigned cur_ncb   = (unsigned)task_array[0];
-			unsigned cur_nrhob = (unsigned)task_array[1];
-
+			int ncb_cur   = task_array[0];
+			int nrhob_cur = task_array[1];
+			int nR_cur    = task_array[2];
+			
 			if ( rank == 1 ) {
-				cout << "recv cur_ncb "   << cur_ncb   << endl;
-				cout << "recv cur_nrhob " << cur_nrhob << endl;
+				cout << "recv ncb_cur "   << ncb_cur   << endl;
+				cout << "recv nrhob_cur " << nrhob_cur << endl;
+				cout << "recv nR_cur "    << nR_cur    << endl;
+				cout << endl;
 			}
 
-			for (unsigned cur_nR = 0; cur_nR <= nR; cur_nR++) {
-				cb_cur = cb1 + cur_ncb*(cb2 - cb1) / ncb;
-				c1s.at(1) = cb_cur;
-				c2s.at(1) = cb_cur;
-
-				rhob_cur = rhob1 + cur_nrhob *(rhob2 - rhob1) / nrhob;
-				rhos.at(1) = rhob_cur;
-
-				R_cur = R1 + cur_nR*(R2 - R1) / nR;
+			cb_cur   = cb1 + ncb_cur*(cb2 - cb1) / ncb;
+			rhob_cur = rhob1 + nrhob_cur *(rhob2 - rhob1) / nrhob;
+			R_cur    = R1 + nR_cur*(R2 - R1) / nR;
+			
+			for ( auto &cws_cur : cws_all_cartesians ) { // for all cartesians of cws vectors values
+				for (unsigned jj=0; jj<n_layers_w-1; jj++ ){
+					c1s.at(jj) = cws_cur.at(jj);
+					c2s.at(jj) = cws_cur.at(jj+1);
+					rhos.at(jj) = 1;
+				}
+				c1s.at(n_layers_w-1) = cws_cur.at(n_layers_w-1);
+				c2s.at(n_layers_w-1) = cws_cur.at(n_layers_w-1);
+				rhos.at(n_layers_w-1) = 1;
+				c1s.at(n_layers_w) = cb_cur;
+				c2s.at(n_layers_w) = cb_cur;
+				rhos.at(n_layers_w) = rhob_cur;
 
 				residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
 
-				if (residual < local_resmin) {
-					local_resmin  = residual;
-					local_cbmin   = cb_cur;
-					local_rhobmin = rhob_cur;
-					local_Rmin    = R_cur;
+				if (residual < local_res_min) {
+					local_res_min  = residual;
+					local_cb_min   = cb_cur;
+					local_rhob_min = rhob_cur;
+					local_R_min    = R_cur;
+					local_cws_min  = cws_cur;
 				}
 			}
-
+			
 			// send current local minimum to the control process
-			result_array[0] = local_resmin;
-			result_array[1] = local_cbmin ;
-			result_array[2] = local_rhobmin;
-			result_array[3] = local_Rmin;
-
-			MPI_Send(result_array, 4, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+			result_array[0] = local_res_min;
+			result_array[1] = local_cb_min ;
+			result_array[2] = local_rhob_min;
+			result_array[3] = local_R_min;
+			result_array[4] = local_cws_min[0];
+			result_array[5] = local_cws_min[1];
+			result_array[6] = local_cws_min[2];
+			result_array[7] = local_cws_min[3];
+			result_array[8] = local_cws_min[4];
+			
+			MPI_Send(result_array, result_array_len, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
 		}
 	}
 #endif
