@@ -186,21 +186,21 @@ int main(int argc, char **argv)
 
 		*/
 
-// reading the "experimental" delay time data from a file:
+	// reading the "experimental" delay time data from a file:
 
 	unsigned rord = 3;
 	vector<vector<double>> modal_group_velocities;
 	vector<unsigned> mode_numbers;
 	vector<vector<double>> modal_delays;
 	vector<double> freqs;
-    freqs.clear();
+	freqs.clear();
 	double buff;
 	vector<double> buffvect;
 	mode_numbers.clear();
 	string myLine;
 
-    //ifstream myFileSynth("dtimes_synth_1.txt"); // delays for R = 3500, cw = 1500, cb = 2000, rhow = 1, rhob = 2;
-    ifstream myFileSynth("dtimes_synth_thcline.txt");
+	//ifstream myFileSynth("dtimes_synth_1.txt"); // delays for R = 3500, cw = 1500, cb = 2000, rhow = 1, rhob = 2;
+	ifstream myFileSynth("dtimes_synth_thcline.txt");
 
 	while (getline(myFileSynth, myLine)){
 		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete window symbol for correct reading
@@ -219,185 +219,171 @@ int main(int argc, char **argv)
 	}
 	myFileSynth.close();
 
-/*  //SYMTHETIC TEST #1
-    //OLD version: bottom halfspace + Range
+	/*  //SYMTHETIC TEST #1
+		//OLD version: bottom halfspace + Range
 
 
-	vector<double> depths{ 90, 600 };
-	vector<double> c1s{ 1500, 2000 };
-	vector<double> c2s{ 1500, 2000 };
-	vector<double> rhos{ 1, 2 };
-	vector<unsigned> Ns_points{ 180, 1020 };
+		vector<double> depths{ 90, 600 };
+		vector<double> c1s{ 1500, 2000 };
+		vector<double> c2s{ 1500, 2000 };
+		vector<double> rhos{ 1, 2 };
+		vector<unsigned> Ns_points{ 180, 1020 };
 
-	// END TEST #1
-*/
+		// END TEST #1
+		*/
 
-    // SYNTHETIC TEST #2
-    // new version: ssp in water + bottom halfspace + Range
+	// SYNTHETIC TEST #2
+	// new version: ssp in water + bottom halfspace + Range
 
-    // environment model
-    // waveguide depth: H
-    // water column depth: h
-    // n_layers_w in the water,
+	// environment model
+	// waveguide depth: H
+	// water column depth: h
+	// n_layers_w in the water,
 
-    unsigned ppm = 2;
-    double h = 90;
-    double H = 600;
-    unsigned n_layers_w = 5;
-    double layer_thickness_w = h/n_layers_w;
-    //int layer_np = round(h/n_layers_w);
+	unsigned ppm = 2;
+	double h = 90;
+	double H = 600;
+	unsigned n_layers_w = 5;
+	double layer_thickness_w = h / n_layers_w;
+	//int layer_np = round(h/n_layers_w);
 
-    vector<double> depths;
-    for (unsigned jj=1; jj<=n_layers_w; jj++ ){ depths.push_back( layer_thickness_w*jj ); }
-		depths.push_back( H );
-	
-    vector<double> c1s ( n_layers_w+1, 1500) ;
-    vector<double> c2s ( n_layers_w+1, 1500) ;
-    vector<double> rhos( n_layers_w+1, 1);
-    vector<unsigned> Ns_points( n_layers_w+1, (unsigned)round(ppm*layer_thickness_w) );
+	vector<double> depths;
+	for (unsigned jj = 1; jj <= n_layers_w; jj++){ depths.push_back(layer_thickness_w*jj); }
+	depths.push_back(H);
+
+	vector<double> c1s(n_layers_w + 1, 1500);
+	vector<double> c2s(n_layers_w + 1, 1500);
+	vector<double> rhos(n_layers_w + 1, 1);
+	vector<unsigned> Ns_points(n_layers_w + 1, (unsigned)round(ppm*layer_thickness_w));
 	Ns_points.at(n_layers_w) = (unsigned)round(ppm*(H - h));
 
-    // END TEST #2
-	
+	// END TEST #2
+
 	double residual = 1e50; // start huge value
 	double R = 3500;
-	
+
 	//SEARCH SPACE
 	double cb1 = 1600;
 	double cb2 = 3000;
 	double cb_min = 1e50, cb_cur;
-	unsigned ncb = 100;
+	unsigned ncb;
 
 	double rhob1 = 1;
 	double rhob2 = 3;
 	double rhob_min = 1e50, rhob_cur;
-	unsigned nrhob = 20;
-	
+	unsigned nrhob;
+
 	double R1 = 3000;
 	double R2 = 4000;
 	double R_min = 1e50, R_cur;
-	unsigned nR = 100;
-	
-    double cw1 = 1400;
-    double cw2 = 1500;
-    unsigned ncpl = 1; // search mesh within each water layer
-    vector<double> cws_cur ( n_layers_w, 1500);
-	vector<double> cws_min (n_layers_w, 1500);
+	unsigned nR;
+
+	double cw1 = 1400;
+	double cw2 = 1500;
+	unsigned ncpl; // search mesh within each water layer
+	vector<double> cws_cur(n_layers_w, 1500);
+	vector<double> cws_min(n_layers_w, 1500);
 
 	if (argc == 2) {
 		ncpl = atoi(argv[1]);
 		cout << "ncpl " << ncpl << endl;
 	}
-	
-	unsigned N_total = (unsigned)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
-	cout << "N_total " << N_total << endl;
-    double res_min = 1e50;
-	
+
+	double res_min = 1e50;
+
 	// fix start time
 	chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 	chrono::high_resolution_clock::time_point t2;
 	chrono::duration<double> time_span;
 
 #ifdef _MPI
+	// parallel mode
 	int corecount, rank;
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &corecount);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Status status;
 	double mpi_start_time = MPI_Wtime();
+	// large values
+	ncb = 100;
+	nrhob = 20;
+	nR = 100;
+	ncpl = 4;
+#else 
+	// sequential mode
+	// small values for fast checking of correctness
+	ncb = 10;
+	nrhob = 2;
+	nR = 10;
+	ncpl = 2;
 #endif
 
+	unsigned N_total = (unsigned)round(pow(ncpl + 1, n_layers_w))*(nR + 1)*(nrhob + 1)*(ncb + 1);
+	cout << "N_total " << N_total << endl;
+
 #ifndef _MPI
-	// sample call of the residual computation routine
-
-	// specify bottom parameters;
-	cb_cur = 2000;
-	rhob_cur = 2;
-
-	// ... then specify sound speed in water
-	// This is trivial hydrology, same as TEST #1
-	/*cws_cur.at(0) = 1500;
-	cws_cur.at(1) = 1500;
-	cws_cur.at(2) = 1500;
-	cws_cur.at(3) = 1500;
-	cws_cur.at(4) = 1500;*/
-
-	// TEST #2
-
-	cws_cur.at(0) = 1490;
-	cws_cur.at(1) = 1480;
-	cws_cur.at(2) = 1470;
-	cws_cur.at(3) = 1455;
-	cws_cur.at(4) = 1455;
-
-	// and finally specify range
-	R_cur = 3500;
-
-	// The parameters are transformed into the arrays c1s, c2s, rhos
-	/*
-	// TEST #1
-	c1s.at(1) = cb_cur;
-	c2s.at(1) = cb_cur;
-	rhos.at(1) = rhob_cur;	*/
-
-	// TEST #2
-
-	for (unsigned jj = 0; jj<n_layers_w - 1; jj++){
-		c1s.at(jj) = cws_cur.at(jj);
-		c2s.at(jj) = cws_cur.at(jj + 1);
-		rhos.at(jj) = 1;
-	}
-	c1s.at(n_layers_w - 1) = cws_cur.at(n_layers_w - 1);
-	c2s.at(n_layers_w - 1) = cws_cur.at(n_layers_w - 1);
-	rhos.at(n_layers_w - 1) = 1;
-	c1s.at(n_layers_w) = cb_cur;
-	c2s.at(n_layers_w) = cb_cur;
-	rhos.at(n_layers_w) = rhob_cur;
-	for (unsigned jj = 0; jj <= n_layers_w; jj++){
-		cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << endl;
-	}
-
-	residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R, modal_delays, mode_numbers);
-
 	// sequential mode
-	cout << "Start residual is: " << residual << endl;
 	
-    // NEW: inverting for bottom halfspace parameters + sound speed in water!
+	// make cws_all_cartesians - all cartesians of all speeds in water
+	vector<vector<double>> cws_vii; // all variants for every depth
+	vector<int> index_arr;
+	vector<double> cws_vi;
+	vector<vector<double>> cws_all_cartesians;
+	for (unsigned ncpl_cur = 0; ncpl_cur <= ncpl; ncpl_cur++)
+		cws_vi.push_back(cw1 + ncpl_cur*(cw2 - cw1) / ncpl);
+	for (unsigned i = 0; i < n_layers_w; i++)
+		cws_vii.push_back(cws_vi);
+	while (next_cartesian(cws_vii, index_arr, cws_vi))
+		cws_all_cartesians.push_back(cws_vi);
 
-	//OLD: brute force minimum search -- single bottom layer + range!
-/*	cout << "BRUTE FORCE MINIMUM SEARCH" << endl;
-	cout << "Search space:" << endl;
-	cout << cb1 << "< c_b <" << cb2 << ", step " << (cb2 - cb1) / ncb << endl;
-	cout << rhob1 << "< rho_b <" << rhob2 << ", step " << (rhob2 - rhob1) / nrhob << endl;
-	cout << R1 << "< Range <" << R2 << ", step " << (R2 - R1) / nR << endl;
-	
-	for (unsigned cur_ncb = 0; cur_ncb <= ncb; cur_ncb++) {
-		for (unsigned cur_nrhob = 0; cur_nrhob <= nrhob; cur_nrhob++) {
+	cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << endl;
+
+	// inverting for bottom halfspace parameters + sound speed in water!
+	for (unsigned cur_ncb = 0; cur_ncb <= ncb; cur_ncb++)
+		for (unsigned cur_nrhob = 0; cur_nrhob <= nrhob; cur_nrhob++)
 			for (unsigned cur_nR = 0; cur_nR <= nR; cur_nR++) {
+				// specify bottom parameters;
 				cb_cur = cb1 + cur_ncb*(cb2 - cb1) / ncb;
-				c1s.at(1) = cb_cur;
-				c2s.at(1) = cb_cur;
-
-				rhob_cur = rhob1 + cur_nrhob *(rhob2 - rhob1) / nrhob;
-				rhos.at(1) = rhob_cur;
-
+				rhob_cur = rhob1 + cur_nrhob  *(rhob2 - rhob1) / nrhob;
+				// specify range
 				R_cur = R1 + cur_nR*(R2 - R1) / nR;
+				for (auto &cws_cur : cws_all_cartesians) { // and finally specify sound speed in water
+					// the parameters are transformed into the arrays c1s, c2s, rhos
+					for (unsigned jj = 0; jj < n_layers_w - 1; jj++){
+						c1s.at(jj) = cws_cur.at(jj);
+						c2s.at(jj) = cws_cur.at(jj + 1);
+						rhos.at(jj) = 1;
+					}
+					c1s.at(n_layers_w - 1) = cws_cur.at(n_layers_w - 1);
+					c2s.at(n_layers_w - 1) = cws_cur.at(n_layers_w - 1);
+					rhos.at(n_layers_w - 1) = 1;
+					c1s.at(n_layers_w) = cb_cur;
+					c2s.at(n_layers_w) = cb_cur;
+					rhos.at(n_layers_w) = rhob_cur;
 
-				residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
+					/*for (unsigned jj = 0; jj <= n_layers_w; jj++){
+					cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << endl;
+					}*/
 
-				if (residual < resmin) {
-					resmin = residual;
-					cbmin = cb_cur;
-					rhobmin = rhob_cur;
-					Rmin = R_cur;
-					cout << "New residual minimum:" << endl;
-					cout << "err=" << resmin << ", parameters:" << endl;
-					cout << "c_b=" << cbmin << ", rho_b=" << rhobmin << ", R=" << Rmin << endl;
+					residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
+					
+					if (residual < res_min) {
+						res_min  = residual;
+						cb_min   = cb_cur;
+						rhob_min = rhob_cur;
+						R_min    = R_cur;
+						cws_min  = cws_cur;
+						cout << endl;
+						cout << endl << "New residual minimum:" << endl;
+						cout << "err=" << res_min << ", parameters:" << endl;
+						cout << "c_b=" << cb_min << ", rho_b=" << rhob_min << ", R=" << R_min << endl;
+						cout << "cws_min :" << endl;
+						for (auto &x : cws_min)
+							cout << x << " ";
+					}
 				}
 			}
-		}
-	}
-*/
+
 	// fix final time
 	t2 = std::chrono::high_resolution_clock::now();
 	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
