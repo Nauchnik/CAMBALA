@@ -309,13 +309,48 @@ int main(int argc, char **argv)
 	nrhob = 20;
 	nR = 100;
 	ncpl = 4;
-#else 
+#else
 	// sequential mode
 	// small values for fast checking of correctness
 	ncb = 10;
 	nrhob = 2;
 	nR = 10;
 	ncpl = 2;
+
+    //TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
+	vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};
+	vector<double> c2s_t    { 1490, 1480, 1465, 1460, 1460, 2000};
+	vector<double> rhos_t   { 1, 1, 1, 1, 1, 2};
+	vector<double> depths_t   { 18, 36, 54, 72, 90, 600};
+	vector<unsigned> Ns_points_t  { 36, 36, 36, 36, 36, 1020};
+	double deltaf_t = 0.5;
+	vector<vector<double>> modal_group_velocities_t;
+	vector<unsigned> mode_numbers_t;
+	double R_t = 3500;
+	double residual_t;
+
+    compute_modal_grop_velocities( freqs, deltaf_t, depths_t, c1s_t, c2s_t, rhos_t, Ns_points_t, 1, rord, modal_group_velocities_t, mode_numbers_t );
+    residual_t = compute_modal_delays_residual_uniform(freqs, depths_t, c1s_t, c2s_t, rhos_t, Ns_points, R_t, modal_delays, mode_numbers);
+
+    cout << " TEST comparison." << endl << "RESIDUAL: " << residual_t << endl << endl;;
+
+    ncb = 1;
+    nrhob = 1;
+    nR = 1;
+    ncpl = 4;
+    cb1 = 2000;
+    cb2 = 2000;
+
+    rhob1 = 2;
+    rhob2 = 2;
+
+    R1 = 3500;
+    R2 = 3500;
+
+    cw1 = 1460;
+    cw2 = 1490;
+
+    //END OF TEST BLOCK!
 #endif
 
 	unsigned N_total = (unsigned)round(pow(ncpl + 1, n_layers_w))*(nR + 1)*(nrhob + 1)*(ncb + 1);
@@ -323,7 +358,7 @@ int main(int argc, char **argv)
 
 #ifndef _MPI
 	// sequential mode
-	
+
 	// make cws_all_cartesians - all cartesians of all speeds in water
 	vector<vector<double>> cws_vii; // all variants for every depth
 	vector<int> index_arr;
@@ -339,14 +374,17 @@ int main(int argc, char **argv)
 	cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << endl;
 
 	// inverting for bottom halfspace parameters + sound speed in water!
-	for (unsigned cur_ncb = 0; cur_ncb <= ncb; cur_ncb++)
-		for (unsigned cur_nrhob = 0; cur_nrhob <= nrhob; cur_nrhob++)
-			for (unsigned cur_nR = 0; cur_nR <= nR; cur_nR++) {
+	for (unsigned cur_ncb = 0; cur_ncb < ncb; cur_ncb++)
+		for (unsigned cur_nrhob = 0; cur_nrhob < nrhob; cur_nrhob++)
+			for (unsigned cur_nR = 0; cur_nR < nR; cur_nR++) {
 				// specify bottom parameters;
-				cb_cur = cb1 + cur_ncb*(cb2 - cb1) / ncb;
-				rhob_cur = rhob1 + cur_nrhob  *(rhob2 - rhob1) / nrhob;
+				if (ncb > 1) {cb_cur = cb1 + cur_ncb*(cb2 - cb1) / (ncb-1);}
+				else { cb_cur = cb1; }
+				if (nrhob > 1) {rhob_cur = rhob1 + cur_nrhob  *(rhob2 - rhob1) / (nrhob-1);}
+                else { rhob_cur = rhob1; }
 				// specify range
-				R_cur = R1 + cur_nR*(R2 - R1) / nR;
+				if (nR>1) {R_cur = R1 + cur_nR*(R2 - R1) / (nR-1);}
+				else {R_cur = R1;}
 				for (auto &cws_cur : cws_all_cartesians) { // and finally specify sound speed in water
 					// the parameters are transformed into the arrays c1s, c2s, rhos
 					for (unsigned jj = 0; jj < n_layers_w - 1; jj++){
@@ -361,12 +399,13 @@ int main(int argc, char **argv)
 					c2s.at(n_layers_w) = cb_cur;
 					rhos.at(n_layers_w) = rhob_cur;
 
-					/*for (unsigned jj = 0; jj <= n_layers_w; jj++){
+					for (unsigned jj = 0; jj <= n_layers_w; jj++){
 					cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << endl;
-					}*/
+					}
 
 					residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
-					
+					cout << residual << endl << endl;
+
 					if (residual < res_min) {
 						res_min  = residual;
 						cb_min   = cb_cur;
@@ -393,7 +432,7 @@ int main(int argc, char **argv)
 	cout << "err=" << res_min << ", parameters:" << endl;
 	cout << "c_b=" << cb_min << ", rho_b=" << rhob_min << ", R=" << R_min <<  endl;
 	cout << "time " << time_span.count() << endl;
-	
+
 #else
 	// MPI mode
 	const int result_array_len = 9;
@@ -401,7 +440,7 @@ int main(int argc, char **argv)
 	const int task_array_len = 3;
 	int task_array[task_array_len];
 	computing_process_input_data cur_data;
-	
+
 	if ( rank == 0 ) {
 		// sequential mode
 		cout << "Start residual is: " << residual << endl;
@@ -413,7 +452,7 @@ int main(int argc, char **argv)
 		cout << R1 << "< Range <" << R2 << ", step " << (R2 - R1) / nR << endl;
 		cout << cw1 << "< cws <" << cw2 << " , step " << (cw2 - cw1) / ncpl << endl;
 		cout << rhob1 << "< rho_b <" << rhob2 << ", step " << (rhob2 - rhob1) / nrhob << endl;
-		
+
 		stringstream sstream_out;
 		sstream_out << "MPI control process" << std::endl;
 		std::chrono::high_resolution_clock::time_point t1, t2, finding_new_bkv_start_time, now_time;
@@ -457,7 +496,7 @@ int main(int argc, char **argv)
 		while ( processed_task_count < computing_process_input_data_vec.size() ) {
 			MPI_Recv( result_array, result_array_len, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
 			processed_task_count++;
-			
+
 			residual   = result_array[0];
 			cb_cur     = result_array[1];
 			rhob_cur   = result_array[2];
@@ -467,12 +506,12 @@ int main(int argc, char **argv)
 			cws_cur[2] = result_array[6];
 			cws_cur[3] = result_array[7];
 			cws_cur[4] = result_array[8];
-			
+
 			/*sstream_out << "recv residual " << residual << std::endl;
 			sstream_out << "recv cb_cur "   << cb_cur   << std::endl;
 			sstream_out << "recv rhob_cur " << rhob_cur << std::endl;
 			sstream_out << "recv R_cur "    << R_cur    << std::endl;*/
-			
+
 			if (residual < res_min) {
 				res_min = residual;
 				cb_min = cb_cur;
@@ -503,7 +542,7 @@ int main(int argc, char **argv)
 			sstream_out.clear(); sstream_out.str("");
 			ofile.close(); ofile.clear();
 		}
-		
+
 		// send stop-messages
 		task_array[0] = task_array[1] = task_array[2] = -1;
 		for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++)
@@ -518,7 +557,7 @@ int main(int argc, char **argv)
 			sstream_out << x << " ";
 		sstream_out << endl;
 		sstream_out << "final time " << MPI_Wtime() - mpi_start_time << " s" << endl;
-		
+
 		ofile.open("mpi_out", std::ios_base::app);
 		ofile << sstream_out.rdbuf();
 		sstream_out.clear(); sstream_out.str("");
@@ -532,7 +571,7 @@ int main(int argc, char **argv)
 		double local_rhob_min;
 		double local_R_min;
 		vector<double> local_cws_min(n_layers_w, 1500);
-		
+
 		vector<vector<double>> cws_vii; // all variants for every depth
 		vector<int> index_arr;
 		vector<double> cws_vi;
@@ -548,9 +587,9 @@ int main(int argc, char **argv)
 			cws_vii.push_back(cws_vi);
 		while (next_cartesian(cws_vii, index_arr, cws_vi))
 			cws_all_cartesians.push_back(cws_vi);
-		
+
 		cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << endl;
-		
+
 		for(;;) {
 			MPI_Recv(task_array, task_array_len, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 			// if stop-message then finalize
@@ -562,7 +601,7 @@ int main(int argc, char **argv)
 			int ncb_cur   = task_array[0];
 			int nrhob_cur = task_array[1];
 			int nR_cur    = task_array[2];
-			
+
 			if ( rank == 1 ) {
 				cout << "recv ncb_cur "   << ncb_cur   << endl;
 				cout << "recv nrhob_cur " << nrhob_cur << endl;
@@ -573,7 +612,7 @@ int main(int argc, char **argv)
 			cb_cur   = cb1 + ncb_cur*(cb2 - cb1) / ncb;
 			rhob_cur = rhob1 + nrhob_cur *(rhob2 - rhob1) / nrhob;
 			R_cur    = R1 + nR_cur*(R2 - R1) / nR;
-			
+
 			for ( auto &cws_cur : cws_all_cartesians ) { // for all cartesians of cws vectors values
 				for (unsigned jj=0; jj<n_layers_w-1; jj++ ){
 					c1s.at(jj) = cws_cur.at(jj);
@@ -597,7 +636,7 @@ int main(int argc, char **argv)
 					local_cws_min  = cws_cur;
 				}
 			}
-			
+
 			// send current local minimum to the control process
 			result_array[0] = local_res_min;
 			result_array[1] = local_cb_min ;
@@ -608,7 +647,7 @@ int main(int argc, char **argv)
 			result_array[6] = local_cws_min[2];
 			result_array[7] = local_cws_min[3];
 			result_array[8] = local_cws_min[4];
-			
+
 			MPI_Send(result_array, result_array_len, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
 		}
 	}
