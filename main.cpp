@@ -283,6 +283,13 @@ int main(int argc, char **argv)
 	unsigned ncpl; // search mesh within each water layer
 	vector<double> cws_cur(n_layers_w, 1500);
 	vector<double> cws_min(n_layers_w, 1500);
+	vector<double> cws_fixed{ 1490, 1490, 1480, 1465, 1460 }; // use when ncpl = 1
+	
+	if (cws_fixed.size() != n_layers_w) {
+		cerr << "cws_fixed.size() != n_layers_w" << endl;
+		cerr << cws_fixed.size() << " != " << n_layers_w << endl;
+		exit(1);
+	}
 
 	if (argc == 2) {
 		ncpl = atoi(argv[1]);
@@ -315,7 +322,7 @@ int main(int argc, char **argv)
 	ncb = 1;
 	nrhob = 1;
 	nR = 41;
-	ncpl = 10;
+	ncpl = 2;
 
  /*   //TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
     vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};
@@ -364,7 +371,7 @@ int main(int argc, char **argv)
     //END OF TEST BLOCK! */
 #endif
 
-	unsigned N_total = (unsigned)round(pow(ncpl + 1, n_layers_w))*(nR + 1)*(nrhob + 1)*(ncb + 1);
+	unsigned N_total = (unsigned)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
 	cout << "N_total " << N_total << endl;
 
 #ifndef _MPI
@@ -375,13 +382,17 @@ int main(int argc, char **argv)
 	vector<int> index_arr;
 	vector<double> cws_vi;
 	vector<vector<double>> cws_all_cartesians;
-	for (unsigned ncpl_cur = 0; ncpl_cur <= ncpl; ncpl_cur++)
-		cws_vi.push_back(cw1 + ncpl_cur*(cw2 - cw1) / ncpl);
-	for (unsigned i = 0; i < n_layers_w; i++)
-		cws_vii.push_back(cws_vi);
-	while (next_cartesian(cws_vii, index_arr, cws_vi))
-		cws_all_cartesians.push_back(cws_vi);
-
+	if (ncpl == 1)
+		cws_all_cartesians.push_back(cws_fixed);
+	else {
+		for (unsigned ncpl_cur = 0; ncpl_cur < ncpl; ncpl_cur++)
+			cws_vi.push_back(cw1 + ncpl_cur*(cw2 - cw1) / (ncpl - 1));
+		for (unsigned i = 0; i < n_layers_w; i++)
+			cws_vii.push_back(cws_vi);
+		while (next_cartesian(cws_vii, index_arr, cws_vi))
+			cws_all_cartesians.push_back(cws_vi);
+	}
+	
 	cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << endl;
 
 	// inverting for bottom halfspace parameters + sound speed in water!
@@ -394,7 +405,7 @@ int main(int argc, char **argv)
 				if (nrhob > 1) {rhob_cur = rhob1 + cur_nrhob  *(rhob2 - rhob1) / (nrhob-1);}
                 else { rhob_cur = rhob1; }
 				// specify range
-				if (nR>1) {R_cur = R1 + cur_nR*(R2 - R1) / (nR-1);}
+				if (nR > 1) {R_cur = R1 + cur_nR*(R2 - R1) / (nR-1);}
 				else {R_cur = R1;}
 				for (auto &cws_cur : cws_all_cartesians) { // and finally specify sound speed in water
 					// the parameters are transformed into the arrays c1s, c2s, rhos
@@ -411,7 +422,7 @@ int main(int argc, char **argv)
 					rhos.at(n_layers_w) = rhob_cur;
 
 					for (unsigned jj = 0; jj <= n_layers_w; jj++){
-					cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << endl;
+						cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << endl;
 					}
 
 					residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
