@@ -36,14 +36,6 @@ struct layer
 	double dend;         // density at the end of a layer
 };
 
-// data for sending to computing process in MPI mode
-struct computing_process_input_data
-{
-	int ncb;
-	int nrhob;
-	int nR;
-};
-
 template< typename T >
 bool next_cartesian(std::vector<T> &vii, std::vector<int> &index_arr, T &cur_vi)
 {
@@ -197,10 +189,14 @@ int main(int argc, char **argv)
 	double buff;
 	vector<double> buffvect;
 	mode_numbers.clear();
-	string myLine;
-
-	//ifstream myFileSynth("dtimes_synth_1.txt"); // delays for R = 3500, cw = 1500, cb = 2000, rhow = 1, rhob = 2;
-	ifstream myFileSynth("dtimes_synth_thcline_hhf.txt");
+	string myLine, myFileName = "dtimes_synth_thcline_hhf.txt";
+	
+	if (argc >= 2) {
+		myFileName = argv[1];
+		cout << "myFileName " << myFileName << endl;
+	}
+	
+	ifstream myFileSynth(myFileName.c_str());
 
 	while (getline(myFileSynth, myLine)){
 		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete window symbol for correct reading
@@ -290,12 +286,7 @@ int main(int argc, char **argv)
 		cerr << cws_fixed.size() << " != " << n_layers_w << endl;
 		exit(1);
 	}
-
-	if (argc == 2) {
-		ncpl = atoi(argv[1]);
-		cout << "ncpl " << ncpl << endl;
-	}
-
+	
 	double res_min = 1e50;
 
 	// fix start time
@@ -312,10 +303,10 @@ int main(int argc, char **argv)
 	MPI_Status status;
 	double mpi_start_time = MPI_Wtime();
 	// large values
-	ncb = 100;
-	nrhob = 20;
-	nR = 100;
-	ncpl = 4;
+	ncb = 1;
+	nrhob = 1;
+	nR = 41;
+	ncpl = 10;
 #else
 	// sequential mode
 	// small values for fast checking of correctness
@@ -371,11 +362,13 @@ int main(int argc, char **argv)
     //END OF TEST BLOCK! */
 #endif
 
+	if (argc >= 3) {
+		ncpl = atoi(argv[2]);
+		cout << "new ncpl " << ncpl << endl;
+	}
+	
 	unsigned N_total = (unsigned)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
 	cout << "N_total " << N_total << endl;
-
-#ifndef _MPI
-	// sequential mode
 
 	// make cws_all_cartesians - all cartesians of all speeds in water
 	vector<vector<double>> cws_vii; // all variants for every depth
@@ -392,8 +385,11 @@ int main(int argc, char **argv)
 		while (next_cartesian(cws_vii, index_arr, cws_vi))
 			cws_all_cartesians.push_back(cws_vi);
 	}
-	
+
 	cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << endl;
+
+#ifndef _MPI
+	// sequential mode
 
 	// inverting for bottom halfspace parameters + sound speed in water!
 	for (unsigned cur_ncb = 0; cur_ncb < ncb; cur_ncb++)
@@ -459,10 +455,9 @@ int main(int argc, char **argv)
 	// MPI mode
 	const int result_array_len = 9;
 	double result_array[result_array_len];
-	const int task_array_len = 3;
-	int task_array[task_array_len];
-	computing_process_input_data cur_data;
-
+	const int task_array_len = n_layers_w;
+	double task_array[task_array_len];
+	
 	if ( rank == 0 ) {
 		// sequential mode
 		cout << "Start residual is: " << residual << endl;
@@ -480,32 +475,21 @@ int main(int argc, char **argv)
 		std::chrono::high_resolution_clock::time_point t1, t2, finding_new_bkv_start_time, now_time;
 		std::chrono::duration<double> time_span;
 
-		vector<computing_process_input_data> computing_process_input_data_vec;
-		for (int cur_ncb = 0; cur_ncb <= ncb; cur_ncb++)
-			for (int cur_nrhob = 0; cur_nrhob <= nrhob; cur_nrhob++)
-				for (int cur_nR = 0; cur_nR <= nR; cur_nR++) {
-					cur_data.ncb   = cur_ncb;
-					cur_data.nrhob = cur_nrhob;
-					cur_data.nR    = cur_nR;
-					computing_process_input_data_vec.push_back(cur_data);
-				}
-
-		sstream_out << "computing_process_input_data_vec.size() " << computing_process_input_data_vec.size() << std::endl;
-		if (computing_process_input_data_vec.size() < corecount) {
-			std::cerr << "computing_process_input_data_vec.size() < corecount" << std::endl;
-			std::cerr << computing_process_input_data_vec.size() << " < " << corecount << std::endl;
+		sstream_out << "cws_all_cartesians.size() " << cws_all_cartesians.size() << std::endl;
+		if (cws_all_cartesians.size() < corecount) {
+			std::cerr << "cws_all_cartesians.size() < corecount" << std::endl;
+			std::cerr << cws_all_cartesians.size() << " < " << corecount << std::endl;
 			exit(1);
 		}
 
 		unsigned send_task_count = 0;
 		unsigned processed_task_count = 0;
-
+		
 		// sending first part of tasks
 		for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++) {
-			task_array[0] = computing_process_input_data_vec[send_task_count].ncb;
-			task_array[1] = computing_process_input_data_vec[send_task_count].nrhob;
-			task_array[2] = computing_process_input_data_vec[send_task_count].nR;
-			MPI_Send(task_array, task_array_len, MPI_INT, computing_process_index, 0, MPI_COMM_WORLD);
+			for (int j=0; j < task_array_len; j++)
+				task_array[j] = cws_all_cartesians[send_task_count][j];
+			MPI_Send(task_array, task_array_len, MPI_DOUBLE, computing_process_index, 0, MPI_COMM_WORLD);
 			send_task_count++;
 		}
 		sstream_out << "send_task_count " << send_task_count << std::endl;
@@ -515,7 +499,7 @@ int main(int argc, char **argv)
 		ofile.close(); ofile.clear();
 
 		// get results and send new tasks on idle computing processes
-		while ( processed_task_count < computing_process_input_data_vec.size() ) {
+		while ( processed_task_count < cws_all_cartesians.size() ) {
 			MPI_Recv( result_array, result_array_len, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
 			processed_task_count++;
 
@@ -550,26 +534,26 @@ int main(int argc, char **argv)
 				sstream_out << "time from start " << MPI_Wtime() - mpi_start_time << " s" << endl;
 			}
 			// if free tasks for sending
-			if ( send_task_count < computing_process_input_data_vec.size() ) {
-				task_array[0] = computing_process_input_data_vec[send_task_count].ncb;
-				task_array[1] = computing_process_input_data_vec[send_task_count].nrhob;
-				task_array[2] = computing_process_input_data_vec[send_task_count].nR;
-				MPI_Send( task_array, task_array_len, MPI_INT, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
+			if ( send_task_count < cws_all_cartesians.size() ) {
+				for (int j=0; j < task_array_len; j++)
+					task_array[j] = cws_all_cartesians[send_task_count][j];
+				MPI_Send( task_array, task_array_len, MPI_DOUBLE, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
 				send_task_count++;
 				sstream_out << "send_task_count " << send_task_count << std::endl;
 			}
-
+			
 			ofile.open("mpi_out", std::ios_base::app);
 			ofile << sstream_out.rdbuf();
 			sstream_out.clear(); sstream_out.str("");
 			ofile.close(); ofile.clear();
 		}
-
+		
 		// send stop-messages
-		task_array[0] = task_array[1] = task_array[2] = -1;
+		for (int j=0; j < task_array_len; j++)
+			task_array[j] = -1;
 		for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++)
-			MPI_Send(task_array, task_array_len, MPI_INT, computing_process_index, 0, MPI_COMM_WORLD);
-
+			MPI_Send(task_array, task_array_len, MPI_DOUBLE, computing_process_index, 0, MPI_COMM_WORLD);
+		
 		sstream_out << endl << "SEARCH ENDED!" << endl;
 		sstream_out << "RESULTING VALUE:" << endl;
 		sstream_out << "err=" << res_min << ", parameters:" << endl;
@@ -613,52 +597,57 @@ int main(int argc, char **argv)
 		cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << endl;
 
 		for(;;) {
-			MPI_Recv(task_array, task_array_len, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+			MPI_Recv(task_array, task_array_len, MPI_DOUBLE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 			// if stop-message then finalize
-			if ( ( task_array[0] == -1 ) && ( task_array[1] == -1 ) && ( task_array[2] == -1 ) ) {
+			if ( ( task_array[0] == -1 ) && ( task_array[2] == -1 ) && ( task_array[3] == -1 ) ) {
 				MPI_Finalize();
 				break;
 			}
+			
+			for(int j=0; j < task_array_len;j++)
+				cws_cur[j] = task_array[j];
 
-			int ncb_cur   = task_array[0];
-			int nrhob_cur = task_array[1];
-			int nR_cur    = task_array[2];
+			if ( rank == 1 )
+				for(int j=0; j < task_array_len;j++)
+					cout << "recv cws_cur " << cws_cur[j] << endl;
+			
+			// inverting for bottom halfspace parameters + sound speed in water!
+			for (unsigned cur_ncb = 0; cur_ncb < ncb; cur_ncb++)
+				for (unsigned cur_nrhob = 0; cur_nrhob < nrhob; cur_nrhob++)
+					for (unsigned cur_nR = 0; cur_nR < nR; cur_nR++) {
+						// specify bottom parameters;
+						if (ncb > 1) {cb_cur = cb1 + cur_ncb*(cb2 - cb1) / (ncb-1);}
+						else { cb_cur = cb1; }
+						if (nrhob > 1) {rhob_cur = rhob1 + cur_nrhob  *(rhob2 - rhob1) / (nrhob-1);}
+						else { rhob_cur = rhob1; }
+						// specify range
+						if (nR > 1) {R_cur = R1 + cur_nR*(R2 - R1) / (nR-1);}
+						else {R_cur = R1;}
 
-			if ( rank == 1 ) {
-				cout << "recv ncb_cur "   << ncb_cur   << endl;
-				cout << "recv nrhob_cur " << nrhob_cur << endl;
-				cout << "recv nR_cur "    << nR_cur    << endl;
-				cout << endl;
-			}
+						// the parameters are transformed into the arrays c1s, c2s, rhos
+						for (unsigned jj = 0; jj < n_layers_w - 1; jj++){
+							c1s.at(jj) = cws_cur.at(jj);
+							c2s.at(jj) = cws_cur.at(jj + 1);
+							rhos.at(jj) = 1;
+						}
+						c1s.at(n_layers_w - 1) = cws_cur.at(n_layers_w - 1);
+						c2s.at(n_layers_w - 1) = cws_cur.at(n_layers_w - 1);
+						rhos.at(n_layers_w - 1) = 1;
+						c1s.at(n_layers_w) = cb_cur;
+						c2s.at(n_layers_w) = cb_cur;
+						rhos.at(n_layers_w) = rhob_cur;
 
-			cb_cur   = cb1 + ncb_cur*(cb2 - cb1) / ncb;
-			rhob_cur = rhob1 + nrhob_cur *(rhob2 - rhob1) / nrhob;
-			R_cur    = R1 + nR_cur*(R2 - R1) / nR;
+						residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
 
-			for ( auto &cws_cur : cws_all_cartesians ) { // for all cartesians of cws vectors values
-				for (unsigned jj=0; jj<n_layers_w-1; jj++ ){
-					c1s.at(jj) = cws_cur.at(jj);
-					c2s.at(jj) = cws_cur.at(jj+1);
-					rhos.at(jj) = 1;
-				}
-				c1s.at(n_layers_w-1) = cws_cur.at(n_layers_w-1);
-				c2s.at(n_layers_w-1) = cws_cur.at(n_layers_w-1);
-				rhos.at(n_layers_w-1) = 1;
-				c1s.at(n_layers_w) = cb_cur;
-				c2s.at(n_layers_w) = cb_cur;
-				rhos.at(n_layers_w) = rhob_cur;
-
-				residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
-
-				if (residual < local_res_min) {
-					local_res_min  = residual;
-					local_cb_min   = cb_cur;
-					local_rhob_min = rhob_cur;
-					local_R_min    = R_cur;
-					local_cws_min  = cws_cur;
-				}
-			}
-
+						if (residual < local_res_min) {
+							local_res_min  = residual;
+							local_cb_min   = cb_cur;
+							local_rhob_min = rhob_cur;
+							local_R_min    = R_cur;
+							local_cws_min  = cws_cur;
+						}
+					}
+			
 			// send current local minimum to the control process
 			result_array[0] = local_res_min;
 			result_array[1] = local_cb_min ;
