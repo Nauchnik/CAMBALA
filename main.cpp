@@ -322,7 +322,7 @@ int main(int argc, char **argv)
 	ncb = 1;
 	nrhob = 1;
 	nR = 41;
-	ncpl = 2;
+	ncpl = 10;
 
  /*   //TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
     vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};
