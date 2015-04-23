@@ -200,7 +200,7 @@ int main(int argc, char **argv)
 	string myLine;
 
 	//ifstream myFileSynth("dtimes_synth_1.txt"); // delays for R = 3500, cw = 1500, cb = 2000, rhow = 1, rhob = 2;
-	ifstream myFileSynth("dtimes_synth_thcline.txt");
+	ifstream myFileSynth("dtimes_synth_thcline_hhf.txt");
 
 	while (getline(myFileSynth, myLine)){
 		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete window symbol for correct reading
@@ -263,22 +263,22 @@ int main(int argc, char **argv)
 	double R = 3500;
 
 	//SEARCH SPACE
-	double cb1 = 1600;
-	double cb2 = 3000;
+	double cb1 = 2000;
+	double cb2 = 2000;
 	double cb_min = 1e50, cb_cur;
 	unsigned ncb;
 
-	double rhob1 = 1;
-	double rhob2 = 3;
+	double rhob1 = 2;
+	double rhob2 = 2;
 	double rhob_min = 1e50, rhob_cur;
 	unsigned nrhob;
 
-	double R1 = 3000;
-	double R2 = 4000;
+	double R1 = 3400;
+	double R2 = 3600;
 	double R_min = 1e50, R_cur;
 	unsigned nR;
 
-	double cw1 = 1400;
+	double cw1 = 1450;
 	double cw2 = 1500;
 	unsigned ncpl; // search mesh within each water layer
 	vector<double> cws_cur(n_layers_w, 1500);
@@ -312,14 +312,15 @@ int main(int argc, char **argv)
 #else
 	// sequential mode
 	// small values for fast checking of correctness
-	ncb = 10;
-	nrhob = 2;
-	nR = 10;
-	ncpl = 2;
+	ncb = 1;
+	nrhob = 1;
+	nR = 41;
+	ncpl = 10;
 
-    //TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
-	vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};
-	vector<double> c2s_t    { 1490, 1480, 1465, 1460, 1460, 2000};
+ /*   //TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
+    vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};
+    vector<double> c2s_t    { 1490, 1480, 1465, 1460, 1460, 2000};
+
 	vector<double> rhos_t   { 1, 1, 1, 1, 1, 2};
 	vector<double> depths_t   { 18, 36, 54, 72, 90, 600};
 	vector<unsigned> Ns_points_t  { 36, 36, 36, 36, 36, 1020};
@@ -330,6 +331,16 @@ int main(int argc, char **argv)
 	double residual_t;
 
     compute_modal_grop_velocities( freqs, deltaf_t, depths_t, c1s_t, c2s_t, rhos_t, Ns_points_t, 1, rord, modal_group_velocities_t, mode_numbers_t );
+
+    for (unsigned ii=0; ii<freqs.size();  ii++) {
+
+        for (unsigned jj=0; jj<mode_numbers_t.at(ii);  jj++) {
+			cout << modal_group_velocities_t[ii][jj] << "; ";
+        }
+        cout << endl;
+    }
+
+
     residual_t = compute_modal_delays_residual_uniform(freqs, depths_t, c1s_t, c2s_t, rhos_t, Ns_points, R_t, modal_delays, mode_numbers);
 
     cout << " TEST comparison." << endl << "RESIDUAL: " << residual_t << endl << endl;;
@@ -337,7 +348,7 @@ int main(int argc, char **argv)
     ncb = 1;
     nrhob = 1;
     nR = 1;
-    ncpl = 4;
+    ncpl = 6;
     cb1 = 2000;
     cb2 = 2000;
 
@@ -350,7 +361,7 @@ int main(int argc, char **argv)
     cw1 = 1460;
     cw2 = 1490;
 
-    //END OF TEST BLOCK!
+    //END OF TEST BLOCK! */
 #endif
 
 	unsigned N_total = (unsigned)round(pow(ncpl + 1, n_layers_w))*(nR + 1)*(nrhob + 1)*(ncb + 1);
