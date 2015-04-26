@@ -190,11 +190,15 @@ int main(int argc, char **argv)
 	vector<double> buffvect;
 	mode_numbers.clear();
 	string myLine, myFileName = "dtimes_synth_thcline_hhf.txt";
+	int launchType = 0; // 0 - deafult, 1: fixed cw1=1490, 2: cw1>cw2>...>cwn, 3 : both 1 and 2
 	
 	if (argc >= 2) {
 		myFileName = argv[1];
 		cout << "myFileName " << myFileName << endl;
 	}
+
+	if (argc >= 3)
+		launchType = atoi(argv[2]);
 	
 	ifstream myFileSynth(myFileName.c_str());
 
@@ -362,19 +366,21 @@ int main(int argc, char **argv)
     //END OF TEST BLOCK! */
 #endif
 
-	if (argc >= 3) {
-		ncpl = atoi(argv[2]);
+	if (argc >= 4) {
+		ncpl = atoi(argv[3]);
 		cout << "new ncpl " << ncpl << endl;
 	}
 	
 	unsigned N_total = (unsigned)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
 	cout << "N_total " << N_total << endl;
-
+	cout << "launchType " << launchType << endl;
+	
 	// make cws_all_cartesians - all cartesians of all speeds in water
 	vector<vector<double>> cws_vii; // all variants for every depth
 	vector<int> index_arr;
 	vector<double> cws_vi;
 	vector<vector<double>> cws_all_cartesians;
+	bool isAdding;
 	if (ncpl == 1)
 		cws_all_cartesians.push_back(cws_fixed);
 	else {
@@ -382,8 +388,38 @@ int main(int argc, char **argv)
 			cws_vi.push_back(cw1 + ncpl_cur*(cw2 - cw1) / (ncpl - 1));
 		for (unsigned i = 0; i < n_layers_w; i++)
 			cws_vii.push_back(cws_vi);
-		while (next_cartesian(cws_vii, index_arr, cws_vi))
-			cws_all_cartesians.push_back(cws_vi);
+		while (next_cartesian(cws_vii, index_arr, cws_vi)) {
+			switch (launchType){
+			case 1 :
+				if (cws_vi[0] == 1490)
+					cws_all_cartesians.push_back(cws_vi);
+				break;
+			case 2:
+				isAdding = true;
+				for (unsigned cws_vi_index = 0; cws_vi_index < cws_vi.size()-1; cws_vi_index++)
+					if (cws_vi[cws_vi_index] <= cws_vi[cws_vi_index+1])
+						isAdding = false;
+				if (isAdding)
+					cws_all_cartesians.push_back(cws_vi);
+				break;
+			case 3:
+				if ( cws_vi[0] != 1490 )
+					isAdding = false;
+				else {
+					isAdding = true;
+					for (unsigned cws_vi_index = 0; cws_vi_index < cws_vi.size() - 1; cws_vi_index++)
+						if (cws_vi[cws_vi_index] <= cws_vi[cws_vi_index + 1])
+							isAdding = false;
+				}
+				if (isAdding)
+					cws_all_cartesians.push_back(cws_vi);
+				break;
+			default:
+				cws_all_cartesians.push_back(cws_vi);
+				break;
+			}
+			
+		}
 	}
 
 	cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << endl;
