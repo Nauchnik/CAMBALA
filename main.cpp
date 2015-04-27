@@ -374,6 +374,9 @@ int main(int argc, char **argv)
 	unsigned N_total = (unsigned)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
 	cout << "N_total " << N_total << endl;
 	cout << "launchType " << launchType << endl;
+
+	if (launchType == 4)
+		nR = 1;
 	
 	// make cws_all_cartesians - all cartesians of all speeds in water
 	vector<vector<double>> cws_vii; // all variants for every depth
