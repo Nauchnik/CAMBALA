@@ -375,9 +375,12 @@ int main(int argc, char **argv)
 	cout << "N_total " << N_total << endl;
 	cout << "launchType " << launchType << endl;
 
-	if (launchType == 4)
+	if (launchType == 4) {
 		nR = 1;
-	
+		R1 = 3500;
+		R2 = 3500;
+	}
+
 	// make cws_all_cartesians - all cartesians of all speeds in water
 	vector<vector<double>> cws_vii; // all variants for every depth
 	vector<int> index_arr;
