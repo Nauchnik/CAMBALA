@@ -380,7 +380,7 @@ int main(int argc, char **argv)
 		R1 = 3500;
 		R2 = 3500;
 	}
-
+	
 	switch (launchType)
 	{
 	case 5:
@@ -390,6 +390,18 @@ int main(int argc, char **argv)
 		nrhob = 1;
 		break;
 	case 6:
+		cb1 = cb1 = 4000;
+		ncb = 1;
+		rhob1 = rhob2 = 4;
+		nrhob = 1;
+		break;
+	case 7:
+		cb1 = cb1 = 3000;
+		ncb = 1;
+		rhob1 = rhob2 = 3;
+		nrhob = 1;
+		break;
+	case 8:
 		cb1 = cb1 = 4000;
 		ncb = 1;
 		rhob1 = rhob2 = 4;
@@ -438,11 +450,11 @@ int main(int argc, char **argv)
 				if (isAdding)
 					cws_all_cartesians.push_back(cws_vi);
 				break;
-			case 5: // like case 1
+			case 7: // like case 1
 				if (cws_vi[0] == 1490)
 					cws_all_cartesians.push_back(cws_vi);
 				break;
-			case 6: // like case 1
+			case 8: // like case 1
 				if (cws_vi[0] == 1490)
 					cws_all_cartesians.push_back(cws_vi);
 				break;
