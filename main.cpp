@@ -365,7 +365,7 @@ int main(int argc, char **argv)
 
     //END OF TEST BLOCK! */
 #endif
-
+	
 	if (argc >= 4) {
 		ncpl = atoi(argv[3]);
 		cout << "new ncpl " << ncpl << endl;
@@ -374,13 +374,31 @@ int main(int argc, char **argv)
 	unsigned N_total = (unsigned)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
 	cout << "N_total " << N_total << endl;
 	cout << "launchType " << launchType << endl;
-
-	if (launchType == 4) {
+	
+	if ((launchType >= 4) && (launchType <= 6)) {
 		nR = 1;
 		R1 = 3500;
 		R2 = 3500;
 	}
 
+	switch (launchType)
+	{
+	case 5:
+		cb1 = cb1 = 3000;
+		ncb = 1;
+		rhob1 = rhob2 = 3;
+		nrhob = 1;
+		break;
+	case 6:
+		cb1 = cb1 = 4000;
+		ncb = 1;
+		rhob1 = rhob2 = 4;
+		nrhob = 1;
+		break;
+	default:
+		break;
+	}
+	
 	// make cws_all_cartesians - all cartesians of all speeds in water
 	vector<vector<double>> cws_vii; // all variants for every depth
 	vector<int> index_arr;
@@ -420,14 +438,21 @@ int main(int argc, char **argv)
 				if (isAdding)
 					cws_all_cartesians.push_back(cws_vi);
 				break;
+			case 5: // like case 1
+				if (cws_vi[0] == 1490)
+					cws_all_cartesians.push_back(cws_vi);
+				break;
+			case 6: // like case 1
+				if (cws_vi[0] == 1490)
+					cws_all_cartesians.push_back(cws_vi);
+				break;
 			default:
 				cws_all_cartesians.push_back(cws_vi);
 				break;
 			}
-			
 		}
 	}
-
+	
 	cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << endl;
 
 #ifndef _MPI
