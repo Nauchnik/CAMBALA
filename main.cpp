@@ -384,25 +384,25 @@ int main(int argc, char **argv)
 	switch (launchType)
 	{
 	case 5:
-		cb1 = cb1 = 3000;
+		cb1 = cb2 = 3000;
 		ncb = 1;
 		rhob1 = rhob2 = 3;
 		nrhob = 1;
 		break;
 	case 6:
-		cb1 = cb1 = 4000;
+		cb1 = cb2 = 4000;
 		ncb = 1;
 		rhob1 = rhob2 = 4;
 		nrhob = 1;
 		break;
 	case 7:
-		cb1 = cb1 = 3000;
+		cb1 = cb2 = 3000;
 		ncb = 1;
 		rhob1 = rhob2 = 3;
 		nrhob = 1;
 		break;
 	case 8:
-		cb1 = cb1 = 4000;
+		cb1 = cb2 = 4000;
 		ncb = 1;
 		rhob1 = rhob2 = 4;
 		nrhob = 1;
