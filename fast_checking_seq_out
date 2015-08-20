@@ -1,0 +1,551 @@
+Input parameters :
+ncpl 2
+n_layers_w 5
+nR 2
+nrhob 1
+ncb 1
+Formula for calculating total number of points in a search space: (ncpl^n_layers_w)*nR*nrhob*ncb
+N_total 64
+launchType 0
+cws_all_cartesians.size() 32
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.24822
+
+
+
+New residual minimum:
+err=0.24822, parameters:
+c_b=2000, rho_b=2, R=3400
+cws_min :
+1450 1450 1450 1450 1450 Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.228926
+
+
+
+New residual minimum:
+err=0.228926, parameters:
+c_b=2000, rho_b=2, R=3400
+cws_min :
+1450 1450 1450 1450 1500 Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.245785
+
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.26325
+
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.244241
+
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.304933
+
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.260062
+
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.399162
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.242282
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.300644
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.316009
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.434047
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.263608
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.434387
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.344066
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.59314
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.248228
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.244478
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.261027
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.315684
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.267759
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.374542
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.304728
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.48245
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.236458
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.310303
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.307197
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.477376
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.262886
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.476664
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.382237
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.67713
+
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.534615
+
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.56013
+
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.53097
+
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.534898
+
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.533202
+
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.472809
+
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.51712
+
+Layer #1: c=1450...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.431537
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.54105
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.469489
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.461767
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.343162
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.518588
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.33722
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.446916
+
+Layer #1: c=1450...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.202678
+
+
+
+New residual minimum:
+err=0.202678, parameters:
+c_b=2000, rho_b=2, R=3600
+cws_min :
+1450 1500 1500 1500 1500 Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.533823
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.533343
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.51118
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.469996
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.512737
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.394777
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.470717
+
+Layer #1: c=1500...1450; rho=1; np=36
+Layer #2: c=1450...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.319819
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.54923
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.465169
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.468589
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1450; rho=1; np=36
+Layer #3: c=1450...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.310543
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.529685
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1450; rho=1; np=36
+Layer #4: c=1450...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.309722
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1450; rho=1; np=36
+Layer #5: c=1450...1450; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.429806
+
+Layer #1: c=1500...1500; rho=1; np=36
+Layer #2: c=1500...1500; rho=1; np=36
+Layer #3: c=1500...1500; rho=1; np=36
+Layer #4: c=1500...1500; rho=1; np=36
+Layer #5: c=1500...1500; rho=1; np=36
+Layer #6: c=2000...2000; rho=2; np=1020
+0.0975548
+
+
+
+New residual minimum:
+err=0.0975548, parameters:
+c_b=2000, rho_b=2, R=3600
+cws_min :
+1500 1500 1500 1500 1500 SEARCH ENDED!
+RESULTING VALUE:
+err=0.0975548, parameters:
+c_b=2000, rho_b=2, R=3600
+time 26.4675

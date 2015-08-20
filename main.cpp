@@ -24,12 +24,10 @@
 
 const double LOCAL_M_PI = 3.14159265358979323846;
 
-using namespace std;
-
 // layer data
 struct layer
 {
-	vector<double> zend; // vector of finite depths
+	std::vector<double> zend; // vector of finite depths
 	double cbeg;         // velocity of a sound at the beginning of a layer
 	double cend;         // velocity of a sound at the end of a layer
 	double dbeg;         // density at the beginning of a layer
@@ -78,133 +76,54 @@ bool next_cartesian(std::vector<T> &vii, std::vector<int> &index_arr, T &cur_vi)
 	return true;
 }
 
-vector<double> compute_wnumbers(double &omeg, vector<double> &c, vector<double> &rho, vector<unsigned> &interface_idcs, vector<double> &meshsizes,unsigned flOnlyTrapped);
-vector<double> compute_wnumbers_extrap(double &omeg, vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,vector<unsigned> &Ns_points, unsigned flOnlyTrapped,unsigned &ordRich);
-vector<double> compute_wnumbers_extrap_lin_dz(double &omeg, vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,vector<unsigned> &Ns_points, unsigned flOnlyTrapped,unsigned &ordRich);
-int compute_modal_grop_velocities( vector<double> &freqs, double deltaf, vector<double> &depths, vector<double> &c1s, vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, unsigned flOnlyTrapped, unsigned &ordRich, vector<vector<double>> &modal_group_velocities, vector<unsigned> &mode_numbers );
-double compute_modal_delays_residual_uniform( vector<double> &freqs, vector<double> &depths, vector<double> &c1s, vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, double R, vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
+std::vector<double> compute_wnumbers(double &omeg, std::vector<double> &c, std::vector<double> &rho, 
+	                                 std::vector<unsigned> &interface_idcs, std::vector<double> &meshsizes, 
+									 unsigned flOnlyTrapped);
+
+std::vector<double> compute_wnumbers_extrap(double &omeg, std::vector<double> &depths, std::vector<double> &c1s, 
+	                                        std::vector<double> &c2s, std::vector<double> &rhos, 
+											std::vector<unsigned> &Ns_points, unsigned flOnlyTrapped, unsigned &ordRich);
+
+std::vector<double> compute_wnumbers_extrap_lin_dz(double &omeg, std::vector<double> &depths, std::vector<double> &c1s, 
+	                                               std::vector<double> &c2s, std::vector<double> &rhos, 
+												   std::vector<unsigned> &Ns_points, unsigned flOnlyTrapped, unsigned &ordRich);
+
+int compute_modal_grop_velocities(std::vector<double> &freqs, double deltaf, std::vector<double> &depths, std::vector<double> &c1s, 
+	                              std::vector<double> &c2s, std::vector<double> &rhos, std::vector<unsigned> &Ns_points, 
+								  unsigned flOnlyTrapped, unsigned &ordRich, std::vector<std::vector<double>> &modal_group_velocities, 
+								  std::vector<unsigned> &mode_numbers);
+
+double compute_modal_delays_residual_uniform(std::vector<double> &freqs, std::vector<double> &depths, std::vector<double> &c1s, 
+	                                         std::vector<double> &c2s, std::vector<double> &rhos, std::vector<unsigned> &Ns_points, 
+											 double R, std::vector<std::vector<double>> &experimental_delays, 
+											 std::vector<unsigned> &experimental_mode_numbers);
 
 int main(int argc, char **argv)
 {
-	/*
-		double freq = 50;
-		double c_w = 1500;
-		double c_b = 2000;
-		double rho_w = 1;
-		double rho_b = 2;
-		double dz = 1;
-		unsigned nz = 501;
-		unsigned ib = 90;    //at POINT = 89 we have water, at POINT = 90 we have bottom
-		//   ii = 89,                  at ii = 90
-
-		cout.precision(15);
-
-		double omeg = 2*LOCAL_M_PI*freq;
-
-		vector<double> input_c;
-		vector<double> input_rho;
-		vector<double> input_mesh { dz,dz };
-		vector<unsigned> input_interf_idcs { ib };
-		vector<double> out_wnum;
-
-		for ( unsigned ii = 0; ii<nz; ii++ ){
-		if (ii<ib){                   //
-		input_c.push_back(c_w);
-		input_rho.push_back(rho_w);
-		}
-		else {
-		input_c.push_back(c_b);
-		input_rho.push_back(rho_b);
-		}
-
-		}
-
-		cout << "freq = " << freq << endl;
-		cout << "omega = " << omeg << endl;
-
-		out_wnum = compute_wnumbers(omeg, input_c, input_rho,input_interf_idcs, input_mesh,1);
-
-		for (unsigned ii=0; ii<out_wnum.size();  ii++) {
-
-		cout << ii << "->" << out_wnum.at(ii) << endl;
-
-
-		}
-
-		cout << "NEW: extrapolation" << endl;
-
-		vector<double> depths {90,600};
-		vector<double> c1s  {1500,2000};
-		vector<double> c2s  {1500,2000};
-		vector<double> rhos  {1,2};
-		vector<unsigned> Ns_points  {180,1020};
-		unsigned rord = 3;
-		vector<double> freqs {20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100};
-		vector<vector<double>> modal_group_velocities;
-		vector<unsigned> mode_numbers;
-		double deltaf = 0.5;
-
-		out_wnum = compute_wnumbers_extrap_lin_dz(omeg,depths,c1s,c2s,rhos,Ns_points,1,rord);
-
-		cout << "Extrapolated ev:" << endl;
-		for (unsigned ii=0; ii<out_wnum.size();  ii++) {
-
-		cout << ii << "->" << out_wnum.at(ii) << endl;
-
-
-		}
-
-		compute_modal_grop_velocities( freqs, deltaf, depths,c1s, c2s, rhos, Ns_points, 1, rord, modal_group_velocities, mode_numbers );
-
-		ofstream myFile("mgv.txt");
-		//    for (int ii=0; ii<N_points-2; ii++){
-		//        myFile << std::fixed << std::setprecision(16) << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
-		//    }
-		//
-
-		for (unsigned ii=0; ii<freqs.size();  ii++) {
-		cout << "f=" << freqs.at(ii) << endl;
-
-		for (unsigned jj=0; jj<mode_numbers.at(ii);  jj++) {
-
-		cout << modal_group_velocities[ii][jj] << endl;
-		myFile << std::fixed << std::setprecision(16) << modal_group_velocities[ii][jj] << "\t";
-
-		}
-		myFile << endl;
-		}
-
-		myFile.close();
-
-		*/
-
-	// reading the "experimental" delay time data from a file:
-
 	unsigned rord = 3;
-	vector<vector<double>> modal_group_velocities;
-	vector<unsigned> mode_numbers;
-	vector<vector<double>> modal_delays;
-	vector<double> freqs;
-	freqs.clear();
+	std::vector<std::vector<double>> modal_group_velocities;
+	std::vector<unsigned> mode_numbers;
+	std::vector<std::vector<double>> modal_delays;
+	std::vector<double> freqs;
 	double buff;
-	vector<double> buffvect;
-	mode_numbers.clear();
-	string myLine, myFileName = "dtimes_synth_thcline_hhf.txt";
+	std::vector<double> buffvect;
+	std::string myLine, myFileName = "dtimes_synth_thcline_hhf.txt";
 	int launchType = 0; // 0 - deafult, 1: fixed cw1=1490, 2: cw1>cw2>...>cwn, 3 : both 1 and 2
 	
 	if (argc >= 2) {
 		myFileName = argv[1];
-		cout << "myFileName " << myFileName << endl;
+		std::cout << "myFileName " << myFileName << std::endl;
 	}
 
 	if (argc >= 3)
 		launchType = atoi(argv[2]);
 	
-	ifstream myFileSynth(myFileName.c_str());
+	std::ifstream myFileSynth(myFileName.c_str());
 
-	while (getline(myFileSynth, myLine)){
+	// reading the "experimental" delay time data from a file
+	while (std::getline(myFileSynth, myLine)){
 		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete window symbol for correct reading
-		stringstream myLineStream(myLine);
+		std::stringstream myLineStream(myLine);
 		myLineStream >> buff;
 		freqs.push_back(buff);
 		buffvect.clear();
@@ -247,14 +166,14 @@ int main(int argc, char **argv)
 	double layer_thickness_w = h / n_layers_w;
 	//int layer_np = round(h/n_layers_w);
 
-	vector<double> depths;
+	std::vector<double> depths;
 	for (unsigned jj = 1; jj <= n_layers_w; jj++){ depths.push_back(layer_thickness_w*jj); }
 	depths.push_back(H);
 
-	vector<double> c1s(n_layers_w + 1, 1500);
-	vector<double> c2s(n_layers_w + 1, 1500);
-	vector<double> rhos(n_layers_w + 1, 1);
-	vector<unsigned> Ns_points(n_layers_w + 1, (unsigned)round(ppm*layer_thickness_w));
+	std::vector<double> c1s(n_layers_w + 1, 1500);
+	std::vector<double> c2s(n_layers_w + 1, 1500);
+	std::vector<double> rhos(n_layers_w + 1, 1);
+	std::vector<unsigned> Ns_points(n_layers_w + 1, (unsigned)round(ppm*layer_thickness_w));
 	Ns_points.at(n_layers_w) = (unsigned)round(ppm*(H - h));
 
 	// END TEST #2
@@ -277,26 +196,26 @@ int main(int argc, char **argv)
 	double R2 = 3600;
 	double R_min = 1e50, R_cur;
 	unsigned nR;
-
+	
 	double cw1 = 1450;
 	double cw2 = 1500;
 	unsigned ncpl; // search mesh within each water layer
-	vector<double> cws_cur(n_layers_w, 1500);
-	vector<double> cws_min(n_layers_w, 1500);
-	vector<double> cws_fixed{ 1490, 1490, 1480, 1465, 1460 }; // use when ncpl = 1
+	std::vector<double> cws_cur(n_layers_w, 1500);
+	std::vector<double> cws_min(n_layers_w, 1500);
+	std::vector<double> cws_fixed{ 1490, 1490, 1480, 1465, 1460 }; // use when ncpl = 1
 	
 	if (cws_fixed.size() != n_layers_w) {
-		cerr << "cws_fixed.size() != n_layers_w" << endl;
-		cerr << cws_fixed.size() << " != " << n_layers_w << endl;
+		std::cerr << "cws_fixed.size() != n_layers_w" << std::endl;
+		std::cerr << cws_fixed.size() << " != " << n_layers_w << std::endl;
 		exit(1);
 	}
 	
 	double res_min = 1e50;
 
 	// fix start time
-	chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-	chrono::high_resolution_clock::time_point t2;
-	chrono::duration<double> time_span;
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+	std::chrono::high_resolution_clock::time_point t2;
+	std::chrono::duration<double> time_span;
 
 #ifdef _MPI
 	// parallel mode
@@ -316,8 +235,8 @@ int main(int argc, char **argv)
 	// small values for fast checking of correctness
 	ncb = 1;
 	nrhob = 1;
-	nR = 41;
-	ncpl = 10;
+	nR = 2;
+	ncpl = 2;
 
  /*   //TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
     vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};
@@ -368,54 +287,46 @@ int main(int argc, char **argv)
 	
 	if (argc >= 4) {
 		ncpl = atoi(argv[3]);
-		cout << "new ncpl " << ncpl << endl;
+		std::cout << "new ncpl " << ncpl << std::endl;
 	}
 	
+	std::cout << "Input parameters :" << std::endl;
+	std::cout << "ncpl " << ncpl << std::endl;
+	std::cout << "n_layers_w " << n_layers_w << std::endl;
+	std::cout << "nR " << nR << std::endl;
+	std::cout << "nrhob " << nrhob << std::endl;
+	std::cout << "ncb " << ncb << std::endl;
+	// Calculate total number of points in a search space
 	unsigned N_total = (unsigned)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
-	cout << "N_total " << N_total << endl;
-	cout << "launchType " << launchType << endl;
+	std::cout << "Formula for calculating total number of points in a search space: (ncpl^n_layers_w)*nR*nrhob*ncb" << std::endl;
+	std::cout << "N_total " << N_total << std::endl;
+	std::cout << "launchType " << launchType << std::endl;
 	
+	// set other parameters of the search space
 	if ((launchType >= 4) && (launchType <= 6)) {
 		nR = 1;
 		R1 = 3500;
 		R2 = 3500;
 	}
 	
-	switch (launchType)
-	{
-	case 5:
+	if ((launchType == 5) || (launchType == 7)) {
 		cb1 = cb2 = 3000;
 		ncb = 1;
 		rhob1 = rhob2 = 3;
 		nrhob = 1;
-		break;
-	case 6:
+	}
+	else if ((launchType == 6) || (launchType == 8)) {
 		cb1 = cb2 = 4000;
 		ncb = 1;
 		rhob1 = rhob2 = 4;
 		nrhob = 1;
-		break;
-	case 7:
-		cb1 = cb2 = 3000;
-		ncb = 1;
-		rhob1 = rhob2 = 3;
-		nrhob = 1;
-		break;
-	case 8:
-		cb1 = cb2 = 4000;
-		ncb = 1;
-		rhob1 = rhob2 = 4;
-		nrhob = 1;
-		break;
-	default:
-		break;
 	}
 	
 	// make cws_all_cartesians - all cartesians of all speeds in water
-	vector<vector<double>> cws_vii; // all variants for every depth
-	vector<int> index_arr;
-	vector<double> cws_vi;
-	vector<vector<double>> cws_all_cartesians;
+	std::vector<std::vector<double>> cws_vii; // all variants for every depth
+	std::vector<int> index_arr;
+	std::vector<double> cws_vi;
+	std::vector<std::vector<double>> cws_all_cartesians;
 	bool isAdding;
 	if (ncpl == 1)
 		cws_all_cartesians.push_back(cws_fixed);
@@ -465,12 +376,12 @@ int main(int argc, char **argv)
 		}
 	}
 	
-	cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << endl;
+	std::cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << std::endl;
 
 #ifndef _MPI
 	// sequential mode
 
-	// inverting for bottom halfspace parameters + sound speed in water!
+	// inverting for bottom halfspace parameters + sound speed in water
 	for (unsigned cur_ncb = 0; cur_ncb < ncb; cur_ncb++)
 		for (unsigned cur_nrhob = 0; cur_nrhob < nrhob; cur_nrhob++)
 			for (unsigned cur_nR = 0; cur_nR < nR; cur_nR++) {
@@ -497,11 +408,11 @@ int main(int argc, char **argv)
 					rhos.at(n_layers_w) = rhob_cur;
 
 					for (unsigned jj = 0; jj <= n_layers_w; jj++){
-						cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << endl;
+						std::cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << std::endl;
 					}
 
 					residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
-					cout << residual << endl << endl;
+					std::cout << residual << std::endl << std::endl;
 
 					if (residual < res_min) {
 						res_min  = residual;
@@ -509,13 +420,13 @@ int main(int argc, char **argv)
 						rhob_min = rhob_cur;
 						R_min    = R_cur;
 						cws_min  = cws_cur;
-						cout << endl;
-						cout << endl << "New residual minimum:" << endl;
-						cout << "err=" << res_min << ", parameters:" << endl;
-						cout << "c_b=" << cb_min << ", rho_b=" << rhob_min << ", R=" << R_min << endl;
-						cout << "cws_min :" << endl;
+						std::cout << std::endl;
+						std::cout << std::endl << "New residual minimum:" << std::endl;
+						std::cout << "err=" << res_min << ", parameters:" << std::endl;
+						std::cout << "c_b=" << cb_min << ", rho_b=" << rhob_min << ", R=" << R_min << std::endl;
+						std::cout << "cws_min :" << std::endl;
 						for (auto &x : cws_min)
-							cout << x << " ";
+							std::cout << x << " ";
 					}
 				}
 			}
@@ -524,11 +435,11 @@ int main(int argc, char **argv)
 	t2 = std::chrono::high_resolution_clock::now();
 	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 
-	cout << "SEARCH ENDED!" << endl;
-	cout << "RESULTING VALUE:" << endl;
-	cout << "err=" << res_min << ", parameters:" << endl;
-	cout << "c_b=" << cb_min << ", rho_b=" << rhob_min << ", R=" << R_min <<  endl;
-	cout << "time " << time_span.count() << endl;
+	std::cout << "SEARCH ENDED!" << std::endl;
+	std::cout << "RESULTING VALUE:" << std::endl;
+	std::cout << "err=" << res_min << ", parameters:" << std::endl;
+	std::cout << "c_b=" << cb_min << ", rho_b=" << rhob_min << ", R=" << R_min << std::endl;
+	std::cout << "time " << time_span.count() << std::endl;
 
 #else
 	// MPI mode
@@ -762,15 +673,15 @@ The routine computes the (uniform) residual (misfit) of experimental data and th
 It should be used as follows: for a set of environment models the residual should be computed. The minimal value of the residual indicates
 the most "adequate" model.
 */
-double compute_modal_delays_residual_uniform( vector<double> &freqs,
-                                     vector<double> &depths,
-                                     vector<double> &c1s,
-                                     vector<double> &c2s,
-                                     vector<double> &rhos,
-                                     vector<unsigned> &Ns_points,
+double compute_modal_delays_residual_uniform(std::vector<double> &freqs,
+									 std::vector<double> &depths,
+									 std::vector<double> &c1s,
+									 std::vector<double> &c2s,
+									 std::vector<double> &rhos,
+									 std::vector<unsigned> &Ns_points,
                                      double R,
-                                     vector<vector<double>> &experimental_delays,
-                                     vector<unsigned> &experimental_mode_numbers
+									 std::vector<std::vector<double>> &experimental_delays,
+									 std::vector<unsigned> &experimental_mode_numbers
                                      )
 {
     unsigned rord = 3;
@@ -780,13 +691,13 @@ double compute_modal_delays_residual_uniform( vector<double> &freqs,
     unsigned mnumb;
     double mdelay;
 
-    vector<vector<double>> modal_group_velocities;
-    vector<unsigned> mode_numbers;
+	std::vector<std::vector<double>> modal_group_velocities;
+	std::vector<unsigned> mode_numbers;
 
     compute_modal_grop_velocities( freqs, deltaf, depths,c1s, c2s, rhos, Ns_points, flTrappedOnly, rord, modal_group_velocities, mode_numbers );
 
     for (unsigned ii=0; ii<freqs.size();  ii++) {
-		mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii) );
+		mnumb = std::min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
         for (unsigned jj=0; jj<mnumb;  jj++) {
 			if (experimental_delays[ii][jj]>0) {
 				mdelay =  R/modal_group_velocities[ii][jj];
@@ -801,25 +712,25 @@ double compute_modal_delays_residual_uniform( vector<double> &freqs,
 }
 
 
-int compute_modal_grop_velocities(      vector<double> &freqs,
-                                        double deltaf,
-                                        vector<double> &depths,
-                                        vector<double> &c1s,
-                                        vector<double> &c2s,
-                                        vector<double> &rhos,
-                                        vector<unsigned> &Ns_points,
-                                        unsigned flOnlyTrapped,
-                                        unsigned &ordRich,
-                                        vector<vector<double>> &modal_group_velocities,
-                                        vector<unsigned> &mode_numbers
-                                        )
+int compute_modal_grop_velocities(std::vector<double> &freqs,
+								  double deltaf,
+								  std::vector<double> &depths,
+								  std::vector<double> &c1s,
+								  std::vector<double> &c2s,
+								  std::vector<double> &rhos,
+								  std::vector<unsigned> &Ns_points,
+                                  unsigned flOnlyTrapped,
+                                  unsigned &ordRich,
+								  std::vector<std::vector<double>> &modal_group_velocities,
+								  std::vector<unsigned> &mode_numbers
+                                  )
 {
     mode_numbers.clear();
     modal_group_velocities.clear();
 
-    vector<double> out_wnum1;
-    vector<double> out_wnum2;
-    vector<double> mgv_ii;
+	std::vector<double> out_wnum1;
+	std::vector<double> out_wnum2;
+	std::vector<double> mgv_ii;
     unsigned nwnum;
 	unsigned nfr = (unsigned)freqs.size();
     double omeg1, omeg2;
@@ -843,7 +754,7 @@ int compute_modal_grop_velocities(      vector<double> &freqs,
 
 		omeg2 = 2*LOCAL_M_PI*(freqs.at(ii) - deltaf / 2);
         out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2,depths,c1s,c2s,rhos,Ns_points,1,ordRich);
-        nwnum = min(nwnum, (unsigned)out_wnum2.size());
+		nwnum = std::min(nwnum, (unsigned)out_wnum2.size());
 
         for (unsigned jj=0; jj < nwnum; jj++ )
         {
@@ -867,14 +778,14 @@ General considerations:
 it is better to set all the numbers to multiple of 12 in advance
 3) Richardson extrapolation of the order 3 gives reasonable accuracy
 */
-vector<double> compute_wnumbers_extrap(       double &omeg, // sound frequency
-											  vector<double> &depths,
-											  vector<double> &c1s,
-											  vector<double> &c2s,
-											  vector<double> &rhos,
-											  vector<unsigned> &Ns_points,
-											  unsigned flOnlyTrapped,
-											  unsigned &ordRich)
+std::vector<double> compute_wnumbers_extrap(double &omeg, // sound frequency
+											std::vector<double> &depths,
+											std::vector<double> &c1s,
+											std::vector<double> &c2s,
+											std::vector<double> &rhos,
+											std::vector<unsigned> &Ns_points,
+											unsigned flOnlyTrapped,
+											unsigned &ordRich)
 /*  subroutine for computing wavenumbers for a given waveguide structure
     the computation is performed by the FD method for certain meshsize,
     Richardson extrapolation is used to improve the
@@ -897,7 +808,7 @@ ordRich -- order of the Richardson extrapolation;
 the top of the first layer is z=0
 */
 {
-    vector<double> coeff_extrap;
+	std::vector<double> coeff_extrap;
 	switch (ordRich) {
 	case 1 :
 		coeff_extrap.assign({ 1 });
@@ -919,12 +830,12 @@ the top of the first layer is z=0
 //        cout << coeff_extrap.at(ii) << endl;
 //    }
 
-    vector<double> input_c;
-    vector<double> input_rho;
-    vector<double> input_mesh;
-    vector<unsigned> input_interf_idcs;
-    vector<double> out_wnum2;
-    vector<double> wnum_extrapR;
+	std::vector<double> input_c;
+	std::vector<double> input_rho;
+	std::vector<double> input_mesh;
+	std::vector<unsigned> input_interf_idcs;
+	std::vector<double> out_wnum2;
+	std::vector<double> wnum_extrapR;
     double zc = 0;
     double zp = 0;
     double dz = 0;
@@ -971,7 +882,7 @@ the top of the first layer is z=0
         //cout << "rr=" << rr << endl;
 
         out_wnum2 = compute_wnumbers(omeg, input_c, input_rho,input_interf_idcs, input_mesh,flOnlyTrapped);
-		m_wnum = min(m_wnum, (unsigned)out_wnum2.size());
+		m_wnum = std::min(m_wnum, (unsigned)out_wnum2.size());
 
         if (rr == 1) { wnum_extrapR.assign(m_wnum,0);}
 
@@ -995,14 +906,14 @@ the top of the first layer is z=0
 
 
 
-vector<double> compute_wnumbers_extrap_lin_dz( double &omeg, // sound frequency
-											   vector<double> &depths,
-											   vector<double> &c1s,
-											   vector<double> &c2s,
-											   vector<double> &rhos,
-											   vector<unsigned> &Ns_points,
-											   unsigned flOnlyTrapped,
-											   unsigned &ordRich )
+std::vector<double> compute_wnumbers_extrap_lin_dz(double &omeg, // sound frequency
+												   std::vector<double> &depths,
+												   std::vector<double> &c1s,
+												   std::vector<double> &c2s,
+												   std::vector<double> &rhos,
+												   std::vector<unsigned> &Ns_points,
+											       unsigned flOnlyTrapped,
+											       unsigned &ordRich )
 /*  subroutine for computing wavenumbers for a given waveguide structure
     the computation is performed by the FD method for certain meshsize,
     Richardson extrapolation is used to improve the
@@ -1025,12 +936,12 @@ ordRich -- order of the Richardson extrapolation;
 the top of the first layer is z=0
 	*/
 {
-    vector<double> input_c;
-    vector<double> input_rho;
-    vector<double> input_mesh;
-    vector<unsigned> input_interf_idcs;
-    vector<double> out_wnum2;
-    vector<double> wnum_extrapR;
+	std::vector<double> input_c;
+	std::vector<double> input_rho;
+	std::vector<double> input_mesh;
+	std::vector<unsigned> input_interf_idcs;
+	std::vector<double> out_wnum2;
+	std::vector<double> wnum_extrapR;
     double zc = 0;
     double zp = 0;
     double dz = 0;
@@ -1040,7 +951,7 @@ the top of the first layer is z=0
     unsigned n_points_total = 0;
     unsigned n_points_layer = 0;
 
-    vector<double> coeff_extrap;
+	std::vector<double> coeff_extrap;
 	switch (ordRich) {
 	case 1 :
 		coeff_extrap.assign({1});
@@ -1110,7 +1021,7 @@ the top of the first layer is z=0
 //        cout << "rr=" << rr << endl;
 
         out_wnum2 = compute_wnumbers(omeg, input_c, input_rho,input_interf_idcs, input_mesh,flOnlyTrapped);
-		m_wnum = min(m_wnum, (unsigned)out_wnum2.size());
+		m_wnum = std::min(m_wnum, (unsigned)out_wnum2.size());
 
         if (rr == 1) { wnum_extrapR.assign(m_wnum,0);}
 
@@ -1132,13 +1043,13 @@ the top of the first layer is z=0
 }
 
 
-vector<double> compute_wnumbers( double &omeg, // sound frequency
-								 vector<double> &c,
-								 vector<double> &rho,
-								 vector<unsigned> &interface_idcs,
-								 vector<double> &meshsizes,
-								 unsigned flOnlyTrapped                 // set flOnlyTrapped = 0 to compute all propagating modes, i.e. such that k^2>=0
-											  )
+std::vector<double> compute_wnumbers(double &omeg, // sound frequency
+									 std::vector<double> &c,
+									 std::vector<double> &rho,
+									 std::vector<unsigned> &interface_idcs,
+									 std::vector<double> &meshsizes,
+								     unsigned flOnlyTrapped                 // set flOnlyTrapped = 0 to compute all propagating modes, i.e. such that k^2>=0
+									)
 {
 	// prepare the three diagonals of the matrix to be passed to the EIG function
     // for the c = c_j, j=0... N_points
@@ -1148,10 +1059,10 @@ vector<double> compute_wnumbers( double &omeg, // sound frequency
     // for c(interface_idcs.at(k-1)) the value of c is the one BELOW the k-th interface
     //(i.e. for the water-bottom interface at the boundary we take the value from the bottom)
 
-	vector<double> md;
-	vector<double> ud;
-	vector<double> ld;
-    vector<double> wnumbers2;
+	std::vector<double> md;
+	std::vector<double> ud;
+	std::vector<double> ld;
+	std::vector<double> wnumbers2;
 
 	int N_points = (unsigned)c.size();
     unsigned layer_number = 0;
