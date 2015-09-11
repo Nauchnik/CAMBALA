@@ -7,57 +7,70 @@
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="alglib">
+      <UniqueIdentifier>{672fa2f5-0982-44a4-8dc4-8f66582b3beb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="LICENSE" />
+    <None Include="Makefile" />
+    <None Include="Makefile_seq" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\alglib\alglibinternal.cpp">
+    <ClCompile Include="sspemdd_parallel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\alglib\alglibmisc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\alglib\ap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\alglib\integration.cpp">
+    <ClCompile Include="sspemdd_sequential.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\alglib\linalg.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>alglib</Filter>
     </ClCompile>
     <ClCompile Include="..\alglib\specialfunctions.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\alglib\alglibmisc.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\alglib\ap.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\alglib\alglibinternal.cpp">
+      <Filter>alglib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Makefile_seq" />
-    <None Include="Makefile" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\alglib\alglibinternal.h">
+    <ClInclude Include="sspemdd_parallel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\alglib\alglibmisc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\alglib\ap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\alglib\integration.h">
+    <ClInclude Include="sspemdd_sequential.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\alglib\linalg.h">
-      <Filter>Header Files</Filter>
+      <Filter>alglib</Filter>
     </ClInclude>
     <ClInclude Include="..\alglib\specialfunctions.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\alglib\alglibmisc.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\alglib\ap.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\alglib\alglibinternal.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="sspemdd_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
