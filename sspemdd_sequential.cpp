@@ -2,7 +2,8 @@
 
 /*
 A routine for computing delay residual.
-Arguments:
+
+Arguments:
 1) Environment: five arrays of the same length: depth, c1s, c2s, rhos, Ns_points;
 (each entry describes one layer as described in the comments to compute_wnumbers_extrap() )
 
