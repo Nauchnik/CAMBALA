@@ -1,8 +1,8 @@
-/*************************************************************************
-// SSPEMDD: Sound Speed Profile Estimator from Modal Delay Data -- Copyright(c) 2015
-// Pavel Petrov(V.I.Il'ichev Pacific Oceanological Institute), 
-// Oleg Zaikin(V.M.Matrosov Institute for System Dynamics and Control Theory)
-*************************************************************************/
+/*****************************************************************************************
+// SSPEMDD: Sound Speed Profile Estimator from Modal Delay Data -- Copyright(c) 2015-2016
+// Pavel Petrov (Il'ichev Pacific Oceanological Institute of FEB RAS), 
+// Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory of SB RAS)
+*****************************************************************************************/
 
 #ifdef _MPI
 #include <mpi.h>
@@ -27,10 +27,10 @@
 struct layer
 {
 	std::vector<double> zend; // vector of finite depths
-	double cbeg;         // velocity of a sound at the beginning of a layer
-	double cend;         // velocity of a sound at the end of a layer
-	double dbeg;         // density at the beginning of a layer
-	double dend;         // density at the end of a layer
+	double cbeg;			  // velocity of a sound at the beginning of a layer
+	double cend;			  // velocity of a sound at the end of a layer
+	double dbeg;              // density at the beginning of a layer
+	double dend;              // density at the end of a layer
 };
 
 int main(int argc, char **argv)
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 	double buff;
 	std::vector<double> buffvect;
 	std::string myLine, myFileName = "dtimes_synth_thcline_hhf.txt";
-	int launchType = 0; // 0 - deafult, 1: fixed cw1=1490, 2: cw1>cw2>...>cwn, 3 : both 1 and 2
+	int launchType = 0; // 0 - deafult; 1 - fixed cw1=1490; 2 - cw1>cw2>...>cwn; 3 - both 1 and 2
 	sspemdd_sequential sspemdd_seq;
 	
 	if (argc >= 2) {
@@ -55,22 +55,23 @@ int main(int argc, char **argv)
 		launchType = atoi(argv[2]);
 	
 	std::ifstream myFileSynth(myFileName.c_str());
-
+	std::stringstream myLineStream;
 	// reading the "experimental" delay time data from a file
 	while (std::getline(myFileSynth, myLine)){
-		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete window symbol for correct reading
-		std::stringstream myLineStream(myLine);
+		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading
+		myLineStream << myLine;
 		myLineStream >> buff;
 		freqs.push_back(buff);
+		
 		buffvect.clear();
-
 		while (!myLineStream.eof()) {
 			myLineStream >> buff;
 			buffvect.push_back(buff);
 			mode_numbers.push_back((unsigned)buffvect.size());
 		}
-
+		
 		modal_delays.push_back(buffvect);
+		myLineStream.str(""); myLineStream.clear();
 	}
 	myFileSynth.close();
 
@@ -103,9 +104,11 @@ int main(int argc, char **argv)
 	//int layer_np = round(h/n_layers_w);
 
 	std::vector<double> depths;
-	for (unsigned jj = 1; jj <= n_layers_w; jj++){ depths.push_back(layer_thickness_w*jj); }
+	for (unsigned jj = 1; jj <= n_layers_w; jj++){ 
+		depths.push_back(layer_thickness_w*jj); 
+	}
 	depths.push_back(H);
-
+	
 	std::vector<double> c1s(n_layers_w + 1, 1500);
 	std::vector<double> c2s(n_layers_w + 1, 1500);
 	std::vector<double> rhos(n_layers_w + 1, 1);
@@ -167,11 +170,11 @@ int main(int argc, char **argv)
 	sspemdd_par.cb_min = cb_min;
 	sspemdd_par.rhob_min = rhob_min;
 	sspemdd_par.R_min = R_min;
+	sspemdd_par.residual = residual;
 	sspemdd_par.ncb = 1;
 	sspemdd_par.nrhob = 1;
 	sspemdd_par.nR = 41;
 	sspemdd_par.ncpl = 10;
-	sspemdd_par.residual = residual;
 	sspemdd_par.cb1 = cb1;
 	sspemdd_par.cb2 = cb2;
 	sspemdd_par.cw1 = cw1;
@@ -195,12 +198,11 @@ int main(int argc, char **argv)
 	sspemdd_par.modal_delays = modal_delays;
 #else
 	// sequential mode
-	// small values for fast checking of correctness
 	ncb = 1;
 	nrhob = 1;
-	nR = 2;
-	ncpl = 2;
-
+	nR = 41;
+	ncpl = 10;
+	
  /*   //TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
     vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};
     vector<double> c2s_t    { 1490, 1480, 1465, 1460, 1460, 2000};

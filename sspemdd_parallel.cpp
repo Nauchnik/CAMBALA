@@ -1,3 +1,7 @@
+#include "sspemdd_parallel.h"
+#include "sspemdd_sequential.h"
+#include "sspemdd_utils.h"
+
 #include <iostream>
 #include <vector>
 #include <sstream>
@@ -6,10 +10,6 @@
 #include <iomanip>
 #include <algorithm>
 #include <cmath>
-
-#include "SSPEMDD_utils.h"
-#include "sspemdd_parallel.h"
-#include "sspemdd_sequential.h"
 
 sspemdd_parallel::sspemdd_parallel() :
 	ncb(0),
@@ -98,20 +98,26 @@ void sspemdd_parallel::control_process()
 		MPI_Recv(result_array, result_array_len, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		processed_task_count++;
 
-		residual = result_array[0];
-		cb_cur = result_array[1];
-		rhob_cur = result_array[2];
-		R_cur = result_array[3];
+		residual   = result_array[0];
+		cb_cur     = result_array[1];
+		rhob_cur   = result_array[2];
+		R_cur      = result_array[3];
 		cws_cur[0] = result_array[4];
 		cws_cur[1] = result_array[5];
 		cws_cur[2] = result_array[6];
 		cws_cur[3] = result_array[7];
 		cws_cur[4] = result_array[8];
-
-		/*sstream_out << "recv residual " << residual << std::endl;
-		sstream_out << "recv cb_cur "   << cb_cur   << std::endl;
-		sstream_out << "recv rhob_cur " << rhob_cur << std::endl;
-		sstream_out << "recv R_cur "    << R_cur    << std::endl;*/
+		
+		sstream_out << "recv new result " << std::endl;
+		sstream_out << "recv residual "   << residual   << std::endl;
+		sstream_out << "recv cb_cur "     << cb_cur     << std::endl;
+		sstream_out << "recv rhob_cur "   << rhob_cur   << std::endl;
+		sstream_out << "recv R_cur "      << R_cur      << std::endl;
+		sstream_out << "recv cws_cur[0] " << cws_cur[0] << std::endl;
+		sstream_out << "recv cws_cur[1] " << cws_cur[1] << std::endl;
+		sstream_out << "recv cws_cur[2] " << cws_cur[2] << std::endl;
+		sstream_out << "recv cws_cur[3] " << cws_cur[3] << std::endl;
+		sstream_out << "recv cws_cur[4] " << cws_cur[4] << std::endl;
 
 		if (residual < res_min) {
 			res_min = residual;
