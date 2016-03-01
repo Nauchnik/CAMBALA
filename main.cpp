@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 	std::string myLine, myFileName = "dtimes_synth_thcline_hhf.txt";
 	int launchType = 0; // 0 - deafult; 1 - fixed cw1=1490; 2 - cw1>cw2>...>cwn; 3 - both 1 and 2
 	sspemdd_sequential sspemdd_seq;
-	
+
 	if (argc >= 2) {
 		myFileName = argv[1];
 		std::cout << "myFileName " << myFileName << std::endl;
@@ -53,23 +53,23 @@ int main(int argc, char **argv)
 
 	if (argc >= 3)
 		launchType = atoi(argv[2]);
-	
+
 	std::ifstream myFileSynth(myFileName.c_str());
 	std::stringstream myLineStream;
 	// reading the "experimental" delay time data from a file
-	while (std::getline(myFileSynth, myLine)){
+	while (std::getline(myFileSynth, myLine)) {
 		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading
 		myLineStream << myLine;
 		myLineStream >> buff;
 		freqs.push_back(buff);
-		
+
 		buffvect.clear();
 		while (!myLineStream.eof()) {
 			myLineStream >> buff;
 			buffvect.push_back(buff);
 			mode_numbers.push_back((unsigned)buffvect.size());
 		}
-		
+
 		modal_delays.push_back(buffvect);
 		myLineStream.str(""); myLineStream.clear();
 	}
@@ -88,13 +88,13 @@ int main(int argc, char **argv)
 		// END TEST #1
 		*/
 
-	// SYNTHETIC TEST #2
-	// new version: ssp in water + bottom halfspace + Range
+		// SYNTHETIC TEST #2
+		// new version: ssp in water + bottom halfspace + Range
 
-	// environment model
-	// waveguide depth: H
-	// water column depth: h
-	// n_layers_w in the water,
+		// environment model
+		// waveguide depth: H
+		// water column depth: h
+		// n_layers_w in the water,
 
 	unsigned ppm = 2;
 	double h = 90;
@@ -104,11 +104,11 @@ int main(int argc, char **argv)
 	//int layer_np = round(h/n_layers_w);
 
 	std::vector<double> depths;
-	for (unsigned jj = 1; jj <= n_layers_w; jj++){ 
-		depths.push_back(layer_thickness_w*jj); 
+	for (unsigned jj = 1; jj <= n_layers_w; jj++) {
+		depths.push_back(layer_thickness_w*jj);
 	}
 	depths.push_back(H);
-	
+
 	std::vector<double> c1s(n_layers_w + 1, 1500);
 	std::vector<double> c2s(n_layers_w + 1, 1500);
 	std::vector<double> rhos(n_layers_w + 1, 1);
@@ -135,20 +135,20 @@ int main(int argc, char **argv)
 	double R2 = 3600;
 	double R_min = 1e50, R_cur = 0;
 	unsigned nR = 0;
-	
+
 	double cw1 = 1450;
 	double cw2 = 1500;
 	unsigned ncpl; // search mesh within each water layer
 	std::vector<double> cws_cur(n_layers_w, 1500);
 	std::vector<double> cws_min(n_layers_w, 1500);
 	std::vector<double> cws_fixed{ 1490, 1490, 1480, 1465, 1460 }; // use when ncpl = 1
-	
+
 	if (cws_fixed.size() != n_layers_w) {
 		std::cerr << "cws_fixed.size() != n_layers_w" << std::endl;
 		std::cerr << cws_fixed.size() << " != " << n_layers_w << std::endl;
 		exit(1);
 	}
-	
+
 	double res_min = 1e50;
 
 	// fix start time
@@ -156,104 +156,63 @@ int main(int argc, char **argv)
 	std::chrono::high_resolution_clock::time_point t2;
 	std::chrono::duration<double> time_span;
 
-#ifdef _MPI
-	// parallel mode
-	int rank;
-	int corecount;
-	MPI_Init(&argc, &argv);
-	MPI_Comm_size(MPI_COMM_WORLD, &corecount);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	sspemdd_parallel sspemdd_par;
-	sspemdd_par.rank = rank;
-	sspemdd_par.corecount = corecount;
-	sspemdd_par.res_min = res_min;
-	sspemdd_par.cb_min = cb_min;
-	sspemdd_par.rhob_min = rhob_min;
-	sspemdd_par.R_min = R_min;
-	sspemdd_par.residual = residual;
-	sspemdd_par.ncb = 1;
-	sspemdd_par.nrhob = 1;
-	sspemdd_par.nR = 41;
-	sspemdd_par.ncpl = 10;
-	sspemdd_par.cb1 = cb1;
-	sspemdd_par.cb2 = cb2;
-	sspemdd_par.cw1 = cw1;
-	sspemdd_par.cw2 = cw2;
-	sspemdd_par.R1 = R1;
-	sspemdd_par.R2 = R2;
-	sspemdd_par.rhob1 = rhob1;
-	sspemdd_par.rhob2 = rhob2;
-	sspemdd_par.n_layers_w = n_layers_w;
-	sspemdd_par.cws_cur = cws_cur;
-	sspemdd_par.cws_min = cws_min;
-	sspemdd_par.cws_fixed = cws_fixed; // use when ncpl = 1
-	sspemdd_par.c1s = c1s;
-	sspemdd_par.c2s = c2s;
-	sspemdd_par.rhos = rhos;
-	sspemdd_par.Ns_points = Ns_points;
-	sspemdd_par.depths = depths;
-	sspemdd_par.freqs = freqs;
-	sspemdd_par.modal_group_velocities = modal_group_velocities;
-	sspemdd_par.mode_numbers = mode_numbers;
-	sspemdd_par.modal_delays = modal_delays;
-#else
-	// sequential mode
-	ncb = 1;
-	nrhob = 1;
-	nR = 41;
-	ncpl = 10;
-	
- /*   //TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
-    vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};
-    vector<double> c2s_t    { 1490, 1480, 1465, 1460, 1460, 2000};
-
-	vector<double> rhos_t   { 1, 1, 1, 1, 1, 2};
-	vector<double> depths_t   { 18, 36, 54, 72, 90, 600};
-	vector<unsigned> Ns_points_t  { 36, 36, 36, 36, 36, 1020};
-	double deltaf_t = 0.5;
-	vector<vector<double>> modal_group_velocities_t;
-	vector<unsigned> mode_numbers_t;
-	double R_t = 3500;
-	double residual_t;
-
-    compute_modal_grop_velocities( freqs, deltaf_t, depths_t, c1s_t, c2s_t, rhos_t, Ns_points_t, 1, rord, modal_group_velocities_t, mode_numbers_t );
-
-    for (unsigned ii=0; ii<freqs.size();  ii++) {
-
-        for (unsigned jj=0; jj<mode_numbers_t.at(ii);  jj++) {
-			cout << modal_group_velocities_t[ii][jj] << "; ";
-        }
-        cout << endl;
-    }
-
-    residual_t = wnumbers_obj.compute_modal_delays_residual_uniform(freqs, depths_t, c1s_t, c2s_t, rhos_t, Ns_points, R_t, modal_delays, mode_numbers);
-
-    cout << " TEST comparison." << endl << "RESIDUAL: " << residual_t << endl << endl;;
-
-    ncb = 1;
-    nrhob = 1;
-    nR = 1;
-    ncpl = 6;
-    cb1 = 2000;
-    cb2 = 2000;
-
-    rhob1 = 2;
-    rhob2 = 2;
-
-    R1 = 3500;
-    R2 = 3500;
-
-    cw1 = 1460;
-    cw2 = 1490;
-
-    //END OF TEST BLOCK! */
-#endif
-	
 	if (argc >= 4) {
 		ncpl = atoi(argv[3]);
 		std::cout << "new ncpl " << ncpl << std::endl;
 	}
-	
+
+	ncb = 1;
+	nrhob = 1;
+	nR = 41;
+	ncpl = 10;
+
+	/*   //TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
+	   vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};
+	   vector<double> c2s_t    { 1490, 1480, 1465, 1460, 1460, 2000};
+
+	   vector<double> rhos_t   { 1, 1, 1, 1, 1, 2};
+	   vector<double> depths_t   { 18, 36, 54, 72, 90, 600};
+	   vector<unsigned> Ns_points_t  { 36, 36, 36, 36, 36, 1020};
+	   double deltaf_t = 0.5;
+	   vector<vector<double>> modal_group_velocities_t;
+	   vector<unsigned> mode_numbers_t;
+	   double R_t = 3500;
+	   double residual_t;
+
+	   compute_modal_grop_velocities( freqs, deltaf_t, depths_t, c1s_t, c2s_t, rhos_t, Ns_points_t, 1, rord, modal_group_velocities_t, mode_numbers_t );
+
+	   for (unsigned ii=0; ii<freqs.size();  ii++) {
+
+		   for (unsigned jj=0; jj<mode_numbers_t.at(ii);  jj++) {
+			   cout << modal_group_velocities_t[ii][jj] << "; ";
+		   }
+		   cout << endl;
+	   }
+
+	   residual_t = wnumbers_obj.compute_modal_delays_residual_uniform(freqs, depths_t, c1s_t, c2s_t, rhos_t, Ns_points, R_t, modal_delays, mode_numbers);
+
+	   cout << " TEST comparison." << endl << "RESIDUAL: " << residual_t << endl << endl;;
+
+	   ncb = 1;
+	   nrhob = 1;
+	   nR = 1;
+	   ncpl = 6;
+	   cb1 = 2000;
+	   cb2 = 2000;
+
+	   rhob1 = 2;
+	   rhob2 = 2;
+
+	   R1 = 3500;
+	   R2 = 3500;
+
+	   cw1 = 1460;
+	   cw2 = 1490;
+
+	   //END OF TEST BLOCK! */
+
+	unsigned N_total = (unsigned)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
+
 	std::cout << "Input parameters :" << std::endl;
 	std::cout << "ncpl " << ncpl << std::endl;
 	std::cout << "n_layers_w " << n_layers_w << std::endl;
@@ -261,11 +220,10 @@ int main(int argc, char **argv)
 	std::cout << "nrhob " << nrhob << std::endl;
 	std::cout << "ncb " << ncb << std::endl;
 	// Calculate total number of points in a search space
-	unsigned N_total = (unsigned)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
 	std::cout << "Formula for calculating total number of points in a search space: (ncpl^n_layers_w)*nR*nrhob*ncb" << std::endl;
 	std::cout << "N_total " << N_total << std::endl;
 	std::cout << "launchType " << launchType << std::endl;
-	
+
 	// set other parameters of the search space
 	if ((launchType >= 4) && (launchType <= 6)) {
 		nR = 1;
@@ -341,10 +299,6 @@ int main(int argc, char **argv)
 	}
 	
 	std::cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << std::endl;
-	
-#ifdef _MPI
-	sspemdd_par.cws_all_cartesians = cws_all_cartesians;
-#endif
 
 #ifndef _MPI
 	// sequential mode
@@ -408,13 +362,56 @@ int main(int argc, char **argv)
 	std::cout << "err=" << res_min << ", parameters:" << std::endl;
 	std::cout << "c_b=" << cb_min << ", rho_b=" << rhob_min << ", R=" << R_min << std::endl;
 	std::cout << "time " << time_span.count() << std::endl;
-
 #else
+	int rank = 0;
+	int corecount = 1;
+	
+	// parallel mode
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &corecount);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	sspemdd_parallel sspemdd_par;
+	sspemdd_par.rank = rank;
+	sspemdd_par.corecount = corecount;
+	sspemdd_par.res_min = res_min;
+	sspemdd_par.cb_min = cb_min;
+	sspemdd_par.rhob_min = rhob_min;
+	sspemdd_par.R_min = R_min;
+	sspemdd_par.residual = residual;
+	sspemdd_par.ncb = ncb;
+	sspemdd_par.nrhob = nrhob;
+	sspemdd_par.nR = nR;
+	sspemdd_par.ncpl = ncpl;
+	sspemdd_par.cb1 = cb1;
+	sspemdd_par.cb2 = cb2;
+	sspemdd_par.cw1 = cw1;
+	sspemdd_par.cw2 = cw2;
+	sspemdd_par.R1 = R1;
+	sspemdd_par.R2 = R2;
+	sspemdd_par.rhob1 = rhob1;
+	sspemdd_par.rhob2 = rhob2;
+	sspemdd_par.n_layers_w = n_layers_w;
+	sspemdd_par.cws_cur = cws_cur;
+	sspemdd_par.cws_min = cws_min;
+	sspemdd_par.cws_fixed = cws_fixed; // use when ncpl = 1
+	sspemdd_par.c1s = c1s;
+	sspemdd_par.c2s = c2s;
+	sspemdd_par.rhos = rhos;
+	sspemdd_par.Ns_points = Ns_points;
+	sspemdd_par.depths = depths;
+	sspemdd_par.freqs = freqs;
+	sspemdd_par.modal_group_velocities = modal_group_velocities;
+	sspemdd_par.mode_numbers = mode_numbers;
+	sspemdd_par.modal_delays = modal_delays;
+	sspemdd_par.cws_all_cartesians = cws_all_cartesians;
+
 	// MPI mode
 	if (rank == 0)
 		sspemdd_par.control_process();
 	else if (rank > 0)
 		sspemdd_par.computing_process();
 #endif
+
 	return 0;
 }
