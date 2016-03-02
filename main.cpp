@@ -124,21 +124,21 @@ int main(int argc, char **argv)
 	double cb1 = 2000;
 	double cb2 = 2000;
 	double cb_min = 1e50, cb_cur;
-	unsigned ncb = 0;
+	unsigned ncb = 1;
 
 	double rhob1 = 2;
 	double rhob2 = 2;
 	double rhob_min = 1e50, rhob_cur;
-	unsigned nrhob = 0;
+	unsigned nrhob = 1;
 
 	double R1 = 3400;
 	double R2 = 3600;
 	double R_min = 1e50, R_cur = 0;
-	unsigned nR = 0;
+	unsigned nR = 41;
 
 	double cw1 = 1450;
 	double cw2 = 1500;
-	unsigned ncpl; // search mesh within each water layer
+	unsigned ncpl = 0; // search mesh within each water layer
 	std::vector<double> cws_cur(n_layers_w, 1500);
 	std::vector<double> cws_min(n_layers_w, 1500);
 	std::vector<double> cws_fixed{ 1490, 1490, 1480, 1465, 1460 }; // use when ncpl = 1
@@ -156,15 +156,14 @@ int main(int argc, char **argv)
 	std::chrono::high_resolution_clock::time_point t2;
 	std::chrono::duration<double> time_span;
 
+#ifdef _DEBUG
+	ncpl = 10;
+#endif
+
 	if (argc >= 4) {
 		ncpl = atoi(argv[3]);
 		std::cout << "new ncpl " << ncpl << std::endl;
 	}
-
-	ncb = 1;
-	nrhob = 1;
-	nR = 41;
-	ncpl = 10;
 
 	/*   //TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
 	   vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};

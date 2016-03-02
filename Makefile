@@ -32,5 +32,5 @@ main.o: main.cpp
 	
 clean:
 	rm -rf *.o
-	rm acoustics_client_app
+	rm SSPEMDD_parallel
 	clear
