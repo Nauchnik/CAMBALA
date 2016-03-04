@@ -33,6 +33,8 @@ struct layer
 	double dend;              // density at the end of a layer
 };
 
+void MPI_main(sspemdd_parallel sspemdd_par);
+
 int main(int argc, char **argv)
 {
 	unsigned rord = 3;
@@ -136,6 +138,8 @@ int main(int argc, char **argv)
 	double R_min = 1e50, R_cur = 0;
 	unsigned nR = 41;
 
+	double res_min = 1e100;
+
 	double cw1 = 1450;
 	double cw2 = 1500;
 	unsigned ncpl = 0; // search mesh within each water layer
@@ -149,15 +153,14 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	double res_min = 1e50;
-
 	// fix start time
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 	std::chrono::high_resolution_clock::time_point t2;
 	std::chrono::duration<double> time_span;
 
 #ifdef _DEBUG
-	ncpl = 10;
+	ncpl = 11;
+	launchType = 1;
 #endif
 
 	if (argc >= 4) {
@@ -405,12 +408,17 @@ int main(int argc, char **argv)
 	sspemdd_par.modal_delays = modal_delays;
 	sspemdd_par.cws_all_cartesians = cws_all_cartesians;
 
-	// MPI mode
-	if (rank == 0)
-		sspemdd_par.control_process();
-	else if (rank > 0)
-		sspemdd_par.computing_process();
+	MPI_main(sspemdd_par);
 #endif
-
 	return 0;
+}
+
+void MPI_main(sspemdd_parallel sspemdd_par)
+{
+	sspemdd_par.allocateArrays();
+
+	if (sspemdd_par.rank == 0)
+		sspemdd_par.control_process();
+	else if (sspemdd_par.rank > 0)
+		sspemdd_par.computing_process();
 }

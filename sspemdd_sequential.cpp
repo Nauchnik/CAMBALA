@@ -112,7 +112,6 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 	return 0;
 }
 
-
 /*
 General considerations:
 1) It is better to choose mesh in such a way that mesh size is the same for all z. This gives better accuracy!

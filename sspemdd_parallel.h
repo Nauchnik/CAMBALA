@@ -59,6 +59,7 @@ public:
 	double *result_array;
 	void control_process();
 	void computing_process();
+	void allocateArrays();
 };
 
 #endif

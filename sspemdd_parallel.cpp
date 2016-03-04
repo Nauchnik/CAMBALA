@@ -16,7 +16,7 @@ sspemdd_parallel::sspemdd_parallel() :
 	nrhob(0),
 	nR(0),
 	task_array_len ( 0 ),
-	result_array_len ( 9 ),
+	result_array_len ( 0 ),
 	corecount ( 0 ),
 	rank ( 0 ),
 	residual ( 0.0 ),
@@ -32,21 +32,14 @@ sspemdd_parallel::sspemdd_parallel() :
 	R_cur (0.0),
 	rhob_cur(0.0),
 	n_layers_w(0),
-	res_min(0.0),
+	res_min(1e100),
 	cb_min(0.0),
 	rhob_min(0.0),
 	R_min(0.0)
-{
-	task_array_len = n_layers_w;
-	task_array = new double[task_array_len];
-	result_array = new double[result_array_len];
-#ifdef _MPI
-	mpi_start_time = MPI_Wtime();
-#endif
-}
+{}
 
 sspemdd_parallel::~sspemdd_parallel()
-{
+{ 
 	delete[] task_array;
 	delete[] result_array;
 }
@@ -55,22 +48,25 @@ void sspemdd_parallel::control_process()
 {
 #ifdef _MPI
 	MPI_Status status;
-	std::cout << "Start residual is: " << residual << std::endl;
+	std::stringstream sstream_out;
+	mpi_start_time = MPI_Wtime();
+
+	sstream_out << "Start residual is: " << residual << std::endl;
 
 	// brute force minimum search
-	std::cout << "BRUTE FORCE MINIMUM SEARCH" << std::endl;
-	std::cout << "Search space:" << std::endl;
-	std::cout << cb1 << "< c_b <" << cb2 << ", step " << (cb2 - cb1) / ncb << std::endl;
-	std::cout << R1 << "< Range <" << R2 << ", step " << (R2 - R1) / nR << std::endl;
-	std::cout << cw1 << "< cws <" << cw2 << " , step " << (cw2 - cw1) / ncpl << std::endl;
-	std::cout << rhob1 << "< rho_b <" << rhob2 << ", step " << (rhob2 - rhob1) / nrhob << std::endl;
-
-	std::stringstream sstream_out;
+	sstream_out << "BRUTE FORCE MINIMUM SEARCH" << std::endl;
+	sstream_out << "Search space:" << std::endl;
+	sstream_out << cb1 << " < c_b < " << cb2 << std::endl;
+	sstream_out << R1 << " < Range < " << R2 << std::endl;
+	sstream_out << cw1 << " < cws < " << cw2 << std::endl;
+	sstream_out << rhob1 << "< rho_b < " << rhob2 << std::endl;
+	
 	sstream_out << "MPI control process" << std::endl;
-	std::chrono::high_resolution_clock::time_point t1, t2, finding_new_bkv_start_time, now_time;
-	std::chrono::duration<double> time_span;
-
 	sstream_out << "cws_all_cartesians.size() " << cws_all_cartesians.size() << std::endl;
+	sstream_out << "cws_all_cartesians[0]" << std::endl;
+	for (unsigned j = 0; j < cws_all_cartesians[0].size(); j++)
+		sstream_out << cws_all_cartesians[0][j] << " ";
+	sstream_out << std::endl;
 	if (cws_all_cartesians.size() < (unsigned)corecount) {
 		std::cerr << "cws_all_cartesians.size() < corecount" << std::endl;
 		std::cerr << cws_all_cartesians.size() << " < " << corecount << std::endl;
@@ -85,6 +81,10 @@ void sspemdd_parallel::control_process()
 		for (int j = 0; j < (int)task_array_len; j++)
 			task_array[j] = cws_all_cartesians[send_task_count][j];
 		MPI_Send(task_array, task_array_len, MPI_DOUBLE, computing_process_index, 0, MPI_COMM_WORLD);
+		/*sstream_out << "sending cws as task_array " << std::endl;
+		for (int j = 0; j < (int)task_array_len; j++)
+			sstream_out << task_array[j] << " ";
+		sstream_out << std::endl;*/
 		send_task_count++;
 	}
 	sstream_out << "send_task_count " << send_task_count << std::endl;
@@ -92,6 +92,8 @@ void sspemdd_parallel::control_process()
 	ofile << sstream_out.rdbuf();
 	sstream_out.clear(); sstream_out.str("");
 	ofile.close(); ofile.clear();
+	double stop_message = -1;
+	cws_cur.resize(n_layers_w);
 
 	// get results and send new tasks on idle computing processes
 	while (processed_task_count < cws_all_cartesians.size()) {
@@ -108,7 +110,7 @@ void sspemdd_parallel::control_process()
 		cws_cur[3] = result_array[7];
 		cws_cur[4] = result_array[8];
 		
-		sstream_out << "recv new result " << std::endl;
+		/*sstream_out << "recv new result " << std::endl;
 		sstream_out << "recv residual "   << residual   << std::endl;
 		sstream_out << "recv cb_cur "     << cb_cur     << std::endl;
 		sstream_out << "recv rhob_cur "   << rhob_cur   << std::endl;
@@ -117,8 +119,8 @@ void sspemdd_parallel::control_process()
 		sstream_out << "recv cws_cur[1] " << cws_cur[1] << std::endl;
 		sstream_out << "recv cws_cur[2] " << cws_cur[2] << std::endl;
 		sstream_out << "recv cws_cur[3] " << cws_cur[3] << std::endl;
-		sstream_out << "recv cws_cur[4] " << cws_cur[4] << std::endl;
-
+		sstream_out << "recv cws_cur[4] " << cws_cur[4] << std::endl;*/
+		
 		if (residual < res_min) {
 			res_min = residual;
 			cb_min = cb_cur;
@@ -142,19 +144,20 @@ void sspemdd_parallel::control_process()
 			send_task_count++;
 			sstream_out << "send_task_count " << send_task_count << std::endl;
 		}
+		else {
+			// send stop-messages
+			for (unsigned j = 0; j < task_array_len; j++)
+				task_array[j] = -1;
+			for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++)
+				MPI_Send(task_array, task_array_len, MPI_DOUBLE, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
+		}
 
 		ofile.open("mpi_out", std::ios_base::app);
 		ofile << sstream_out.rdbuf();
 		sstream_out.clear(); sstream_out.str("");
 		ofile.close(); ofile.clear();
 	}
-
-	// send stop-messages
-	for (unsigned j = 0; j < task_array_len; j++)
-		task_array[j] = -1;
-	for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++)
-		MPI_Send(task_array, task_array_len, MPI_DOUBLE, computing_process_index, 0, MPI_COMM_WORLD);
-
+	
 	sstream_out << std::endl << "SEARCH ENDED!" << std::endl;
 	sstream_out << "RESULTING VALUE:" << std::endl;
 	sstream_out << "err=" << res_min << ", parameters:" << std::endl;
@@ -183,27 +186,15 @@ void sspemdd_parallel::computing_process()
 	double local_rhob_min;
 	double local_R_min;
 	std::vector<double> local_cws_min(n_layers_w, 1500);
-
-	std::vector<std::vector<double>> cws_vii; // all variants for every depth
-	std::vector<int> index_arr;
-	std::vector<double> cws_vi;
-	std::vector<std::vector<double>> local_cws_all_cartesians;
-	for (unsigned ncpl_cur = 0; ncpl_cur <= ncpl; ncpl_cur++)
-		cws_vi.push_back(cw1 + ncpl_cur*(cw2 - cw1) / ncpl);
-	if (rank == 1) {
-		std::cout << "cws_vi" << std::endl;
-		for (auto &x : cws_vi)
-			std::cout << x << " ";
-	}
-	for (unsigned i = 0; i < n_layers_w; i++)
-		cws_vii.push_back(cws_vi);
-	while (SSPEMDD_utils::next_cartesian(cws_vii, index_arr, cws_vi))
-		local_cws_all_cartesians.push_back(cws_vi);
+	sspemdd_sequential sspemdd_seq;
+	cws_cur.resize(n_layers_w);
 	
-	std::cout << "local_cws_all_cartesians.size() " << local_cws_all_cartesians.size() << std::endl;
-
+	if ( rank == 1 )
+		std::cout << "computing process, rank " << rank << std::endl;
+	
 	for (;;) {
 		MPI_Recv(task_array, task_array_len, MPI_DOUBLE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+
 		// if stop-message then finalize
 		if ((task_array[0] == -1) && (task_array[2] == -1) && (task_array[3] == -1)) {
 			MPI_Finalize();
@@ -212,12 +203,10 @@ void sspemdd_parallel::computing_process()
 
 		for (unsigned j = 0; j < task_array_len; j++)
 			cws_cur[j] = task_array[j];
-
-		if (rank == 1)
+		if (rank == 1) {
 			for (unsigned j = 0; j < task_array_len; j++)
 				std::cout << "recv cws_cur " << cws_cur[j] << std::endl;
-		
-		sspemdd_sequential sspemdd_seq;
+		}
 
 		// inverting for bottom halfspace parameters + sound speed in water!
 		for (unsigned cur_ncb = 0; cur_ncb < ncb; cur_ncb++)
@@ -253,6 +242,10 @@ void sspemdd_parallel::computing_process()
 						local_rhob_min = rhob_cur;
 						local_R_min = R_cur;
 						local_cws_min = cws_cur;
+						if (rank == 1) {
+							std::cout << "on rank 1 residual < local_res_min : " 
+								<< residual << " < " << local_res_min << std::endl;
+						}
 					}
 				}
 
@@ -266,8 +259,25 @@ void sspemdd_parallel::computing_process()
 		result_array[6] = local_cws_min[2];
 		result_array[7] = local_cws_min[3];
 		result_array[8] = local_cws_min[4];
-
+		/*std::cout << "sending local_res_min " << local_res_min << std::endl;
+		std::cout << "sending local_cb_min " << local_cb_min << std::endl;
+		std::cout << "sending local_rhob_min " << local_rhob_min << std::endl;
+		std::cout << "sending local_R_min " << local_R_min << std::endl;
+		std::cout << " sending local_cws_min[0]" << local_cws_min[0] << std::endl;
+		std::cout << " sending local_cws_min[1]" << local_cws_min[1] << std::endl;
+		std::cout << " sending local_cws_min[2]" << local_cws_min[2] << std::endl;
+		std::cout << " sending local_cws_min[3]" << local_cws_min[3] << std::endl;
+		std::cout << " sending local_cws_min[4]" << local_cws_min[4] << std::endl;*/
+		
 		MPI_Send(result_array, result_array_len, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
 	}
 #endif
+}
+
+void sspemdd_parallel::allocateArrays()
+{
+	task_array_len = n_layers_w;
+	result_array_len = 9;
+	task_array = new double[task_array_len];
+	result_array = new double[result_array_len];
 }
