@@ -421,4 +421,6 @@ void MPI_main(sspemdd_parallel sspemdd_par)
 		sspemdd_par.control_process();
 	else if (sspemdd_par.rank > 0)
 		sspemdd_par.computing_process();
+
+	sspemdd_par.deallocateArrays();
 }

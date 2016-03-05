@@ -39,10 +39,7 @@ sspemdd_parallel::sspemdd_parallel() :
 {}
 
 sspemdd_parallel::~sspemdd_parallel()
-{ 
-	delete[] task_array;
-	delete[] result_array;
-}
+{}
 
 void sspemdd_parallel::control_process()
 {
@@ -99,7 +96,8 @@ void sspemdd_parallel::control_process()
 	while (processed_task_count < cws_all_cartesians.size()) {
 		MPI_Recv(result_array, result_array_len, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		processed_task_count++;
-
+		sstream_out << "processed_task_count " << processed_task_count << std::endl;
+		
 		residual   = result_array[0];
 		cb_cur     = result_array[1];
 		rhob_cur   = result_array[2];
@@ -148,10 +146,9 @@ void sspemdd_parallel::control_process()
 			// send stop-messages
 			for (unsigned j = 0; j < task_array_len; j++)
 				task_array[j] = -1;
-			for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++)
 				MPI_Send(task_array, task_array_len, MPI_DOUBLE, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
 		}
-
+		
 		ofile.open("mpi_out", std::ios_base::app);
 		ofile << sstream_out.rdbuf();
 		sstream_out.clear(); sstream_out.str("");
@@ -194,19 +191,20 @@ void sspemdd_parallel::computing_process()
 	
 	for (;;) {
 		MPI_Recv(task_array, task_array_len, MPI_DOUBLE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-
+		
 		// if stop-message then finalize
-		if ((task_array[0] == -1) && (task_array[2] == -1) && (task_array[3] == -1)) {
+		if (task_array[0] == -1) {
+			std::cout << "rank " << rank << " received stop-message" << std::endl;
 			MPI_Finalize();
 			break;
 		}
-
+		
 		for (unsigned j = 0; j < task_array_len; j++)
 			cws_cur[j] = task_array[j];
-		if (rank == 1) {
+		/*if (rank == 1) {
 			for (unsigned j = 0; j < task_array_len; j++)
 				std::cout << "recv cws_cur " << cws_cur[j] << std::endl;
-		}
+		}*/
 
 		// inverting for bottom halfspace parameters + sound speed in water!
 		for (unsigned cur_ncb = 0; cur_ncb < ncb; cur_ncb++)
@@ -242,10 +240,10 @@ void sspemdd_parallel::computing_process()
 						local_rhob_min = rhob_cur;
 						local_R_min = R_cur;
 						local_cws_min = cws_cur;
-						if (rank == 1) {
+						/*if (rank == 1) {
 							std::cout << "on rank 1 residual < local_res_min : " 
 								<< residual << " < " << local_res_min << std::endl;
-						}
+						}*/
 					}
 				}
 
@@ -280,4 +278,12 @@ void sspemdd_parallel::allocateArrays()
 	result_array_len = 9;
 	task_array = new double[task_array_len];
 	result_array = new double[result_array_len];
+}
+
+void sspemdd_parallel::deallocateArrays()
+{
+	std::cout << "deallocateArrays() start" << std::endl;
+	delete[] task_array;
+	delete[] result_array;
+	std::cout << "deallocateArrays() end" << std::endl;
 }
