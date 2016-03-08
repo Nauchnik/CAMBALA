@@ -140,7 +140,7 @@ void sspemdd_parallel::control_process()
 				task_array[j] = cws_all_cartesians[send_task_count][j];
 			MPI_Send(task_array, task_array_len, MPI_DOUBLE, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
 			send_task_count++;
-			sstream_out << "send_task_count " << send_task_count << std::endl;
+			//sstream_out << "send_task_count " << send_task_count << std::endl;
 		}
 		else {
 			// send stop-messages
@@ -282,8 +282,6 @@ void sspemdd_parallel::allocateArrays()
 
 void sspemdd_parallel::deallocateArrays()
 {
-	std::cout << "deallocateArrays() start" << std::endl;
 	delete[] task_array;
 	delete[] result_array;
-	std::cout << "deallocateArrays() end" << std::endl;
 }
