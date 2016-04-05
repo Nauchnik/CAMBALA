@@ -10,7 +10,7 @@
 #include <algorithm>
 #include "sspemdd_sequential.h"
 
-class sspemdd_parallel
+class sspemdd_parallel : public sspemdd_sequential
 {
 public:
 	sspemdd_parallel();
@@ -20,23 +20,10 @@ public:
 	double mpi_start_time;
 	unsigned task_array_len;
 	unsigned result_array_len;
-	unsigned ncb;
-	unsigned nrhob;
-	unsigned nR;
-	unsigned ncpl;
 	double residual;
-	double cb1;
-	double cb2;
-	double cw1;
-	double cw2;
-	double R1;
-	double R2;
-	double rhob1;
-	double rhob2;
 	double cb_cur;
 	double R_cur;
 	double rhob_cur;
-	unsigned n_layers_w;
 	double res_min;
 	double cb_min;
 	double rhob_min;

@@ -10,7 +10,6 @@
 
 #include "sspemdd_sequential.h"
 #include "sspemdd_parallel.h"
-#include "sspemdd_utils.h"
 
 #define _USE_MATH_DEFINES
 
@@ -37,8 +36,25 @@ void MPI_main(sspemdd_parallel sspemdd_par);
 
 int main(int argc, char **argv)
 {
-	unsigned rord = 3;
-	std::vector<std::vector<double>> modal_group_velocities;
+	//SEARCH SPACE
+	double cb1 = 2000;
+	double cb2 = 2000;
+	unsigned ncb = 1;
+
+	double rhob1 = 2;
+	double rhob2 = 2;
+	unsigned nrhob = 1;
+
+	double R1 = 3400;
+	double R2 = 3600;
+	unsigned nR = 41;
+
+	double cw1 = 1450;
+	double cw2 = 1500;
+	unsigned ncpl = 0; // search mesh within each water layer
+
+	// unsigned rord = 3;
+	//std::vector<std::vector<double>> modal_group_velocities;
 	std::vector<unsigned> mode_numbers;
 	std::vector<std::vector<double>> modal_delays;
 	std::vector<double> freqs;
@@ -48,13 +64,29 @@ int main(int argc, char **argv)
 	int launchType = 0; // 0 - deafult; 1 - fixed cw1=1490; 2 - cw1>cw2>...>cwn; 3 - both 1 and 2
 	sspemdd_sequential sspemdd_seq;
 
+#ifdef _DEBUG
+	argc = 4;
+	argv[1] = "dtimes_synth_thcline_hhf.txt";
+	argv[2] = "7"; // launchType
+	argv[3] = "21"; // ncpl
+#endif
+	
 	if (argc >= 2) {
 		myFileName = argv[1];
 		std::cout << "myFileName " << myFileName << std::endl;
 	}
-
+	else {
+		std::cout << "Usage : thcline_file [launchType] [ncpl]" << std::endl;
+		return 1;
+	}
+	
 	if (argc >= 3)
 		launchType = atoi(argv[2]);
+
+	if (argc >= 4) {
+		ncpl = atoi(argv[3]);
+		std::cout << "ncpl " << ncpl << std::endl;
+	}
 
 	std::ifstream myFileSynth(myFileName.c_str());
 	std::stringstream myLineStream;
@@ -106,9 +138,8 @@ int main(int argc, char **argv)
 	//int layer_np = round(h/n_layers_w);
 
 	std::vector<double> depths;
-	for (unsigned jj = 1; jj <= n_layers_w; jj++) {
+	for (unsigned jj = 1; jj <= n_layers_w; jj++) 
 		depths.push_back(layer_thickness_w*jj);
-	}
 	depths.push_back(H);
 
 	std::vector<double> c1s(n_layers_w + 1, 1500);
@@ -117,56 +148,12 @@ int main(int argc, char **argv)
 	std::vector<unsigned> Ns_points(n_layers_w + 1, (unsigned)round(ppm*layer_thickness_w));
 	Ns_points.at(n_layers_w) = (unsigned)round(ppm*(H - h));
 
-	// END TEST #2
-
-	double residual = 1e50; // start huge value
-	double R = 3500;
-
-	//SEARCH SPACE
-	double cb1 = 2000;
-	double cb2 = 2000;
-	double cb_min = 1e50, cb_cur;
-	unsigned ncb = 1;
-
-	double rhob1 = 2;
-	double rhob2 = 2;
-	double rhob_min = 1e50, rhob_cur;
-	unsigned nrhob = 1;
-
-	double R1 = 3400;
-	double R2 = 3600;
-	double R_min = 1e50, R_cur = 0;
-	unsigned nR = 41;
-
-	double res_min = 1e100;
-
-	double cw1 = 1450;
-	double cw2 = 1500;
-	unsigned ncpl = 0; // search mesh within each water layer
-	std::vector<double> cws_cur(n_layers_w, 1500);
-	std::vector<double> cws_min(n_layers_w, 1500);
-	std::vector<double> cws_fixed{ 1490, 1490, 1480, 1465, 1460 }; // use when ncpl = 1
-
-	if (cws_fixed.size() != n_layers_w) {
-		std::cerr << "cws_fixed.size() != n_layers_w" << std::endl;
-		std::cerr << cws_fixed.size() << " != " << n_layers_w << std::endl;
-		exit(1);
-	}
+	// END TEST #
 
 	// fix start time
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 	std::chrono::high_resolution_clock::time_point t2;
 	std::chrono::duration<double> time_span;
-
-#ifdef _DEBUG
-	ncpl = 11;
-	launchType = 1;
-#endif
-
-	if (argc >= 4) {
-		ncpl = atoi(argv[3]);
-		std::cout << "new ncpl " << ncpl << std::endl;
-	}
 
 	/*   //TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
 	   vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};
@@ -213,8 +200,8 @@ int main(int argc, char **argv)
 
 	   //END OF TEST BLOCK! */
 
-	unsigned N_total = (unsigned)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
-
+	unsigned long long N_total = (unsigned long long)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
+	
 	std::cout << "Input parameters :" << std::endl;
 	std::cout << "ncpl " << ncpl << std::endl;
 	std::cout << "n_layers_w " << n_layers_w << std::endl;
@@ -245,125 +232,53 @@ int main(int argc, char **argv)
 		rhob1 = rhob2 = 4;
 		nrhob = 1;
 	}
-	
-	// make cws_all_cartesians - all cartesians of all speeds in water
-	std::vector<std::vector<double>> cws_vii; // all variants for every depth
-	std::vector<int> index_arr;
-	std::vector<double> cws_vi;
-	std::vector<std::vector<double>> cws_all_cartesians;
-	bool isAdding;
-	if (ncpl == 1)
-		cws_all_cartesians.push_back(cws_fixed);
-	else {
-		for (unsigned ncpl_cur = 0; ncpl_cur < ncpl; ncpl_cur++)
-			cws_vi.push_back(cw1 + ncpl_cur*(cw2 - cw1) / (ncpl - 1));
-		for (unsigned i = 0; i < n_layers_w; i++)
-			cws_vii.push_back(cws_vi);
-		while (SSPEMDD_utils::next_cartesian(cws_vii, index_arr, cws_vi)) {
-			switch (launchType){
-			case 1 :
-				if (cws_vi[0] == 1490)
-					cws_all_cartesians.push_back(cws_vi);
-				break;
-			case 2:
-				isAdding = true;
-				for (unsigned cws_vi_index = 0; cws_vi_index < cws_vi.size()-1; cws_vi_index++)
-					if (cws_vi[cws_vi_index] <= cws_vi[cws_vi_index+1])
-						isAdding = false;
-				if (isAdding)
-					cws_all_cartesians.push_back(cws_vi);
-				break;
-			case 3:
-				if ( cws_vi[0] != 1490 )
-					isAdding = false;
-				else {
-					isAdding = true;
-					for (unsigned cws_vi_index = 0; cws_vi_index < cws_vi.size() - 1; cws_vi_index++)
-						if (cws_vi[cws_vi_index] <= cws_vi[cws_vi_index + 1])
-							isAdding = false;
-				}
-				if (isAdding)
-					cws_all_cartesians.push_back(cws_vi);
-				break;
-			case 7: // like case 1
-				if (cws_vi[0] == 1490)
-					cws_all_cartesians.push_back(cws_vi);
-				break;
-			case 8: // like case 1
-				if (cws_vi[0] == 1490)
-					cws_all_cartesians.push_back(cws_vi);
-				break;
-			default:
-				cws_all_cartesians.push_back(cws_vi);
-				break;
-			}
-		}
-	}
-	
-	std::cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << std::endl;
 
+	sspemdd_seq.cb1 = cb1;
+	sspemdd_seq.cb2 = cb2;
+	sspemdd_seq.ncb = ncb;
+	sspemdd_seq.rhob1 = rhob1;
+	sspemdd_seq.rhob2 = rhob2;
+	sspemdd_seq.nrhob = nrhob;
+	sspemdd_seq.R1 = R1;
+	sspemdd_seq.R2 = R2;
+	sspemdd_seq.nR = nR;
+	sspemdd_seq.cw1 = cw1;
+	sspemdd_seq.cw2 = cw2;
+	sspemdd_seq.ncpl = ncpl;
+	sspemdd_seq.n_layers_w = n_layers_w;
+	sspemdd_seq.launchType = launchType;
+	sspemdd_seq.depths = depths;
+	sspemdd_seq.c1s = c1s;
+	sspemdd_seq.c2s = c2s;
+	sspemdd_seq.rhos = rhos;
+	sspemdd_seq.Ns_points = Ns_points;
+	sspemdd_seq.mode_numbers = mode_numbers;
+	sspemdd_seq.modal_delays = modal_delays;
+	sspemdd_seq.freqs = freqs;
+	
+	sspemdd_seq.init();
+	
 #ifndef _MPI
 	// sequential mode
-
-	// inverting for bottom halfspace parameters + sound speed in water
-	for (unsigned cur_ncb = 0; cur_ncb < ncb; cur_ncb++)
-		for (unsigned cur_nrhob = 0; cur_nrhob < nrhob; cur_nrhob++)
-			for (unsigned cur_nR = 0; cur_nR < nR; cur_nR++) {
-				// specify bottom parameters;
-				if (ncb > 1) {cb_cur = cb1 + cur_ncb*(cb2 - cb1) / (ncb-1);}
-				else { cb_cur = cb1; }
-				if (nrhob > 1) {rhob_cur = rhob1 + cur_nrhob  *(rhob2 - rhob1) / (nrhob-1);}
-                else { rhob_cur = rhob1; }
-				// specify range
-				if (nR > 1) {R_cur = R1 + cur_nR*(R2 - R1) / (nR-1);}
-				else {R_cur = R1;}
-				for (auto &cws_cur : cws_all_cartesians) { // and finally specify sound speed in water
-					// the parameters are transformed into the arrays c1s, c2s, rhos
-					for (unsigned jj = 0; jj < n_layers_w - 1; jj++){
-						c1s.at(jj) = cws_cur.at(jj);
-						c2s.at(jj) = cws_cur.at(jj + 1);
-						rhos.at(jj) = 1;
-					}
-					c1s.at(n_layers_w - 1) = cws_cur.at(n_layers_w - 1);
-					c2s.at(n_layers_w - 1) = cws_cur.at(n_layers_w - 1);
-					rhos.at(n_layers_w - 1) = 1;
-					c1s.at(n_layers_w) = cb_cur;
-					c2s.at(n_layers_w) = cb_cur;
-					rhos.at(n_layers_w) = rhob_cur;
-
-					for (unsigned jj = 0; jj <= n_layers_w; jj++){
-						std::cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << std::endl;
-					}
-					
-					residual = sspemdd_seq.compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, R_cur, modal_delays, mode_numbers);
-					std::cout << residual << std::endl << std::endl;
-
-					if (residual < res_min) {
-						res_min  = residual;
-						cb_min   = cb_cur;
-						rhob_min = rhob_cur;
-						R_min    = R_cur;
-						cws_min  = cws_cur;
-						std::cout << std::endl;
-						std::cout << std::endl << "New residual minimum:" << std::endl;
-						std::cout << "err=" << res_min << ", parameters:" << std::endl;
-						std::cout << "c_b=" << cb_min << ", rho_b=" << rhob_min << ", R=" << R_min << std::endl;
-						std::cout << "cws_min :" << std::endl;
-						for (auto &x : cws_min)
-							std::cout << x << " ";
-					}
-				}
-			}
-
+	
+	//sspemdd_seq.findGlobalMinBruteForce();
+	sspemdd_seq.findLocalMinHillClimbing();
+	
 	// fix final time
 	t2 = std::chrono::high_resolution_clock::now();
 	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-
+	
 	std::cout << "SEARCH ENDED!" << std::endl;
 	std::cout << "RESULTING VALUE:" << std::endl;
-	std::cout << "err=" << res_min << ", parameters:" << std::endl;
-	std::cout << "c_b=" << cb_min << ", rho_b=" << rhob_min << ", R=" << R_min << std::endl;
-	std::cout << "time " << time_span.count() << std::endl;
+	std::cout << "err = " << sspemdd_seq.record_point.residual << ", parameters:" << std::endl;
+	std::cout << "c_b = " << sspemdd_seq.record_point.cb <<
+		         "rho_b = " << sspemdd_seq.record_point.rhob <<
+		         "R = " << sspemdd_seq.record_point.R << std::endl;
+	std::cout << "cws :" << std::endl;
+	for (auto &x : sspemdd_seq.record_point.cws)
+		std::cout << x << " ";
+	std::cout << std::endl;
+	std::cout << "total solving time " << time_span.count() << std::endl;
 #else
 	int rank = 0;
 	int corecount = 1;

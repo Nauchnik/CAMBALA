@@ -60,6 +60,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\alglib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -78,6 +79,7 @@
     <ClCompile Include="..\alglib\ap.cpp" />
     <ClCompile Include="..\alglib\linalg.cpp" />
     <ClCompile Include="..\alglib\specialfunctions.cpp" />
+    <ClCompile Include="hill_climbing.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="sspemdd_parallel.cpp" />
     <ClCompile Include="sspemdd_sequential.cpp" />

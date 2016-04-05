@@ -1,4 +1,29 @@
 #include "sspemdd_sequential.h"
+#include "sspemdd_utils.h"
+#include <iostream>
+#include <time.h>
+
+sspemdd_sequential::sspemdd_sequential() :
+	ncb(0),
+	nrhob(0),
+	nR(0),
+	cb1(0.0),
+	cb2(0.0),
+	cw1(0.0),
+	cw2(0.0),
+	R1(0.0),
+	R2(0.0),
+	rhob1(0.0),
+	rhob2(0.0),
+	n_layers_w(0),
+	launchType(0)
+{
+	record_point.cb = 1e50;
+	record_point.rhob = 1e50;
+	record_point.R = 1e50;
+	record_point.residual = 1e100;
+	srand(0);
+}
 
 /*
 A routine for computing delay residual.
@@ -513,4 +538,255 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 	}
 
 	return wnumbers2;
+}
+
+void sspemdd_sequential::init()
+{
+	// TODO move to constructor
+	std::vector<double> tmp_vec{ 1490, 1490, 1480, 1465, 1460 }; // use when ncpl = 1
+	cws_fixed = tmp_vec;
+	record_point.cws.resize(n_layers_w);
+	for (unsigned i = 0; i < record_point.cws.size(); i++)
+		record_point.cws[i] = cw2;
+}
+
+void sspemdd_sequential::findGlobalMinBruteForce()
+{
+	// make cws_all_cartesians - all cartesians of all speeds in water
+	std::vector<std::vector<double>> cws_vii; // all variants for every depth
+	std::vector<int> index_arr;
+	std::vector<double> cws_vi;
+	std::vector<std::vector<double>> cws_all_cartesians;
+	bool isAdding;
+	if (ncpl == 1)
+		cws_all_cartesians.push_back(cws_fixed);
+	else {
+		for (unsigned ncpl_cur = 0; ncpl_cur < ncpl; ncpl_cur++)
+			cws_vi.push_back(cw1 + ncpl_cur*(cw2 - cw1) / (ncpl - 1));
+		for (unsigned i = 0; i < n_layers_w; i++)
+			cws_vii.push_back(cws_vi);
+		while (SSPEMDD_utils::next_cartesian(cws_vii, index_arr, cws_vi)) {
+			switch (launchType) {
+			case 1:
+				if (cws_vi[0] == 1490)
+					cws_all_cartesians.push_back(cws_vi);
+				break;
+			case 2:
+				isAdding = true;
+				for (unsigned cws_vi_index = 0; cws_vi_index < cws_vi.size() - 1; cws_vi_index++)
+					if (cws_vi[cws_vi_index] <= cws_vi[cws_vi_index + 1])
+						isAdding = false;
+				if (isAdding)
+					cws_all_cartesians.push_back(cws_vi);
+				break;
+			case 3:
+				if (cws_vi[0] != 1490)
+					isAdding = false;
+				else {
+					isAdding = true;
+					for (unsigned cws_vi_index = 0; cws_vi_index < cws_vi.size() - 1; cws_vi_index++)
+						if (cws_vi[cws_vi_index] <= cws_vi[cws_vi_index + 1])
+							isAdding = false;
+				}
+				if (isAdding)
+					cws_all_cartesians.push_back(cws_vi);
+				break;
+			case 7: // like case 1
+				if (cws_vi[0] == 1490)
+					cws_all_cartesians.push_back(cws_vi);
+				break;
+			case 8: // like case 1
+				if (cws_vi[0] == 1490)
+					cws_all_cartesians.push_back(cws_vi);
+				break;
+			default:
+				cws_all_cartesians.push_back(cws_vi);
+				break;
+			}
+		}
+	}
+
+	std::cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << std::endl;
+	double cb_cur, rhob_cur, R_cur;
+	search_space_point cur_point;
+	
+	// inverting for bottom halfspace parameters + sound speed in water
+	for (unsigned cur_ncb = 0; cur_ncb < ncb; cur_ncb++) {
+		for (unsigned cur_nrhob = 0; cur_nrhob < nrhob; cur_nrhob++) {
+			for (unsigned cur_nR = 0; cur_nR < nR; cur_nR++) {
+				// specify bottom parameters;
+				if (ncb > 1) { cb_cur = cb1 + cur_ncb*(cb2 - cb1) / (ncb - 1); }
+				else { cb_cur = cb1; }
+				if (nrhob > 1) { rhob_cur = rhob1 + cur_nrhob * (rhob2 - rhob1) / (nrhob - 1); }
+				else { rhob_cur = rhob1; }
+				// specify range
+				if (nR > 1) { R_cur = R1 + cur_nR*(R2 - R1) / (nR - 1); }
+				else { R_cur = R1; }
+				cur_point.cb = cb_cur;
+				cur_point.rhob = rhob_cur;
+				cur_point.R = R_cur;
+				for (auto &cws_cur : cws_all_cartesians) {
+					cur_point.cws = cws_cur;
+					fill_data_compute_residual(cur_point);
+				}
+			}
+		}
+	}
+}
+
+void sspemdd_sequential::fill_data_compute_residual( search_space_point &point)
+{ // finally specify sound speed in water
+  // the parameters are transformed into the arrays c1s, c2s, rhos
+	for (unsigned jj = 0; jj < n_layers_w - 1; jj++) {
+		c1s.at(jj) = point.cws.at(jj);
+		c2s.at(jj) = point.cws.at(jj + 1);
+		rhos.at(jj) = 1;
+	}
+	c1s.at(n_layers_w - 1) = point.cws.at(n_layers_w - 1);
+	c2s.at(n_layers_w - 1) = point.cws.at(n_layers_w - 1);
+	rhos.at(n_layers_w - 1) = 1;
+	c1s.at(n_layers_w) = point.cb;
+	c2s.at(n_layers_w) = point.cb;
+	rhos.at(n_layers_w) = point.rhob;
+	
+	//for (unsigned jj = 0; jj <= n_layers_w; jj++)
+	//	std::cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << std::endl;
+	point.residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, point.R, modal_delays, mode_numbers);
+	//std::cout << residual << std::endl << std::endl;
+
+	if (point.residual < record_point.residual) {
+		record_point.residual = point.residual;
+		record_point.cb       = point.cb;
+		record_point.rhob     = point.rhob;
+		record_point.R        = point.R;
+		record_point.cws      = point.cws;
+		std::cout << std::endl;
+		std::cout << std::endl << "New residual minimum:" << std::endl;
+		std::cout << "err = " << record_point.residual << ", parameters:" << std::endl;
+		std::cout << "c_b = " << record_point.cb <<
+			", rho_b = " << record_point.rhob <<
+			", R = " << record_point.R << std::endl;
+		std::cout << "cws_min :" << std::endl;
+		for (auto &x : record_point.cws)
+			std::cout << x << " ";
+		std::cout << std::endl;
+	}
+}
+
+void sspemdd_sequential::loadValuesToSearchSpaceVariables()
+{
+	// search_space_variables[0] - cb
+	// search_space_variables[1] - rhob
+	// search_space_variables[2] - R
+	// search_space_variables[3...] - cws
+	std::vector<double> tmp_vec;
+	
+	// fill search_space_variables[0] with cb
+	tmp_vec.resize(ncb);
+	for (unsigned i = 0; i < ncb; i++)
+		tmp_vec[i] = cb1 + (ncb == 1 ? 0 : i*(cb2 - cb1) / (ncb - 1) );
+	search_space.push_back(tmp_vec);
+
+	// fill search_space_variables[1] with rhob
+	tmp_vec.resize(nrhob);
+	for (unsigned i = 0; i < nrhob; i++)
+		tmp_vec[i] = rhob1 + (nrhob == 1 ? 0 : i*(rhob2 - rhob1) / (nrhob - 1));
+	search_space.push_back(tmp_vec);
+	
+	// fill search_space_variables[2] with cb
+	tmp_vec.resize(nR);
+	for (unsigned i = 0; i < nR; i++)
+		tmp_vec[i] = R1 + (nR == 1 ? 0 : i*(R2 - R1) / (nR - 1));
+	search_space.push_back(tmp_vec);
+	
+	// fill search_space_variables[3-...] with cws
+	tmp_vec.resize(ncpl);
+	for (unsigned i = 0; i < ncpl; i++)
+		tmp_vec[i] = cw1 + (ncpl == 1 ? 0 : i*(cw2 - cw1) / (ncpl - 1));
+	for (unsigned i = 0; i < n_layers_w; i++)
+		search_space.push_back(tmp_vec);
+}
+
+void sspemdd_sequential::findLocalMinHillClimbing()
+{
+	loadValuesToSearchSpaceVariables();
+	// choose random point in the search space
+	std::vector<unsigned> cur_point_indexes, record_point_indexes;
+	cur_point_indexes.resize(search_space.size());
+	for (unsigned variable_index = 0; variable_index < search_space.size(); variable_index++)
+		cur_point_indexes[variable_index] = rand() % search_space[variable_index].size(); // get random index
+	record_point_indexes = cur_point_indexes;
+	
+	// calculate residual in the start point
+	search_space_point cur_point;
+	cur_point = fromPointIndexesToPoint( cur_point_indexes );
+	fill_data_compute_residual( cur_point ); // calculated residual is written to cur_point
+	record_point = cur_point;
+	
+	// launch hill climbing for variables
+	bool isLocalMin;
+	bool isRecordUpdateInDimension;
+	unsigned checked_points_number = 0;
+	unsigned index_from;
+	double old_record_residual;
+	unsigned iterated_local_search_runs = 100;
+	
+	for (unsigned run_index = 0; run_index < iterated_local_search_runs; run_index++) {
+		std::cout << "run " << run_index << " of ILS" << std::endl;
+		do { // do while local min not reached
+			isLocalMin = true; // if changing of every variable will not lead to a record updata, then a local min reached
+			for (unsigned variable_index = 0; variable_index < search_space.size(); variable_index++) {
+				if (search_space[variable_index].size() == 1) {
+					//std::cout << "one value of a variable, skip it" << std::endl;
+					continue;
+				}
+				std::cout << "variable_index " << variable_index << std::endl;
+				cur_point_indexes = record_point_indexes;
+				index_from = cur_point_indexes[variable_index]; // don't check index twice
+				std::cout << "index_from " << index_from << std::endl;
+				do { // change value of a variabble while it leads to updating of a record
+					old_record_residual = record_point.residual;
+					cur_point_indexes[variable_index]++;
+					if (cur_point_indexes[variable_index] == search_space[variable_index].size())
+						cur_point_indexes[variable_index] = 0;
+					if (cur_point_indexes[variable_index] == index_from) {
+						std::cout << "cur_point_indexes[variable_index] == index_from. Break iteration." << std::endl;
+						break;
+					}
+					std::cout << "checking index " << cur_point_indexes[variable_index] <<
+						", max index " << search_space[variable_index].size() - 1 << std::endl;
+					cur_point = fromPointIndexesToPoint(cur_point_indexes);
+					fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
+					checked_points_number++;
+					std::cout << "checked_points_number " << checked_points_number << std::endl;
+					std::cout << "-----" << std::endl;
+					if (record_point.residual < old_record_residual) { // new record was found
+						record_point_indexes = cur_point_indexes;
+						isLocalMin = false;
+						isRecordUpdateInDimension = true;
+					}
+					else
+						isRecordUpdateInDimension = false;
+				} while (isRecordUpdateInDimension);
+			}
+		} while (!isLocalMin);
+		std::cout << std::endl << "*** local minimum in hill climbing" << std::endl;
+		std::cout << "-----" << std::endl;
+		srand(checked_points_number);
+		for (unsigned variable_index = 0; variable_index < search_space.size(); variable_index++) {
+			cur_point_indexes[variable_index] += (rand() % search_space[variable_index].size());
+			cur_point_indexes[variable_index] = cur_point_indexes[variable_index] % search_space[variable_index].size();
+		}
+	}
+}
+
+search_space_point sspemdd_sequential::fromPointIndexesToPoint(std::vector<unsigned> cur_point_indexes)
+{
+	search_space_point point;
+	point.cb   = search_space[0][cur_point_indexes[0]];
+	point.rhob = search_space[1][cur_point_indexes[1]];
+	point.R    = search_space[2][cur_point_indexes[2]];
+	for (unsigned i = 3; i < search_space.size(); i++)
+		point.cws.push_back(search_space[i][cur_point_indexes[i]]);
+	return point;
 }
