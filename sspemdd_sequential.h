@@ -34,6 +34,7 @@ public:
 	double rhob2;
 	unsigned n_layers_w;
 	int launchType;
+	unsigned iterated_local_search_runs;
 	std::vector<double> cws_fixed;
 	std::vector<unsigned> mode_numbers;
 	std::vector<std::vector<double>> modal_delays;

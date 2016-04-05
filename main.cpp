@@ -63,6 +63,7 @@ int main(int argc, char **argv)
 	std::string myLine, myFileName = "dtimes_synth_thcline_hhf.txt";
 	int launchType = 0; // 0 - deafult; 1 - fixed cw1=1490; 2 - cw1>cw2>...>cwn; 3 - both 1 and 2
 	sspemdd_sequential sspemdd_seq;
+	unsigned iterated_local_search_runs;
 
 #ifdef _DEBUG
 	argc = 4;
@@ -76,7 +77,7 @@ int main(int argc, char **argv)
 		std::cout << "myFileName " << myFileName << std::endl;
 	}
 	else {
-		std::cout << "Usage : thcline_file [launchType] [ncpl]" << std::endl;
+		std::cout << "Usage : thcline_file [launchType] [ncpl] [iterated_local_search_runs]" << std::endl;
 		return 1;
 	}
 	
@@ -88,6 +89,11 @@ int main(int argc, char **argv)
 		std::cout << "ncpl " << ncpl << std::endl;
 	}
 
+	if (argc >= 5) {
+		iterated_local_search_runs = atoi(argv[4]);
+		std::cout << "iterated_local_search_runs " << ncpl << std::endl;
+	}
+	
 	std::ifstream myFileSynth(myFileName.c_str());
 	std::stringstream myLineStream;
 	// reading the "experimental" delay time data from a file
@@ -245,6 +251,7 @@ int main(int argc, char **argv)
 	sspemdd_seq.cw1 = cw1;
 	sspemdd_seq.cw2 = cw2;
 	sspemdd_seq.ncpl = ncpl;
+	sspemdd_seq.iterated_local_search_runs = iterated_local_search_runs;
 	sspemdd_seq.n_layers_w = n_layers_w;
 	sspemdd_seq.launchType = launchType;
 	sspemdd_seq.depths = depths;
@@ -280,7 +287,7 @@ int main(int argc, char **argv)
 	std::cout << std::endl;
 	std::cout << "total solving time " << time_span.count() << std::endl;
 #else
-	int rank = 0;
+	/*int rank = 0;
 	int corecount = 1;
 	
 	// parallel mode
@@ -324,6 +331,7 @@ int main(int argc, char **argv)
 	sspemdd_par.cws_all_cartesians = cws_all_cartesians;
 
 	MPI_main(sspemdd_par);
+	*/
 #endif
 	return 0;
 }
