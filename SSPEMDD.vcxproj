@@ -79,7 +79,6 @@
     <ClCompile Include="..\alglib\ap.cpp" />
     <ClCompile Include="..\alglib\linalg.cpp" />
     <ClCompile Include="..\alglib\specialfunctions.cpp" />
-    <ClCompile Include="hill_climbing.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="sspemdd_parallel.cpp" />
     <ClCompile Include="sspemdd_sequential.cpp" />

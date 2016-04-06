@@ -53,7 +53,6 @@ int main(int argc, char **argv)
 	double cw2 = 1500;
 	unsigned ncpl = 0; // search mesh within each water layer
 
-	// unsigned rord = 3;
 	//std::vector<std::vector<double>> modal_group_velocities;
 	std::vector<unsigned> mode_numbers;
 	std::vector<std::vector<double>> modal_delays;
@@ -63,13 +62,14 @@ int main(int argc, char **argv)
 	std::string myLine, myFileName = "dtimes_synth_thcline_hhf.txt";
 	int launchType = 0; // 0 - deafult; 1 - fixed cw1=1490; 2 - cw1>cw2>...>cwn; 3 - both 1 and 2
 	sspemdd_sequential sspemdd_seq;
-	unsigned iterated_local_search_runs;
+	unsigned iterated_local_search_runs = 10;
 
 #ifdef _DEBUG
-	argc = 4;
-	argv[1] = "dtimes_synth_thcline_hhf.txt";
+	argc = 5;
+	argv[1] = "dtimes_synth_thcline_hf.txt";
 	argv[2] = "7"; // launchType
-	argv[3] = "21"; // ncpl
+	argv[3] = "11"; // ncpl
+	argv[4] = "10"; // iterated_local_search_runs
 #endif
 	
 	if (argc >= 2) {
@@ -161,50 +161,33 @@ int main(int argc, char **argv)
 	std::chrono::high_resolution_clock::time_point t2;
 	std::chrono::duration<double> time_span;
 
-	/*   //TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
-	   vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};
-	   vector<double> c2s_t    { 1490, 1480, 1465, 1460, 1460, 2000};
+	//TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
+	std::cout << "TEST BLOCK" << std::endl;
+	std::vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};
+	std::vector<double> c2s_t    { 1490, 1480, 1465, 1460, 1460, 2000};
+	std::vector<double> rhos_t   { 1, 1, 1, 1, 1, 2};
+	std::vector<double> depths_t   { 18, 36, 54, 72, 90, 600};
+	std::vector<unsigned> Ns_points_t  { 36, 36, 36, 36, 36, 1020};
+	double deltaf_t = 0.5;
+	std::vector<std::vector<double>> modal_group_velocities_t;
+	std::vector<unsigned> mode_numbers_t;
+	double R_t = 3500;
+	double residual_t;
+	unsigned rord = 3;
 
-	   vector<double> rhos_t   { 1, 1, 1, 1, 1, 2};
-	   vector<double> depths_t   { 18, 36, 54, 72, 90, 600};
-	   vector<unsigned> Ns_points_t  { 36, 36, 36, 36, 36, 1020};
-	   double deltaf_t = 0.5;
-	   vector<vector<double>> modal_group_velocities_t;
-	   vector<unsigned> mode_numbers_t;
-	   double R_t = 3500;
-	   double residual_t;
+	sspemdd_seq.compute_modal_grop_velocities( freqs, deltaf_t, depths_t, c1s_t, c2s_t, rhos_t, Ns_points_t, 1, rord, modal_group_velocities_t, mode_numbers_t );
 
-	   compute_modal_grop_velocities( freqs, deltaf_t, depths_t, c1s_t, c2s_t, rhos_t, Ns_points_t, 1, rord, modal_group_velocities_t, mode_numbers_t );
+	for (unsigned ii=0; ii<freqs.size();  ii++) {
+		for (unsigned jj=0; jj<mode_numbers_t.at(ii);  jj++) {
+			std::cout << modal_group_velocities_t[ii][jj] << "; ";
+		}
+		std::cout << std::endl;
+	}
 
-	   for (unsigned ii=0; ii<freqs.size();  ii++) {
+	residual_t = sspemdd_seq.compute_modal_delays_residual_uniform(freqs, depths_t, c1s_t, c2s_t, rhos_t, Ns_points, R_t, modal_delays, mode_numbers);
 
-		   for (unsigned jj=0; jj<mode_numbers_t.at(ii);  jj++) {
-			   cout << modal_group_velocities_t[ii][jj] << "; ";
-		   }
-		   cout << endl;
-	   }
-
-	   residual_t = wnumbers_obj.compute_modal_delays_residual_uniform(freqs, depths_t, c1s_t, c2s_t, rhos_t, Ns_points, R_t, modal_delays, mode_numbers);
-
-	   cout << " TEST comparison." << endl << "RESIDUAL: " << residual_t << endl << endl;;
-
-	   ncb = 1;
-	   nrhob = 1;
-	   nR = 1;
-	   ncpl = 6;
-	   cb1 = 2000;
-	   cb2 = 2000;
-
-	   rhob1 = 2;
-	   rhob2 = 2;
-
-	   R1 = 3500;
-	   R2 = 3500;
-
-	   cw1 = 1460;
-	   cw2 = 1490;
-
-	   //END OF TEST BLOCK! */
+	std::cout << " TEST comparison." << std::endl << "RESIDUAL: " << residual_t << std::endl << std::endl;;
+	//END OF TEST BLOCK!
 
 	unsigned long long N_total = (unsigned long long)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
 	
@@ -268,24 +251,16 @@ int main(int argc, char **argv)
 #ifndef _MPI
 	// sequential mode
 	
-	//sspemdd_seq.findGlobalMinBruteForce();
+	// sspemdd_seq.findGlobalMinBruteForce();
 	sspemdd_seq.findLocalMinHillClimbing();
-	
+	sspemdd_seq.report_final_result();
+
 	// fix final time
-	t2 = std::chrono::high_resolution_clock::now();
+	/*t2 = std::chrono::high_resolution_clock::now();
 	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	
-	std::cout << "SEARCH ENDED!" << std::endl;
-	std::cout << "RESULTING VALUE:" << std::endl;
-	std::cout << "err = " << sspemdd_seq.record_point.residual << ", parameters:" << std::endl;
-	std::cout << "c_b = " << sspemdd_seq.record_point.cb <<
-		         "rho_b = " << sspemdd_seq.record_point.rhob <<
-		         "R = " << sspemdd_seq.record_point.R << std::endl;
-	std::cout << "cws :" << std::endl;
-	for (auto &x : sspemdd_seq.record_point.cws)
-		std::cout << x << " ";
 	std::cout << std::endl;
-	std::cout << "total solving time " << time_span.count() << std::endl;
+	std::cout << "total solving time " << time_span.count() << std::endl;*/
 #else
 	/*int rank = 0;
 	int corecount = 1;

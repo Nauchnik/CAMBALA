@@ -24,6 +24,7 @@ sspemdd_sequential::sspemdd_sequential() :
 	record_point.R = 1e50;
 	record_point.residual = 1e100;
 	srand(time(NULL));
+	start_chrono_time = std::chrono::high_resolution_clock::now();
 }
 
 /*
@@ -551,6 +552,29 @@ void sspemdd_sequential::init()
 		record_point.cws[i] = cw2;
 }
 
+void sspemdd_sequential::report_final_result()
+{
+	// fix final time
+	std::chrono::high_resolution_clock::time_point t2;
+	std::chrono::duration<double> time_span;
+	t2 = std::chrono::high_resolution_clock::now();
+	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - start_chrono_time);
+
+	std::cout << std::endl;
+	std::cout << "total solving time " << time_span.count() << std::endl;
+	std::cout << "SEARCH ENDED!" << std::endl;
+	std::cout << "RESULTING VALUE:" << std::endl;
+	std::cout << "err = " << record_point.residual << ", parameters:" << std::endl;
+	std::cout << "c_b = " << record_point.cb << std::endl 
+			  << "rho_b = " << record_point.rhob << std::endl
+			  << "R = " << record_point.R << std::endl;
+	std::cout << "cws :" << std::endl;
+	for (auto &x : record_point.cws)
+		std::cout << x << " ";
+	std::cout << std::endl;
+	std::cout << "total solving time " << time_span.count() << std::endl;
+}
+
 void sspemdd_sequential::findGlobalMinBruteForce()
 {
 	// make cws_all_cartesians - all cartesians of all speeds in water
@@ -664,9 +688,9 @@ void sspemdd_sequential::fill_data_compute_residual( search_space_point &point)
 		std::cout << std::endl;
 		std::cout << std::endl << "New residual minimum:" << std::endl;
 		std::cout << "err = " << record_point.residual << ", parameters:" << std::endl;
-		std::cout << "c_b = " << record_point.cb <<
-			", rho_b = " << record_point.rhob <<
-			", R = " << record_point.R << std::endl;
+		std::cout << "c_b = " << record_point.cb 
+				  << ", rho_b = " << record_point.rhob
+			      << ", R = " << record_point.R << std::endl;
 		std::cout << "cws_min :" << std::endl;
 		for (auto &x : record_point.cws)
 			std::cout << x << " ";

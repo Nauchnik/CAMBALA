@@ -44,9 +44,6 @@
     <ClCompile Include="..\alglib\alglibinternal.cpp">
       <Filter>alglib</Filter>
     </ClCompile>
-    <ClCompile Include="hill_climbing.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="sspemdd_sequential.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
