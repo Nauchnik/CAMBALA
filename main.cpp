@@ -162,7 +162,7 @@ int main(int argc, char **argv)
 	std::chrono::duration<double> time_span;
 
 	//TEST BLOCK! PLEASE DONT REMOVE, COMMENT IF NECESSARY
-	std::cout << "TEST BLOCK" << std::endl;
+	/*std::cout << "TEST BLOCK" << std::endl;
 	std::vector<double> c1s_t    { 1490, 1490, 1480, 1465, 1460, 2000};
 	std::vector<double> c2s_t    { 1490, 1480, 1465, 1460, 1460, 2000};
 	std::vector<double> rhos_t   { 1, 1, 1, 1, 1, 2};
@@ -187,6 +187,7 @@ int main(int argc, char **argv)
 	residual_t = sspemdd_seq.compute_modal_delays_residual_uniform(freqs, depths_t, c1s_t, c2s_t, rhos_t, Ns_points, R_t, modal_delays, mode_numbers);
 
 	std::cout << " TEST comparison." << std::endl << "RESIDUAL: " << residual_t << std::endl << std::endl;;
+	*/
 	//END OF TEST BLOCK!
 
 	unsigned long long N_total = (unsigned long long)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;

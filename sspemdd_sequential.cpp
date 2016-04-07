@@ -577,6 +577,7 @@ void sspemdd_sequential::report_final_result()
 
 void sspemdd_sequential::findGlobalMinBruteForce()
 {
+	std::cout << "findGlobalMinBruteForce()" << std::endl;
 	// make cws_all_cartesians - all cartesians of all speeds in water
 	std::vector<std::vector<double>> cws_vii; // all variants for every depth
 	std::vector<int> index_arr;
@@ -734,6 +735,7 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 
 void sspemdd_sequential::findLocalMinHillClimbing()
 {
+	std::cout << "findLocalMinHillClimbing" << std::endl;
 	loadValuesToSearchSpaceVariables();
 	// choose random point in the search space
 	std::vector<unsigned> cur_point_indexes, record_point_indexes;
@@ -764,10 +766,10 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 					//std::cout << "one value of a variable, skip it" << std::endl;
 					continue;
 				}
-				std::cout << "variable_index " << variable_index << std::endl;
+				//std::cout << "variable_index " << variable_index << std::endl;
 				cur_point_indexes = record_point_indexes;
 				index_from = cur_point_indexes[variable_index]; // don't check index twice
-				std::cout << "index_from " << index_from << std::endl;
+				//std::cout << "index_from " << index_from << std::endl;
 				do { // change value of a variabble while it leads to updating of a record
 					old_record_residual = record_point.residual;
 					cur_point_indexes[variable_index]++;
@@ -777,13 +779,13 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 						std::cout << "cur_point_indexes[variable_index] == index_from. Break iteration." << std::endl;
 						break;
 					}
-					std::cout << "checking index " << cur_point_indexes[variable_index] <<
-						", max index " << search_space[variable_index].size() - 1 << std::endl;
+					//std::cout << "checking index " << cur_point_indexes[variable_index] <<
+					//	", max index " << search_space[variable_index].size() - 1 << std::endl;
 					cur_point = fromPointIndexesToPoint(cur_point_indexes);
 					fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
 					checked_points_number++;
-					std::cout << "checked_points_number " << checked_points_number << std::endl;
-					std::cout << "-----" << std::endl;
+					//std::cout << "checked_points_number " << checked_points_number << std::endl;
+					//std::cout << "-----" << std::endl;
 					if (record_point.residual < old_record_residual) { // new record was found
 						record_point_indexes = cur_point_indexes;
 						isLocalMin = false;
