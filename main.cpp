@@ -308,6 +308,11 @@ int main(int argc, char **argv)
 	MPI_main(sspemdd_par);
 	*/
 #endif
+
+	t2 = std::chrono::high_resolution_clock::now();
+	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+	std::cout << "main() total time " << time_span.count() << " s" << std::endl;
+	
 	return 0;
 }
 
