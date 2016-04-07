@@ -71,15 +71,14 @@ public:
 		std::vector<unsigned> &mode_numbers);
 
 	// functions by Oleg
-	void findGlobalMinBruteForce();
-	void init();
-	void report_final_result();
-	
-	// hill climbing
 	std::vector<std::vector<double>> search_space; // values of variables which form a search space
+	int verbosity;
+	void init();
+	void findGlobalMinBruteForce();
+	void loadValuesToSearchSpaceVariables();
 	void findLocalMinHillClimbing();
 	void iteratedLocalSearch();
-	void loadValuesToSearchSpaceVariables();
+	void report_final_result();
 
 private:
 	void fill_data_compute_residual(search_space_point &point);

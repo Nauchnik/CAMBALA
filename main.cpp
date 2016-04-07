@@ -63,12 +63,13 @@ int main(int argc, char **argv)
 	int launchType = 0; // 0 - deafult; 1 - fixed cw1=1490; 2 - cw1>cw2>...>cwn; 3 - both 1 and 2
 	sspemdd_sequential sspemdd_seq;
 	unsigned iterated_local_search_runs = 10;
+	int verbosity = 0;
 
 #ifdef _DEBUG
 	argc = 5;
 	argv[1] = "dtimes_synth_thcline_hf.txt";
 	argv[2] = "7"; // launchType
-	argv[3] = "11"; // ncpl
+	argv[3] = "21"; // ncpl
 	argv[4] = "10"; // iterated_local_search_runs
 #endif
 	
@@ -77,7 +78,7 @@ int main(int argc, char **argv)
 		std::cout << "myFileName " << myFileName << std::endl;
 	}
 	else {
-		std::cout << "Usage : thcline_file [launchType] [ncpl] [iterated_local_search_runs]" << std::endl;
+		std::cout << "Usage : thcline_file [launchType] [ncpl] [iterated_local_search_runs] [verbosity]" << std::endl;
 		return 1;
 	}
 	
@@ -91,7 +92,12 @@ int main(int argc, char **argv)
 
 	if (argc >= 5) {
 		iterated_local_search_runs = atoi(argv[4]);
-		std::cout << "iterated_local_search_runs " << ncpl << std::endl;
+		std::cout << "iterated_local_search_runs " << iterated_local_search_runs << std::endl;
+	}
+
+	if (argc >= 6) {
+		verbosity = atoi(argv[5]);
+		std::cout << "verbosity " << verbosity << std::endl;
 	}
 	
 	std::ifstream myFileSynth(myFileName.c_str());
@@ -191,6 +197,8 @@ int main(int argc, char **argv)
 	//END OF TEST BLOCK!
 
 	unsigned long long N_total = (unsigned long long)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
+	if ((launchType == 1) || (launchType == 3) || (launchType == 7) || (launchType == 8))
+		N_total /= ncpl;
 	
 	std::cout << "Input parameters :" << std::endl;
 	std::cout << "ncpl " << ncpl << std::endl;
@@ -246,7 +254,8 @@ int main(int argc, char **argv)
 	sspemdd_seq.mode_numbers = mode_numbers;
 	sspemdd_seq.modal_delays = modal_delays;
 	sspemdd_seq.freqs = freqs;
-	
+	sspemdd_seq.verbosity = verbosity;
+
 	sspemdd_seq.init();
 	
 #ifndef _MPI
