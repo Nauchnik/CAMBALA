@@ -24,7 +24,7 @@ sspemdd_sequential::sspemdd_sequential() :
 	record_point.rhob = 1e50;
 	record_point.R = 1e50;
 	record_point.residual = 1e100;
-	srand(time(NULL));
+	srand((unsigned)time(NULL));
 	start_chrono_time = std::chrono::high_resolution_clock::now();
 }
 
@@ -733,8 +733,8 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 	search_space.push_back(tmp_vec);
 	
 	// test for launchType 7
-	nR = 1;
-	R1 = R2 = 3505;
+	/*nR = 1;
+	R1 = R2 = 3505;*/
 	
 	// fill search_space_variables[2] with cb
 	tmp_vec.resize(nR);
@@ -746,21 +746,21 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 	// fill search_space_variables[3-...] with cws
 	tmp_vec.resize(ncpl);
 	std::vector<double> restricted_cws1{ 1490 };
-	std::vector<double> restricted_cws2{ 1492.5 };
-	std::vector<double> restricted_cws3{ 1482.5 };
+	//std::vector<double> restricted_cws2{ 1492.5 }; // test for launchType 7
+	//std::vector<double> restricted_cws3{ 1482.5 }; // test for launchType 7
 	for (unsigned i = 0; i < ncpl; i++)
 		tmp_vec[i] = cw1 + (ncpl == 1 ? 0 : i*(cw2 - cw1) / (ncpl - 1));
 	if ((launchType == 1) || (launchType == 3) || (launchType == 7) || (launchType == 8))
 		search_space.push_back(restricted_cws1); // fixed first cws in this case
 	else
 		search_space.push_back(tmp_vec);
-	search_space.push_back(restricted_cws2);
-	search_space.push_back(restricted_cws3);
-	// test for launchType 7
-	for (unsigned i = 3; i < n_layers_w; i++)
+	for (unsigned i = 1; i < n_layers_w; i++)
 		search_space.push_back(tmp_vec);
-	//for (unsigned i = 1; i < n_layers_w; i++)
-	//	search_space.push_back(tmp_vec);
+	// test for launchType 7
+	/*search_space.push_back(restricted_cws2);
+	search_space.push_back(restricted_cws3);
+	for (unsigned i = 3; i < n_layers_w; i++)
+		search_space.push_back(tmp_vec);*/
 }
 
 void sspemdd_sequential::findLocalMinHillClimbing()
