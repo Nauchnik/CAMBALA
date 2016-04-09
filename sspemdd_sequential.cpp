@@ -552,6 +552,11 @@ void sspemdd_sequential::init()
 	for (unsigned i = 0; i < record_point.cws.size(); i++)
 		record_point.cws[i] = cw2;
 
+	record_point.cb = 1e50;
+	record_point.rhob = 1e50;
+	record_point.R = 1e50;
+	record_point.residual = 1e100;
+
 	// test launch on the global minium
 	/*if (launchType == 7) {
 		search_space_point cur_point;
@@ -885,4 +890,9 @@ search_space_point sspemdd_sequential::fromPointIndexesToPoint(std::vector<unsig
 		point.cws.push_back(search_space[i][cur_point_indexes[i]]);
 	point.residual = 1e100;
 	return point;
+}
+
+double sspemdd_sequential::getRecordResidual()
+{
+	return record_point.residual;
 }

@@ -45,7 +45,8 @@ public:
 	std::vector<double> c2s;
 	std::vector<double> rhos;
 	std::vector<unsigned> Ns_points;
-	search_space_point record_point;
+	double getRecordResidual();
+	void fill_data_compute_residual(search_space_point &point);
 
 	// functions by Pavel
 	double compute_modal_delays_residual_uniform(std::vector<double> &freqs, std::vector<double> &depths, std::vector<double> &c1s,
@@ -77,11 +78,10 @@ public:
 	void findGlobalMinBruteForce();
 	void loadValuesToSearchSpaceVariables();
 	void findLocalMinHillClimbing();
-	void iteratedLocalSearch();
 	void report_final_result();
 
 private:
-	void fill_data_compute_residual(search_space_point &point);
+	search_space_point record_point;
 	std::chrono::high_resolution_clock::time_point start_chrono_time;
 	// hill climbing
 	search_space_point fromPointIndexesToPoint( std::vector<unsigned> cur_point_indexes );

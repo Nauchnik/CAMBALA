@@ -257,6 +257,18 @@ int main(int argc, char **argv)
 	sspemdd_seq.verbosity = verbosity;
 
 	sspemdd_seq.init();
+
+#ifdef _DEBUG
+	search_space_point point;
+	point.cb = 4000;
+	point.rhob = 4;
+	point.R = 3520;
+	std::vector<double> cws{ 1500, 1500, 1490, 1475, 1468.75 };
+	point.cws = cws;
+	sspemdd_seq.fill_data_compute_residual(point);
+	std::cout << sspemdd_seq.getRecordResidual();
+	sspemdd_seq.init(); // restart record point
+#endif
 	
 #ifndef _MPI
 	// sequential mode
