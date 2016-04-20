@@ -3,16 +3,21 @@
 #include <iostream>
 #include <time.h>
 
+//tau_comment: tau comes here as a new inversion parameter
+
 sspemdd_sequential::sspemdd_sequential() :
 	ncb(0),
 	nrhob(0),
 	nR(0),
+	ntau(0),
 	cb1(0.0),
 	cb2(0.0),
 	cw1(0.0),
 	cw2(0.0),
 	R1(0.0),
 	R2(0.0),
+	tau1(0.0),
+	tau2(0.0),
 	rhob1(0.0),
 	rhob2(0.0),
 	n_layers_w(0),
@@ -23,6 +28,7 @@ sspemdd_sequential::sspemdd_sequential() :
 	record_point.cb = 1e50;
 	record_point.rhob = 1e50;
 	record_point.R = 1e50;
+	record_point.tau = 1e50;
 	record_point.residual = 1e100;
 	srand((unsigned)time(NULL));
 	start_chrono_time = std::chrono::high_resolution_clock::now();
@@ -46,6 +52,9 @@ The routine computes the (uniform) residual (misfit) of experimental data and th
 It should be used as follows: for a set of environment models the residual should be computed. The minimal value of the residual indicates
 the most "adequate" model.
 */
+
+//tau_comment: tau is appended here as a new argument for residual computation
+
 double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<double> &freqs,
 	std::vector<double> &depths,
 	std::vector<double> &c1s,
@@ -53,6 +62,7 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 	std::vector<double> &rhos,
 	std::vector<unsigned> &Ns_points,
 	double R,
+	double tau,
 	std::vector<std::vector<double>> &experimental_delays,
 	std::vector<unsigned> &experimental_mode_numbers
 	)
@@ -74,7 +84,9 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 		for (unsigned jj = 0; jj<mnumb; jj++) {
 			if (experimental_delays[ii][jj]>0) {
 				mdelay = R / modal_group_velocities[ii][jj];
-				residual = residual + pow(experimental_delays[ii][jj] - mdelay, 2);
+				//tau_comment: this is the very place where it comes into play in the computation
+				//please check the search block!
+				residual = residual + pow(experimental_delays[ii][jj] + tau - mdelay, 2);
 			}
 		}
 	}
@@ -82,6 +94,46 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 	residual = sqrt(residual);
 
 	return residual;
+}
+int sspemdd_sequential::compute_wnumbers_bb(std::vector<double> &freqs,
+	double deltaf,
+	std::vector<double> &depths,
+	std::vector<double> &c1s,
+	std::vector<double> &c2s,
+	std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points,
+	unsigned flOnlyTrapped,
+	unsigned &ordRich,
+	std::vector<std::vector<double>> &modal_group_velocities,
+	std::vector<unsigned> &mode_numbers
+	)
+{
+	mode_numbers.clear();
+	modal_group_velocities.clear();
+
+	std::vector<double> out_wnum1;
+	std::vector<double> mgv_ii;
+	unsigned nwnum;
+	unsigned nfr = (unsigned)freqs.size();
+	double omeg1;
+
+	for (unsigned ii = 0; ii<nfr; ii++) {
+		out_wnum1.clear();
+		mgv_ii.clear();
+		omeg1 = 2 * LOCAL_M_PI*(freqs.at(ii) + deltaf / 2);
+		out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
+		nwnum = (unsigned)out_wnum1.size();
+
+		for (unsigned jj = 0; jj < nwnum; jj++)
+		{
+			mgv_ii.push_back(out_wnum1.at(jj));
+		}
+
+		modal_group_velocities.push_back(mgv_ii);
+		mode_numbers.push_back(nwnum);
+	}
+
+	return 0;
 }
 
 int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs,
@@ -95,7 +147,7 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 	unsigned &ordRich,
 	std::vector<std::vector<double>> &modal_group_velocities,
 	std::vector<unsigned> &mode_numbers
-	)
+)
 {
 	mode_numbers.clear();
 	modal_group_velocities.clear();
@@ -543,6 +595,9 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 	return wnumbers2;
 }
 
+//tau_comment: search and output,
+//check for tau!
+
 void sspemdd_sequential::init()
 {
 	// TODO move to constructor
@@ -555,6 +610,7 @@ void sspemdd_sequential::init()
 	record_point.cb = 1e50;
 	record_point.rhob = 1e50;
 	record_point.R = 1e50;
+	record_point.tau = 1e50;
 	record_point.residual = 1e100;
 
 	// test launch on the global minium
@@ -584,6 +640,7 @@ void sspemdd_sequential::report_final_result()
 	std::cout << "RESULTING VALUE:" << std::endl;
 	std::cout << "err = " << record_point.residual << ", parameters:" << std::endl;
 	std::cout << "c_b = " << record_point.cb << std::endl 
+			  << "tau = " << record_point.tau << std::endl
 			  << "rho_b = " << record_point.rhob << std::endl
 			  << "R = " << record_point.R << std::endl;
 	std::cout << "cws :" << std::endl;
@@ -695,8 +752,9 @@ void sspemdd_sequential::fill_data_compute_residual( search_space_point &point)
 	
 	//for (unsigned jj = 0; jj <= n_layers_w; jj++)
 	//	std::cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << std::endl;
-	point.residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, point.R, modal_delays, mode_numbers);
 	//std::cout << residual << std::endl << std::endl;
+	//tau_comment: added tau to function call
+	point.residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, point.R, point.tau, modal_delays, mode_numbers);
 
 	if (point.residual < record_point.residual) {
 		record_point.residual = point.residual;
@@ -709,6 +767,7 @@ void sspemdd_sequential::fill_data_compute_residual( search_space_point &point)
 		std::cout << "err = " << record_point.residual << ", parameters:" << std::endl;
 		std::cout << "c_b = " << record_point.cb 
 				  << ", rho_b = " << record_point.rhob
+				  << ", tau = " << record_point.tau
 			      << ", R = " << record_point.R << std::endl;
 		std::cout << "cws_min :" << std::endl;
 		for (auto &x : record_point.cws)
