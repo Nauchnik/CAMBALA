@@ -49,6 +49,10 @@ int main(int argc, char **argv)
 	double R2 = 3600;
 	unsigned nR = 41;
 
+	double tau1 = 0;
+	double tau2 = 0;
+	unsigned ntau = 1;
+
 	double cw1 = 1450;
 	double cw2 = 1500;
 	unsigned ncpl = 0; // search mesh within each water layer
@@ -59,7 +63,7 @@ int main(int argc, char **argv)
 	std::vector<double> freqs;
 	double buff;
 	std::vector<double> buffvect;
-	std::string myLine, myFileName = "dtimes_synth_thcline_hhf.txt";
+	std::string myLine, myFileName = "8000_extracted.txt";
 	int launchType = 0; // 0 - deafult; 1 - fixed cw1=1490; 2 - cw1>cw2>...>cwn; 3 - both 1 and 2
 	sspemdd_sequential sspemdd_seq;
 	unsigned iterated_local_search_runs = 10;
@@ -67,9 +71,9 @@ int main(int argc, char **argv)
 
 #ifdef _DEBUG
 	argc = 5;
-	argv[1] = "dtimes_synth_thcline_hf.txt";
-	argv[2] = "7"; // launchType
-	argv[3] = "21"; // ncpl
+	argv[1] = "8000_extracted.txt";
+	argv[2] = "0"; // launchType
+	argv[3] = "1"; // ncpl
 	argv[4] = "10"; // iterated_local_search_runs
 #endif
 	
@@ -142,10 +146,19 @@ int main(int argc, char **argv)
 		// water column depth: h
 		// n_layers_w in the water,
 
+	bool isHomogeneousWaterLayer = false;
+
+	unsigned n_layers_w;
+	if (myFileName == "8000_extracted.txt") {
+		isHomogeneousWaterLayer = true;
+		n_layers_w = 1;
+	}
+	else
+		n_layers_w = 5;
+
 	unsigned ppm = 2;
 	double h = 90;
 	double H = 600;
-	unsigned n_layers_w = 5;
 	double layer_thickness_w = h / n_layers_w;
 	//int layer_np = round(h/n_layers_w);
 
@@ -196,21 +209,6 @@ int main(int argc, char **argv)
 	*/
 	//END OF TEST BLOCK!
 
-	unsigned long long N_total = (unsigned long long)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb;
-	if ((launchType == 1) || (launchType == 3) || (launchType == 7) || (launchType == 8))
-		N_total /= ncpl;
-	
-	std::cout << "Input parameters :" << std::endl;
-	std::cout << "ncpl " << ncpl << std::endl;
-	std::cout << "n_layers_w " << n_layers_w << std::endl;
-	std::cout << "nR " << nR << std::endl;
-	std::cout << "nrhob " << nrhob << std::endl;
-	std::cout << "ncb " << ncb << std::endl;
-	// Calculate total number of points in a search space
-	std::cout << "Formula for calculating total number of points in a search space: (ncpl^n_layers_w)*nR*nrhob*ncb" << std::endl;
-	std::cout << "N_total " << N_total << std::endl;
-	std::cout << "launchType " << launchType << std::endl;
-
 	// set other parameters of the search space
 	if ((launchType >= 4) && (launchType <= 6)) {
 		nR = 1;
@@ -231,6 +229,38 @@ int main(int argc, char **argv)
 		nrhob = 1;
 	}
 
+	if (isHomogeneousWaterLayer) {
+		cb1 = 1600;
+		cb2 = 1900;
+		ncb = 61;
+		rhob1 = 1.6;
+		rhob2 = 2.0;
+		nrhob = 9;
+		tau1 = -0.015;
+		tau2 = 0.015;
+		ntau = 61;
+		R1 = R2 = 8000;
+		nR = 1;
+		cw1 = cw2 = 1500;
+		ncpl = 1;
+	}
+	
+	unsigned long long N_total = (unsigned long long)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb*ntau;
+	if ((launchType == 1) || (launchType == 3) || (launchType == 7) || (launchType == 8))
+		N_total /= ncpl;
+
+	std::cout << "Input parameters :" << std::endl;
+	std::cout << "ncpl " << ncpl << std::endl;
+	std::cout << "n_layers_w " << n_layers_w << std::endl;
+	std::cout << "nR " << nR << std::endl;
+	std::cout << "ntau " << ntau << std::endl;
+	std::cout << "nrhob " << nrhob << std::endl;
+	std::cout << "ncb " << ncb << std::endl;
+	// Calculate total number of points in a search space
+	std::cout << "Formula for calculating total number of points in a search space: (ncpl^n_layers_w)*nR*nrhob*ncb" << std::endl;
+	std::cout << "N_total " << N_total << std::endl;
+	std::cout << "launchType " << launchType << std::endl;
+
 	sspemdd_seq.cb1 = cb1;
 	sspemdd_seq.cb2 = cb2;
 	sspemdd_seq.ncb = ncb;
@@ -240,12 +270,16 @@ int main(int argc, char **argv)
 	sspemdd_seq.R1 = R1;
 	sspemdd_seq.R2 = R2;
 	sspemdd_seq.nR = nR;
+	sspemdd_seq.tau1 = tau1;
+	sspemdd_seq.tau2 = tau2;
+	sspemdd_seq.ntau = ntau;
 	sspemdd_seq.cw1 = cw1;
 	sspemdd_seq.cw2 = cw2;
 	sspemdd_seq.ncpl = ncpl;
 	sspemdd_seq.iterated_local_search_runs = iterated_local_search_runs;
 	sspemdd_seq.n_layers_w = n_layers_w;
 	sspemdd_seq.launchType = launchType;
+	sspemdd_seq.isHomogeneousWaterLayer = isHomogeneousWaterLayer;
 	sspemdd_seq.depths = depths;
 	sspemdd_seq.c1s = c1s;
 	sspemdd_seq.c2s = c2s;
