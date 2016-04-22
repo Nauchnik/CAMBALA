@@ -257,7 +257,7 @@ int main(int argc, char **argv)
 	std::cout << "nrhob " << nrhob << std::endl;
 	std::cout << "ncb " << ncb << std::endl;
 	// Calculate total number of points in a search space
-	std::cout << "Formula for calculating total number of points in a search space: (ncpl^n_layers_w)*nR*nrhob*ncb" << std::endl;
+	std::cout << "Formula for calculating total number of points in a search space: (ncpl^n_layers_w)*nR*nrhob*ncb*ntau" << std::endl;
 	std::cout << "N_total " << N_total << std::endl;
 	std::cout << "launchType " << launchType << std::endl;
 
@@ -307,8 +307,8 @@ int main(int argc, char **argv)
 #ifndef _MPI
 	// sequential mode
 	
-	// sspemdd_seq.findGlobalMinBruteForce();
-	sspemdd_seq.findLocalMinHillClimbing();
+	sspemdd_seq.findGlobalMinBruteForce();
+	//sspemdd_seq.findLocalMinHillClimbing();
 	sspemdd_seq.report_final_result();
 
 	// fix final time
