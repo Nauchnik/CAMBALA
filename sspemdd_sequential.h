@@ -97,6 +97,7 @@ private:
 	std::chrono::high_resolution_clock::time_point start_chrono_time;
 	// hill climbing
 	search_space_point fromPointIndexesToPoint( std::vector<unsigned> cur_point_indexes );
+	bool is_valid_search_space_point(search_space_point point );
 };
 
 #endif

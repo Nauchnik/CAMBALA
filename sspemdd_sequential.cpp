@@ -623,6 +623,8 @@ void sspemdd_sequential::init()
 	record_point.R = 1e50;
 	record_point.tau = 1e50;
 	record_point.residual = 1e100;
+
+	loadValuesToSearchSpaceVariables();
 }
 
 void sspemdd_sequential::report_final_result()
@@ -652,91 +654,22 @@ void sspemdd_sequential::report_final_result()
 void sspemdd_sequential::findGlobalMinBruteForce()
 {
 	std::cout << "findGlobalMinBruteForce()" << std::endl;
-	// make cws_all_cartesians - all cartesians of all speeds in water
-	std::vector<std::vector<double>> cws_vii; // all variants for every depth
-	std::vector<int> index_arr;
-	std::vector<double> cws_vi;
-	std::vector<std::vector<double>> cws_all_cartesians;
-	bool isAdding;
-	if (ncpl == 1)
-		cws_all_cartesians.push_back(cws_fixed);
-	else {
-		for (unsigned ncpl_cur = 0; ncpl_cur < ncpl; ncpl_cur++)
-			cws_vi.push_back(cw1 + ncpl_cur*(cw2 - cw1) / (ncpl - 1));
-		for (unsigned i = 0; i < n_layers_w; i++)
-			cws_vii.push_back(cws_vi);
-		while (SSPEMDD_utils::next_cartesian(cws_vii, index_arr, cws_vi)) {
-			switch (launchType) {
-			case 1:
-				if (cws_vi[0] == 1490)
-					cws_all_cartesians.push_back(cws_vi);
-				break;
-			case 2:
-				isAdding = true;
-				for (unsigned cws_vi_index = 0; cws_vi_index < cws_vi.size() - 1; cws_vi_index++)
-					if (cws_vi[cws_vi_index] <= cws_vi[cws_vi_index + 1])
-						isAdding = false;
-				if (isAdding)
-					cws_all_cartesians.push_back(cws_vi);
-				break;
-			case 3:
-				if (cws_vi[0] != 1490)
-					isAdding = false;
-				else {
-					isAdding = true;
-					for (unsigned cws_vi_index = 0; cws_vi_index < cws_vi.size() - 1; cws_vi_index++)
-						if (cws_vi[cws_vi_index] <= cws_vi[cws_vi_index + 1])
-							isAdding = false;
-				}
-				if (isAdding)
-					cws_all_cartesians.push_back(cws_vi);
-				break;
-			case 7: // like case 1
-				if (cws_vi[0] == 1490)
-					cws_all_cartesians.push_back(cws_vi);
-				break;
-			case 8: // like case 1
-				if (cws_vi[0] == 1490)
-					cws_all_cartesians.push_back(cws_vi);
-				break;
-			default:
-				cws_all_cartesians.push_back(cws_vi);
-				break;
-			}
-		}
-	}
 
-	std::cout << "cws_all_cartesians.size() " << cws_all_cartesians.size() << std::endl;
-	double cb_cur, rhob_cur, R_cur, tau_cur;
+	std::vector<int> index_arr;
 	search_space_point cur_point;
-	unsigned long long compute_residual_launches = 0;
-	
-	// inverting for bottom halfspace parameters + sound speed in water
-	for (unsigned cur_ncb = 0; cur_ncb < ncb; cur_ncb++) {
-		for (unsigned cur_nrhob = 0; cur_nrhob < nrhob; cur_nrhob++) {
-			for (unsigned cur_nR = 0; cur_nR < nR; cur_nR++) {
-				for (unsigned cur_ntau = 0; cur_ntau < ntau; cur_ntau++) {
-					// specify bottom parameters;
-					if (ncb > 1) { cb_cur = cb1 + cur_ncb*(cb2 - cb1) / (ncb - 1); }
-					else { cb_cur = cb1; }
-					if (nrhob > 1) { rhob_cur = rhob1 + cur_nrhob * (rhob2 - rhob1) / (nrhob - 1); }
-					else { rhob_cur = rhob1; }
-					// specify range
-					if (nR > 1) { R_cur = R1 + cur_nR*(R2 - R1) / (nR - 1); }
-					else { R_cur = R1; }
-					if (ntau > 1) { tau_cur = tau1 + cur_ntau*(tau2 - tau1) / (ntau - 1); }
-					else { tau_cur = tau1; }
-					cur_point.cb = cb_cur;
-					cur_point.rhob = rhob_cur;
-					cur_point.R = R_cur;
-					cur_point.tau = tau_cur;
-					for (auto &cws_cur : cws_all_cartesians) {
-						cur_point.cws = cws_cur;
-						fill_data_compute_residual(cur_point);
-						std::cout << "compute_residual_launches " << ++compute_residual_launches << std::endl;
-					}
-				}
-			}
+	std::vector<unsigned> cur_point_indexes;
+	std::vector<std::vector<unsigned>> search_space_indexes;
+	search_space_indexes.resize(search_space.size());
+	for (unsigned variable_index = 0; variable_index < search_space.size(); variable_index++)
+		for ( unsigned j=0; j < search_space[variable_index].size(); j++)
+			search_space_indexes[variable_index].push_back(j);
+	unsigned checked_points_number = 0;
+
+	while (SSPEMDD_utils::next_cartesian(search_space_indexes, index_arr, cur_point_indexes)) {
+		cur_point = fromPointIndexesToPoint(cur_point_indexes);
+		if (is_valid_search_space_point(cur_point)) {
+			fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
+			checked_points_number++;
 		}
 	}
 }
@@ -791,6 +724,7 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 	// search_space_variables[3] - tau
 	// search_space_variables[4...] - cws
 	std::vector<double> tmp_vec;
+	search_space.clear();
 
 	// fill search_space_variables[0] with cb
 	tmp_vec.resize(ncb);
@@ -816,26 +750,34 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 		tmp_vec[i] = tau1 + (ntau == 1 ? 0 : i*(tau2 - tau1) / (ntau - 1));
 	search_space.push_back(tmp_vec);
 	
-	// TODO add case launchType == 2
 	// fill search_space_variables[4-...] with cws
 	tmp_vec.resize(ncpl);
 	std::vector<double> restricted_cws1{ 1490 };
-	//std::vector<double> restricted_cws2{ 1492.5 }; // test for launchType 7
-	//std::vector<double> restricted_cws3{ 1482.5 }; // test for launchType 7
 	for (unsigned i = 0; i < ncpl; i++)
 		tmp_vec[i] = cw1 + (ncpl == 1 ? 0 : i*(cw2 - cw1) / (ncpl - 1));
 	if ((launchType == 1) || (launchType == 3) || (launchType == 7) || (launchType == 8))
 		search_space.push_back(restricted_cws1); // fixed first cws in this case
 	else
 		search_space.push_back(tmp_vec);
+	// other layers
 	for (unsigned i = 1; i < n_layers_w; i++)
 		search_space.push_back(tmp_vec);
+}
+
+bool sspemdd_sequential::is_valid_search_space_point(search_space_point point)
+{
+	std::vector<double> cws_vi = point.cws;
+	if ((launchType == 2) || (launchType == 3)) {
+		for (unsigned cws_vi_index = 0; cws_vi_index < cws_vi.size() - 1; cws_vi_index++)
+			if (cws_vi[cws_vi_index] >= cws_vi[cws_vi_index + 1])
+				return false;
+	}
+	return true;
 }
 
 void sspemdd_sequential::findLocalMinHillClimbing()
 {
 	std::cout << "findLocalMinHillClimbing" << std::endl;
-	loadValuesToSearchSpaceVariables();
 	// choose random point in the search space
 	std::vector<unsigned> cur_point_indexes, record_point_indexes, global_record_point_indexes;
 	search_space_point cur_point, global_record_point;

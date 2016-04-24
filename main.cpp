@@ -72,6 +72,7 @@ int main(int argc, char **argv)
 #ifdef _DEBUG
 	argc = 5;
 	argv[1] = "8000_extracted.txt";
+	//argv[1] = "dtimes_synth_thcline_hf.txt";
 	argv[2] = "0"; // launchType
 	argv[3] = "1"; // ncpl
 	argv[4] = "10"; // iterated_local_search_runs
@@ -291,18 +292,6 @@ int main(int argc, char **argv)
 	sspemdd_seq.verbosity = verbosity;
 
 	sspemdd_seq.init();
-
-#ifdef _DEBUG
-	search_space_point point;
-	point.cb = 4000;
-	point.rhob = 4;
-	point.R = 3520;
-	std::vector<double> cws{ 1500, 1500, 1490, 1475, 1468.75 };
-	point.cws = cws;
-	sspemdd_seq.fill_data_compute_residual(point);
-	std::cout << sspemdd_seq.getRecordResidual();
-	sspemdd_seq.init(); // restart record point
-#endif
 	
 #ifndef _MPI
 	// sequential mode
