@@ -32,6 +32,38 @@ struct layer
 	double dend;              // density at the end of a layer
 };
 
+struct sspemdd_params
+{
+	double cb1;
+	double cb2;
+	unsigned ncb;
+	double rhob1;
+	double rhob2;
+	unsigned nrhob;
+	double R1;
+	double R2;
+	unsigned nR;
+	double tau1;
+	double tau2;
+	unsigned ntau;
+	double cw1;
+	double cw2;
+	unsigned ncpl;
+	unsigned iterated_local_search_runs;
+	unsigned n_layers_w;
+	int launchType;
+	bool isHomogeneousWaterLayer;
+	std::vector<double> depths;
+	std::vector<double> c1s;
+	std::vector<double> c2s;
+	std::vector<double> rhos;
+	std::vector<unsigned>Ns_points;
+	std::vector<unsigned>mode_numbers;
+	std::vector<std::vector<double>> modal_delays;
+	std::vector<double> freqs;
+	int verbosity;
+};
+
 void MPI_main(sspemdd_parallel sspemdd_par);
 
 int main(int argc, char **argv)
@@ -261,6 +293,9 @@ int main(int argc, char **argv)
 	std::cout << "Formula for calculating total number of points in a search space: (ncpl^n_layers_w)*nR*nrhob*ncb*ntau" << std::endl;
 	std::cout << "N_total " << N_total << std::endl;
 	std::cout << "launchType " << launchType << std::endl;
+	
+#ifndef _MPI
+	// sequential mode
 
 	sspemdd_seq.cb1 = cb1;
 	sspemdd_seq.cb2 = cb2;
@@ -289,15 +324,13 @@ int main(int argc, char **argv)
 	sspemdd_seq.mode_numbers = mode_numbers;
 	sspemdd_seq.modal_delays = modal_delays;
 	sspemdd_seq.freqs = freqs;
+	sspemdd_seq.N_total = N_total;
 	sspemdd_seq.verbosity = verbosity;
 
 	sspemdd_seq.init();
 	
-#ifndef _MPI
-	// sequential mode
-	
-	sspemdd_seq.findGlobalMinBruteForce();
-	//sspemdd_seq.findLocalMinHillClimbing();
+	//sspemdd_seq.findGlobalMinBruteForce();
+	sspemdd_seq.findLocalMinHillClimbing();
 	sspemdd_seq.report_final_result();
 
 	// fix final time
@@ -307,7 +340,7 @@ int main(int argc, char **argv)
 	std::cout << std::endl;
 	std::cout << "total solving time " << time_span.count() << std::endl;*/
 #else
-	/*int rank = 0;
+	int rank = 0;
 	int corecount = 1;
 	
 	// parallel mode
@@ -318,40 +351,38 @@ int main(int argc, char **argv)
 	sspemdd_parallel sspemdd_par;
 	sspemdd_par.rank = rank;
 	sspemdd_par.corecount = corecount;
-	sspemdd_par.res_min = res_min;
-	sspemdd_par.cb_min = cb_min;
-	sspemdd_par.rhob_min = rhob_min;
-	sspemdd_par.R_min = R_min;
-	sspemdd_par.residual = residual;
-	sspemdd_par.ncb = ncb;
-	sspemdd_par.nrhob = nrhob;
-	sspemdd_par.nR = nR;
-	sspemdd_par.ncpl = ncpl;
+
 	sspemdd_par.cb1 = cb1;
 	sspemdd_par.cb2 = cb2;
-	sspemdd_par.cw1 = cw1;
-	sspemdd_par.cw2 = cw2;
-	sspemdd_par.R1 = R1;
-	sspemdd_par.R2 = R2;
+	sspemdd_par.ncb = ncb;
 	sspemdd_par.rhob1 = rhob1;
 	sspemdd_par.rhob2 = rhob2;
+	sspemdd_par.nrhob = nrhob;
+	sspemdd_par.R1 = R1;
+	sspemdd_par.R2 = R2;
+	sspemdd_par.nR = nR;
+	sspemdd_par.tau1 = tau1;
+	sspemdd_par.tau2 = tau2;
+	sspemdd_par.ntau = ntau;
+	sspemdd_par.cw1 = cw1;
+	sspemdd_par.cw2 = cw2;
+	sspemdd_par.ncpl = ncpl;
+	sspemdd_par.iterated_local_search_runs = iterated_local_search_runs;
 	sspemdd_par.n_layers_w = n_layers_w;
-	sspemdd_par.cws_cur = cws_cur;
-	sspemdd_par.cws_min = cws_min;
-	sspemdd_par.cws_fixed = cws_fixed; // use when ncpl = 1
+	sspemdd_par.launchType = launchType;
+	sspemdd_par.isHomogeneousWaterLayer = isHomogeneousWaterLayer;
+	sspemdd_par.depths = depths;
 	sspemdd_par.c1s = c1s;
 	sspemdd_par.c2s = c2s;
 	sspemdd_par.rhos = rhos;
 	sspemdd_par.Ns_points = Ns_points;
-	sspemdd_par.depths = depths;
-	sspemdd_par.freqs = freqs;
-	sspemdd_par.modal_group_velocities = modal_group_velocities;
 	sspemdd_par.mode_numbers = mode_numbers;
 	sspemdd_par.modal_delays = modal_delays;
-	sspemdd_par.cws_all_cartesians = cws_all_cartesians;
-
-	MPI_main(sspemdd_par);
-	*/
+	sspemdd_par.freqs = freqs;
+	sspemdd_par.verbosity = verbosity;
+	
+	sspemdd_par.init();
+	sspemdd_par.MPI_main();
 #endif
 
 	t2 = std::chrono::high_resolution_clock::now();
@@ -359,16 +390,4 @@ int main(int argc, char **argv)
 	std::cout << "main() total time " << time_span.count() << " s" << std::endl;
 	
 	return 0;
-}
-
-void MPI_main(sspemdd_parallel sspemdd_par)
-{
-	sspemdd_par.allocateArrays();
-
-	if (sspemdd_par.rank == 0)
-		sspemdd_par.control_process();
-	else if (sspemdd_par.rank > 0)
-		sspemdd_par.computing_process();
-
-	sspemdd_par.deallocateArrays();
 }

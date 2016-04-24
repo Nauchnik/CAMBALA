@@ -25,7 +25,8 @@ sspemdd_sequential::sspemdd_sequential() :
 	launchType(0),
 	iterated_local_search_runs(10),
 	verbosity(0),
-	isHomogeneousWaterLayer (false)
+	isHomogeneousWaterLayer (false),
+	N_total (1)
 {
 	record_point.cb = 1e50;
 	record_point.rhob = 1e50;

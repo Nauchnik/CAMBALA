@@ -12,22 +12,26 @@
 #include <cmath>
 
 sspemdd_parallel::sspemdd_parallel() :
-	task_array_len ( 0 ),
-	result_array_len ( 0 ),
+	task_len ( 0 ),
+	result_len ( 0 ),
 	corecount ( 0 ),
-	rank ( 0 ),
-	residual ( 0.0 ),
-	cb_cur (0.0),
-	R_cur (0.0),
-	rhob_cur(0.0),
-	res_min(1e100),
-	cb_min(0.0),
-	rhob_min(0.0),
-	R_min(0.0)
+	rank ( 0 )
 {}
 
 sspemdd_parallel::~sspemdd_parallel()
 {}
+
+void sspemdd_parallel::MPI_main()
+{
+	allocateArrays();
+
+	if (rank == 0)
+		control_process();
+	else if (rank > 0)
+		computing_process();
+	
+	deallocateArrays();
+}
 
 void sspemdd_parallel::control_process()
 {
@@ -36,40 +40,45 @@ void sspemdd_parallel::control_process()
 	std::stringstream sstream_out;
 	mpi_start_time = MPI_Wtime();
 
+	sstream_out << "MPI control process" << std::endl;
 	sstream_out << "Start residual is: " << residual << std::endl;
-
-	// brute force minimum search
-	sstream_out << "BRUTE FORCE MINIMUM SEARCH" << std::endl;
 	sstream_out << "Search space:" << std::endl;
 	sstream_out << cb1 << " < c_b < " << cb2 << std::endl;
 	sstream_out << R1 << " < Range < " << R2 << std::endl;
 	sstream_out << cw1 << " < cws < " << cw2 << std::endl;
 	sstream_out << rhob1 << "< rho_b < " << rhob2 << std::endl;
+	sstream_out << tau1 << "< tau < " << tau2 << std::endl;
+	sstream_out << task_array_len << "< task_array_len < " << task_array_len << std::endl;
 	
-	sstream_out << "MPI control process" << std::endl;
-	sstream_out << "cws_all_cartesians.size() " << cws_all_cartesians.size() << std::endl;
-	sstream_out << "cws_all_cartesians[0]" << std::endl;
-	for (unsigned j = 0; j < cws_all_cartesians[0].size(); j++)
-		sstream_out << cws_all_cartesians[0][j] << " ";
-	sstream_out << std::endl;
-	if (cws_all_cartesians.size() < (unsigned)corecount) {
-		std::cerr << "cws_all_cartesians.size() < corecount" << std::endl;
-		std::cerr << cws_all_cartesians.size() << " < " << corecount << std::endl;
-		exit(1);
+	std::vector<int> index_arr;
+	std::vector<std::vector<unsigned>> search_space_indexes;
+	std::vector<unsigned> cur_point_indexes;
+	search_space_indexes.resize(search_space.size());
+	for (unsigned variable_index = 0; variable_index < search_space.size(); variable_index++)
+		for (unsigned j = 0; j < search_space[variable_index].size(); j++)
+			search_space_indexes[variable_index].push_back(j);
+	std::vector<std::vector<unsigned>> tasks_vec;
+	
+	tasks_vec.resize(N_total);
+	unsigned long long task_index = 0;
+	search_space_point cur_point;
+	while (SSPEMDD_utils::next_cartesian(search_space_indexes, index_arr, cur_point_indexes)) {
+		cur_point = fromPointIndexesToPoint(cur_point_indexes);
+		tasks_vec[task_index][0] = ;
+		task_index++;
 	}
-
+	sstream_out << "tasks_vec.size() " << tasks_vec.size() << std::endl;
+	
 	unsigned send_task_count = 0;
 	unsigned processed_task_count = 0;
-
+	sstream_out << "task_array_len " << task_array_len << std::endl;
+	sstream_out << "tasks_vec[0].size() " << tasks_vec[0].size() << std::endl;
+	
 	// sending first part of tasks
 	for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++) {
 		for (int j = 0; j < (int)task_array_len; j++)
-			task_array[j] = cws_all_cartesians[send_task_count][j];
+			task[j] = tasks_vec[send_task_count][j];
 		MPI_Send(task_array, task_array_len, MPI_DOUBLE, computing_process_index, 0, MPI_COMM_WORLD);
-		/*sstream_out << "sending cws as task_array " << std::endl;
-		for (int j = 0; j < (int)task_array_len; j++)
-			sstream_out << task_array[j] << " ";
-		sstream_out << std::endl;*/
 		send_task_count++;
 	}
 	sstream_out << "send_task_count " << send_task_count << std::endl;
@@ -77,24 +86,20 @@ void sspemdd_parallel::control_process()
 	ofile << sstream_out.rdbuf();
 	sstream_out.clear(); sstream_out.str("");
 	ofile.close(); ofile.clear();
-	double stop_message = -1;
-	cws_cur.resize(n_layers_w);
 
 	// get results and send new tasks on idle computing processes
 	while (processed_task_count < cws_all_cartesians.size()) {
-		MPI_Recv(result_array, result_array_len, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		MPI_Recv(task, task_array_len, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		processed_task_count++;
 		sstream_out << "processed_task_count " << processed_task_count << std::endl;
 		
-		residual   = result_array[0];
-		cb_cur     = result_array[1];
-		rhob_cur   = result_array[2];
-		R_cur      = result_array[3];
-		cws_cur[0] = result_array[4];
-		cws_cur[1] = result_array[5];
-		cws_cur[2] = result_array[6];
-		cws_cur[3] = result_array[7];
-		cws_cur[4] = result_array[8];
+		cur_point.cb   = task[0];
+		cur_point.rhob = task[1];
+		cur_point.R    = task[2];
+		cur_point.tau  = task[3];
+		cur_point.cws.clear();
+		for (unsigned i = 4; i < search_space.size(); i++)
+			cur_point.cws.push_back(task[i]);
 		
 		/*sstream_out << "recv new result " << std::endl;
 		sstream_out << "recv residual "   << residual   << std::endl;
@@ -262,14 +267,14 @@ void sspemdd_parallel::computing_process()
 
 void sspemdd_parallel::allocateArrays()
 {
-	task_array_len = n_layers_w;
-	result_array_len = 9;
-	task_array = new double[task_array_len];
-	result_array = new double[result_array_len];
+	task_len = record_point.cws.size() + 4;
+	task = new double[task_len];
+	result_len = task_len + 1;
+	result = new double[result_len];
 }
 
 void sspemdd_parallel::deallocateArrays()
 {
-	delete[] task_array;
-	delete[] result_array;
+	delete[] task;
+	delete[] result;
 }

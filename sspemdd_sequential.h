@@ -10,7 +10,6 @@ const double LOCAL_M_PI = 3.14159265358979323846;
 
 struct search_space_point
 {
-	//tau_comment: added tau to search space point
 	double R;
 	double tau;
 	double rhob;
@@ -42,6 +41,7 @@ public:
 	int launchType;
 	unsigned iterated_local_search_runs;
 	bool isHomogeneousWaterLayer;
+	unsigned long long N_total;
 	std::vector<double> cws_fixed;
 	std::vector<unsigned> mode_numbers;
 	std::vector<std::vector<double>> modal_delays;
@@ -51,6 +51,7 @@ public:
 	std::vector<double> c2s;
 	std::vector<double> rhos;
 	std::vector<unsigned> Ns_points;
+	int verbosity;
 	double getRecordResidual();
 	void fill_data_compute_residual(search_space_point &point);
 
@@ -85,15 +86,16 @@ public:
 
 	// functions by Oleg
 	std::vector<std::vector<double>> search_space; // values of variables which form a search space
-	int verbosity;
 	void init();
 	void findGlobalMinBruteForce();
 	void loadValuesToSearchSpaceVariables();
 	void findLocalMinHillClimbing();
 	void report_final_result();
 
-private:
+protected:
 	search_space_point record_point;
+
+private:
 	std::chrono::high_resolution_clock::time_point start_chrono_time;
 	// hill climbing
 	search_space_point fromPointIndexesToPoint( std::vector<unsigned> cur_point_indexes );
