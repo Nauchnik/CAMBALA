@@ -64,8 +64,6 @@ struct sspemdd_params
 	int verbosity;
 };
 
-void MPI_main(sspemdd_parallel sspemdd_par);
-
 int main(int argc, char **argv)
 {
 	//SEARCH SPACE
@@ -277,10 +275,6 @@ int main(int argc, char **argv)
 		cw1 = cw2 = 1500;
 		ncpl = 1;
 	}
-	
-	unsigned long long N_total = (unsigned long long)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb*ntau;
-	if ((launchType == 1) || (launchType == 3) || (launchType == 7) || (launchType == 8))
-		N_total /= ncpl;
 
 	std::cout << "Input parameters :" << std::endl;
 	std::cout << "ncpl " << ncpl << std::endl;
@@ -289,10 +283,6 @@ int main(int argc, char **argv)
 	std::cout << "ntau " << ntau << std::endl;
 	std::cout << "nrhob " << nrhob << std::endl;
 	std::cout << "ncb " << ncb << std::endl;
-	// Calculate total number of points in a search space
-	std::cout << "Formula for calculating total number of points in a search space: (ncpl^n_layers_w)*nR*nrhob*ncb*ntau" << std::endl;
-	std::cout << "N_total " << N_total << std::endl;
-	std::cout << "launchType " << launchType << std::endl;
 	
 #ifndef _MPI
 	// sequential mode
@@ -324,7 +314,6 @@ int main(int argc, char **argv)
 	sspemdd_seq.mode_numbers = mode_numbers;
 	sspemdd_seq.modal_delays = modal_delays;
 	sspemdd_seq.freqs = freqs;
-	sspemdd_seq.N_total = N_total;
 	sspemdd_seq.verbosity = verbosity;
 
 	sspemdd_seq.init();

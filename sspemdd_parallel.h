@@ -28,8 +28,6 @@ public:
 private:
 	void control_process();
 	void computing_process();
-	void allocateArrays();
-	void deallocateArrays();
 };
 
 #endif

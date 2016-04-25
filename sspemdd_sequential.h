@@ -7,6 +7,7 @@
 #include "linalg.h"
 
 const double LOCAL_M_PI = 3.14159265358979323846;
+const double START_RESIDUAL = 1e100;
 
 struct search_space_point
 {
@@ -41,7 +42,6 @@ public:
 	int launchType;
 	unsigned iterated_local_search_runs;
 	bool isHomogeneousWaterLayer;
-	unsigned long long N_total;
 	std::vector<double> cws_fixed;
 	std::vector<unsigned> mode_numbers;
 	std::vector<std::vector<double>> modal_delays;
@@ -93,12 +93,12 @@ public:
 	void report_final_result();
 
 protected:
+	unsigned long long N_total;
 	search_space_point record_point;
-
-private:
 	std::chrono::high_resolution_clock::time_point start_chrono_time;
 	// hill climbing
 	search_space_point fromPointIndexesToPoint( std::vector<unsigned> cur_point_indexes );
+	search_space_point fromDoubleVecToPoint(std::vector<double> double_vec);
 	bool is_valid_search_space_point(search_space_point point );
 };
 

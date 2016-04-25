@@ -32,7 +32,7 @@ sspemdd_sequential::sspemdd_sequential() :
 	record_point.rhob = 1e50;
 	record_point.R = 1e50;
 	record_point.tau = 1e50;
-	record_point.residual = 1e100;
+	record_point.residual = START_RESIDUAL;
 	srand((unsigned)time(NULL));
 	start_chrono_time = std::chrono::high_resolution_clock::now();
 }
@@ -603,6 +603,11 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 
 void sspemdd_sequential::init()
 {
+	N_total = (unsigned long long)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb*ntau;
+	if ((launchType == 1) || (launchType == 3) || (launchType == 7) || (launchType == 8))
+		N_total /= ncpl;
+	std::cout << "N_total " << N_total << std::endl;
+
 	// TODO move to constructor
 	std::vector<double> tmp_vec;
 	if (isHomogeneousWaterLayer)
@@ -623,9 +628,10 @@ void sspemdd_sequential::init()
 	record_point.rhob = 1e50;
 	record_point.R = 1e50;
 	record_point.tau = 1e50;
-	record_point.residual = 1e100;
-
+	record_point.residual = START_RESIDUAL;
+	
 	loadValuesToSearchSpaceVariables();
+
 }
 
 void sspemdd_sequential::report_final_result()
@@ -896,7 +902,20 @@ search_space_point sspemdd_sequential::fromPointIndexesToPoint(std::vector<unsig
 	point.tau  = search_space[3][cur_point_indexes[3]];
 	for (unsigned i = 4; i < search_space.size(); i++)
 		point.cws.push_back(search_space[i][cur_point_indexes[i]]);
-	point.residual = 1e100;
+	point.residual = START_RESIDUAL;
+	return point;
+}
+
+search_space_point sspemdd_sequential::fromDoubleVecToPoint(std::vector<double> double_vec)
+{
+	search_space_point point;
+	point.cb   = double_vec[0];
+	point.rhob = double_vec[1];
+	point.R    = double_vec[2];
+	point.tau  = double_vec[3];
+	for (unsigned i = 4; i < double_vec.size(); i++)
+		point.cws.push_back(double_vec[i]);
+	point.residual = START_RESIDUAL;
 	return point;
 }
 
