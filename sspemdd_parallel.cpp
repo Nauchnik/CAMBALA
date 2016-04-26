@@ -105,12 +105,13 @@ void sspemdd_parallel::control_process()
 			record_point = fromDoubleVecToPoint(point_values_vec[received_task_index]);
 			record_point.residual = received_residual;
 			
-			sstream_out << std::endl << "New residual minimum:" << std::endl;
-			sstream_out << "err= " << record_point.residual << ", parameters:" << std::endl;
-			sstream_out << "c_b= " << record_point.cb << 
+			std::cout << "Control process, new residual minimum : "  << received_residual << std::endl;
+			sstream_out << std::endl << "Control process, new residual minimum:" << std::endl;
+			sstream_out << "err = " << record_point.residual << ", parameters:" << std::endl;
+			sstream_out << "c_b = " << record_point.cb << 
 				           ", rho_b= " << record_point.rhob << 
 						   ", tau = " << record_point.tau <<
-				           ", R= " << record_point.R << std::endl;
+				           ", R = " << record_point.R << std::endl;
 			sstream_out << "cws_min :" << std::endl;
 			for (auto &x : record_point.cws)
 				sstream_out << x << " ";
@@ -128,7 +129,7 @@ void sspemdd_parallel::control_process()
 		else {
 			// send stop-messages
 			for (unsigned j = 0; j < task_len; j++)
-				task[j] = -1;
+				task[j] = STOP_MESSAGE;
 			MPI_Send(task, task_len, MPI_DOUBLE, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
 		}
 		
@@ -193,7 +194,7 @@ void sspemdd_parallel::computing_process()
 		}
 		
 		// if stop-message then finalize
-		if (task[task_len] == -1) {
+		if (task[task_len-1] == -1) {
 			std::cout << "rank " << rank << " received stop-message" << std::endl;
 			MPI_Finalize();
 			break;
