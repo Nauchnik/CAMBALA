@@ -2,6 +2,7 @@
 #define SSPEMDD_SEQUENTIAL_H
 
 #include <vector>
+#include <fstream>
 #include <algorithm>
 #include <chrono>
 #include "linalg.h"
