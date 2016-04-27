@@ -264,18 +264,18 @@ int main(int argc, char **argv)
 		cb1 = 1600;
 		cb2 = 1900;
 		ncb = 61;
-		rhob1 = 1.6;
+		rhob1 = 1.4;
 		rhob2 = 2.0;
 		nrhob = 9;
 		tau1 = -0.015;
 		tau2 = 0.015;
-		ntau = 61;
+		ntau = 301;
 		R1 = R2 = 8000;
 		nR = 1;
 		cw1 = cw2 = 1500;
 		ncpl = 1;
 	}
-
+	
 	std::cout << "Input parameters :" << std::endl;
 	std::cout << "ncpl " << ncpl << std::endl;
 	std::cout << "n_layers_w " << n_layers_w << std::endl;

@@ -72,7 +72,7 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 {
 	unsigned rord = 3;
 	unsigned flTrappedOnly = 1;
-	double deltaf = 0.5;
+	double deltaf = 0.05;
 	double residual = 0;
 	unsigned mnumb;
 	double mdelay;
