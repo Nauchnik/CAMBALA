@@ -76,6 +76,9 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 	double residual = 0;
 	unsigned mnumb;
 	double mdelay;
+	//2016.04.27:Pavel: now we use RMS as the residual
+    unsigned nRes = 0;
+
 
 	std::vector<std::vector<double>> modal_group_velocities;
 	std::vector<unsigned> mode_numbers;
@@ -83,18 +86,29 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, flTrappedOnly, rord, modal_group_velocities, mode_numbers);
 
 	for (unsigned ii = 0; ii<freqs.size(); ii++) {
-		mnumb = std::min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
+		//2016.04.27:Pavel: mnumb = std::min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
+		mnumb = experimental_mode_numbers.at(ii);
 		for (unsigned jj = 0; jj<mnumb; jj++) {
 			if (experimental_delays[ii][jj]>0) {
-				mdelay = R / modal_group_velocities[ii][jj];
+                nRes = nRes + 1;
+                //2016.04.27:Pavel:
+                if ( jj<mode_numbers.at(ii) ) {
+                    mdelay = R / modal_group_velocities[ii][jj];
+                }
+                else if ( (ii+1<freqs.size()) && (jj<mode_numbers.at(ii+1))  ) {
+                    mdelay = R / modal_group_velocities[ii+1][jj];
+                }
+                else {
+                    mdelay = 0;
+                }
 				//tau_comment: this is the very place where it comes into play in the computation
 				//please check the search block!
 				residual = residual + pow(experimental_delays[ii][jj] + tau - mdelay, 2);
 			}
 		}
 	}
-
-	residual = sqrt(residual);
+    //2016.04.27:Pavel: RMS
+	residual = sqrt(residual/nRes);
 
 	return residual;
 }
@@ -166,7 +180,7 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 		out_wnum1.clear();
 		out_wnum2.clear();
 		mgv_ii.clear();
-		omeg1 = 2 * LOCAL_M_PI*(freqs.at(ii) + deltaf / 2);
+		omeg1 = 2 * LOCAL_M_PI*(freqs.at(ii) + deltaf);
 		out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
 		nwnum = (unsigned)out_wnum1.size();
 
@@ -179,9 +193,10 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 		}
 		*/
 
-		omeg2 = 2 * LOCAL_M_PI*(freqs.at(ii) - deltaf / 2);
+		omeg2 = 2 * LOCAL_M_PI*(freqs.at(ii));
 		out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
-		nwnum = std::min(nwnum, (unsigned)out_wnum2.size());
+		//nwnum = std::min(nwnum, (unsigned)out_wnum2.size());
+        nwnum = (unsigned)out_wnum2.size();
 
 		for (unsigned jj = 0; jj < nwnum; jj++)
 		{
@@ -613,7 +628,7 @@ void sspemdd_sequential::init()
 	if (isHomogeneousWaterLayer)
 		tmp_vec.push_back(cw1);
 	else {
-		tmp_vec.push_back(1490); 
+		tmp_vec.push_back(1490);
 		tmp_vec.push_back(1490);
 		tmp_vec.push_back(1480);
 		tmp_vec.push_back(1465);
@@ -629,7 +644,7 @@ void sspemdd_sequential::init()
 	record_point.R = 1e50;
 	record_point.tau = 1e50;
 	record_point.residual = START_RESIDUAL;
-	
+
 	loadValuesToSearchSpaceVariables();
 
 }
@@ -647,7 +662,7 @@ void sspemdd_sequential::report_final_result()
 	std::cout << "SEARCH ENDED!" << std::endl;
 	std::cout << "RESULTING VALUE:" << std::endl;
 	std::cout << "err = " << record_point.residual << ", parameters:" << std::endl;
-	std::cout << "c_b = " << record_point.cb << std::endl 
+	std::cout << "c_b = " << record_point.cb << std::endl
 			  << "tau = " << record_point.tau << std::endl
 			  << "rho_b = " << record_point.rhob << std::endl
 			  << "R = " << record_point.R << std::endl;
@@ -695,7 +710,7 @@ void sspemdd_sequential::fill_data_compute_residual( search_space_point &point)
 	c1s.at(n_layers_w) = point.cb;
 	c2s.at(n_layers_w) = point.cb;
 	rhos.at(n_layers_w) = point.rhob;
-	
+
 	//for (unsigned jj = 0; jj <= n_layers_w; jj++)
 	//	std::cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << std::endl;
 	//std::cout << residual << std::endl << std::endl;
@@ -712,7 +727,7 @@ void sspemdd_sequential::fill_data_compute_residual( search_space_point &point)
 		std::cout << std::endl;
 		std::cout << std::endl << "New residual minimum:" << std::endl;
 		std::cout << "err = " << record_point.residual << ", parameters:" << std::endl;
-		std::cout << "c_b = " << record_point.cb 
+		std::cout << "c_b = " << record_point.cb
 				  << ", rho_b = " << record_point.rhob
 				  << ", tau = " << record_point.tau
 			      << ", R = " << record_point.R << std::endl;
@@ -744,19 +759,19 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 	for (unsigned i = 0; i < nrhob; i++)
 		tmp_vec[i] = rhob1 + (nrhob == 1 ? 0 : i*(rhob2 - rhob1) / (nrhob - 1));
 	search_space.push_back(tmp_vec);
-	
+
 	// fill search_space_variables[2] with R
 	tmp_vec.resize(nR);
 	for (unsigned i = 0; i < nR; i++)
 		tmp_vec[i] = R1 + (nR == 1 ? 0 : i*(R2 - R1) / (nR - 1));
 	search_space.push_back(tmp_vec);
-	
+
 	// fill search_space_variables[3] with tau
 	tmp_vec.resize(ntau);
 	for (unsigned i = 0; i < ntau; i++)
 		tmp_vec[i] = tau1 + (ntau == 1 ? 0 : i*(tau2 - tau1) / (ntau - 1));
 	search_space.push_back(tmp_vec);
-	
+
 	// fill search_space_variables[4-...] with cws
 	tmp_vec.resize(ncpl);
 	std::vector<double> restricted_cws1{ 1490 };
@@ -792,7 +807,7 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 	for (unsigned variable_index = 0; variable_index < search_space.size(); variable_index++)
 		cur_point_indexes[variable_index] = rand() % search_space[variable_index].size(); // get random index
 	record_point_indexes = cur_point_indexes;
-	
+
 	// calculate residual in the start point
 	cur_point = fromPointIndexesToPoint( cur_point_indexes );
 	fill_data_compute_residual( cur_point ); // calculated residual is written to cur_point
@@ -806,7 +821,7 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 	unsigned index_from;
 	double old_record_residual;
 	unsigned rand_numb;
-	
+
 	for (unsigned run_index = 0; run_index < iterated_local_search_runs; run_index++) {
 		std::cout << "run " << run_index << " of ILS" << std::endl;
 		do { // do while local min not reached
@@ -851,7 +866,7 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 				} while (isRecordUpdateInDimension);
 			}
 		} while (!isLocalMin);
-		
+
 		//std::cout << "record_point.residual " << record_point.residual << std::endl;
 		//std::cout << "global_record_point.residual " << global_record_point.residual << std::endl;
 		if ( record_point.residual < global_record_point.residual ) {
@@ -860,7 +875,7 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 			std::cout << "on run_index " << run_index << " new global minimum with residual "
 				      << global_record_point.residual << std::endl;
 		}
-		
+
 		std::cout << "checked_points_number " << checked_points_number << std::endl;
 		std::cout << std::endl << "*** local minimum in hill climbing" << std::endl;
 		std::cout << "local record of residual " << record_point.residual << std::endl;
@@ -881,14 +896,14 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 			std::cout << cur_point_indexes[variable_index] << " ";
 		}
 		std::cout << std::endl;
-		
+
 		cur_point = fromPointIndexesToPoint(cur_point_indexes);
 		fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
 		record_point = cur_point;
 		record_point_indexes = cur_point_indexes;
 	}
 	std::cout << "total checked_points_number " << checked_points_number << std::endl;
-	
+
 	// during optimization record_point is a local minimum, finaly it's the global minimum
 	record_point = global_record_point;
 }
