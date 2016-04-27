@@ -110,15 +110,15 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
     //2016.04.27:Pavel: RMS
 	residual = sqrt(residual/nRes);
 
-	std::ofstream ofile("R_mgv");
+	/*std::ofstream ofile("R_mgv");
 	for (unsigned ii = 0; ii < freqs.size(); ii++) {
-		mnumb = experimental_mode_numbers.at(ii);
+		mnumb = mode_numbers.at(ii);
 		ofile << freqs.at(ii) << "\t";
 		for (unsigned jj = 0; jj < mnumb; jj++)
 			ofile << R / modal_group_velocities[ii][jj] << "\t";
 		ofile << std::endl;
 	}
-	ofile.close();
+	ofile.close();*/
 
 	return residual;
 }
