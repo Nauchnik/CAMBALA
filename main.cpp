@@ -266,7 +266,7 @@ int main(int argc, char **argv)
 		ncb = 61;
 		rhob1 = 1.4;
 		rhob2 = 2.0;
-		nrhob = 9;
+		nrhob = 13;
 		tau1 = -0.015;
 		tau2 = 0.015;
 		ntau = 301;
