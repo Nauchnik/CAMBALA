@@ -180,7 +180,7 @@ int main(int argc, char **argv)
 	bool isHomogeneousWaterLayer = false;
 
 	unsigned n_layers_w;
-	if (myFileName == "8000_extracted.txt") {
+	if (myFileName.find("8000_extracted") != std::string::npos) {
 		isHomogeneousWaterLayer = true;
 		n_layers_w = 1;
 	}
