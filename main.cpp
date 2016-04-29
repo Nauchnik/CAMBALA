@@ -269,7 +269,7 @@ int main(int argc, char **argv)
 		nrhob = 13;
 		tau1 = -0.015;
 		tau2 = 0.015;
-		ntau = 301;
+		ntau = 61;
 		R1 = R2 = 8000;
 		nR = 1;
 		cw1 = cw2 = 1500;
