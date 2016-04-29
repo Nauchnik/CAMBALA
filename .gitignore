@@ -3,6 +3,7 @@
 
 # .VC.db
 *.VC.db
+SSPEMDD.VC.db
 
 # User-specific files
 *.suo
