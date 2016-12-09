@@ -270,6 +270,7 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, //
 		break;
 	case 4:
 		coeff_extrap.assign({ -1 / double(6), 4, -13.5, 32 / double(3) });
+		break;
 	default:
 		ordRich = 3;
 		coeff_extrap.assign({ 0.5, -4, 4.5 });
