@@ -3,24 +3,22 @@
 #include <iostream>
 #include <time.h>
 
-//tau_comment: tau comes here as a new inversion parameter
-
 sspemdd_sequential::sspemdd_sequential() :
 	ncb(1),
 	nrhob(1),
-	nR(1),
+	nR(41),
 	ntau(1),
 	ncpl(1),
-	cb1(0.0),
-	cb2(0.0),
-	cw1(0.0),
-	cw2(0.0),
-	R1(0.0),
-	R2(0.0),
+	cb1(2000.0),
+	cb2(2000.0),
+	cw1(1450.0),
+	cw2(1500.0),
+	R1(3400.0),
+	R2(3600.0),
 	tau1(0.0),
 	tau2(0.0),
-	rhob1(0.0),
-	rhob2(0.0),
+	rhob1(2.0),
+	rhob2(2.0),
 	n_layers_w(1),
 	launchType(0),
 	iterated_local_search_runs(10),
@@ -658,7 +656,6 @@ void sspemdd_sequential::init()
 	record_point.residual = START_RESIDUAL;
 
 	loadValuesToSearchSpaceVariables();
-
 }
 
 void sspemdd_sequential::report_final_result()
@@ -708,7 +705,7 @@ void sspemdd_sequential::findGlobalMinBruteForce()
 	}
 }
 
-void sspemdd_sequential::fill_data_compute_residual( search_space_point &point)
+double sspemdd_sequential::fill_data_compute_residual( search_space_point &point)
 { // finally specify sound speed in water
   // the parameters are transformed into the arrays c1s, c2s, rhos
 	for (unsigned jj = 0; jj < n_layers_w - 1; jj++) {
@@ -748,6 +745,8 @@ void sspemdd_sequential::fill_data_compute_residual( search_space_point &point)
 			std::cout << x << " ";
 		std::cout << std::endl;
 	}
+
+	return point.residual;
 }
 
 void sspemdd_sequential::loadValuesToSearchSpaceVariables()
@@ -949,4 +948,108 @@ search_space_point sspemdd_sequential::fromDoubleVecToPoint(std::vector<double> 
 double sspemdd_sequential::getRecordResidual()
 {
 	return record_point.residual;
+}
+
+void sspemdd_sequential::readDataFromFile(std::string myFileName, const int launchT) {
+	launchType = launchT;
+	std::ifstream myFileSynth(myFileName.c_str());
+	std::stringstream myLineStream;
+	std::string myLine;
+	double buff;
+	std::vector<double> buffvect;
+	// reading the "experimental" delay time data from a file
+	while (std::getline(myFileSynth, myLine)) {
+		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading
+		myLineStream << myLine;
+		myLineStream >> buff;
+		freqs.push_back(buff);
+
+		buffvect.clear();
+		while (!myLineStream.eof()) {
+			myLineStream >> buff;
+			buffvect.push_back(buff);
+			mode_numbers.push_back((unsigned)buffvect.size());
+		}
+
+		modal_delays.push_back(buffvect);
+		myLineStream.str(""); myLineStream.clear();
+	}
+	myFileSynth.close();
+
+	isHomogeneousWaterLayer = false;
+	if (myFileName.find("8000_extracted") != std::string::npos) {
+		isHomogeneousWaterLayer = true;
+		n_layers_w = 1;
+	}
+	else
+		n_layers_w = 5;
+
+	unsigned ppm = 2;
+	double h = 90;
+	double H = 600;
+	double layer_thickness_w = h / n_layers_w;
+	
+	for (unsigned jj = 1; jj <= n_layers_w; jj++)
+		depths.push_back(layer_thickness_w*jj);
+	depths.push_back(H);
+
+	c1s.resize(n_layers_w + 1);
+	for (auto &x : c1s)
+		x = 1500;
+	c2s.resize(n_layers_w + 1);
+	for (auto &x : c2s)
+		x = 1500;
+	rhos.resize(n_layers_w + 1);
+	for (auto &x : rhos)
+		x = 1;
+	Ns_points.resize(n_layers_w + 1);
+	for (auto &x : Ns_points)
+		x = (unsigned)round(ppm*layer_thickness_w);
+	Ns_points.at(n_layers_w) = (unsigned)round(ppm*(H - h));
+
+	if (isHomogeneousWaterLayer) {
+		cb1 = 1600;
+		cb2 = 1900;
+		ncb = 61;
+		rhob1 = 1.4;
+		rhob2 = 2.0;
+		nrhob = 13;
+		tau1 = -0.015;
+		tau2 = 0.015;
+		ntau = 61;
+		R1 = R2 = 8000;
+		nR = 1;
+		cw1 = cw2 = 1500;
+		ncpl = 1;
+	}
+	else {
+		// set other parameters of the search space
+		if ((launchType >= 4) && (launchType <= 6)) {
+			nR = 1;
+			R1 = 3500;
+			R2 = 3500;
+		}
+
+		if ((launchType == 5) || (launchType == 7)) {
+			cb1 = cb2 = 3000;
+			ncb = 1;
+			rhob1 = rhob2 = 3;
+			nrhob = 1;
+		}
+		else if ((launchType == 6) || (launchType == 8)) {
+			cb1 = cb2 = 4000;
+			ncb = 1;
+			rhob1 = rhob2 = 4;
+			nrhob = 1;
+		}
+	}
+
+	std::cout << "Parameters :" << std::endl;
+	std::cout << "ncpl " << ncpl << std::endl;
+	std::cout << "n_layers_w " << n_layers_w << std::endl;
+	std::cout << "nR " << nR << std::endl;
+	std::cout << "ntau " << ntau << std::endl;
+	std::cout << "nrhob " << nrhob << std::endl;
+	std::cout << "ncb " << ncb << std::endl;
+	std::cout << "isHomogeneousWaterLayer " << isHomogeneousWaterLayer << std::endl;
 }

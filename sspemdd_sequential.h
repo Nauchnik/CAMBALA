@@ -53,8 +53,10 @@ public:
 	std::vector<double> rhos;
 	std::vector<unsigned> Ns_points;
 	int verbosity;
+	
+	void readDataFromFile(std::string myFileName, const int launchT);
 	double getRecordResidual();
-	void fill_data_compute_residual(search_space_point &point);
+	double fill_data_compute_residual(search_space_point &point);
 
 	// functions by Pavel
 	//tau_comment: added tau to the arguments of compute_modal_delays_residual_uniform()
