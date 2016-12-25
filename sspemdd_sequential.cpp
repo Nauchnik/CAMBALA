@@ -821,6 +821,7 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 
 	// calculate residual in the start point
 	cur_point = fromPointIndexesToPoint( cur_point_indexes );
+
 	fill_data_compute_residual( cur_point ); // calculated residual is written to cur_point
 	global_record_point = record_point;
 	global_record_point_indexes = record_point_indexes;
@@ -979,6 +980,10 @@ void sspemdd_sequential::readDataFromFile(std::string myFileName, const int laun
 	isHomogeneousWaterLayer = false;
 	if (myFileName.find("8000_extracted") != std::string::npos) {
 		isHomogeneousWaterLayer = true;
+		if (launchType != HOMOG_WATER_LAYER_LAUNCH_TYPE) {
+			launchType = HOMOG_WATER_LAYER_LAUNCH_TYPE;
+			std::cout << "launchType was changed to " << launchType << std::endl;
+		}
 		n_layers_w = 1;
 	}
 	else

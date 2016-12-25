@@ -34,8 +34,8 @@ int main(int argc, char **argv)
 
 #ifdef _DEBUG
 	argc = 5;
-	//argv[1] = "8000_extracted.txt";
-	argv[1] = "dtimes_synth_thcline_hf.txt";
+	argv[1] = "8000_extracted.txt";
+	//argv[1] = "dtimes_synth_thcline_hf.txt";
 	argv[2] = "7"; // launchType
 	argv[3] = "6"; // ncpl
 	argv[4] = "10"; // iterated_local_search_runs
@@ -50,8 +50,10 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	
-	if (argc >= 3)
+	if (argc >= 3) {
 		launchType = atoi(argv[2]);
+		std::cout << "launchType " << launchType << std::endl;
+	}
 
 	if (argc >= 4) {
 		ncpl = atoi(argv[3]);

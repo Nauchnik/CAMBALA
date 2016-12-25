@@ -9,6 +9,7 @@
 
 const double LOCAL_M_PI = 3.14159265358979323846;
 const double START_RESIDUAL = 1e100;
+const int HOMOG_WATER_LAYER_LAUNCH_TYPE = 0;
 
 struct search_space_point
 {
