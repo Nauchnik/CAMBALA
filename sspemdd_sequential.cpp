@@ -121,6 +121,78 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 	return residual;
 }
 
+//2016.12.31:Pavel: a residual functions where the "experimental" spectrogram modulud is taken as the weight coefficients
+//this is a simplest nonuniform residual function
+
+double sspemdd_sequential::compute_modal_delays_residual_weighted(std::vector<double> &freqs,
+	std::vector<double> &depths,
+	std::vector<double> &c1s,
+	std::vector<double> &c2s,
+	std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points,
+	double R,
+	double tau,
+	std::vector<std::vector<double>> &experimental_delays,
+        std::vector<std::vector<double>> &weight_coeffs,   //2016.12.31:Pavel: this is a key parameter controlling the weights
+	std::vector<unsigned> &experimental_mode_numbers
+	)
+{
+	unsigned rord = 3;
+	unsigned flTrappedOnly = 1;
+	double deltaf = 0.05;
+	double residual = 0;
+	unsigned mnumb;
+	double mdelay;
+	//2016.04.27:Pavel: now we use RMS as the residual
+    unsigned nRes = 0;
+
+
+	std::vector<std::vector<double>> modal_group_velocities;
+	std::vector<unsigned> mode_numbers;
+
+	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, flTrappedOnly, rord, modal_group_velocities, mode_numbers);
+
+	for (unsigned ii = 0; ii<freqs.size(); ii++) {
+		//2016.04.27:Pavel: mnumb = std::min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
+		mnumb = experimental_mode_numbers.at(ii);
+		for (unsigned jj = 0; jj<mnumb; jj++) {
+			if (experimental_delays[ii][jj]>0) {
+                nRes = nRes + 1;
+                //2016.04.27:Pavel:
+                if ( jj<mode_numbers.at(ii) ) {
+                    mdelay = R / modal_group_velocities[ii][jj];
+                }
+                else if ( (ii+1<freqs.size()) && (jj<mode_numbers.at(ii+1))  ) {
+                    mdelay = R / modal_group_velocities[ii+1][jj];
+                }
+                else {
+                    mdelay = 0;
+                }
+				//tau_comment: this is the very place where it comes into play in the computation
+				//please check the search block!
+                                //2016.12.31:Pavel: weight coefficients are included
+				residual = residual + weight_coeffs[ii][jj]*pow(experimental_delays[ii][jj] + tau - mdelay, 2);
+			}
+		}
+	}
+    //2016.04.27:Pavel: RMS
+	residual = sqrt(residual/nRes);
+
+	/*std::ofstream ofile("R_mgv");
+	for (unsigned ii = 0; ii < freqs.size(); ii++) {
+		mnumb = mode_numbers.at(ii);
+		ofile << freqs.at(ii) << "\t";
+		for (unsigned jj = 0; jj < mnumb; jj++)
+			ofile << R / modal_group_velocities[ii][jj] << "\t";
+		ofile << std::endl;
+	}
+	ofile.close();*/
+
+	return residual;
+}
+
+
+
 int sspemdd_sequential::compute_wnumbers_bb(std::vector<double> &freqs,
 	double deltaf,
 	std::vector<double> &depths,
