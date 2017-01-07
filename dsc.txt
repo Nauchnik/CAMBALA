@@ -1,0 +1,39 @@
+Данные для ЛЧМ-сигнала, в волноводе с данными м. Шульца.
+
+10_ac_modes_R7km.txt -- данные для разных глубин приема (первое число -- глубина приемника).
+
+
+8000_ac_modes_zr25.txt -- данные для разных R (первое число), глубина приемника фиксирована, равна 25 м.
+
+
+чирп:
+
+f0 = 40;
+f1 = 160;
+nperiod = 5;
+Tchirp = 2*nperiod/(f1 + f0);
+
+
+ft_s = sin(2*pi*( f0*tt + (f1-f0)*tt.^2/(2*Tchirp) ));
+
+
+ft_s( tt>Tchirp ) = 0;
+
+
+гидрология:
+
+zh = 0:2:MP.LayersData(2,1);
+HydroExp = dlmread('sample_hydro.txt');
+[~,  ii] = max(HydroExp(:,4));
+jj = 1;
+zExp = HydroExp(jj:ii,4);
+cExp = HydroExp(jj:ii,1);
+
+ch = interp1(zExp,cExp,zh,'nearest','extrap');
+
+MP.HydrologyData = [zh.' ch.'];
+
+
+дно:
+
+MP.LayersData = [[0 1500 1500 1 1 0 0]; [50 1500 1700 1 1.7 0 0] ];
