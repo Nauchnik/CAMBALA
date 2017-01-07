@@ -9,7 +9,6 @@
 
 const double LOCAL_M_PI = 3.14159265358979323846;
 const double START_RESIDUAL = 1e100;
-const int HOMOG_WATER_LAYER_LAUNCH_TYPE = 0;
 
 struct search_space_point
 {
@@ -43,8 +42,7 @@ public:
 	unsigned n_layers_w;
 	int launchType;
 	unsigned iterated_local_search_runs;
-	bool isHomogeneousWaterLayer;
-	std::vector<double> cws_fixed;
+	bool isSpeedNearSurfaceKnown;
 	std::vector<unsigned> mode_numbers;
 	std::vector<std::vector<double>> modal_delays;
 	std::vector<double> freqs;
@@ -53,18 +51,26 @@ public:
 	std::vector<double> c2s;
 	std::vector<double> rhos;
 	std::vector<unsigned> Ns_points;
+	std::vector<std::vector<double>> weight_coeffs;
 	int verbosity;
 	
-	void readDataFromFile(std::string myFileName, const int launchT);
+	void readInputDataFromFiles(std::string dtimesFileName, std::string spmagFileName, const int launchT);
 	double getRecordResidual();
 	double fill_data_compute_residual(search_space_point &point);
 
 	// functions by Pavel
 	//tau_comment: added tau to the arguments of compute_modal_delays_residual_uniform()
-	double compute_modal_delays_residual_uniform(std::vector<double> &freqs, std::vector<double> &depths, std::vector<double> &c1s,
-		std::vector<double> &c2s, std::vector<double> &rhos, std::vector<unsigned> &Ns_points,
-		double R, double tau, std::vector<std::vector<double>> &experimental_delays,
-		std::vector<unsigned> &experimental_mode_numbers);
+	double compute_modal_delays_residual_uniform(std::vector<double> &freqs, std::vector<double> &depths, 
+		std::vector<double> &c1s, std::vector<double> &c2s, std::vector<double> &rhos, 
+		std::vector<unsigned> &Ns_points, double R, double tau, 
+		std::vector<std::vector<double>> &experimental_delays, std::vector<unsigned> &experimental_mode_numbers);
+
+	double sspemdd_sequential::compute_modal_delays_residual_weighted(std::vector<double> &freqs,
+		std::vector<double> &depths, std::vector<double> &c1s, std::vector<double> &c2s,
+		std::vector<double> &rhos, std::vector<unsigned> &Ns_points, double R,
+		double tau, std::vector<std::vector<double>> &experimental_delays,
+		std::vector<std::vector<double>> &weight_coeffs, std::vector<unsigned> &experimental_mode_numbers
+	);
 
 	std::vector<double> compute_wnumbers(double &omeg, std::vector<double> &c, std::vector<double> &rho,
 		std::vector<unsigned> &interface_idcs, std::vector<double> &meshsizes,

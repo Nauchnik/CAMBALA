@@ -26,24 +26,27 @@ int main(int argc, char **argv)
 {
 	unsigned ncpl = 0; // search mesh within each water layer
 
-	std::string myFileName = "8000_extracted.txt";
-	int launchType = 0; // 0 - deafult; 1 - fixed cw1=1490; 2 - cw1>cw2>...>cwn; 3 - both 1 and 2
+	std::string dtimesFileName = "50_ac_modes_R7km_dtimes.txt";
+	std::string spmagFileName = "50_ac_modes_R7km_spmag.txt";
+	int launchType = 11; // 0 - deafult; 1 - fixed cw1=1490; 2 - cw1>cw2>...>cwn; 3 - both 1 and 2
 	sspemdd_sequential sspemdd_seq;
 	unsigned iterated_local_search_runs = 10;
 	int verbosity = 0;
 
 #ifdef _DEBUG
 	argc = 5;
-	argv[1] = "8000_extracted.txt";
+	argv[1] = "50_ac_modes_R7km_dtimes.txt";
 	//argv[1] = "dtimes_synth_thcline_hf.txt";
-	argv[2] = "7"; // launchType
-	argv[3] = "6"; // ncpl
+	argv[2] = "11"; // launchType
+	argv[3] = "21"; // ncpl
 	argv[4] = "10"; // iterated_local_search_runs
 #endif
+
+	std::cout << "spmagFileName " << spmagFileName << std::endl;
 	
 	if (argc >= 2) {
-		myFileName = argv[1];
-		std::cout << "myFileName " << myFileName << std::endl;
+		dtimesFileName = argv[1];
+		std::cout << "dtimesFileName " << dtimesFileName << std::endl;
 	}
 	else {
 		std::cout << "Usage : thcline_file [launchType] [ncpl] [iterated_local_search_runs] [verbosity]" << std::endl;
@@ -82,7 +85,7 @@ int main(int argc, char **argv)
 	sspemdd_seq.iterated_local_search_runs = iterated_local_search_runs;
 	sspemdd_seq.verbosity = verbosity;
 	// read modal_delays, mode_numbers and freqs, then determine the search space
-	sspemdd_seq.readDataFromFile(myFileName, launchType);
+	sspemdd_seq.readInputDataFromFiles(dtimesFileName, spmagFileName, launchType);
 	sspemdd_seq.init();
 	
 	//sspemdd_seq.findGlobalMinBruteForce();
@@ -107,7 +110,8 @@ int main(int argc, char **argv)
 	sspemdd_par.corecount = corecount;
 
 	// read modal_delays, mode_numbers and freqs, then determine the search space
-	sspemdd_par.readDataFromFile(myFileName, launchType);
+	sspemdd_par.readDtimesFromFile(dtimesFileName, launchType);
+	sspemdd_par.readSpmagFromFile(spmagFileName);
 	
 	sspemdd_par.ncpl = ncpl;
 	sspemdd_par.iterated_local_search_runs = iterated_local_search_runs;
@@ -116,7 +120,7 @@ int main(int argc, char **argv)
 	sspemdd_par.init();
 	double cur_time = MPI_Wtime();
 	sspemdd_par.MPI_main();
-	std::cout << "MPI_main() total time " << MPI_Wtimr() - cur_time << " s" << std::endl;
+	std::cout << "MPI_main() total time " << MPI_Wtime() - cur_time << " s" << std::endl;
 #endif
 	
 	return 0;

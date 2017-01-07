@@ -23,7 +23,7 @@ sspemdd_sequential::sspemdd_sequential() :
 	launchType(0),
 	iterated_local_search_runs(10),
 	verbosity(0),
-	isHomogeneousWaterLayer (false),
+	isSpeedNearSurfaceKnown (false),
 	N_total (1)
 {
 	record_point.cb = 1e50;
@@ -76,7 +76,6 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 	double mdelay;
 	//2016.04.27:Pavel: now we use RMS as the residual
     unsigned nRes = 0;
-
 
 	std::vector<std::vector<double>> modal_group_velocities;
 	std::vector<unsigned> mode_numbers;
@@ -133,7 +132,7 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(std::vector<do
 	double R,
 	double tau,
 	std::vector<std::vector<double>> &experimental_delays,
-        std::vector<std::vector<double>> &weight_coeffs,   //2016.12.31:Pavel: this is a key parameter controlling the weights
+    std::vector<std::vector<double>> &weight_coeffs,   //2016.12.31:Pavel: this is a key parameter controlling the weights
 	std::vector<unsigned> &experimental_mode_numbers
 	)
 {
@@ -145,7 +144,6 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(std::vector<do
 	double mdelay;
 	//2016.04.27:Pavel: now we use RMS as the residual
     unsigned nRes = 0;
-
 
 	std::vector<std::vector<double>> modal_group_velocities;
 	std::vector<unsigned> mode_numbers;
@@ -176,7 +174,8 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(std::vector<do
 		}
 	}
     //2016.04.27:Pavel: RMS
-	residual = sqrt(residual/nRes);
+	double d = (double)(residual / (double)nRes);
+	residual = sqrt(d);
 
 	/*std::ofstream ofile("R_mgv");
 	for (unsigned ii = 0; ii < freqs.size(); ii++) {
@@ -190,8 +189,6 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(std::vector<do
 
 	return residual;
 }
-
-
 
 int sspemdd_sequential::compute_wnumbers_bb(std::vector<double> &freqs,
 	double deltaf,
@@ -700,23 +697,15 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 
 void sspemdd_sequential::init()
 {
+	if ((launchType == 1) || (launchType == 3) || (launchType == 7) || 
+		(launchType == 8) || (launchType == 13))
+		isSpeedNearSurfaceKnown = true;
+	
 	N_total = (unsigned long long)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb*ntau;
-	if ((launchType == 1) || (launchType == 3) || (launchType == 7) || (launchType == 8))
+	if (isSpeedNearSurfaceKnown)
 		N_total /= ncpl;
 	std::cout << "N_total " << N_total << std::endl;
 
-	// TODO move to constructor
-	std::vector<double> tmp_vec;
-	if (isHomogeneousWaterLayer)
-		tmp_vec.push_back(cw1);
-	else {
-		tmp_vec.push_back(1490);
-		tmp_vec.push_back(1490);
-		tmp_vec.push_back(1480);
-		tmp_vec.push_back(1465);
-		tmp_vec.push_back(1460);
-	}
-	cws_fixed = tmp_vec; // use when ncpl = 1
 	record_point.cws.resize(n_layers_w);
 	for (unsigned i = 0; i < record_point.cws.size(); i++)
 		record_point.cws[i] = cw2;
@@ -796,8 +785,11 @@ double sspemdd_sequential::fill_data_compute_residual( search_space_point &point
 	//	std::cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << std::endl;
 	//std::cout << residual << std::endl << std::endl;
 	//tau_comment: added tau to function call
-	point.residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, point.R, point.tau, modal_delays, mode_numbers);
-
+	//point.residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, 
+	//					point.R, point.tau, modal_delays, mode_numbers);
+	point.residual = compute_modal_delays_residual_weighted(freqs, depths, c1s, c2s, rhos, Ns_points, 
+						point.R, point.tau, modal_delays, weight_coeffs, mode_numbers);
+	
 	if (point.residual < record_point.residual) {
 		record_point.residual = point.residual;
 		record_point.cb       = point.cb;
@@ -857,10 +849,10 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 
 	// fill search_space_variables[4-...] with cws
 	tmp_vec.resize(ncpl);
-	std::vector<double> restricted_cws1{ 1490 };
+	std::vector<double> restricted_cws1{ 1499.772 }; // known real speed near surface
 	for (unsigned i = 0; i < ncpl; i++)
 		tmp_vec[i] = cw1 + (ncpl == 1 ? 0 : i*(cw2 - cw1) / (ncpl - 1));
-	if ((launchType == 1) || (launchType == 3) || (launchType == 7) || (launchType == 8))
+	if (isSpeedNearSurfaceKnown)
 		search_space.push_back(restricted_cws1); // fixed first cws in this case
 	else
 		search_space.push_back(tmp_vec);
@@ -1023,15 +1015,18 @@ double sspemdd_sequential::getRecordResidual()
 	return record_point.residual;
 }
 
-void sspemdd_sequential::readDataFromFile(std::string myFileName, const int launchT) {
+void sspemdd_sequential:: readInputDataFromFiles(std::string dtimesFileName, 
+											    std::string spmagFileName, 
+												const int launchT)
+{	
 	launchType = launchT;
-	std::ifstream myFileSynth(myFileName.c_str());
+	std::ifstream dtimesFile(dtimesFileName.c_str());
 	std::stringstream myLineStream;
 	std::string myLine;
 	double buff;
 	std::vector<double> buffvect;
 	// reading the "experimental" delay time data from a file
-	while (std::getline(myFileSynth, myLine)) {
+	while (std::getline(dtimesFile, myLine)) {
 		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading
 		myLineStream << myLine;
 		myLineStream >> buff;
@@ -1047,17 +1042,10 @@ void sspemdd_sequential::readDataFromFile(std::string myFileName, const int laun
 		modal_delays.push_back(buffvect);
 		myLineStream.str(""); myLineStream.clear();
 	}
-	myFileSynth.close();
+	dtimesFile.close();
 
-	isHomogeneousWaterLayer = false;
-	if (myFileName.find("8000_extracted") != std::string::npos) {
-		isHomogeneousWaterLayer = true;
-		if (launchType != HOMOG_WATER_LAYER_LAUNCH_TYPE) {
-			launchType = HOMOG_WATER_LAYER_LAUNCH_TYPE;
-			std::cout << "launchType was changed to " << launchType << std::endl;
-		}
+	if ( launchType == 11 )
 		n_layers_w = 1;
-	}
 	else
 		n_layers_w = 5;
 
@@ -1084,7 +1072,7 @@ void sspemdd_sequential::readDataFromFile(std::string myFileName, const int laun
 		x = (unsigned)round(ppm*layer_thickness_w);
 	Ns_points.at(n_layers_w) = (unsigned)round(ppm*(H - h));
 
-	if (isHomogeneousWaterLayer) {
+	if (launchType == 11) {
 		cb1 = 1600;
 		cb2 = 1900;
 		ncb = 61;
@@ -1099,8 +1087,7 @@ void sspemdd_sequential::readDataFromFile(std::string myFileName, const int laun
 		cw1 = cw2 = 1500;
 		ncpl = 1;
 	}
-	else {
-		// set other parameters of the search space
+	else { // set other parameters of the search space
 		if ((launchType >= 4) && (launchType <= 6)) {
 			nR = 1;
 			R1 = 3500;
@@ -1119,8 +1106,35 @@ void sspemdd_sequential::readDataFromFile(std::string myFileName, const int laun
 			rhob1 = rhob2 = 4;
 			nrhob = 1;
 		}
+		else if (launchType == 12) { // r = const
+			cb1 = cb2 = 1700;
+			ncb = 1;
+			rhob1 = rhob2 = 1.7;
+			nrhob = 1;
+			tau1 = tau2 = 0;
+			ntau = 1;
+			R1 = R2 = 7000;
+			nR = 1;
+			cw1 = 1450;
+			cw2 = 1500;
+			ncpl = 21;
+		}
+		else if (launchType == 13) { // c0 = const
+			cb1 = cb2 = 1700;
+			ncb = 1;
+			rhob1 = rhob2 = 1.7;
+			nrhob = 1;
+			tau1 = tau2 = 0;
+			ntau = 1;
+			R1 = 6900;
+			R2 = 7100;
+			nR = 41;
+			cw1 = 1450;
+			cw2 = 1500;
+			ncpl = 21;
+		}
 	}
-
+	
 	std::cout << "Parameters :" << std::endl;
 	std::cout << "ncpl " << ncpl << std::endl;
 	std::cout << "n_layers_w " << n_layers_w << std::endl;
@@ -1128,5 +1142,32 @@ void sspemdd_sequential::readDataFromFile(std::string myFileName, const int laun
 	std::cout << "ntau " << ntau << std::endl;
 	std::cout << "nrhob " << nrhob << std::endl;
 	std::cout << "ncb " << ncb << std::endl;
-	std::cout << "isHomogeneousWaterLayer " << isHomogeneousWaterLayer << std::endl;
+
+	weight_coeffs.clear();
+	if (spmagFileName == "")
+		return;
+	std::ifstream spmagFile(spmagFileName.c_str());
+	buffvect.clear();
+
+	while (std::getline(spmagFile, myLine)) {
+		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading
+		myLineStream << myLine;
+		myLineStream >> buff;
+
+		buffvect.clear();
+		while (!myLineStream.eof()) {
+			myLineStream >> buff;
+			buffvect.push_back(buff);
+		}
+
+		weight_coeffs.push_back(buffvect);
+		myLineStream.str(""); myLineStream.clear();
+	}
+	spmagFile.close();
+	std::cout << "weight_coeffs first 10 lines : " << std::endl;
+	for (unsigned i = 0; i < 10; i++) {
+		for (auto &x : weight_coeffs[i])
+			std::cout << x << " ";
+		std::cout << std::endl;
+	}
 }
