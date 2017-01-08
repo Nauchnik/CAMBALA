@@ -53,10 +53,6 @@ public:
 	std::vector<unsigned> Ns_points;
 	std::vector<std::vector<double>> weight_coeffs;
 	int verbosity;
-	
-	void readInputDataFromFiles(std::string dtimesFileName, std::string spmagFileName, const int launchT);
-	double getRecordResidual();
-	double fill_data_compute_residual(search_space_point &point);
 
 	// functions by Pavel
 	//tau_comment: added tau to the arguments of compute_modal_delays_residual_uniform()
@@ -96,7 +92,10 @@ public:
 
 	// functions by Oleg
 	std::vector<std::vector<double>> search_space; // values of variables which form a search space
+	void readInputDataFromFiles(std::string dtimesFileName, std::string spmagFileName, const int launchT);
 	void init();
+	double getRecordResidual();
+	double fill_data_compute_residual(search_space_point &point);
 	void findGlobalMinBruteForce();
 	void loadValuesToSearchSpaceVariables();
 	void findLocalMinHillClimbing();

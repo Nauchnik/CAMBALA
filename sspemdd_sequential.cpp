@@ -701,6 +701,8 @@ void sspemdd_sequential::init()
 		(launchType == 8) || (launchType == 13))
 		isSpeedNearSurfaceKnown = true;
 	
+	std::cout << "isSpeedNearSurfaceKnown " << isSpeedNearSurfaceKnown << std::endl;
+	
 	N_total = (unsigned long long)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb*ntau;
 	if (isSpeedNearSurfaceKnown)
 		N_total /= ncpl;
@@ -786,7 +788,7 @@ double sspemdd_sequential::fill_data_compute_residual( search_space_point &point
 	//std::cout << residual << std::endl << std::endl;
 	//tau_comment: added tau to function call
 	//point.residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, 
-	//					point.R, point.tau, modal_delays, mode_numbers);
+	//				point.R, point.tau, modal_delays, mode_numbers);
 	point.residual = compute_modal_delays_residual_weighted(freqs, depths, c1s, c2s, rhos, Ns_points, 
 						point.R, point.tau, modal_delays, weight_coeffs, mode_numbers);
 	
@@ -859,6 +861,8 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 	// other layers
 	for (unsigned i = 1; i < n_layers_w; i++)
 		search_space.push_back(tmp_vec);
+	
+	std::cout << "loadValuesToSearchSpaceVariables() finished" << std::endl;
 }
 
 bool sspemdd_sequential::is_valid_search_space_point(search_space_point point)
@@ -1072,7 +1076,24 @@ void sspemdd_sequential:: readInputDataFromFiles(std::string dtimesFileName,
 		x = (unsigned)round(ppm*layer_thickness_w);
 	Ns_points.at(n_layers_w) = (unsigned)round(ppm*(H - h));
 
-	if (launchType == 11) {
+	if ((launchType >= 4) && (launchType <= 6)) {
+		nR = 1;
+		R1 = 3500;
+		R2 = 3500;
+	}
+	if ((launchType == 5) || (launchType == 7)) {
+		cb1 = cb2 = 3000;
+		ncb = 1;
+		rhob1 = rhob2 = 3;
+		nrhob = 1;
+	}
+	else if ((launchType == 6) || (launchType == 8)) {
+		cb1 = cb2 = 4000;
+		ncb = 1;
+		rhob1 = rhob2 = 4;
+		nrhob = 1;
+	}
+	else if (launchType == 11) {
 		cb1 = 1600;
 		cb2 = 1900;
 		ncb = 61;
@@ -1087,62 +1108,52 @@ void sspemdd_sequential:: readInputDataFromFiles(std::string dtimesFileName,
 		cw1 = cw2 = 1500;
 		ncpl = 1;
 	}
-	else { // set other parameters of the search space
-		if ((launchType >= 4) && (launchType <= 6)) {
-			nR = 1;
-			R1 = 3500;
-			R2 = 3500;
-		}
-
-		if ((launchType == 5) || (launchType == 7)) {
-			cb1 = cb2 = 3000;
-			ncb = 1;
-			rhob1 = rhob2 = 3;
-			nrhob = 1;
-		}
-		else if ((launchType == 6) || (launchType == 8)) {
-			cb1 = cb2 = 4000;
-			ncb = 1;
-			rhob1 = rhob2 = 4;
-			nrhob = 1;
-		}
-		else if (launchType == 12) { // r = const
-			cb1 = cb2 = 1700;
-			ncb = 1;
-			rhob1 = rhob2 = 1.7;
-			nrhob = 1;
-			tau1 = tau2 = 0;
-			ntau = 1;
-			R1 = R2 = 7000;
-			nR = 1;
-			cw1 = 1450;
-			cw2 = 1500;
-			ncpl = 21;
-		}
-		else if (launchType == 13) { // c0 = const
-			cb1 = cb2 = 1700;
-			ncb = 1;
-			rhob1 = rhob2 = 1.7;
-			nrhob = 1;
-			tau1 = tau2 = 0;
-			ntau = 1;
-			R1 = 6900;
-			R2 = 7100;
-			nR = 41;
-			cw1 = 1450;
-			cw2 = 1500;
-			ncpl = 21;
-		}
+	else if (launchType == 12) { // r = const
+		cb1 = cb2 = 1700;
+		ncb = 1;
+		rhob1 = rhob2 = 1.7;
+		nrhob = 1;
+		tau1 = tau2 = 0;
+		ntau = 1;
+		R1 = R2 = 7000;
+		nR = 1;
+		cw1 = 1450;
+		cw2 = 1500;
+		ncpl = 21;
+	}
+	else if (launchType == 13) { // c0 = const
+		cb1 = cb2 = 1700;
+		ncb = 1;
+		rhob1 = rhob2 = 1.7;
+		nrhob = 1;
+		tau1 = tau2 = 0;
+		ntau = 1;
+		R1 = 6900;
+		R2 = 7100;
+		nR = 101;
+		cw1 = 1450;
+		cw2 = 1500;
+		ncpl = 11;
 	}
 	
 	std::cout << "Parameters :" << std::endl;
 	std::cout << "ncpl " << ncpl << std::endl;
+	std::cout << "cw1 " << cw1 << std::endl;
+	std::cout << "cw2 " << cw2 << std::endl;
 	std::cout << "n_layers_w " << n_layers_w << std::endl;
 	std::cout << "nR " << nR << std::endl;
+	std::cout << "R1 " << R1 << std::endl;
+	std::cout << "R2 " << R2 << std::endl;
 	std::cout << "ntau " << ntau << std::endl;
+	std::cout << "tau1 " << tau1 << std::endl;
+	std::cout << "tau2 " << tau2 << std::endl;
 	std::cout << "nrhob " << nrhob << std::endl;
+	std::cout << "rhob1 " << rhob1 << std::endl;
+	std::cout << "rhob2 " << rhob2 << std::endl;
 	std::cout << "ncb " << ncb << std::endl;
-
+	std::cout << "cb1 " << cb1 << std::endl;
+	std::cout << "cb2 " << cb2 << std::endl;
+	
 	weight_coeffs.clear();
 	if (spmagFileName == "")
 		return;
@@ -1164,6 +1175,7 @@ void sspemdd_sequential:: readInputDataFromFiles(std::string dtimesFileName,
 		myLineStream.str(""); myLineStream.clear();
 	}
 	spmagFile.close();
+	std::cout << "weight_coeffs.size() " << weight_coeffs.size() << std::endl;
 	std::cout << "weight_coeffs first 10 lines : " << std::endl;
 	for (unsigned i = 0; i < 10; i++) {
 		for (auto &x : weight_coeffs[i])

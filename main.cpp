@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 	argc = 5;
 	argv[1] = "50_ac_modes_R7km_dtimes.txt";
 	//argv[1] = "dtimes_synth_thcline_hf.txt";
-	argv[2] = "11"; // launchType
+	argv[2] = "12"; // launchType
 	argv[3] = "21"; // ncpl
 	argv[4] = "10"; // iterated_local_search_runs
 #endif
@@ -109,15 +109,14 @@ int main(int argc, char **argv)
 	sspemdd_par.rank = rank;
 	sspemdd_par.corecount = corecount;
 
-	// read modal_delays, mode_numbers and freqs, then determine the search space
-	sspemdd_par.readDtimesFromFile(dtimesFileName, launchType);
-	sspemdd_par.readSpmagFromFile(spmagFileName);
-	
 	sspemdd_par.ncpl = ncpl;
 	sspemdd_par.iterated_local_search_runs = iterated_local_search_runs;
 	sspemdd_par.verbosity = verbosity;
-	
+
+	// read modal_delays, mode_numbers and freqs, then determine the search space
+	sspemdd_par.readInputDataFromFiles(dtimesFileName, spmagFileName, launchType);
 	sspemdd_par.init();
+
 	double cur_time = MPI_Wtime();
 	sspemdd_par.MPI_main();
 	std::cout << "MPI_main() total time " << MPI_Wtime() - cur_time << " s" << std::endl;
