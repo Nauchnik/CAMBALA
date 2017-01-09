@@ -1,0 +1,17 @@
+% SSPEMDD scenario № 12
+% constant parameters
+dtimes_file 50_ac_modes_R7km_dtimes.txt
+spmag_file(string|no) no
+h 50
+H 300
+object_function(weighted|uniform) weighted
+% variable parameters *
+cw0 1500
+cw1 1450:5:1500
+cw2 1450:5:1500
+cw3 1450:5:1500
+cw4 1450:5:1500
+R 6850:5:7150
+rhob 1.7
+cb 1700
+tau 0
