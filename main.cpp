@@ -25,51 +25,34 @@
 int main(int argc, char **argv)
 {
 	unsigned ncpl = 0; // search mesh within each water layer
-
-	std::string dtimesFileName = "50_ac_modes_R7km_dtimes.txt";
-	std::string spmagFileName = "50_ac_modes_R7km_spmag.txt";
-	int launchType = 11; // 0 - deafult; 1 - fixed cw1=1490; 2 - cw1>cw2>...>cwn; 3 - both 1 and 2
+	
+	std::string scenarioFileName = "15_bottom_R_weighted.txt";
 	sspemdd_sequential sspemdd_seq;
 	unsigned iterated_local_search_runs = 10;
 	int verbosity = 0;
 
 #ifdef _DEBUG
-	argc = 5;
-	argv[1] = "50_ac_modes_R7km_dtimes.txt";
-	//argv[1] = "dtimes_synth_thcline_hf.txt";
-	argv[2] = "12"; // launchType
-	argv[3] = "21"; // ncpl
-	argv[4] = "10"; // iterated_local_search_runs
+	argc = 2;
+	argv[1] = "12_hydro_R_weighted.txt";
+	argv[2] = "10"; // iterated_local_search_runs
 #endif
-
-	std::cout << "spmagFileName " << spmagFileName << std::endl;
 	
 	if (argc >= 2) {
-		dtimesFileName = argv[1];
-		std::cout << "dtimesFileName " << dtimesFileName << std::endl;
+		scenarioFileName = argv[1];
+		std::cout << "scenarioFileName " << scenarioFileName << std::endl;
 	}
 	else {
-		std::cout << "Usage : thcline_file [launchType] [ncpl] [iterated_local_search_runs] [verbosity]" << std::endl;
-		return 1;
+		std::cout << "Usage : scenarioFileName [iterated_local_search_runs] [verbosity]" << std::endl;
+		exit(1);
 	}
 	
 	if (argc >= 3) {
-		launchType = atoi(argv[2]);
-		std::cout << "launchType " << launchType << std::endl;
-	}
-
-	if (argc >= 4) {
-		ncpl = atoi(argv[3]);
-		std::cout << "ncpl " << ncpl << std::endl;
-	}
-
-	if (argc >= 5) {
-		iterated_local_search_runs = atoi(argv[4]);
+		iterated_local_search_runs = atoi(argv[2]);
 		std::cout << "iterated_local_search_runs " << iterated_local_search_runs << std::endl;
 	}
 
-	if (argc >= 6) {
-		verbosity = atoi(argv[5]);
+	if (argc >= 4) {
+		verbosity = atoi(argv[3]);
 		std::cout << "verbosity " << verbosity << std::endl;
 	}
 
@@ -81,11 +64,10 @@ int main(int argc, char **argv)
 #ifndef _MPI
 	// sequential mode
 
-	sspemdd_seq.ncpl = ncpl;
 	sspemdd_seq.iterated_local_search_runs = iterated_local_search_runs;
 	sspemdd_seq.verbosity = verbosity;
 	// read modal_delays, mode_numbers and freqs, then determine the search space
-	sspemdd_seq.readInputDataFromFiles(dtimesFileName, spmagFileName, launchType);
+	sspemdd_seq.readScenario(scenarioFileName);
 	sspemdd_seq.init();
 	
 	//sspemdd_seq.findGlobalMinBruteForce();

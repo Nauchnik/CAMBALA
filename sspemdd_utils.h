@@ -8,7 +8,6 @@
 #include <algorithm>
 
 namespace SSPEMDD_utils{
-	
 	// construct all combinations of some parameters
 	template< typename T >
 	bool next_cartesian(std::vector<T> &vii, std::vector<int> &index_arr, T &cur_vi)

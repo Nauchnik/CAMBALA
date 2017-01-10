@@ -4,15 +4,14 @@
 #include <time.h>
 
 sspemdd_sequential::sspemdd_sequential() :
+	h(0),
+	H(0),
 	ncb(1),
 	nrhob(1),
 	nR(41),
 	ntau(1),
-	ncpl(1),
 	cb1(2000.0),
 	cb2(2000.0),
-	cw1(1450.0),
-	cw2(1500.0),
 	R1(3400.0),
 	R2(3600.0),
 	tau1(0.0),
@@ -20,10 +19,8 @@ sspemdd_sequential::sspemdd_sequential() :
 	rhob1(2.0),
 	rhob2(2.0),
 	n_layers_w(1),
-	launchType(0),
 	iterated_local_search_runs(10),
 	verbosity(0),
-	isSpeedNearSurfaceKnown (false),
 	N_total (1)
 {
 	record_point.cb = 1e50;
@@ -697,20 +694,13 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 
 void sspemdd_sequential::init()
 {
-	if ((launchType == 1) || (launchType == 3) || (launchType == 7) || 
-		(launchType == 8) || (launchType == 13))
-		isSpeedNearSurfaceKnown = true;
-	
-	std::cout << "isSpeedNearSurfaceKnown " << isSpeedNearSurfaceKnown << std::endl;
-	
-	N_total = (unsigned long long)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb*ntau;
-	if (isSpeedNearSurfaceKnown)
-		N_total /= ncpl;
+	// TODO use ncpl for each c
+	/*N_total = (unsigned long long)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb*ntau;
 	std::cout << "N_total " << N_total << std::endl;
 
 	record_point.cws.resize(n_layers_w);
 	for (unsigned i = 0; i < record_point.cws.size(); i++)
-		record_point.cws[i] = cw2;
+		record_point.cws[i] = cw2;*/
 
 	record_point.cb = 1e50;
 	record_point.rhob = 1e50;
@@ -761,10 +751,8 @@ void sspemdd_sequential::findGlobalMinBruteForce()
 
 	while (SSPEMDD_utils::next_cartesian(search_space_indexes, index_arr, cur_point_indexes)) {
 		cur_point = fromPointIndexesToPoint(cur_point_indexes);
-		if (is_valid_search_space_point(cur_point)) {
-			fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
-			checked_points_number++;
-		}
+		fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
+		checked_points_number++;
 	}
 }
 
@@ -849,31 +837,21 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 		tmp_vec[i] = tau1 + (ntau == 1 ? 0 : i*(tau2 - tau1) / (ntau - 1));
 	search_space.push_back(tmp_vec);
 
+	// TODO fix
 	// fill search_space_variables[4-...] with cws
-	tmp_vec.resize(ncpl);
+	/*tmp_vec.resize(ncpl);
 	std::vector<double> restricted_cws1{ 1499.772 }; // known real speed near surface
 	for (unsigned i = 0; i < ncpl; i++)
 		tmp_vec[i] = cw1 + (ncpl == 1 ? 0 : i*(cw2 - cw1) / (ncpl - 1));
 	if (isSpeedNearSurfaceKnown)
 		search_space.push_back(restricted_cws1); // fixed first cws in this case
 	else
-		search_space.push_back(tmp_vec);
+		search_space.push_back(tmp_vec);*/
 	// other layers
 	for (unsigned i = 1; i < n_layers_w; i++)
 		search_space.push_back(tmp_vec);
 	
 	std::cout << "loadValuesToSearchSpaceVariables() finished" << std::endl;
-}
-
-bool sspemdd_sequential::is_valid_search_space_point(search_space_point point)
-{
-	std::vector<double> cws_vi = point.cws;
-	if ((launchType == 2) || (launchType == 3)) {
-		for (unsigned cws_vi_index = 0; cws_vi_index < cws_vi.size() - 1; cws_vi_index++)
-			if (cws_vi[cws_vi_index] >= cws_vi[cws_vi_index + 1])
-				return false;
-	}
-	return true;
 }
 
 void sspemdd_sequential::findLocalMinHillClimbing()
@@ -1019,11 +997,148 @@ double sspemdd_sequential::getRecordResidual()
 	return record_point.residual;
 }
 
-void sspemdd_sequential:: readInputDataFromFiles(std::string dtimesFileName, 
-											    std::string spmagFileName, 
-												const int launchT)
+void sspemdd_sequential::getThreeValuesFromStr(std::string str, double &val1, double &val2, double &val3)
+{
+	val1 = val3 = -1;
+	val2 = 1;
+	std::string word1, word2, word3;
+	for (auto &x : str)
+		if (x == ':')
+			x = ' ';
+	std::stringstream sstream;
+	sstream << str;
+	sstream >> word1 >> word2 >> word3;
+	std::istringstream(word1) >> val1;
+	std::istringstream(word2) >> val2;
+	std::istringstream(word3) >> val3;
+	if (val3 == -1)
+		val3 = val1;
+}
+
+void sspemdd_sequential::readScenario(std::string scenarioFileName)
+{
+/*
+	read constant and variable values from a scenario file
+*/
+	std::ifstream scenarioFile(scenarioFileName.c_str());
+
+	if (!scenarioFile.is_open()) {
+		std::cerr << "scenarioFile with the name " << scenarioFileName << " wasn't openend" << std::endl;
+		exit(1);
+	}
+
+	std::string dtimesFileName, spmagFileName, str, word, tmp_word;
+	std::stringstream sstream;
+	unsigned cw_index = 0;
+	double cur_val_step = 0, cur_val1 = 0, cur_val2 = 0;
+	while (getline(scenarioFile, str)) {
+		if ((str == "") || (str[0] == '%'))
+			continue;
+		sstream << str;
+		sstream >> word;
+		if (word.find("dtimes_file") != std::string::npos) {
+			sstream >> word;
+			sstream >> dtimesFileName;
+		}
+		else if (word.find("spmag_file") != std::string::npos) {
+			sstream >> word;
+			sstream >> spmagFileName;
+		}
+		else if (word == "h")
+			sstream >> h;
+		else if (word == "H")
+			sstream >> H;
+		else if ((word.size() >= 2) && (word[0] == 'c') && (word[1] == 'w')) {
+			word = word.substr(2, word.size()-2);
+			std::istringstream(word) >> cw_index;
+			sstream >> word;
+			if (cw1_arr.size() < cw_index + 1)
+				cw1_arr.resize(cw_index + 1);
+			if (cw2_arr.size() < cw_index + 1)
+				cw2_arr.resize(cw_index + 1);
+			if (ncpl_arr.size() < cw_index + 1)
+				ncpl_arr.resize(cw_index + 1);
+			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			cw1_arr[cw_index] = cur_val1;
+			cw2_arr[cw_index] = cur_val2;
+			if (cur_val1 == cur_val2)
+				ncpl_arr[cw_index] = 1;
+			else
+				ncpl_arr[cw_index] = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+		}
+		else if (word == "R") {
+			sstream >> word;
+			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			R1 = cur_val1;
+			R2 = cur_val2;
+			if (R1 == R2)
+				nR = 1;
+			else
+				nR = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+		}
+		else if (word == "rhob") {
+			sstream >> word;
+			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			rhob1 = cur_val1;
+			rhob2 = cur_val2;
+			if (rhob1 == rhob2)
+				nrhob = 1;
+			else
+				nrhob = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+		}
+		else if (word == "cb") {
+			sstream >> word;
+			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			cb1 = cur_val1;
+			cb2 = cur_val2;
+			if (cb1 == cb2)
+				ncb = 1;
+			else
+				ncb = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+		}
+		else if (word == "tau") {
+			sstream >> word;
+			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			tau1 = cur_val1;
+			tau2 = cur_val2;
+			if (tau1 == tau2)
+				ntau = 1;
+			else
+				ntau = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+		}
+		sstream.str(""); sstream.clear();
+	}
+	n_layers_w = cw1_arr.size();
+
+	unsigned ppm = 2;
+	double layer_thickness_w = h / n_layers_w;
+
+	// TODO
+	/*for (unsigned jj = 1; jj <= n_layers_w; jj++)
+		depths.push_back(layer_thickness_w*jj);
+	depths.push_back(H);
+
+	c1s.resize(n_layers_w + 1);
+	for (auto &x : c1s)
+		x = 1500;
+	c2s.resize(n_layers_w + 1);
+	for (auto &x : c2s)
+		x = 1500;
+	rhos.resize(n_layers_w + 1);
+	for (auto &x : rhos)
+		x = 1;
+	Ns_points.resize(n_layers_w + 1);
+	for (auto &x : Ns_points)
+		x = (unsigned)round(ppm*layer_thickness_w);
+	Ns_points.at(n_layers_w) = (unsigned)round(ppm*(H - h));*/
+
+	//readInputData(dtimesFileName, spmagFileName);
+}
+
+void sspemdd_sequential::readInputDataFromFiles( std::string dtimesFileName, 
+											     std::string spmagFileName, 
+												 const int launchT )
 {	
-	launchType = launchT;
 	std::ifstream dtimesFile(dtimesFileName.c_str());
 	std::stringstream myLineStream;
 	std::string myLine;
@@ -1048,98 +1163,10 @@ void sspemdd_sequential:: readInputDataFromFiles(std::string dtimesFileName,
 	}
 	dtimesFile.close();
 
-	if ( launchType == 11 )
-		n_layers_w = 1;
-	else
-		n_layers_w = 5;
-
-	unsigned ppm = 2;
-	double h = 90;
-	double H = 600;
-	double layer_thickness_w = h / n_layers_w;
-	
-	for (unsigned jj = 1; jj <= n_layers_w; jj++)
-		depths.push_back(layer_thickness_w*jj);
-	depths.push_back(H);
-
-	c1s.resize(n_layers_w + 1);
-	for (auto &x : c1s)
-		x = 1500;
-	c2s.resize(n_layers_w + 1);
-	for (auto &x : c2s)
-		x = 1500;
-	rhos.resize(n_layers_w + 1);
-	for (auto &x : rhos)
-		x = 1;
-	Ns_points.resize(n_layers_w + 1);
-	for (auto &x : Ns_points)
-		x = (unsigned)round(ppm*layer_thickness_w);
-	Ns_points.at(n_layers_w) = (unsigned)round(ppm*(H - h));
-
-	if ((launchType >= 4) && (launchType <= 6)) {
-		nR = 1;
-		R1 = 3500;
-		R2 = 3500;
-	}
-	if ((launchType == 5) || (launchType == 7)) {
-		cb1 = cb2 = 3000;
-		ncb = 1;
-		rhob1 = rhob2 = 3;
-		nrhob = 1;
-	}
-	else if ((launchType == 6) || (launchType == 8)) {
-		cb1 = cb2 = 4000;
-		ncb = 1;
-		rhob1 = rhob2 = 4;
-		nrhob = 1;
-	}
-	else if (launchType == 11) {
-		cb1 = 1600;
-		cb2 = 1900;
-		ncb = 61;
-		rhob1 = 1.4;
-		rhob2 = 2.0;
-		nrhob = 13;
-		tau1 = -0.015;
-		tau2 = 0.015;
-		ntau = 61;
-		R1 = R2 = 8000;
-		nR = 1;
-		cw1 = cw2 = 1500;
-		ncpl = 1;
-	}
-	else if (launchType == 12) { // r = const
-		cb1 = cb2 = 1700;
-		ncb = 1;
-		rhob1 = rhob2 = 1.7;
-		nrhob = 1;
-		tau1 = tau2 = 0;
-		ntau = 1;
-		R1 = R2 = 7000;
-		nR = 1;
-		cw1 = 1450;
-		cw2 = 1500;
-		ncpl = 21;
-	}
-	else if (launchType == 13) { // c0 = const
-		cb1 = cb2 = 1700;
-		ncb = 1;
-		rhob1 = rhob2 = 1.7;
-		nrhob = 1;
-		tau1 = tau2 = 0;
-		ntau = 1;
-		R1 = 6900;
-		R2 = 7100;
-		nR = 101;
-		cw1 = 1450;
-		cw2 = 1500;
-		ncpl = 11;
-	}
-	
 	std::cout << "Parameters :" << std::endl;
-	std::cout << "ncpl " << ncpl << std::endl;
-	std::cout << "cw1 " << cw1 << std::endl;
-	std::cout << "cw2 " << cw2 << std::endl;
+	// TODO
+	//std::cout << "cw1 " << cw1 << std::endl;
+	//std::cout << "cw2 " << cw2 << std::endl;
 	std::cout << "n_layers_w " << n_layers_w << std::endl;
 	std::cout << "nR " << nR << std::endl;
 	std::cout << "R1 " << R1 << std::endl;

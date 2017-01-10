@@ -24,15 +24,17 @@ class sspemdd_sequential
 {
 public:
 	sspemdd_sequential();
+	double h;
+	double H;
 	unsigned ncb;
 	unsigned nrhob;
 	unsigned nR;
 	unsigned ntau;  //tau_comment: added tau to the class declaration
-	unsigned ncpl;
 	double cb1;
 	double cb2;
-	double cw1;
-	double cw2;
+	std::vector<double> cw1_arr;
+	std::vector<double> cw2_arr;
+	std::vector<double> ncpl_arr;
 	double R1;
 	double R2;
 	double tau1;    //tau_comment: added tau to the class declaration
@@ -40,9 +42,7 @@ public:
 	double rhob1;
 	double rhob2;
 	unsigned n_layers_w;
-	int launchType;
 	unsigned iterated_local_search_runs;
-	bool isSpeedNearSurfaceKnown;
 	std::vector<unsigned> mode_numbers;
 	std::vector<std::vector<double>> modal_delays;
 	std::vector<double> freqs;
@@ -53,6 +53,19 @@ public:
 	std::vector<unsigned> Ns_points;
 	std::vector<std::vector<double>> weight_coeffs;
 	int verbosity;
+
+	// functions by Oleg
+	std::vector<std::vector<double>> search_space; // values of variables which form a search space
+	void readScenario(std::string scenarioFileName);
+	void readInputDataFromFiles(std::string dtimesFileName, std::string spmagFileName, const int launchT);
+	void init();
+	double getRecordResidual();
+	double fill_data_compute_residual(search_space_point &point);
+	void findGlobalMinBruteForce();
+	void loadValuesToSearchSpaceVariables();
+	void findLocalMinHillClimbing();
+	void report_final_result();
+	void getThreeValuesFromStr(std::string str, double &val1, double &val2, double &val3);
 
 	// functions by Pavel
 	//tau_comment: added tau to the arguments of compute_modal_delays_residual_uniform()
@@ -90,17 +103,6 @@ public:
 		unsigned flOnlyTrapped, unsigned &ordRich, std::vector<std::vector<double>> &modal_group_velocities,
 		std::vector<unsigned> &mode_numbers);
 
-	// functions by Oleg
-	std::vector<std::vector<double>> search_space; // values of variables which form a search space
-	void readInputDataFromFiles(std::string dtimesFileName, std::string spmagFileName, const int launchT);
-	void init();
-	double getRecordResidual();
-	double fill_data_compute_residual(search_space_point &point);
-	void findGlobalMinBruteForce();
-	void loadValuesToSearchSpaceVariables();
-	void findLocalMinHillClimbing();
-	void report_final_result();
-
 protected:
 	unsigned long long N_total;
 	search_space_point record_point;
@@ -108,7 +110,6 @@ protected:
 	// hill climbing
 	search_space_point fromPointIndexesToPoint( std::vector<unsigned> cur_point_indexes );
 	search_space_point fromDoubleVecToPoint(std::vector<double> double_vec);
-	bool is_valid_search_space_point(search_space_point point );
 };
 
 #endif
