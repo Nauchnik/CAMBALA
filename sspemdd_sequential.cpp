@@ -694,19 +694,31 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 
 void sspemdd_sequential::init()
 {
-	// TODO use ncpl for each c
-	/*N_total = (unsigned long long)round(pow(ncpl, n_layers_w))*nR*nrhob*ncb*ntau;
+	unsigned ppm = 2;
+	double layer_thickness_w = h / n_layers_w;
+
+	for (unsigned jj = 1; jj <= n_layers_w; jj++)
+	depths.push_back(layer_thickness_w*jj);
+	depths.push_back(H);
+
+	c1s.resize(n_layers_w + 1);
+	for (auto &x : c1s)
+	x = 1500;
+	c2s.resize(n_layers_w + 1);
+	for (auto &x : c2s)
+	x = 1500;
+	rhos.resize(n_layers_w + 1);
+	for (auto &x : rhos)
+	x = 1;
+	Ns_points.resize(n_layers_w + 1);
+	for (auto &x : Ns_points)
+	x = (unsigned)round(ppm*layer_thickness_w);
+	Ns_points.at(n_layers_w) = (unsigned)round(ppm*(H - h));
+
+	N_total = nR*nrhob*ncb*ntau;
+	for (auto &x : ncpl_arr)
+		N_total *= (unsigned long long)x;
 	std::cout << "N_total " << N_total << std::endl;
-
-	record_point.cws.resize(n_layers_w);
-	for (unsigned i = 0; i < record_point.cws.size(); i++)
-		record_point.cws[i] = cw2;*/
-
-	record_point.cb = 1e50;
-	record_point.rhob = 1e50;
-	record_point.R = 1e50;
-	record_point.tau = 1e50;
-	record_point.residual = START_RESIDUAL;
 
 	loadValuesToSearchSpaceVariables();
 }
@@ -812,6 +824,17 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 	// search_space_variables[4...] - cws
 	std::vector<double> tmp_vec;
 	search_space.clear();
+
+	// TODO
+	/*record_point.cws.resize(n_layers_w);
+	for (unsigned i = 0; i < record_point.cws.size(); i++)
+	record_point.cws[i] = cw2;*/
+
+	record_point.cb = 1e50;
+	record_point.rhob = 1e50;
+	record_point.R = 1e50;
+	record_point.tau = 1e50;
+	record_point.residual = START_RESIDUAL;
 
 	// fill search_space_variables[0] with cb
 	tmp_vec.resize(ncb);
@@ -1027,7 +1050,7 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 		exit(1);
 	}
 
-	std::string dtimesFileName, spmagFileName, str, word, tmp_word;
+	std::string str, word, tmp_word;
 	std::stringstream sstream;
 	unsigned cw_index = 0;
 	double cur_val_step = 0, cur_val1 = 0, cur_val2 = 0;
@@ -1036,14 +1059,10 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 			continue;
 		sstream << str;
 		sstream >> word;
-		if (word.find("dtimes_file") != std::string::npos) {
-			sstream >> word;
+		if (word.find("dtimes_file") != std::string::npos)
 			sstream >> dtimesFileName;
-		}
-		else if (word.find("spmag_file") != std::string::npos) {
-			sstream >> word;
+		else if (word.find("spmag_file") != std::string::npos)
 			sstream >> spmagFileName;
-		}
 		else if (word == "h")
 			sstream >> h;
 		else if (word == "H")
@@ -1110,36 +1129,41 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 	}
 	n_layers_w = cw1_arr.size();
 
-	unsigned ppm = 2;
-	double layer_thickness_w = h / n_layers_w;
-
-	// TODO
-	/*for (unsigned jj = 1; jj <= n_layers_w; jj++)
-		depths.push_back(layer_thickness_w*jj);
-	depths.push_back(H);
-
-	c1s.resize(n_layers_w + 1);
-	for (auto &x : c1s)
-		x = 1500;
-	c2s.resize(n_layers_w + 1);
-	for (auto &x : c2s)
-		x = 1500;
-	rhos.resize(n_layers_w + 1);
-	for (auto &x : rhos)
-		x = 1;
-	Ns_points.resize(n_layers_w + 1);
-	for (auto &x : Ns_points)
-		x = (unsigned)round(ppm*layer_thickness_w);
-	Ns_points.at(n_layers_w) = (unsigned)round(ppm*(H - h));*/
-
-	//readInputData(dtimesFileName, spmagFileName);
+	std::cout << "Parameters :" << std::endl;
+	std::cout << "cw1_arr :" << std::endl;
+	for (auto &x : cw1_arr)
+		std::cout << x << " ";
+	std::cout << std::endl;
+	std::cout << "cw2_arr :" << std::endl;
+	for (auto &x : cw2_arr)
+		std::cout << x << " ";
+	std::cout << std::endl;
+	std::cout << "ncpl_arr :" << std::endl;
+	for (auto &x : ncpl_arr)
+		std::cout << x << " ";
+	std::cout << std::endl;
+	std::cout << "n_layers_w " << n_layers_w << std::endl;
+	std::cout << "nR " << nR << std::endl;
+	std::cout << "R1 " << R1 << std::endl;
+	std::cout << "R2 " << R2 << std::endl;
+	std::cout << "ntau " << ntau << std::endl;
+	std::cout << "tau1 " << tau1 << std::endl;
+	std::cout << "tau2 " << tau2 << std::endl;
+	std::cout << "nrhob " << nrhob << std::endl;
+	std::cout << "rhob1 " << rhob1 << std::endl;
+	std::cout << "rhob2 " << rhob2 << std::endl;
+	std::cout << "ncb " << ncb << std::endl;
+	std::cout << "cb1 " << cb1 << std::endl;
+	std::cout << "cb2 " << cb2 << std::endl;
 }
 
-void sspemdd_sequential::readInputDataFromFiles( std::string dtimesFileName, 
-											     std::string spmagFileName, 
-												 const int launchT )
+void sspemdd_sequential::readInputDataFromFiles()
 {	
 	std::ifstream dtimesFile(dtimesFileName.c_str());
+	if (!dtimesFile.is_open()) {
+		std::cerr << "dtimesFile " << dtimesFileName << " wasn't opened" << std::endl;
+		exit(1);
+	}
 	std::stringstream myLineStream;
 	std::string myLine;
 	double buff;
@@ -1162,31 +1186,15 @@ void sspemdd_sequential::readInputDataFromFiles( std::string dtimesFileName,
 		myLineStream.str(""); myLineStream.clear();
 	}
 	dtimesFile.close();
-
-	std::cout << "Parameters :" << std::endl;
-	// TODO
-	//std::cout << "cw1 " << cw1 << std::endl;
-	//std::cout << "cw2 " << cw2 << std::endl;
-	std::cout << "n_layers_w " << n_layers_w << std::endl;
-	std::cout << "nR " << nR << std::endl;
-	std::cout << "R1 " << R1 << std::endl;
-	std::cout << "R2 " << R2 << std::endl;
-	std::cout << "ntau " << ntau << std::endl;
-	std::cout << "tau1 " << tau1 << std::endl;
-	std::cout << "tau2 " << tau2 << std::endl;
-	std::cout << "nrhob " << nrhob << std::endl;
-	std::cout << "rhob1 " << rhob1 << std::endl;
-	std::cout << "rhob2 " << rhob2 << std::endl;
-	std::cout << "ncb " << ncb << std::endl;
-	std::cout << "cb1 " << cb1 << std::endl;
-	std::cout << "cb2 " << cb2 << std::endl;
 	
 	weight_coeffs.clear();
-	if (spmagFileName == "")
-		return;
 	std::ifstream spmagFile(spmagFileName.c_str());
+	if(!spmagFile.is_open()) {
+		std::cerr << "spmagFile " << spmagFileName << " wasn't opened" << std::endl;
+		exit(1);
+	}
 	buffvect.clear();
-
+	
 	while (std::getline(spmagFile, myLine)) {
 		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading
 		myLineStream << myLine;

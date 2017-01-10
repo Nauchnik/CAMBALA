@@ -23,7 +23,7 @@ namespace UnitTestHomogBottom1
 			cws : 1500 
 			*/
 			sspemdd_sequential sspemdd_seq;
-			sspemdd_seq.readInputDataFromFiles("../8000_extracted.txt", "", 0);
+			sspemdd_seq.readInputDataFromFiles();
 			sspemdd_seq.init();
 			search_space_point cur_point;
 			cur_point.cb = 1830;

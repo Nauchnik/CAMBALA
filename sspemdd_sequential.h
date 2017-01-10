@@ -26,10 +26,10 @@ public:
 	sspemdd_sequential();
 	double h;
 	double H;
-	unsigned ncb;
-	unsigned nrhob;
-	unsigned nR;
-	unsigned ntau;  //tau_comment: added tau to the class declaration
+	unsigned long long ncb;
+	unsigned long long nrhob;
+	unsigned long long nR;
+	unsigned long long ntau;  //tau_comment: added tau to the class declaration
 	double cb1;
 	double cb2;
 	std::vector<double> cw1_arr;
@@ -41,8 +41,8 @@ public:
 	double tau2;    //tau_comment: added tau to the class declaration
 	double rhob1;
 	double rhob2;
-	unsigned n_layers_w;
-	unsigned iterated_local_search_runs;
+	unsigned long long n_layers_w;
+	unsigned long long iterated_local_search_runs;
 	std::vector<unsigned> mode_numbers;
 	std::vector<std::vector<double>> modal_delays;
 	std::vector<double> freqs;
@@ -53,11 +53,13 @@ public:
 	std::vector<unsigned> Ns_points;
 	std::vector<std::vector<double>> weight_coeffs;
 	int verbosity;
+	std::string dtimesFileName;
+	std::string spmagFileName;
 
 	// functions by Oleg
 	std::vector<std::vector<double>> search_space; // values of variables which form a search space
 	void readScenario(std::string scenarioFileName);
-	void readInputDataFromFiles(std::string dtimesFileName, std::string spmagFileName, const int launchT);
+	void readInputDataFromFiles();
 	void init();
 	double getRecordResidual();
 	double fill_data_compute_residual(search_space_point &point);

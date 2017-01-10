@@ -68,6 +68,7 @@ int main(int argc, char **argv)
 	sspemdd_seq.verbosity = verbosity;
 	// read modal_delays, mode_numbers and freqs, then determine the search space
 	sspemdd_seq.readScenario(scenarioFileName);
+	sspemdd_seq.readInputDataFromFiles();
 	sspemdd_seq.init();
 	
 	//sspemdd_seq.findGlobalMinBruteForce();

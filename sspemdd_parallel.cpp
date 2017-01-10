@@ -41,7 +41,6 @@ void sspemdd_parallel::control_process()
 	sstream_out << "Search space:" << std::endl;
 	sstream_out << cb1 << " < c_b < " << cb2 << std::endl;
 	sstream_out << R1 << " < Range < " << R2 << std::endl;
-	sstream_out << cw1 << " < cws < " << cw2 << std::endl;
 	sstream_out << rhob1 << " < rho_b < " << rhob2 << std::endl;
 	sstream_out << tau1 << " < tau < " << tau2 << std::endl;
 	
