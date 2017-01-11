@@ -8,7 +8,7 @@
 #include "linalg.h"
 
 const double LOCAL_M_PI = 3.14159265358979323846;
-const double START_RESIDUAL = 1e100;
+const double START_HUGE_VALUE = 1e100;
 
 struct search_space_point
 {
@@ -34,7 +34,7 @@ public:
 	double cb2;
 	std::vector<double> cw1_arr;
 	std::vector<double> cw2_arr;
-	std::vector<double> ncpl_arr;
+	std::vector<unsigned long long> ncpl_arr;
 	double R1;
 	double R2;
 	double tau1;    //tau_comment: added tau to the class declaration

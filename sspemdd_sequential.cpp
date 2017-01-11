@@ -23,11 +23,11 @@ sspemdd_sequential::sspemdd_sequential() :
 	verbosity(0),
 	N_total (1)
 {
-	record_point.cb = 1e50;
-	record_point.rhob = 1e50;
-	record_point.R = 1e50;
-	record_point.tau = 1e50;
-	record_point.residual = START_RESIDUAL;
+	record_point.cb       = START_HUGE_VALUE;
+	record_point.rhob     = START_HUGE_VALUE;
+	record_point.R        = START_HUGE_VALUE;
+	record_point.tau      = START_HUGE_VALUE;
+	record_point.residual = START_HUGE_VALUE;
 	srand((unsigned)time(NULL));
 	start_chrono_time = std::chrono::high_resolution_clock::now();
 }
@@ -824,55 +824,42 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 	// search_space_variables[4...] - cws
 	std::vector<double> tmp_vec;
 	search_space.clear();
-
-	// TODO
-	/*record_point.cws.resize(n_layers_w);
-	for (unsigned i = 0; i < record_point.cws.size(); i++)
-	record_point.cws[i] = cw2;*/
-
-	record_point.cb = 1e50;
-	record_point.rhob = 1e50;
-	record_point.R = 1e50;
-	record_point.tau = 1e50;
-	record_point.residual = START_RESIDUAL;
-
+	
+	record_point.cws.resize(n_layers_w);
+	for (unsigned long long i = 0; i < record_point.cws.size(); i++)
+		record_point.cws[i] = cw1_arr[i];
+	
 	// fill search_space_variables[0] with cb
 	tmp_vec.resize(ncb);
-	for (unsigned i = 0; i < ncb; i++)
+	for (unsigned long long i = 0; i < ncb; i++)
 		tmp_vec[i] = cb1 + (ncb == 1 ? 0 : i*(cb2 - cb1) / (ncb - 1));
 	search_space.push_back(tmp_vec);
 
 	// fill search_space_variables[1] with rhob
 	tmp_vec.resize(nrhob);
-	for (unsigned i = 0; i < nrhob; i++)
+	for (unsigned long long i = 0; i < nrhob; i++)
 		tmp_vec[i] = rhob1 + (nrhob == 1 ? 0 : i*(rhob2 - rhob1) / (nrhob - 1));
 	search_space.push_back(tmp_vec);
 
 	// fill search_space_variables[2] with R
 	tmp_vec.resize(nR);
-	for (unsigned i = 0; i < nR; i++)
+	for (unsigned long long i = 0; i < nR; i++)
 		tmp_vec[i] = R1 + (nR == 1 ? 0 : i*(R2 - R1) / (nR - 1));
 	search_space.push_back(tmp_vec);
 
 	// fill search_space_variables[3] with tau
 	tmp_vec.resize(ntau);
-	for (unsigned i = 0; i < ntau; i++)
+	for (unsigned long long i = 0; i < ntau; i++)
 		tmp_vec[i] = tau1 + (ntau == 1 ? 0 : i*(tau2 - tau1) / (ntau - 1));
 	search_space.push_back(tmp_vec);
 
-	// TODO fix
 	// fill search_space_variables[4-...] with cws
-	/*tmp_vec.resize(ncpl);
-	std::vector<double> restricted_cws1{ 1499.772 }; // known real speed near surface
-	for (unsigned i = 0; i < ncpl; i++)
-		tmp_vec[i] = cw1 + (ncpl == 1 ? 0 : i*(cw2 - cw1) / (ncpl - 1));
-	if (isSpeedNearSurfaceKnown)
-		search_space.push_back(restricted_cws1); // fixed first cws in this case
-	else
-		search_space.push_back(tmp_vec);*/
-	// other layers
-	for (unsigned i = 1; i < n_layers_w; i++)
+	for (unsigned long long i = 0; i < cw1_arr.size(); i++) {
+		tmp_vec.resize(ncpl_arr[i]);
+		for (unsigned long long j = 0; j < ncpl_arr[i]; j++)
+			tmp_vec[j] = cw1_arr[i] + (ncpl_arr[i] == 1 ? 0 : j*(cw2_arr[i] - cw1_arr[i]) / (ncpl_arr[i] - 1));
 		search_space.push_back(tmp_vec);
+	}
 	
 	std::cout << "loadValuesToSearchSpaceVariables() finished" << std::endl;
 }
@@ -998,7 +985,7 @@ search_space_point sspemdd_sequential::fromPointIndexesToPoint(std::vector<unsig
 	point.tau  = search_space[3][cur_point_indexes[3]];
 	for (unsigned i = 4; i < search_space.size(); i++)
 		point.cws.push_back(search_space[i][cur_point_indexes[i]]);
-	point.residual = START_RESIDUAL;
+	point.residual = START_HUGE_VALUE;
 	return point;
 }
 
@@ -1011,7 +998,7 @@ search_space_point sspemdd_sequential::fromDoubleVecToPoint(std::vector<double> 
 	point.tau  = double_vec[3];
 	for (unsigned i = 4; i < double_vec.size(); i++)
 		point.cws.push_back(double_vec[i]);
-	point.residual = START_RESIDUAL;
+	point.residual = START_HUGE_VALUE;
 	return point;
 }
 
