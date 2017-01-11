@@ -22,7 +22,8 @@ sspemdd_sequential::sspemdd_sequential() :
 	n_layers_w(1),
 	iterated_local_search_runs(10),
 	verbosity(0),
-	N_total (1)
+	N_total (1),
+	rank (0)
 {
 	record_point.cb       = START_HUGE_VALUE;
 	record_point.rhob     = START_HUGE_VALUE;
@@ -719,9 +720,14 @@ void sspemdd_sequential::init()
 	N_total = nR*nrhob*ncb*ntau;
 	for (auto &x : ncpl_arr)
 		N_total *= (unsigned long long)x;
-	std::cout << "N_total " << N_total << std::endl;
+
+	if (!rank)
+		std::cout << "N_total " << N_total << std::endl;
 
 	loadValuesToSearchSpaceVariables();
+
+	if (!rank)
+		std::cout << "init() finished" << std::endl;
 }
 
 void sspemdd_sequential::report_final_result()
@@ -1127,32 +1133,36 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 	}
 	n_layers_w = cw1_arr.size();
 
-	std::cout << "Parameters :" << std::endl;
-	std::cout << "cw1_arr :" << std::endl;
-	for (auto &x : cw1_arr)
-		std::cout << x << " ";
-	std::cout << std::endl;
-	std::cout << "cw2_arr :" << std::endl;
-	for (auto &x : cw2_arr)
-		std::cout << x << " ";
-	std::cout << std::endl;
-	std::cout << "ncpl_arr :" << std::endl;
-	for (auto &x : ncpl_arr)
-		std::cout << x << " ";
-	std::cout << std::endl;
-	std::cout << "n_layers_w " << n_layers_w << std::endl;
-	std::cout << "nR " << nR << std::endl;
-	std::cout << "R1 " << R1 << std::endl;
-	std::cout << "R2 " << R2 << std::endl;
-	std::cout << "ntau " << ntau << std::endl;
-	std::cout << "tau1 " << tau1 << std::endl;
-	std::cout << "tau2 " << tau2 << std::endl;
-	std::cout << "nrhob " << nrhob << std::endl;
-	std::cout << "rhob1 " << rhob1 << std::endl;
-	std::cout << "rhob2 " << rhob2 << std::endl;
-	std::cout << "ncb " << ncb << std::endl;
-	std::cout << "cb1 " << cb1 << std::endl;
-	std::cout << "cb2 " << cb2 << std::endl;
+	if (!rank) {
+		std::cout << "Parameters :" << std::endl;
+		std::cout << "cw1_arr :" << std::endl;
+		for (auto &x : cw1_arr)
+			std::cout << x << " ";
+		std::cout << std::endl;
+		std::cout << "cw2_arr :" << std::endl;
+		for (auto &x : cw2_arr)
+			std::cout << x << " ";
+		std::cout << std::endl;
+		std::cout << "ncpl_arr :" << std::endl;
+		for (auto &x : ncpl_arr)
+			std::cout << x << " ";
+		std::cout << std::endl;
+		std::cout << "n_layers_w " << n_layers_w << std::endl;
+		std::cout << "nR " << nR << std::endl;
+		std::cout << "R1 " << R1 << std::endl;
+		std::cout << "R2 " << R2 << std::endl;
+		std::cout << "ntau " << ntau << std::endl;
+		std::cout << "tau1 " << tau1 << std::endl;
+		std::cout << "tau2 " << tau2 << std::endl;
+		std::cout << "nrhob " << nrhob << std::endl;
+		std::cout << "rhob1 " << rhob1 << std::endl;
+		std::cout << "rhob2 " << rhob2 << std::endl;
+		std::cout << "ncb " << ncb << std::endl;
+		std::cout << "cb1 " << cb1 << std::endl;
+		std::cout << "cb2 " << cb2 << std::endl;
+
+		std::cout << "readScenario() finished" << std::endl;
+	}
 }
 
 void sspemdd_sequential::readInputDataFromFiles()
@@ -1208,11 +1218,15 @@ void sspemdd_sequential::readInputDataFromFiles()
 		myLineStream.str(""); myLineStream.clear();
 	}
 	spmagFile.close();
-	std::cout << "weight_coeffs.size() " << weight_coeffs.size() << std::endl;
-	std::cout << "weight_coeffs first 10 lines : " << std::endl;
-	for (unsigned i = 0; i < 10; i++) {
-		for (auto &x : weight_coeffs[i])
-			std::cout << x << " ";
-		std::cout << std::endl;
+
+	if (!rank) {
+		std::cout << "weight_coeffs.size() " << weight_coeffs.size() << std::endl;
+		std::cout << "weight_coeffs first 10 lines : " << std::endl;
+		for (unsigned i = 0; i < 10; i++) {
+			for (auto &x : weight_coeffs[i])
+				std::cout << x << " ";
+			std::cout << std::endl;
+		}
+		std::cout << "readInputDataFromFiles() finished " << std::endl;
 	}
 }

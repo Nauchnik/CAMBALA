@@ -95,9 +95,9 @@ int main(int argc, char **argv)
 	sspemdd_par.iterated_local_search_runs = iterated_local_search_runs;
 	sspemdd_par.verbosity = verbosity;
 
-	sspemdd_seq.readScenario(scenarioFileName);
-	sspemdd_seq.readInputDataFromFiles();
-	sspemdd_seq.init();
+	sspemdd_par.readScenario(scenarioFileName);
+	sspemdd_par.readInputDataFromFiles();
+	sspemdd_par.init();
 
 	double cur_time = MPI_Wtime();
 	sspemdd_par.MPI_main();

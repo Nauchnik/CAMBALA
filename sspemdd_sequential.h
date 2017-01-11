@@ -56,6 +56,7 @@ public:
 	int verbosity;
 	std::string dtimesFileName;
 	std::string spmagFileName;
+	int rank;
 
 	// functions by Oleg
 	std::vector<std::vector<double>> search_space; // values of variables which form a search space
