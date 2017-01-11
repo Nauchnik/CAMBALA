@@ -17,7 +17,6 @@ class sspemdd_parallel : public sspemdd_sequential
 public:
 	sspemdd_parallel();
 	~sspemdd_parallel();
-	int rank;
 	int corecount;
 	double mpi_start_time;
 	unsigned task_len;

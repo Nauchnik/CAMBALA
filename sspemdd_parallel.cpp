@@ -14,8 +14,7 @@
 sspemdd_parallel::sspemdd_parallel() :
 	task_len ( 0 ),
 	result_len ( 0 ),
-	corecount ( 0 ),
-	rank ( 0 )
+	corecount ( 0 )
 {}
 
 sspemdd_parallel::~sspemdd_parallel()
@@ -36,6 +35,8 @@ void sspemdd_parallel::control_process()
 	std::stringstream sstream_out;
 	mpi_start_time = MPI_Wtime();
 	
+	std::cout << "control_process() started" << std::endl;
+
 	sstream_out << "MPI control process" << std::endl;
 	sstream_out << "Start residual is: " << record_point.residual << std::endl;
 	sstream_out << "Search space:" << std::endl;
@@ -65,6 +66,7 @@ void sspemdd_parallel::control_process()
 	std::vector<int> index_arr;
 	while (SSPEMDD_utils::next_cartesian(search_space, index_arr, cur_point_values))
 		point_values_vec[index++] = cur_point_values;
+	std::cout << "next_cartesian() finished" << std::endl;
 
 	sstream_out << "point_values_vec[0].size() " << point_values_vec[0].size() << std::endl;
 	task_len = point_values_vec[0].size() + 1; // point data + task index
@@ -72,6 +74,7 @@ void sspemdd_parallel::control_process()
 	result_len = 2; // calculated residual + index of a task
 	result = new double[result_len];
 	sstream_out << "task_len " << task_len << std::endl;
+	std::cout << "4" << std::endl;
 	
 	unsigned send_task_count = 0;
 	
@@ -105,12 +108,13 @@ void sspemdd_parallel::control_process()
 	while (processed_task_count < point_values_vec.size()) {
 		MPI_Recv(result, result_len, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		processed_task_count++;
-		sstream_out << "processed_task_count " << processed_task_count << std::endl;
+		if (processed_task_count % 1000 == 0)
+			sstream_out << std::endl << "processed_task_count " << processed_task_count << std::endl;
 		
 		received_residual = result[0];
 		received_task_index = (unsigned)result[1];
-		sstream_out << "received_residual " << received_residual << std::endl;
-		sstream_out << "received_task_index  " << received_task_index << std::endl;
+		//sstream_out << "received_residual " << received_residual << std::endl;
+		//sstream_out << "received_task_index  " << received_task_index << std::endl;
 		
 		if (received_residual < record_point.residual) {
 			record_point = fromDoubleVecToPoint(point_values_vec[received_task_index]);
