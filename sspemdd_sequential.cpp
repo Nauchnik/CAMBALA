@@ -4,6 +4,7 @@
 #include <time.h>
 
 sspemdd_sequential::sspemdd_sequential() :
+	object_function_type("weighted"),
 	h(0),
 	H(0),
 	ncb(1),
@@ -787,10 +788,18 @@ double sspemdd_sequential::fill_data_compute_residual( search_space_point &point
 	//	std::cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << std::endl;
 	//std::cout << residual << std::endl << std::endl;
 	//tau_comment: added tau to function call
-	//point.residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, 
-	//				point.R, point.tau, modal_delays, mode_numbers);
-	point.residual = compute_modal_delays_residual_weighted(freqs, depths, c1s, c2s, rhos, Ns_points, 
-						point.R, point.tau, modal_delays, weight_coeffs, mode_numbers);
+	if (object_function_type == "uniform") {
+		point.residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points,
+			point.R, point.tau, modal_delays, mode_numbers);
+	}
+	else if (object_function_type == "weighted") {
+		point.residual = compute_modal_delays_residual_weighted(freqs, depths, c1s, c2s, rhos, Ns_points,
+			point.R, point.tau, modal_delays, weight_coeffs, mode_numbers);
+	}
+	else {
+		std::cerr << "unknown object_function_type " << object_function_type << std::endl;
+		exit(1);
+	}
 	
 	if (point.residual < record_point.residual) {
 		record_point.residual = point.residual;
@@ -1054,6 +1063,8 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 			sstream >> h;
 		else if (word == "H")
 			sstream >> H;
+		else if (word.find("object_function") != std::string::npos)
+			sstream >> object_function_type;
 		else if ((word.size() >= 2) && (word[0] == 'c') && (word[1] == 'w')) {
 			word = word.substr(2, word.size()-2);
 			std::istringstream(word) >> cw_index;

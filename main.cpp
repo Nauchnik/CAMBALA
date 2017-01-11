@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 
 	sspemdd_seq.iterated_local_search_runs = iterated_local_search_runs;
 	sspemdd_seq.verbosity = verbosity;
-	// read modal_delays, mode_numbers and freqs, then determine the search space
+	// read scenario, modal_delays, mode_numbers and freqs, then determine the search space
 	sspemdd_seq.readScenario(scenarioFileName);
 	sspemdd_seq.readInputDataFromFiles();
 	sspemdd_seq.init();
@@ -92,13 +92,12 @@ int main(int argc, char **argv)
 	sspemdd_par.rank = rank;
 	sspemdd_par.corecount = corecount;
 
-	sspemdd_par.ncpl = ncpl;
 	sspemdd_par.iterated_local_search_runs = iterated_local_search_runs;
 	sspemdd_par.verbosity = verbosity;
 
-	// read modal_delays, mode_numbers and freqs, then determine the search space
-	sspemdd_par.readInputDataFromFiles(dtimesFileName, spmagFileName, launchType);
-	sspemdd_par.init();
+	sspemdd_seq.readScenario(scenarioFileName);
+	sspemdd_seq.readInputDataFromFiles();
+	sspemdd_seq.init();
 
 	double cur_time = MPI_Wtime();
 	sspemdd_par.MPI_main();

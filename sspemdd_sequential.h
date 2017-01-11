@@ -35,6 +35,7 @@ public:
 	std::vector<double> cw1_arr;
 	std::vector<double> cw2_arr;
 	std::vector<unsigned long long> ncpl_arr;
+	std::string object_function_type;
 	double R1;
 	double R2;
 	double tau1;    //tau_comment: added tau to the class declaration

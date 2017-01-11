@@ -43,6 +43,18 @@ void sspemdd_parallel::control_process()
 	sstream_out << R1 << " < Range < " << R2 << std::endl;
 	sstream_out << rhob1 << " < rho_b < " << rhob2 << std::endl;
 	sstream_out << tau1 << " < tau < " << tau2 << std::endl;
+	sstream_out << "cw1_arr :" << std::endl;
+	for (auto &x : cw1_arr)
+		sstream_out << x << " ";
+	sstream_out << std::endl;
+	sstream_out << "cw2_arr :" << std::endl;
+	for (auto &x : cw2_arr)
+		sstream_out << x << " ";
+	sstream_out << std::endl;
+	sstream_out << "ncpl_arr :" << std::endl;
+	for (auto &x : ncpl_arr)
+		sstream_out << x << " ";
+	sstream_out << std::endl;
 	
 	std::vector<std::vector<double>> point_values_vec;
 	point_values_vec.resize(N_total);
@@ -219,8 +231,7 @@ void sspemdd_parallel::computing_process()
 			std::cout << std::endl;
 		}
 		
-		if (is_valid_search_space_point(cur_point))
-			fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
+		fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
 		
 		result[0] = cur_point.residual;
 		result[1] = task_index;
