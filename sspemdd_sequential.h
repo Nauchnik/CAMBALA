@@ -78,7 +78,7 @@ public:
 		std::vector<unsigned> &Ns_points, double R, double tau, 
 		std::vector<std::vector<double>> &experimental_delays, std::vector<unsigned> &experimental_mode_numbers);
 
-	double sspemdd_sequential::compute_modal_delays_residual_weighted(std::vector<double> &freqs,
+	double compute_modal_delays_residual_weighted(std::vector<double> &freqs,
 		std::vector<double> &depths, std::vector<double> &c1s, std::vector<double> &c2s,
 		std::vector<double> &rhos, std::vector<unsigned> &Ns_points, double R,
 		double tau, std::vector<std::vector<double>> &experimental_delays,
