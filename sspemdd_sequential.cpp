@@ -1069,8 +1069,6 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 			sstream >> h;
 		else if (word == "H")
 			sstream >> H;
-		else if (word.find("object_function") != std::string::npos)
-			sstream >> object_function_type;
 		else if ((word.size() >= 2) && (word[0] == 'c') && (word[1] == 'w')) {
 			word = word.substr(2, word.size()-2);
 			std::istringstream(word) >> cw_index;
@@ -1160,6 +1158,8 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 		std::cout << "ncb " << ncb << std::endl;
 		std::cout << "cb1 " << cb1 << std::endl;
 		std::cout << "cb2 " << cb2 << std::endl;
+		std::cout << "dtimes_file " << dtimesFileName << std::endl;
+		std::cout << "spmag_file " << spmagFileName << std::endl;
 
 		std::cout << "readScenario() finished" << std::endl;
 	}
