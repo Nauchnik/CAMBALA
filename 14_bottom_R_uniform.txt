@@ -6,8 +6,7 @@ dtimes_file 50_ac_modes_R7km_dtimes.txt
 spmag_file(string|no) no
 h 50
 H 300
-object_function(weighted|uniform) uniform
-% variable parameters *
+% variable parameters
 cw0 1500
 cw1 1498
 cw2 1493
