@@ -1197,36 +1197,40 @@ void sspemdd_sequential::readInputDataFromFiles()
 	
 	weight_coeffs.clear();
 	std::ifstream spmagFile(spmagFileName.c_str());
-	if(!spmagFile.is_open()) {
-		std::cerr << "spmagFile " << spmagFileName << " wasn't opened" << std::endl;
-		exit(1);
-	}
-	buffvect.clear();
-	
-	while (std::getline(spmagFile, myLine)) {
-		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading
-		myLineStream << myLine;
-		myLineStream >> buff;
-
+	if (spmagFile.is_open()) {
 		buffvect.clear();
-		while (!myLineStream.eof()) {
+
+		while (std::getline(spmagFile, myLine)) {
+			myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading
+			myLineStream << myLine;
 			myLineStream >> buff;
-			buffvect.push_back(buff);
-		}
 
-		weight_coeffs.push_back(buffvect);
-		myLineStream.str(""); myLineStream.clear();
+			buffvect.clear();
+			while (!myLineStream.eof()) {
+				myLineStream >> buff;
+				buffvect.push_back(buff);
+			}
+
+			weight_coeffs.push_back(buffvect);
+			myLineStream.str(""); myLineStream.clear();
+		}
+		spmagFile.close();
+
+		if (!rank) {
+			std::cout << "weight_coeffs.size() " << weight_coeffs.size() << std::endl;
+			std::cout << "weight_coeffs first 10 lines : " << std::endl;
+			for (unsigned i = 0; i < 10; i++) {
+				for (auto &x : weight_coeffs[i])
+					std::cout << x << " ";
+				std::cout << std::endl;
+			}
+		}
 	}
-	spmagFile.close();
+	else {
+		if (!rank)
+			std::cout << "spmagFile " << spmagFileName << " wasn't opened" << std::endl;
+	}
 
-	if (!rank) {
-		std::cout << "weight_coeffs.size() " << weight_coeffs.size() << std::endl;
-		std::cout << "weight_coeffs first 10 lines : " << std::endl;
-		for (unsigned i = 0; i < 10; i++) {
-			for (auto &x : weight_coeffs[i])
-				std::cout << x << " ";
-			std::cout << std::endl;
-		}
+	if (!rank)
 		std::cout << "readInputDataFromFiles() finished " << std::endl;
-	}
 }
