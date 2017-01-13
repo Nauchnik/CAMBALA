@@ -1,0 +1,1008 @@
+MPI control process
+Start residual is: 1e+100
+Search space:
+1700 < c_b < 1700
+7000 < Range < 7000
+1.7 < rho_b < 1.7
+0 < tau < 0
+cw1_arr :
+1450 1450 1450 1450 1450 
+cw2_arr :
+1500 1500 1500 1500 1500 
+ncpl_arr :
+11 11 11 11 11 
+point_values_vec as vector of tasks
+point_values_vec.size() 161051
+point_values_vec[0].size() 9
+task_len 10
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+before filling task
+send_task_count 479
+
+Control process, new residual minimum:
+err = 1.64833e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1460 1500 
+time from start 5.82768 s
+
+Control process, new residual minimum:
+err = 1.48162e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1465 1500 
+time from start 5.84696 s
+
+Control process, new residual minimum:
+err = 1.32109e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1465 1495 
+time from start 5.85526 s
+
+Control process, new residual minimum:
+err = 1.16089e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1470 1495 
+time from start 5.88277 s
+
+Control process, new residual minimum:
+err = 1.15325e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1470 1490 
+time from start 5.88617 s
+
+Control process, new residual minimum:
+err = 1.06714e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1475 1495 
+time from start 5.90911 s
+
+Control process, new residual minimum:
+err = 1.05918e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1480 1495 
+time from start 5.9248 s
+
+Control process, new residual minimum:
+err = 1.0162e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1475 1490 
+time from start 5.94652 s
+
+Control process, new residual minimum:
+err = 9.54886e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1480 1490 
+time from start 5.95333 s
+
+Control process, new residual minimum:
+err = 8.71723e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1455 1475 1490 
+time from start 6.29995 s
+
+Control process, new residual minimum:
+err = 8.1727e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1455 1480 1490 
+time from start 6.32629 s
+
+Control process, new residual minimum:
+err = 7.78637e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1460 1475 1490 
+time from start 6.74677 s
+
+Control process, new residual minimum:
+err = 7.38864e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1460 1480 1490 
+time from start 6.74978 s
+
+Control process, new residual minimum:
+err = 7.36972e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1465 1480 1490 
+time from start 7.23545 s
+
+Control process, new residual minimum:
+err = 7.3168e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1465 1480 1485 
+time from start 7.25918 s
+
+processed_task_count 1000
+
+Control process, new residual minimum:
+err = 7.19185e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1455 1455 1480 1490 
+time from start 23.304 s
+
+Control process, new residual minimum:
+err = 6.74069e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1455 1460 1475 1490 
+time from start 23.6053 s
+
+Control process, new residual minimum:
+err = 6.58558e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1455 1460 1480 1485 
+time from start 23.6561 s
+
+Control process, new residual minimum:
+err = 6.28067e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1455 1465 1480 1485 
+time from start 24.0023 s
+
+processed_task_count 2000
+
+Control process, new residual minimum:
+err = 6.10318e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1460 1460 1475 1485 
+time from start 40.6101 s
+
+Control process, new residual minimum:
+err = 5.67687e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1460 1460 1480 1485 
+time from start 40.617 s
+
+processed_task_count 3000
+
+processed_task_count 4000
+
+Control process, new residual minimum:
+err = 5.60981e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1465 1455 1480 1485 
+time from start 53.0747 s
+
+Control process, new residual minimum:
+err = 5.29933e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1465 1460 1475 1485 
+time from start 57.4993 s
+
+processed_task_count 5000
+
+Control process, new residual minimum:
+err = 5.25094e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1470 1455 1475 1485 
+time from start 69.7909 s
+
+processed_task_count 6000
+
+processed_task_count 7000
+
+Control process, new residual minimum:
+err = 5.24656e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1475 1495 1450 1475 
+time from start 97.9261 s
+
+processed_task_count 8000
+
+Control process, new residual minimum:
+err = 5.22134e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1480 1490 1450 1475 
+time from start 114.194 s
+
+processed_task_count 9000
+
+processed_task_count 10000
+
+processed_task_count 11000
+
+processed_task_count 12000
+
+processed_task_count 13000
+
+processed_task_count 14000
+
+processed_task_count 15000
+
+processed_task_count 16000
+
+processed_task_count 17000
+
+processed_task_count 18000
+
+processed_task_count 19000
+
+processed_task_count 20000
+
+processed_task_count 21000
+
+processed_task_count 22000
+
+processed_task_count 23000
+
+processed_task_count 24000
+
+processed_task_count 25000
+
+processed_task_count 26000
+
+processed_task_count 27000
+
+processed_task_count 28000
+
+processed_task_count 29000
+
+processed_task_count 30000
+
+processed_task_count 31000
+
+processed_task_count 32000
+
+processed_task_count 33000
+
+processed_task_count 34000
+
+processed_task_count 35000
+
+processed_task_count 36000
+
+processed_task_count 37000
+
+processed_task_count 38000
+
+processed_task_count 39000
+
+processed_task_count 40000
+
+processed_task_count 41000
+
+processed_task_count 42000
+
+processed_task_count 43000
+
+processed_task_count 44000
+
+processed_task_count 45000
+
+processed_task_count 46000
+
+processed_task_count 47000
+
+processed_task_count 48000
+
+processed_task_count 49000
+
+processed_task_count 50000
+
+processed_task_count 51000
+
+processed_task_count 52000
+
+processed_task_count 53000
+
+processed_task_count 54000
+
+processed_task_count 55000
+
+processed_task_count 56000
+
+processed_task_count 57000
+
+processed_task_count 58000
+
+processed_task_count 59000
+
+processed_task_count 60000
+
+processed_task_count 61000
+
+processed_task_count 62000
+
+processed_task_count 63000
+
+processed_task_count 64000
+
+processed_task_count 65000
+
+processed_task_count 66000
+
+processed_task_count 67000
+
+processed_task_count 68000
+
+processed_task_count 69000
+
+processed_task_count 70000
+
+processed_task_count 71000
+
+processed_task_count 72000
+
+processed_task_count 73000
+
+processed_task_count 74000
+
+processed_task_count 75000
+
+processed_task_count 76000
+
+processed_task_count 77000
+
+processed_task_count 78000
+
+processed_task_count 79000
+
+processed_task_count 80000
+
+processed_task_count 81000
+
+processed_task_count 82000
+
+processed_task_count 83000
+
+processed_task_count 84000
+
+processed_task_count 85000
+
+processed_task_count 86000
+
+processed_task_count 87000
+
+processed_task_count 88000
+
+processed_task_count 89000
+
+processed_task_count 90000
+
+processed_task_count 91000
+
+processed_task_count 92000
+
+processed_task_count 93000
+
+processed_task_count 94000
+
+processed_task_count 95000
+
+processed_task_count 96000
+
+processed_task_count 97000
+
+processed_task_count 98000
+
+processed_task_count 99000
+
+processed_task_count 100000
+
+processed_task_count 101000
+
+processed_task_count 102000
+
+processed_task_count 103000
+
+processed_task_count 104000
+
+processed_task_count 105000
+
+processed_task_count 106000
+
+processed_task_count 107000
+
+processed_task_count 108000
+
+processed_task_count 109000
+
+processed_task_count 110000
+
+processed_task_count 111000
+
+processed_task_count 112000
+
+processed_task_count 113000
+
+processed_task_count 114000
+
+processed_task_count 115000
+
+processed_task_count 116000
+
+processed_task_count 117000
+
+processed_task_count 118000
+
+processed_task_count 119000
+
+processed_task_count 120000
+
+processed_task_count 121000
+
+processed_task_count 122000
+
+processed_task_count 123000
+
+processed_task_count 124000
+
+processed_task_count 125000
+
+processed_task_count 126000
+
+processed_task_count 127000
+
+processed_task_count 128000
+
+processed_task_count 129000
+
+processed_task_count 130000
+
+processed_task_count 131000
+
+processed_task_count 132000
+
+processed_task_count 133000
+
+processed_task_count 134000
+
+processed_task_count 135000
+
+processed_task_count 136000
+
+processed_task_count 137000
+
+processed_task_count 138000
+
+processed_task_count 139000
+
+processed_task_count 140000
+
+processed_task_count 141000
+
+processed_task_count 142000
+
+processed_task_count 143000
+
+processed_task_count 144000
+
+processed_task_count 145000
+
+processed_task_count 146000
+
+processed_task_count 147000
+
+processed_task_count 148000
+
+processed_task_count 149000
+
+processed_task_count 150000
+
+processed_task_count 151000
+
+processed_task_count 152000
+
+processed_task_count 153000
+
+processed_task_count 154000
+
+processed_task_count 155000
+
+processed_task_count 156000
+
+processed_task_count 157000
+
+processed_task_count 158000
+
+processed_task_count 159000
+
+processed_task_count 160000
+
+processed_task_count 161000
+
+SEARCH ENDED!
+err = 5.22134e-07, parameters:
+c_b = 1700, rho_b = 1.7, R = 7000, tau = 0
+cws :
+1450 1480 1490 1450 1475 
+final time 1948.74 s
