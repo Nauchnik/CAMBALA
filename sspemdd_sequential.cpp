@@ -1199,7 +1199,6 @@ void sspemdd_sequential::readInputDataFromFiles()
 	std::ifstream spmagFile(spmagFileName.c_str());
 	if (spmagFile.is_open()) {
 		buffvect.clear();
-
 		while (std::getline(spmagFile, myLine)) {
 			myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading
 			myLineStream << myLine;
@@ -1227,10 +1226,14 @@ void sspemdd_sequential::readInputDataFromFiles()
 		}
 	}
 	else {
-		if (!rank)
+		if (!rank) {
 			std::cout << "spmagFile " << spmagFileName << " wasn't opened" << std::endl;
+			object_function_type = "uniform";
+		}
 	}
 
-	if (!rank)
+	if (!rank) {
+		std::cout << "object_function_type changed to " << object_function_type << std::endl;
 		std::cout << "readInputDataFromFiles() finished " << std::endl;
+	}
 }
