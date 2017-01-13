@@ -74,13 +74,12 @@ void sspemdd_parallel::control_process()
 	result_len = 2; // calculated residual + index of a task
 	result = new double[result_len];
 	sstream_out << "task_len " << task_len << std::endl;
-	std::cout << "4" << std::endl;
 	
 	unsigned send_task_count = 0;
 	
 	// sending first part of tasks
 	for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++) {
-		sstream_out << "before filling task" << std::endl;
+		//sstream_out << "before filling task" << std::endl;
 		//std::cout << sstream_out.str();
 		for (unsigned j = 0; j < task_len - 1; j++)
 			task[j] = point_values_vec[send_task_count][j];
@@ -94,6 +93,7 @@ void sspemdd_parallel::control_process()
 		send_task_count++;
 	}
 	sstream_out << "send_task_count " << send_task_count << std::endl;
+	std::cout << "first send_task_count " << send_task_count << std::endl;
 
 	std::ofstream ofile("mpi_out");
 	ofile << sstream_out.rdbuf();

@@ -876,7 +876,8 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 		search_space.push_back(tmp_vec);
 	}
 	
-	std::cout << "loadValuesToSearchSpaceVariables() finished" << std::endl;
+	if (!rank)
+		std::cout << "loadValuesToSearchSpaceVariables() finished" << std::endl;
 }
 
 void sspemdd_sequential::findLocalMinHillClimbing()
@@ -1045,6 +1046,8 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 /*
 	read constant and variable values from a scenario file
 */
+	if (!rank)
+		std::cout << "scenarioFileName " << scenarioFileName << std::endl;
 	std::ifstream scenarioFile(scenarioFileName.c_str());
 
 	if (!scenarioFile.is_open()) {
@@ -1226,10 +1229,9 @@ void sspemdd_sequential::readInputDataFromFiles()
 		}
 	}
 	else {
-		if (!rank) {
+		object_function_type = "uniform";
+		if (!rank)
 			std::cout << "spmagFile " << spmagFileName << " wasn't opened" << std::endl;
-			object_function_type = "uniform";
-		}
 	}
 
 	if (!rank) {

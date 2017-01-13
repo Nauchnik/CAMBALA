@@ -26,21 +26,19 @@ int main(int argc, char **argv)
 {
 	unsigned ncpl = 0; // search mesh within each water layer
 	
-	std::string scenarioFileName = "15_bottom_R_weighted.txt";
+	std::string scenarioFileName = "";
 	sspemdd_sequential sspemdd_seq;
 	unsigned iterated_local_search_runs = 10;
 	int verbosity = 0;
 
 #ifdef _DEBUG
 	argc = 2;
-	argv[1] = "12_hydro_R_weighted.txt";
+	argv[1] = "13_hydro_R_uniform.txt";
 	argv[2] = "10"; // iterated_local_search_runs
 #endif
 	
-	if (argc >= 2) {
+	if (argc >= 2)
 		scenarioFileName = argv[1];
-		std::cout << "scenarioFileName " << scenarioFileName << std::endl;
-	}
 	else {
 		std::cout << "Usage : scenarioFileName [iterated_local_search_runs] [verbosity]" << std::endl;
 		exit(1);
