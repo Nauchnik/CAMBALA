@@ -200,7 +200,7 @@ void sspemdd_parallel::computing_process()
 
 	std::stringstream cur_process_points_sstream;
 
-	cur_process_points_sstream << "cb rhob R tau " << std::endl;
+	cur_process_points_sstream << "cb rhob R tau ";
 	for (unsigned i = 0; i < cw1_arr.size(); i++) {
 		cur_process_points_sstream << "cw" << i;
 		if (i < cw1_arr.size() - 1)
