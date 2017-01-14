@@ -202,10 +202,9 @@ void sspemdd_parallel::computing_process()
 
 	cur_process_points_sstream << "cb rhob R tau ";
 	for (unsigned i = 0; i < cw1_arr.size(); i++) {
-		cur_process_points_sstream << "cw" << i;
-		if (i < cw1_arr.size() - 1)
-			cur_process_points_sstream << " ";
+		cur_process_points_sstream << "cw" << i << " ";
 	}
+	cur_process_points_sstream << "residual";
 	cur_process_points_sstream << std::endl;
 	
 	for (;;) {
@@ -241,11 +240,9 @@ void sspemdd_parallel::computing_process()
 			                       << cur_point.rhob << " "
 								   << cur_point.R << " "
 								   << cur_point.tau << " ";
-		for (unsigned i = 0; i < cur_point.cws.size(); i++) {
+		for (unsigned i = 0; i < cur_point.cws.size(); i++)
 			cur_process_points_sstream << cur_point.cws[i] << " ";
-			if (i < cur_point.cws.size() - 1)
-				cur_process_points_sstream << " ";
-		}
+		cur_process_points_sstream << cur_point.residual;
 		cur_process_points_sstream << std::endl;
 		
 		result[0] = cur_point.residual;
