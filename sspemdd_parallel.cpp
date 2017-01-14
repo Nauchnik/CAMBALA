@@ -108,7 +108,7 @@ void sspemdd_parallel::control_process()
 	while (processed_task_count < point_values_vec.size()) {
 		MPI_Recv(result, result_len, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		processed_task_count++;
-		if (processed_task_count % 1000 == 0)
+		if (processed_task_count % 10000 == 0)
 			sstream_out << std::endl << "processed_task_count " << processed_task_count << std::endl;
 		
 		received_residual = result[0];
@@ -197,6 +197,16 @@ void sspemdd_parallel::computing_process()
 		std::cout << "task_len " << task_len << std::endl;
 		std::cout << "result_len " << result_len << std::endl;
 	}
+
+	std::stringstream cur_process_points_sstream;
+
+	cur_process_points_sstream << "cb rhob R tau " << std::endl;
+	for (unsigned i = 0; i < cw1_arr.size(); i++) {
+		cur_process_points_sstream << "cw" << i;
+		if (i < cw1_arr.size() - 1)
+			cur_process_points_sstream << " ";
+	}
+	cur_process_points_sstream << std::endl;
 	
 	for (;;) {
 		MPI_Recv(task, task_len, MPI_DOUBLE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
@@ -211,7 +221,6 @@ void sspemdd_parallel::computing_process()
 		// if stop-message then finalize
 		if (task[task_len-1] == -1) {
 			std::cout << "rank " << rank << " received stop-message" << std::endl;
-			MPI_Finalize();
 			break;
 		}
 		//std::cout << "1" << std::endl;
@@ -223,19 +232,21 @@ void sspemdd_parallel::computing_process()
 		cur_point = fromDoubleVecToPoint(cur_point_values_vec);
 		//std::cout << "4" << std::endl;
 		
-		if (rank == 1) {
+		if (rank == 1)
 			std::cout << "received task_index " << task_index << std::endl;
-			std::cout << "cur_point.cb " << cur_point.cb << std::endl;
-			std::cout << "cur_point.rhob " << cur_point.rhob << std::endl;
-			std::cout << "cur_point.R " << cur_point.R << std::endl;
-			std::cout << "cur_point.tau " << cur_point.tau << std::endl;
-			std::cout << "cur_point.cws ";
-			for (auto &x : cur_point.cws)
-				std::cout << x << " ";
-			std::cout << std::endl;
-		}
 		
 		fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
+
+		cur_process_points_sstream << cur_point.cb << " " 
+			                       << cur_point.rhob << " "
+								   << cur_point.R << " "
+								   << cur_point.tau << " ";
+		for (unsigned i = 0; i < cur_point.cws.size(); i++) {
+			cur_process_points_sstream << cur_point.cws[i] << " ";
+			if (i < cur_point.cws.size() - 1)
+				cur_process_points_sstream << " ";
+		}
+		cur_process_points_sstream << std::endl;
 		
 		result[0] = cur_point.residual;
 		result[1] = task_index;
@@ -243,5 +254,14 @@ void sspemdd_parallel::computing_process()
 	}
 	delete[] task;
 	delete[] result;
+
+	std::stringstream cur_process_file_name_sstream;
+	cur_process_file_name_sstream << "points_process" << rank;
+	std::ofstream cur_process_file(cur_process_file_name_sstream.str().c_str());
+	cur_process_file << cur_process_points_sstream.rdbuf();
+	cur_process_file.close();
+
+	MPI_Finalize();
+
 #endif
 }
