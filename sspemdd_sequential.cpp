@@ -766,12 +766,10 @@ void sspemdd_sequential::findGlobalMinBruteForce()
 	for (unsigned variable_index = 0; variable_index < search_space.size(); variable_index++)
 		for ( unsigned j=0; j < search_space[variable_index].size(); j++)
 			search_space_indexes[variable_index].push_back(j);
-	unsigned checked_points_number = 0;
 
 	while (SSPEMDD_utils::next_cartesian(search_space_indexes, index_arr, cur_point_indexes)) {
 		cur_point = fromPointIndexesToPoint(cur_point_indexes);
 		fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
-		checked_points_number++;
 	}
 }
 
@@ -901,13 +899,14 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 	// launch hill climbing for variables
 	bool isLocalMin;
 	bool isRecordUpdateInDimension;
-	unsigned checked_points_number = 0;
 	unsigned index_from;
 	double old_record_residual;
 	unsigned rand_numb;
-
+	unsigned skipped_points = 0;
+	checked_points.reserve(N_total);
+	
 	for (unsigned run_index = 0; run_index < iterated_local_search_runs; run_index++) {
-		std::cout << "run " << run_index << " of ILS" << std::endl;
+		std::cout << "iteration " << run_index << " of ILS" << std::endl;
 		do { // do while local min not reached
 			isLocalMin = true; // if changing of every variable will not lead to a record updata, then a local min reached
 			for (unsigned variable_index = 0; variable_index < search_space.size(); variable_index++) {
@@ -934,19 +933,18 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 							", max index " << search_space[variable_index].size() - 1 << std::endl;
 					}
 					cur_point = fromPointIndexesToPoint(cur_point_indexes);
-					fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
-					checked_points_number++;
-					if (verbosity > 0) {
-						std::cout << "checked_points_number " << checked_points_number << std::endl;
-						std::cout << "-----" << std::endl;
+					isRecordUpdateInDimension = false;
+					if (std::find(checked_points.begin(), checked_points.end(), cur_point) != checked_points.end()) {
+						skipped_points++;
+						continue;
 					}
+					fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
+					checked_points.push_back(cur_point);
 					if (record_point.residual < old_record_residual) { // new record was found
 						record_point_indexes = cur_point_indexes;
 						isLocalMin = false;
 						isRecordUpdateInDimension = true;
 					}
-					else
-						isRecordUpdateInDimension = false;
 				} while (isRecordUpdateInDimension);
 			}
 		} while (!isLocalMin);
@@ -960,10 +958,9 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 				      << global_record_point.residual << std::endl;
 		}
 
-		std::cout << "checked_points_number " << checked_points_number << std::endl;
-		std::cout << std::endl << "*** local minimum in hill climbing" << std::endl;
-		std::cout << "local record of residual " << record_point.residual << std::endl;
-		std::cout << "-----" << std::endl;
+		//std::cout << std::endl << "*** local minimum in hill climbing" << std::endl;
+		//std::cout << "local record of residual " << record_point.residual << std::endl;
+		//std::cout << "-----" << std::endl;
 		std::cout << "new random cur_point_indexes : " << std::endl;
 
 		// prmutate current global minimum point to obtain a new start point
@@ -985,9 +982,12 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 		fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
 		record_point = cur_point;
 		record_point_indexes = cur_point_indexes;
-	}
-	std::cout << "total checked_points_number " << checked_points_number << std::endl;
 
+		std::cout << "checked_points size " << checked_points.size() << std::endl;
+		std::cout << "skipped_points " << skipped_points << std::endl;
+		std::cout << "---" << std::endl;
+	}
+	
 	// during optimization record_point is a local minimum, finaly it's the global minimum
 	record_point = global_record_point;
 }

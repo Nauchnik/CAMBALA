@@ -18,6 +18,11 @@ struct search_space_point
 	double cb;
 	std::vector<double> cws;
 	double residual;
+
+	bool operator==(const search_space_point& a) const
+	{
+		return (R == a.R && tau == a.tau && rhob == a.rhob && cb == a.cb && cws == a.cws);
+	}
 };
 
 class sspemdd_sequential
@@ -114,6 +119,7 @@ protected:
 	// hill climbing
 	search_space_point fromPointIndexesToPoint( std::vector<unsigned> cur_point_indexes );
 	search_space_point fromDoubleVecToPoint(std::vector<double> double_vec);
+	std::vector<search_space_point> checked_points;
 };
 
 #endif
