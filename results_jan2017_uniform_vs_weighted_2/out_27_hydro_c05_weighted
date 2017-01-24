@@ -1,0 +1,694 @@
+MPI control process
+Start residual is: 1e+100
+Search space:
+1700 < c_b < 1700
+7000 < Range < 7000
+1.7 < rho_b < 1.7
+0 < tau < 0
+cw1_arr :
+1450 1450 1450 1450 1450 1450 
+cw2_arr :
+1500 1500 1500 1500 1500 1500 
+ncpl_arr :
+11 11 11 11 11 11 
+point_values_vec as vector of tasks
+point_values_vec.size() 1771561
+point_values_vec[0].size() 10
+task_len 11
+send_task_count 479
+
+Control process, new residual minimum:
+err = 1.8541e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1450 1460 1500 
+time from start 9.71091 s
+
+Control process, new residual minimum:
+err = 1.51651e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1450 1470 1500 
+time from start 9.73207 s
+
+Control process, new residual minimum:
+err = 1.3976e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1450 1475 1500 
+time from start 9.77579 s
+
+Control process, new residual minimum:
+err = 1.32965e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1450 1480 1500 
+time from start 9.78478 s
+
+Control process, new residual minimum:
+err = 1.30494e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1450 1480 1495 
+time from start 9.80483 s
+
+Control process, new residual minimum:
+err = 1.27225e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1450 1485 1495 
+time from start 9.81286 s
+
+Control process, new residual minimum:
+err = 1.24537e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1455 1475 1500 
+time from start 10.1402 s
+
+Control process, new residual minimum:
+err = 1.17037e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1455 1480 1500 
+time from start 10.1608 s
+
+Control process, new residual minimum:
+err = 1.14034e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1455 1480 1495 
+time from start 10.1728 s
+
+Control process, new residual minimum:
+err = 1.10217e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1455 1485 1495 
+time from start 10.2125 s
+
+Control process, new residual minimum:
+err = 1.10104e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1460 1475 1500 
+time from start 10.5553 s
+
+Control process, new residual minimum:
+err = 1.01966e-06, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1460 1480 1500 
+time from start 10.5816 s
+
+Control process, new residual minimum:
+err = 9.81908e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1460 1480 1495 
+time from start 10.6179 s
+
+Control process, new residual minimum:
+err = 9.3903e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1460 1485 1495 
+time from start 10.6369 s
+
+Control process, new residual minimum:
+err = 8.86456e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1465 1480 1500 
+time from start 11.0732 s
+
+Control process, new residual minimum:
+err = 8.37441e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1465 1480 1495 
+time from start 11.0757 s
+
+Control process, new residual minimum:
+err = 7.9203e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1465 1485 1495 
+time from start 11.1205 s
+
+Control process, new residual minimum:
+err = 6.75752e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1470 1485 1495 
+time from start 18.941 s
+
+Control process, new residual minimum:
+err = 6.71095e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1475 1490 1495 
+time from start 19.3209 s
+
+Control process, new residual minimum:
+err = 6.42428e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1475 1480 1495 
+time from start 19.3228 s
+
+Control process, new residual minimum:
+err = 6.40184e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1475 1485 1490 
+time from start 19.3394 s
+
+Control process, new residual minimum:
+err = 6.10057e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1450 1475 1485 1495 
+time from start 19.3496 s
+
+Control process, new residual minimum:
+err = 5.888e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1455 1470 1485 1495 
+time from start 38.6028 s
+
+Control process, new residual minimum:
+err = 5.32127e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1455 1475 1485 1495 
+time from start 46.3941 s
+
+Control process, new residual minimum:
+err = 5.28719e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1455 1480 1485 1490 
+time from start 46.7339 s
+
+Control process, new residual minimum:
+err = 5.20649e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1460 1470 1485 1490 
+time from start 65.4276 s
+
+Control process, new residual minimum:
+err = 5.08892e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1460 1470 1490 1490 
+time from start 65.4356 s
+
+Control process, new residual minimum:
+err = 4.57792e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1460 1475 1485 1490 
+time from start 66.1447 s
+
+Control process, new residual minimum:
+err = 4.55887e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1465 1470 1490 1490 
+time from start 92.271 s
+
+Control process, new residual minimum:
+err = 4.19547e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1450 1465 1475 1485 1490 
+time from start 92.7476 s
+
+processed_task_count 10000
+
+Control process, new residual minimum:
+err = 4.18015e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1455 1460 1470 1485 1490 
+time from start 344.004 s
+
+Control process, new residual minimum:
+err = 4.14605e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1455 1460 1475 1490 1490 
+time from start 344.715 s
+
+Control process, new residual minimum:
+err = 3.78737e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1455 1460 1475 1485 1490 
+time from start 344.724 s
+
+Control process, new residual minimum:
+err = 3.70525e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1455 1465 1470 1485 1490 
+time from start 370.2 s
+
+Control process, new residual minimum:
+err = 3.58471e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1455 1465 1475 1485 1490 
+time from start 371.228 s
+
+processed_task_count 20000
+
+processed_task_count 30000
+
+Control process, new residual minimum:
+err = 3.36473e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1460 1460 1470 1485 1490 
+time from start 615.76 s
+
+Control process, new residual minimum:
+err = 3.3516e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1460 1460 1475 1485 1490 
+time from start 621.824 s
+
+Control process, new residual minimum:
+err = 3.07751e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1460 1465 1470 1485 1490 
+time from start 641.945 s
+
+processed_task_count 40000
+
+Control process, new residual minimum:
+err = 2.96743e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1465 1460 1470 1485 1490 
+time from start 892.09 s
+
+processed_task_count 50000
+
+processed_task_count 60000
+
+Control process, new residual minimum:
+err = 2.95333e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1470 1460 1470 1480 1490 
+time from start 1164.88 s
+
+Control process, new residual minimum:
+err = 2.81334e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1470 1465 1465 1480 1490 
+time from start 1187.89 s
+
+processed_task_count 70000
+
+Control process, new residual minimum:
+err = 2.7869e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1475 1465 1465 1485 1485 
+time from start 1461.88 s
+
+Control process, new residual minimum:
+err = 2.64127e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1475 1470 1465 1480 1485 
+time from start 1485.12 s
+
+processed_task_count 80000
+
+processed_task_count 90000
+
+Control process, new residual minimum:
+err = 2.60459e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1480 1465 1465 1480 1485 
+time from start 1732.79 s
+
+Control process, new residual minimum:
+err = 2.59346e-07, parameters:
+c_b = 1700, rho_b= 1.7, tau = 0, R = 7000
+cws_min :
+1450 1480 1475 1460 1475 1485 
+time from start 1780.06 s
+
+processed_task_count 100000
+
+processed_task_count 110000
+
+processed_task_count 120000
+
+processed_task_count 130000
+
+processed_task_count 140000
+
+processed_task_count 150000
+
+processed_task_count 160000
+
+processed_task_count 170000
+
+processed_task_count 180000
+
+processed_task_count 190000
+
+processed_task_count 200000
+
+processed_task_count 210000
+
+processed_task_count 220000
+
+processed_task_count 230000
+
+processed_task_count 240000
+
+processed_task_count 250000
+
+processed_task_count 260000
+
+processed_task_count 270000
+
+processed_task_count 280000
+
+processed_task_count 290000
+
+processed_task_count 300000
+
+processed_task_count 310000
+
+processed_task_count 320000
+
+processed_task_count 330000
+
+processed_task_count 340000
+
+processed_task_count 350000
+
+processed_task_count 360000
+
+processed_task_count 370000
+
+processed_task_count 380000
+
+processed_task_count 390000
+
+processed_task_count 400000
+
+processed_task_count 410000
+
+processed_task_count 420000
+
+processed_task_count 430000
+
+processed_task_count 440000
+
+processed_task_count 450000
+
+processed_task_count 460000
+
+processed_task_count 470000
+
+processed_task_count 480000
+
+processed_task_count 490000
+
+processed_task_count 500000
+
+processed_task_count 510000
+
+processed_task_count 520000
+
+processed_task_count 530000
+
+processed_task_count 540000
+
+processed_task_count 550000
+
+processed_task_count 560000
+
+processed_task_count 570000
+
+processed_task_count 580000
+
+processed_task_count 590000
+
+processed_task_count 600000
+
+processed_task_count 610000
+
+processed_task_count 620000
+
+processed_task_count 630000
+
+processed_task_count 640000
+
+processed_task_count 650000
+
+processed_task_count 660000
+
+processed_task_count 670000
+
+processed_task_count 680000
+
+processed_task_count 690000
+
+processed_task_count 700000
+
+processed_task_count 710000
+
+processed_task_count 720000
+
+processed_task_count 730000
+
+processed_task_count 740000
+
+processed_task_count 750000
+
+processed_task_count 760000
+
+processed_task_count 770000
+
+processed_task_count 780000
+
+processed_task_count 790000
+
+processed_task_count 800000
+
+processed_task_count 810000
+
+processed_task_count 820000
+
+processed_task_count 830000
+
+processed_task_count 840000
+
+processed_task_count 850000
+
+processed_task_count 860000
+
+processed_task_count 870000
+
+processed_task_count 880000
+
+processed_task_count 890000
+
+processed_task_count 900000
+
+processed_task_count 910000
+
+processed_task_count 920000
+
+processed_task_count 930000
+
+processed_task_count 940000
+
+processed_task_count 950000
+
+processed_task_count 960000
+
+processed_task_count 970000
+
+processed_task_count 980000
+
+processed_task_count 990000
+
+processed_task_count 1000000
+
+processed_task_count 1010000
+
+processed_task_count 1020000
+
+processed_task_count 1030000
+
+processed_task_count 1040000
+
+processed_task_count 1050000
+
+processed_task_count 1060000
+
+processed_task_count 1070000
+
+processed_task_count 1080000
+
+processed_task_count 1090000
+
+processed_task_count 1100000
+
+processed_task_count 1110000
+
+processed_task_count 1120000
+
+processed_task_count 1130000
+
+processed_task_count 1140000
+
+processed_task_count 1150000
+
+processed_task_count 1160000
+
+processed_task_count 1170000
+
+processed_task_count 1180000
+
+processed_task_count 1190000
+
+processed_task_count 1200000
+
+processed_task_count 1210000
+
+processed_task_count 1220000
+
+processed_task_count 1230000
+
+processed_task_count 1240000
+
+processed_task_count 1250000
+
+processed_task_count 1260000
+
+processed_task_count 1270000
+
+processed_task_count 1280000
+
+processed_task_count 1290000
+
+processed_task_count 1300000
+
+processed_task_count 1310000
+
+processed_task_count 1320000
+
+processed_task_count 1330000
+
+processed_task_count 1340000
+
+processed_task_count 1350000
+
+processed_task_count 1360000
+
+processed_task_count 1370000
+
+processed_task_count 1380000
+
+processed_task_count 1390000
+
+processed_task_count 1400000
+
+processed_task_count 1410000
+
+processed_task_count 1420000
+
+processed_task_count 1430000
+
+processed_task_count 1440000
+
+processed_task_count 1450000
+
+processed_task_count 1460000
+
+processed_task_count 1470000
+
+processed_task_count 1480000
+
+processed_task_count 1490000
+
+processed_task_count 1500000
+
+processed_task_count 1510000
+
+processed_task_count 1520000
+
+processed_task_count 1530000
+
+processed_task_count 1540000
+
+processed_task_count 1550000
+
+processed_task_count 1560000
+
+processed_task_count 1570000
+
+processed_task_count 1580000
+
+processed_task_count 1590000
+
+processed_task_count 1600000
+
+processed_task_count 1610000
+
+processed_task_count 1620000
+
+processed_task_count 1630000
+
+processed_task_count 1640000
+
+processed_task_count 1650000
+
+processed_task_count 1660000
+
+processed_task_count 1670000
+
+processed_task_count 1680000
+
+processed_task_count 1690000
+
+processed_task_count 1700000
+
+processed_task_count 1710000
+
+processed_task_count 1720000
+
+processed_task_count 1730000
+
+processed_task_count 1740000
+
+processed_task_count 1750000
+
+processed_task_count 1760000
+
+processed_task_count 1770000
+
+SEARCH ENDED!
+err = 2.59346e-07, parameters:
+c_b = 1700, rho_b = 1.7, R = 7000, tau = 0
+cws :
+1450 1480 1475 1460 1475 1485 
+final time 32623.5 s
