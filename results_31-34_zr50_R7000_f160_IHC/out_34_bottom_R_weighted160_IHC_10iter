@@ -1,0 +1,2212 @@
+iterated_local_search_runs 10
+scenarioFileName 34_bottom_R_weighted160.txt
+Parameters :
+cw1_arr :
+1500 1498 1493 1472 1462 
+cw2_arr :
+1500 1498 1493 1472 1462 
+ncpl_arr :
+1 1 1 1 1 
+n_layers_w 5
+nR 301
+R1 6850
+R2 7150
+ntau 1
+tau1 0
+tau2 0
+nrhob 19
+rhob1 1.1
+rhob2 2
+ncb 61
+cb1 1550
+cb2 1850
+dtimes_file 160_dtimes.txt
+spmag_file 160_spmag.txt
+readScenario() finished
+weight_coeffs.size() 871
+weight_coeffs first 10 lines : 
+-1 -1 -1 -1 
+-1 -1 -1 -1 
+-1 -1 -1 -1 
+-1 -1 -1 -1 
+-1 -1 -1 -1 
+-1 -1 -1 -1 
+-1 -1 -1 -1 
+-1 -1 -1 -1 
+-1 -1 -1 -1 
+1.16052e-10 -1 -1 -1 
+object_function_type changed to weighted
+readInputDataFromFiles() finished 
+N_total 348859
+loadValuesToSearchSpaceVariables() finished
+init() finished
+findLocalMinHillClimbing
+
+
+New residual minimum:
+err = 0.00172552, parameters:
+c_b = 1620, rho_b = 1.1, tau = 0, R = 7051
+cws_min :
+1500 1498 1493 1472 1462 
+iteration 0 of ILS
+
+
+New residual minimum:
+err = 0.000100692, parameters:
+c_b = 1625, rho_b = 1.1, tau = 0, R = 7051
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100689, parameters:
+c_b = 1625, rho_b = 1.15, tau = 0, R = 7051
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100685, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7051
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100684, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7052
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100683, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7053
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100682, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7054
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100681, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7055
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100681, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7056
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00010068, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7057
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100679, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7058
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100678, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7059
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100678, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7060
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100677, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7061
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100676, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7062
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100675, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7063
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100675, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7064
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100674, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7065
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100674, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7066
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100673, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7067
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100672, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7068
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100672, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7069
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100671, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7070
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100671, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7071
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00010067, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7072
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00010067, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7073
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100669, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7074
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100669, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7075
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100668, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7076
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100668, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7077
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100667, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7078
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100667, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7079
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100667, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7080
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100666, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7081
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100666, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7082
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100666, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7083
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100665, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7084
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100665, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7085
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100665, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7086
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100665, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7087
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100664, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7088
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100664, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7089
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100664, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7090
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100664, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7091
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100664, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7092
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100664, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7093
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100663, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7094
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100663, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7095
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100663, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7096
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100663, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7097
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100663, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7098
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100663, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 8.93129e-05, parameters:
+c_b = 1630, rho_b = 1.2, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 7.93421e-05, parameters:
+c_b = 1635, rho_b = 1.2, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 6.75557e-05, parameters:
+c_b = 1640, rho_b = 1.2, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 5.78981e-05, parameters:
+c_b = 1645, rho_b = 1.2, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 4.88973e-05, parameters:
+c_b = 1650, rho_b = 1.2, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 4.88805e-05, parameters:
+c_b = 1650, rho_b = 1.25, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 4.42296e-05, parameters:
+c_b = 1650, rho_b = 1.3, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 3.6074e-05, parameters:
+c_b = 1655, rho_b = 1.3, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 2.83367e-05, parameters:
+c_b = 1660, rho_b = 1.3, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 2.1663e-05, parameters:
+c_b = 1665, rho_b = 1.3, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.68205e-05, parameters:
+c_b = 1670, rho_b = 1.3, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.33308e-05, parameters:
+c_b = 1675, rho_b = 1.3, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.33173e-05, parameters:
+c_b = 1675, rho_b = 1.35, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.1216e-05, parameters:
+c_b = 1680, rho_b = 1.35, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.10791e-05, parameters:
+c_b = 1680, rho_b = 1.4, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.10706e-05, parameters:
+c_b = 1680, rho_b = 1.45, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.04455e-05, parameters:
+c_b = 1680, rho_b = 1.5, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 9.42084e-06, parameters:
+c_b = 1680, rho_b = 1.55, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 7.99581e-06, parameters:
+c_b = 1685, rho_b = 1.55, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 3.28832e-06, parameters:
+c_b = 1690, rho_b = 1.55, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 2.95788e-06, parameters:
+c_b = 1695, rho_b = 1.55, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 2.95171e-06, parameters:
+c_b = 1695, rho_b = 1.6, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 2.94871e-06, parameters:
+c_b = 1695, rho_b = 1.65, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 2.94846e-06, parameters:
+c_b = 1695, rho_b = 1.7, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+on run_index 0 new global minimum with residual 2.94846e-06
+new random cur_point_indexes : 
+29 12 249 
+checked_points size 91
+skipped_points 2
+---
+iteration 1 of ILS
+new random cur_point_indexes : 
+26 6 249 
+checked_points size 91
+skipped_points 5
+---
+iteration 2 of ILS
+
+
+New residual minimum:
+err = 8.26563e-06, parameters:
+c_b = 1685, rho_b = 1.4, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 3.36217e-06, parameters:
+c_b = 1690, rho_b = 1.4, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 3.33295e-06, parameters:
+c_b = 1690, rho_b = 1.45, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 3.3085e-06, parameters:
+c_b = 1690, rho_b = 1.5, tau = 0, R = 7099
+cws_min :
+1500 1498 1493 1472 1462 
+new random cur_point_indexes : 
+10 18 288 
+checked_points size 98
+skipped_points 8
+---
+iteration 3 of ILS
+
+
+New residual minimum:
+err = 0.000145846, parameters:
+c_b = 1600, rho_b = 1.1, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000145593, parameters:
+c_b = 1600, rho_b = 1.15, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000137833, parameters:
+c_b = 1605, rho_b = 1.15, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000129489, parameters:
+c_b = 1610, rho_b = 1.15, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000122118, parameters:
+c_b = 1615, rho_b = 1.15, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00011016, parameters:
+c_b = 1620, rho_b = 1.15, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100678, parameters:
+c_b = 1625, rho_b = 1.15, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000100677, parameters:
+c_b = 1625, rho_b = 1.2, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 8.93368e-05, parameters:
+c_b = 1630, rho_b = 1.2, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 7.93829e-05, parameters:
+c_b = 1635, rho_b = 1.2, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 6.75972e-05, parameters:
+c_b = 1640, rho_b = 1.2, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 5.79609e-05, parameters:
+c_b = 1645, rho_b = 1.2, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 4.8954e-05, parameters:
+c_b = 1650, rho_b = 1.2, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 4.89394e-05, parameters:
+c_b = 1650, rho_b = 1.25, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 4.43108e-05, parameters:
+c_b = 1650, rho_b = 1.3, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 3.61923e-05, parameters:
+c_b = 1655, rho_b = 1.3, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 2.85052e-05, parameters:
+c_b = 1660, rho_b = 1.3, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 2.18956e-05, parameters:
+c_b = 1665, rho_b = 1.3, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.71083e-05, parameters:
+c_b = 1670, rho_b = 1.3, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.37261e-05, parameters:
+c_b = 1675, rho_b = 1.3, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.37163e-05, parameters:
+c_b = 1675, rho_b = 1.35, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.17116e-05, parameters:
+c_b = 1680, rho_b = 1.35, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.15848e-05, parameters:
+c_b = 1680, rho_b = 1.4, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.15798e-05, parameters:
+c_b = 1680, rho_b = 1.45, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.09877e-05, parameters:
+c_b = 1680, rho_b = 1.5, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.00204e-05, parameters:
+c_b = 1680, rho_b = 1.55, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 8.72021e-06, parameters:
+c_b = 1685, rho_b = 1.55, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 4.8303e-06, parameters:
+c_b = 1690, rho_b = 1.55, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 4.6618e-06, parameters:
+c_b = 1695, rho_b = 1.55, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 4.66134e-06, parameters:
+c_b = 1695, rho_b = 1.6, tau = 0, R = 7138
+cws_min :
+1500 1498 1493 1472 1462 
+new random cur_point_indexes : 
+50 11 179 
+
+
+New residual minimum:
+err = 1.40783e-06, parameters:
+c_b = 1800, rho_b = 1.65, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+checked_points size 147
+skipped_points 10
+---
+iteration 4 of ILS
+
+
+New residual minimum:
+err = 1.40384e-06, parameters:
+c_b = 1800, rho_b = 1.7, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.40206e-06, parameters:
+c_b = 1800, rho_b = 1.75, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+on run_index 4 new global minimum with residual 1.40206e-06
+new random cur_point_indexes : 
+45 14 273 
+checked_points size 153
+skipped_points 12
+---
+iteration 5 of ILS
+
+
+New residual minimum:
+err = 4.93373e-06, parameters:
+c_b = 1775, rho_b = 1.85, tau = 0, R = 7123
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 4.92282e-06, parameters:
+c_b = 1775, rho_b = 1.9, tau = 0, R = 7123
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 4.91341e-06, parameters:
+c_b = 1775, rho_b = 1.95, tau = 0, R = 7123
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 4.90535e-06, parameters:
+c_b = 1775, rho_b = 2, tau = 0, R = 7123
+cws_min :
+1500 1498 1493 1472 1462 
+new random cur_point_indexes : 
+3 13 96 
+checked_points size 161
+skipped_points 14
+---
+iteration 6 of ILS
+
+
+New residual minimum:
+err = 0.000188108, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6946
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188107, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6947
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188106, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6948
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188105, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6949
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188104, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6950
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188103, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6951
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188102, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6952
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188101, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6953
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.0001881, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6954
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188099, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6955
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188098, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6956
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188097, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6957
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188096, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6958
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188095, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6959
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188094, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6960
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188093, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6961
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188092, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6962
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188091, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6963
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018809, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6964
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188089, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6965
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188088, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6966
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188087, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6967
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188086, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6968
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188085, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6969
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188084, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6970
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188083, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6971
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188082, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6972
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188081, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6973
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188081, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6974
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018808, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6975
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188079, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6976
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188078, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6977
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188077, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6978
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188076, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6979
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188075, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6980
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188075, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6981
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188074, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6982
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188073, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6983
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188072, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6984
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188071, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6985
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188071, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6986
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018807, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6987
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188069, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6988
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188068, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6989
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188068, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6990
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188067, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6991
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188066, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6992
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188065, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6993
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188065, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6994
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188064, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6995
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188063, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6996
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188062, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6997
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188062, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6998
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188061, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 6999
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018806, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7000
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018806, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7001
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188059, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7002
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188058, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7003
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188058, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7004
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188057, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7005
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188056, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7006
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188056, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7007
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188055, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7008
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188054, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7009
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188054, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7010
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188053, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7011
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188053, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7012
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188052, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7013
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188051, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7014
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188051, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7015
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018805, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7016
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018805, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7017
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188049, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7018
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188049, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7019
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188048, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7020
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188048, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7021
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188047, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7022
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188047, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7023
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188046, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7024
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188045, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7025
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188045, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7026
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188045, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7027
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188044, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7028
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188044, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188043, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7030
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188043, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7031
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188042, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7032
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188042, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7033
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188041, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7034
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188041, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7035
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018804, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7036
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018804, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7037
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018804, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7038
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188039, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7039
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188039, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7040
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188038, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7041
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188038, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7042
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188038, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7043
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188037, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7044
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188037, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7045
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188037, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7046
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188036, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7047
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188036, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7048
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188036, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7049
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188035, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7050
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188035, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7051
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188035, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7052
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188034, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7053
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188034, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7054
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188034, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7055
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188033, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7056
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188033, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7057
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188033, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7058
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188033, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7059
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188032, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7060
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188032, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7061
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188032, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7062
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188032, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7063
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188031, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7064
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188031, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7065
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188031, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7066
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188031, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7067
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188031, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7068
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018803, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7069
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018803, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7070
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018803, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7071
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018803, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7072
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018803, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7073
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.00018803, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7074
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188029, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7075
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188029, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7076
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188029, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7077
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188029, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7078
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188029, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7079
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188029, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7080
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188029, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7081
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188029, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7082
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188029, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7083
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188028, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7084
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188028, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7085
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188028, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7086
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188028, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7087
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188028, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7088
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188028, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7089
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188028, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7090
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188028, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7091
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188028, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7092
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188028, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7093
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 0.000188028, parameters:
+c_b = 1570, rho_b = 1.75, tau = 0, R = 7094
+cws_min :
+1500 1498 1493 1472 1462 
+new random cur_point_indexes : 
+42 8 200 
+
+
+New residual minimum:
+err = 1.74329e-06, parameters:
+c_b = 1760, rho_b = 1.5, tau = 0, R = 7050
+cws_min :
+1500 1498 1493 1472 1462 
+checked_points size 315
+skipped_points 15
+---
+iteration 7 of ILS
+
+
+New residual minimum:
+err = 1.72948e-06, parameters:
+c_b = 1760, rho_b = 1.55, tau = 0, R = 7050
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.71894e-06, parameters:
+c_b = 1760, rho_b = 1.6, tau = 0, R = 7050
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.71127e-06, parameters:
+c_b = 1760, rho_b = 1.65, tau = 0, R = 7050
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.70612e-06, parameters:
+c_b = 1760, rho_b = 1.7, tau = 0, R = 7050
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.70317e-06, parameters:
+c_b = 1760, rho_b = 1.75, tau = 0, R = 7050
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.70213e-06, parameters:
+c_b = 1760, rho_b = 1.8, tau = 0, R = 7050
+cws_min :
+1500 1498 1493 1472 1462 
+new random cur_point_indexes : 
+37 4 179 
+
+
+New residual minimum:
+err = 9.19982e-07, parameters:
+c_b = 1735, rho_b = 1.3, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+checked_points size 325
+skipped_points 17
+---
+iteration 8 of ILS
+
+
+New residual minimum:
+err = 9.02652e-07, parameters:
+c_b = 1735, rho_b = 1.35, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 8.91654e-07, parameters:
+c_b = 1735, rho_b = 1.4, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 8.86161e-07, parameters:
+c_b = 1735, rho_b = 1.45, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 8.85384e-07, parameters:
+c_b = 1735, rho_b = 1.5, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+on run_index 8 new global minimum with residual 8.85384e-07
+new random cur_point_indexes : 
+28 8 179 
+checked_points size 333
+skipped_points 19
+---
+iteration 9 of ILS
+
+
+New residual minimum:
+err = 2.08607e-06, parameters:
+c_b = 1690, rho_b = 1.55, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 2.0406e-06, parameters:
+c_b = 1690, rho_b = 1.6, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.99908e-06, parameters:
+c_b = 1690, rho_b = 1.65, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.96123e-06, parameters:
+c_b = 1690, rho_b = 1.7, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.92679e-06, parameters:
+c_b = 1690, rho_b = 1.75, tau = 0, R = 7029
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.91436e-06, parameters:
+c_b = 1690, rho_b = 1.75, tau = 0, R = 7030
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.90296e-06, parameters:
+c_b = 1690, rho_b = 1.75, tau = 0, R = 7031
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.8926e-06, parameters:
+c_b = 1690, rho_b = 1.75, tau = 0, R = 7032
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.8833e-06, parameters:
+c_b = 1690, rho_b = 1.75, tau = 0, R = 7033
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.87507e-06, parameters:
+c_b = 1690, rho_b = 1.75, tau = 0, R = 7034
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.86792e-06, parameters:
+c_b = 1690, rho_b = 1.75, tau = 0, R = 7035
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.86188e-06, parameters:
+c_b = 1690, rho_b = 1.75, tau = 0, R = 7036
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.85695e-06, parameters:
+c_b = 1690, rho_b = 1.75, tau = 0, R = 7037
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.85314e-06, parameters:
+c_b = 1690, rho_b = 1.75, tau = 0, R = 7038
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.85045e-06, parameters:
+c_b = 1690, rho_b = 1.75, tau = 0, R = 7039
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.8489e-06, parameters:
+c_b = 1690, rho_b = 1.75, tau = 0, R = 7040
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.84848e-06, parameters:
+c_b = 1690, rho_b = 1.75, tau = 0, R = 7041
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 1.00194e-06, parameters:
+c_b = 1695, rho_b = 1.75, tau = 0, R = 7041
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 9.3367e-07, parameters:
+c_b = 1700, rho_b = 1.75, tau = 0, R = 7041
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 9.18851e-07, parameters:
+c_b = 1705, rho_b = 1.75, tau = 0, R = 7041
+cws_min :
+1500 1498 1493 1472 1462 
+
+
+New residual minimum:
+err = 9.18675e-07, parameters:
+c_b = 1705, rho_b = 1.8, tau = 0, R = 7041
+cws_min :
+1500 1498 1493 1472 1462 
+new random cur_point_indexes : 
+49 13 24 
+checked_points size 361
+skipped_points 21
+---
+
+total solving time 2265.3
+SEARCH ENDED!
+RESULTING VALUE:
+err = 8.85384e-07, parameters:
+c_b = 1735
+tau = 0
+rho_b = 1.5
+R = 7029
+cws :
+1500 1498 1493 1472 1462 
+total solving time 2265.3
+main() total time 2265.3 s
