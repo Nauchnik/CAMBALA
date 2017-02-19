@@ -21,7 +21,7 @@ sspemdd_sequential::sspemdd_sequential() :
 	rhob2(2.0),
 	n_layers_w(1),
 	iterated_local_search_runs(10),
-	verbosity(0),
+	verbosity(1),
 	N_total (1),
 	rank (0)
 {
@@ -812,17 +812,19 @@ double sspemdd_sequential::fill_data_compute_residual( search_space_point &point
 		record_point.R        = point.R;
 		record_point.tau      = point.tau;
 		record_point.cws      = point.cws;
-		std::cout << std::endl;
-		std::cout << std::endl << "New residual minimum:" << std::endl;
-		std::cout << "err = " << record_point.residual << ", parameters:" << std::endl;
-		std::cout << "c_b = " << record_point.cb
-				  << ", rho_b = " << record_point.rhob
-				  << ", tau = " << record_point.tau
-			      << ", R = " << record_point.R << std::endl;
-		std::cout << "cws_min :" << std::endl;
-		for (auto &x : record_point.cws)
-			std::cout << x << " ";
-		std::cout << std::endl;
+		if (verbosity > 0) {
+			std::cout << std::endl;
+			std::cout << std::endl << "New residual minimum:" << std::endl;
+			std::cout << "err = " << record_point.residual << ", parameters:" << std::endl;
+			std::cout << "c_b = " << record_point.cb
+				<< ", rho_b = " << record_point.rhob
+				<< ", tau = " << record_point.tau
+				<< ", R = " << record_point.R << std::endl;
+			std::cout << "cws_min :" << std::endl;
+			for (auto &x : record_point.cws)
+				std::cout << x << " ";
+			std::cout << std::endl;
+		}
 	}
 
 	return point.residual;
