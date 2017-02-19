@@ -721,12 +721,12 @@ void sspemdd_sequential::init()
 	for (auto &x : ncpl_arr)
 		N_total *= (unsigned long long)x;
 
-	if (!rank)
+	if ( (!rank) && (verbosity > 0) )
 		std::cout << "N_total " << N_total << std::endl;
 
 	loadValuesToSearchSpaceVariables();
 
-	if (!rank)
+	if ( (!rank) && (verbosity > 0) )
 		std::cout << "init() finished" << std::endl;
 }
 
@@ -1048,7 +1048,7 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 /*
 	read constant and variable values from a scenario file
 */
-	if (!rank)
+	if ( (!rank) && (verbosity > 0) )
 		std::cout << "scenarioFileName " << scenarioFileName << std::endl;
 	std::ifstream scenarioFile(scenarioFileName.c_str());
 
@@ -1136,7 +1136,7 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 	}
 	n_layers_w = cw1_arr.size();
 
-	if (!rank) {
+	if ( (!rank) && (verbosity > 0) ) {
 		std::cout << "Parameters :" << std::endl;
 		std::cout << "cw1_arr :" << std::endl;
 		for (auto &x : cw1_arr)
@@ -1220,7 +1220,7 @@ void sspemdd_sequential::readInputDataFromFiles()
 		}
 		spmagFile.close();
 
-		if (!rank) {
+		if ( (!rank) && (verbosity > 0) ) {
 			std::cout << "weight_coeffs.size() " << weight_coeffs.size() << std::endl;
 			std::cout << "weight_coeffs first 10 lines : " << std::endl;
 			for (unsigned i = 0; i < 10; i++) {
@@ -1232,11 +1232,11 @@ void sspemdd_sequential::readInputDataFromFiles()
 	}
 	else {
 		object_function_type = "uniform";
-		if (!rank)
+		if ( (!rank) && (verbosity > 0) )
 			std::cout << "spmagFile " << spmagFileName << " wasn't opened" << std::endl;
 	}
 
-	if (!rank) {
+	if ( (!rank) && (verbosity > 0) ){
 		std::cout << "object_function_type changed to " << object_function_type << std::endl;
 		std::cout << "readInputDataFromFiles() finished " << std::endl;
 	}
