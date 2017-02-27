@@ -887,8 +887,8 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 	std::vector<unsigned> cur_point_indexes, record_point_indexes, global_record_point_indexes;
 	search_space_point cur_point, global_record_point;
 	cur_point_indexes.resize(search_space.size());
-	for (unsigned variable_index = 0; variable_index < search_space.size(); variable_index++)
-		cur_point_indexes[variable_index] = rand() % search_space[variable_index].size(); // get random index
+	for (unsigned i = 0; i < search_space.size(); i++) // i stands for variable_index
+		cur_point_indexes[i] = rand() % search_space[i].size(); // get random index
 	record_point_indexes = cur_point_indexes;
 
 	// calculate residual in the start point
@@ -899,40 +899,38 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 	global_record_point_indexes = record_point_indexes;
 
 	// launch hill climbing for variables
-	bool isLocalMin;
-	bool isRecordUpdateInDimension;
-	unsigned index_from;
-	double old_record_residual;
-	unsigned rand_numb;
-	unsigned skipped_points = 0;
+	
 	checked_points.reserve(N_total);
+	unsigned skipped_points = 0;
+	bool isRecordUpdateInDimension;
 	
 	for (unsigned run_index = 0; run_index < iterated_local_search_runs; run_index++) {
+		bool isLocalMin;
 		std::cout << "iteration " << run_index << " of ILS" << std::endl;
 		do { // do while local min not reached
 			isLocalMin = true; // if changing of every variable will not lead to a record updata, then a local min reached
-			for (unsigned variable_index = 0; variable_index < search_space.size(); variable_index++) {
-				if (search_space[variable_index].size() == 1) {
+			for (unsigned i = 0; i < search_space.size(); i++) { // i stands for variable_index
+				if (search_space[i].size() == 1) {
 					//std::cout << "one value of a variable, skip it" << std::endl;
 					continue;
 				}
 				//std::cout << "variable_index " << variable_index << std::endl;
 				cur_point_indexes = record_point_indexes;
-				index_from = cur_point_indexes[variable_index]; // don't check index twice
+				unsigned index_from = cur_point_indexes[i]; // don't check index twice
 				if (verbosity > 0)
 					std::cout << "index_from " << index_from << std::endl;
 				do { // change value of a variabble while it leads to updating of a record
-					old_record_residual = record_point.residual;
-					cur_point_indexes[variable_index]++;
-					if (cur_point_indexes[variable_index] == search_space[variable_index].size())
-						cur_point_indexes[variable_index] = 0;
-					if (cur_point_indexes[variable_index] == index_from) {
-						std::cout << "cur_point_indexes[variable_index] == index_from. Break iteration." << std::endl;
+					double old_record_residual = record_point.residual;
+					cur_point_indexes[i]++;
+					if (cur_point_indexes[i] == search_space[i].size())
+						cur_point_indexes[i] = 0;
+					if (cur_point_indexes[i] == index_from) {
+						std::cout << "cur_point_indexes[i] == index_from. Break iteration." << std::endl;
 						break;
 					}
 					if (verbosity > 0) {
-						std::cout << "checking index " << cur_point_indexes[variable_index] <<
-							", max index " << search_space[variable_index].size() - 1 << std::endl;
+						std::cout << "checking index " << cur_point_indexes[i] <<
+							", max index " << search_space[i].size() - 1 << std::endl;
 					}
 					cur_point = fromPointIndexesToPoint(cur_point_indexes);
 					isRecordUpdateInDimension = false;
@@ -966,17 +964,17 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 		std::cout << "new random cur_point_indexes : " << std::endl;
 
 		// prmutate current global minimum point to obtain a new start point
-		for (unsigned variable_index = 0; variable_index < search_space.size(); variable_index++) {
-			if (search_space[variable_index].size() == 1) {
-				cur_point_indexes[variable_index] = 0;
+		for (unsigned i = 0; i < search_space.size(); i++) {
+			if (search_space[i].size() == 1) {
+				cur_point_indexes[i] = 0;
 				continue;
 			}
-			rand_numb = rand();
+			unsigned rand_numb = rand();
 			if (rand_numb % 3 == 0)
-				cur_point_indexes[variable_index] = global_record_point_indexes[variable_index];
+				cur_point_indexes[i] = global_record_point_indexes[i];
 			else
-				cur_point_indexes[variable_index] = (rand_numb % search_space[variable_index].size());
-			std::cout << cur_point_indexes[variable_index] << " ";
+				cur_point_indexes[i] = (rand_numb % search_space[i].size());
+			std::cout << cur_point_indexes[i] << " ";
 		}
 		std::cout << std::endl;
 
