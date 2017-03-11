@@ -1,7 +1,7 @@
-CPP = mpiicpc
+CPP = g++
 INC1 = ../alglib/
 INCDIRS = -I${INC1}
-CPPFLAGS = -O3 -std=c++0x ${INCDIRS} -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -D _MPI
+CPPFLAGS = -O0 -std=c++11 ${INCDIRS} -g -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS 
 
 pd-sat: main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o sspemdd_parallel.o
 	${CPP} ${CPPFLAGS} main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o sspemdd_parallel.o -o SSPEMDD_parallel
@@ -34,3 +34,12 @@ clean:
 	rm -rf *.o
 	rm SSPEMDD_parallel
 	clear
+
+bisect_cpu.o: bisect_cpu.cpp
+	${CPP} ${CPPFLAGS} -Wall bisect_cpu.cpp -c
+
+bisect_test.o: bisect_test.cpp
+	${CPP} ${CPPFLAGS} -Wall bisect_test.cpp -c
+
+bisect_test: bisect_test.o bisect_cpu.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o
+	${CPP} ${CPPFLAGS} bisect_test.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o -o bisect_test
