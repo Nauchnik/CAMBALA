@@ -1,7 +1,7 @@
 CPP = g++
 INC1 = ../alglib/
 INCDIRS = -I${INC1}
-CPPFLAGS = -O0 -std=c++11 ${INCDIRS} -g -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS 
+CPPFLAGS = -Wall -O0 -std=c++11 ${INCDIRS} -g -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS 
 
 pd-sat: main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o sspemdd_parallel.o
 	${CPP} ${CPPFLAGS} main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o sspemdd_parallel.o -o SSPEMDD_parallel
@@ -42,4 +42,4 @@ bisect_test.o: bisect_test.cpp
 	${CPP} ${CPPFLAGS} -Wall bisect_test.cpp -c
 
 bisect_test: bisect_test.o bisect_cpu.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o
-	${CPP} ${CPPFLAGS} bisect_test.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o -o bisect_test
+	${CPP} ${CPPFLAGS} bisect_test.o bisect_cpu.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o -o bisect_test

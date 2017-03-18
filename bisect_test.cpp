@@ -1,11 +1,16 @@
 #include <vector>
 #include <cstdlib>
+#include <iostream>
 //#include <cmath>
 //#include <cfloat>
 #include <algorithm>
 #include <limits>
 #include "linalg.h"
+#include "bisect_cpu.h"
+#include "assert.h"
 using EvVec = std::vector <float>;
+
+template <typename T> std::string Vec2String(const T & vec, const char* s = "") { std::string out; for (auto elem: vec) {out+= (std::to_string(elem) + s);} return out;}
 
 struct BidiagMat
 {
@@ -19,14 +24,14 @@ struct BidiagMat
 };
 
 
-struct Interval
+struct Interv
 {
 	float l;
 	float u;
 };
 
 
-Interval computeGerschgorin(const BidiagMat& mat)
+Interv computeGerschgorin(const BidiagMat& mat)
 {
 	float lg = std::numeric_limits<float>::max();
 	float ug = std::numeric_limits<float>::lowest();
@@ -43,7 +48,7 @@ Interval computeGerschgorin(const BidiagMat& mat)
 
 		lg = std::min( lg, d[i] - sum_abs_ni);
 		ug = std::max( ug, d[i] + sum_abs_ni);
-	}  
+	}
 
 	// first and last row, only one superdiagonal element
 
@@ -68,10 +73,10 @@ Interval computeGerschgorin(const BidiagMat& mat)
 	ug = ug + bnorm * 2 * mat_size * EPSILON + psi_n;
 
 	ug = std::max( lg, ug);
-	return (Interval{lg,ug});
+	return (Interv{lg,ug});
 }
 
-EvVec alglibEv(const BidiagMat& mat, Interval eiv)
+EvVec computeEvAlglib(const BidiagMat& mat, Interv eiv)
 {
 	const int mat_size = mat.md.size();
 
@@ -96,6 +101,19 @@ EvVec alglibEv(const BidiagMat& mat, Interval eiv)
 	return std::move(out);
 }
 
+
+EvVec computeEvCpu(const BidiagMat& mat, Interv eiv)
+{
+	const int mat_size = mat.md.size();
+	EvVec eigenvalues(mat_size);
+
+	int num_eiv = bisectCpu ((float*) &mat.md[0], (float*) &mat.sd[0], mat_size,
+		eiv.l, eiv.u, (float*) &eigenvalues[0]);
+	eigenvalues.resize(num_eiv);
+	assert (eigenvalues.size() <= mat_size);
+	return std::move(eigenvalues);
+}
+
 BidiagMat generateTestMatrix(const int mat_size)
 {
 	BidiagMat mat(mat_size);
@@ -107,16 +125,43 @@ BidiagMat generateTestMatrix(const int mat_size)
 	return std::move(mat);
 }
 
+BidiagMat generateTestMatrixDegenerate(const int mat_size)
+{
+	BidiagMat mat(mat_size);
+	for (size_t i = 0; i < mat.md.size(); ++i)
+	{
+		mat.md[i] = float(1);
+		mat.sd[i] = float(0);
+	}
+	return std::move(mat);
+}
+
+void testCompareMatrix(const BidiagMat& mat)
+{
+	auto gg = computeGerschgorin(mat);
+	EvVec ev_control = computeEvAlglib(mat, gg);
+	EvVec ev_cpu = computeEvCpu(mat, gg);
+	std::sort(ev_control.begin(), ev_control.end(), std::greater<float>());
+	std::sort(ev_cpu.begin(), ev_cpu.end(), std::greater<float>());
+
+	std::cout << Vec2String (ev_control, " ");
+	std::cout << "\n EV Count " << ev_control.size() << std::endl;
+	std::cout << Vec2String (ev_cpu, " ");
+	std::cout << "\n EV Count " << ev_cpu.size() << std::endl;
+}
+
 int main (const int argc, const char** argv)
 {
 
 	const int mat_size = std::atoi(argv[1]);
 
-	const BidiagMat mat = generateTestMatrix(mat_size);
+	
+	std::cout << " Regular Matrix: of size " << mat_size << std::endl;
+	testCompareMatrix(generateTestMatrix(mat_size));
+	std::cout << " Degenerate Matrix: of size " << mat_size << std::endl;
+	testCompareMatrix(generateTestMatrixDegenerate(mat_size));
+	//const BidiagMat mat = generateTestMatrix(mat_size);
 
-	auto gg = computeGerschgorin(mat);
-	EvVec ev_control = alglibEv(mat, gg);
-	//EvVec ev_cpu = computeEv(mat, gg);
 
 	//CompareEvs(ev_cpu, ev_control);
 }
