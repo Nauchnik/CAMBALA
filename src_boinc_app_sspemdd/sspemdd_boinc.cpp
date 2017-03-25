@@ -33,13 +33,14 @@
 #define INPUT_FILENAME "in"
 #define OUTPUT_FILENAME "out"
 
-const int MIN_CHECKPOINT_INTERVAL_SEC = 2;
-
-search_space_point fromStrToPoint(std::string str)
-bool do_work( const std::string &input_file_name,
-			  search_space_point &chpt_record_point );
-int do_checkpoint( const unsigned long long &processed_points, const search_space_point &chpt_record_point );
-void fromPointToFile(const search_space_point &point, std::ofstream &temp_ofile);
+search_space_point fromStrToPoint(std::string str);
+bool do_work( const std::string &input_file_name, 
+	          const &unsigned long long processed_points, 
+	          search_space_point &current_record_point );
+int do_checkpoint( const unsigned long long &total_points, 
+	               const unsigned long long &processed_points, 
+	               const search_space_point &current_record_point );
+void fromPointToFile(const search_space_point &point, std::ofstream &ofile);
 
 int main(int argc, char **argv) 
 {
@@ -62,17 +63,18 @@ int main(int argc, char **argv)
 	boinc_resolve_filename_s( INPUT_FILENAME, input_file_name);
 	
 	// read data from the checkpoint file if such exists
-	search_space_point chpt_record_point;
+	search_space_point cur_record_point;
+	cur_record_point.residual = 1e100;
     boinc_resolve_filename_s( CHECKPOINT_FILE, chpt_file_name);
 	chpt_file.open( chpt_file_name.c_str(), ios_base :: in );
 	if ( chpt_file.is_open() ) {
 		chpt_file >> processed_points;
 		getline(chpt_file, str);
-		chpt_record_point = fromStrToPoint(str);
+		cur_record_point = fromStrToPoint(str);
 		chpt_file.close();
 	}
 	
-	if ( !do_work( input_file_name, chpt_record_point ) ) {
+	if ( !do_work( input_file_name, processed_points, cur_record_point ) ) {
 		fprintf( stderr, "APP: do_work() failed:\n" );
 		perror("do_work");
         exit(1);
@@ -87,8 +89,9 @@ int main(int argc, char **argv)
         );
 		exit(-1);
     }
-	for (unsigned i = 0; i < current_results_vec.size(); i++)
-		output_file << current_results_vec[i] << std::endl;
+	
+	fromPointToFile(cur_record_point, output_file);
+	
 	output_file.close();
 	
     boinc_finish(0);
@@ -103,10 +106,12 @@ search_space_point fromStrToPoint(std::string str)
 	double val;
 	while (sstream >> val)
 		point.cws.push_back(val);
+	return point;
 }
 
-bool do_work( const std::string &input_file_name,
-			  search_space_point &chpt_record_point );
+bool do_work( const std::string &input_file_name, 
+	          const &unsigned long long processed_points, 
+	          search_space_point &current_record_point );
 {
 	sspemdd_sequential sspemdd_seq;
 
@@ -114,61 +119,62 @@ bool do_work( const std::string &input_file_name,
 	sspemdd_seq.readInputDataFromFiles();
 	sspemdd_seq.init();
 
-	std::vector<std::vector<double>> point_vec;
+	std::vector<std::vector<double>> points_vec;
 	std::vector<double> cur_point;
 	std::vector<int> index_arr;
 	while (SSPEMDD_utils::next_cartesian(sspemdd_seq.search_space, index_arr, cur_point))
-		point_values_vec.push_back( cur_point_values );
+		points_vec.push_back(cur_point);
 
-	int retval;
+	unsigned long long total_points = points_vec.size();
+	if (processed_points == total_points) // exit if all points already processed
+		return true;
 	
-	for ( ;; ) 
-	{
+	int retval;
+	search_space current_loop_record_point;
+	double dval;
+
+	for ( unsigned long long i = processed_points; i < points_vec.size(); i++) {
+		dval = sspemdd_seq.fill_data_compute_residual(points_vec[i]);
+		if (dval < current_record_point.residual)
+			current_record_point = points_vec[i];
+		
 		// checkpoint current results
 		//if ( ( boinc_is_standalone() ) || ( boinc_time_to_checkpoint() ) ) {
-			retval = do_checkpoint( current_results_vec );
-            if (retval) {
-                fprintf(stderr, "APP: checkpoint failed %d\n", retval );
-                exit(retval);
-            }
-			boinc_checkpoint_completed();
+		retval = do_checkpoint(total_points, i, current_record_point );
+        if (retval) {
+			fprintf(stderr, "APP: checkpoint failed %d\n", retval );
+            exit(retval);
+        }
+		boinc_checkpoint_completed();
         //}
 	}
 
-	/*
-	record_point.residual = point.residual;
-	record_point.cb       = point.cb;
-	record_point.rhob     = point.rhob;
-	record_point.R        = point.R;
-	record_point.tau      = point.tau;
-	record_point.cws      = point.cws;
-	*/
-	
 	return true;
 }
 
-int do_checkpoint( const unsigned long long &processed_points, const search_space_point &chpt_record_point )
+int do_checkpoint( const unsigned long long &total_points, 
+	               const unsigned long long &processed_points, 
+	               const search_space_point &current_record_point )
 {
-	int retval;
+	int retval = 0;
     string resolved_name;
 	
 	ofstream temp_ofile( "temp" );
 	if ( !temp_ofile.is_open() ) return 1;
 
 	temp_ofile << processed_points << std::endl;
-	fromPointToFile(chpt_record_point, temp_ofile);
+	fromPointToFile(current_record_point, temp_ofile);
     temp_ofile.close();
 	
     boinc_resolve_filename_s(CHECKPOINT_FILE, resolved_name);
     retval = boinc_rename( "temp", resolved_name.c_str() );
-    if ( retval ) return retval;
 
-	boinc_fraction_done( ( double )current_solved / ( double )total_tasks );
+	boinc_fraction_done( (double)processed_points / (double)total_points );
 
-    return 0;
+    return retval;
 }
 
-void fromPointToFile(const search_space_point &point, std::ofstream &temp_ofile)
+void fromPointToFile(const search_space_point &point, std::ofstream &ofile)
 {
 	temp_ofile << point.residual << " " << point.cb << " " << point.rhob << " " 
 		       << point.R << " " << point.tau << " ";
