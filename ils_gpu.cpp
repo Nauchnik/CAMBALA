@@ -100,48 +100,45 @@ void PointToMatrixStrided (int batch_sz, int cws_sz, int mat_size,
 
 void FillDiagonals()
 {
-	int N_points = (unsigned)c.size();
-	unsigned layer_number = 0;
-	double dz = meshsizes.at(layer_number);
-	double dz_next = dz; //    ofstream myFile("thematrixdiags.txt");
+	float (&ud)[] = sd;
+	int N_points = c_sz;
+	int layer_number = 0;
 
-	int next_interface_idx = (interface_idcs_sz > 0) 
-		? interface_idcs[0] - 1
-		: N_points;
-
+	float dz = meshsizes[layer_number];
+	float dz_next = dz;
 	for (int i = 0; i < N_points - 2; i++)
 	{
-		// ordinary point
-		ud[i] =  ld[i] = (1 / (dz * dz));
-		md[i] = (-2 / (dz * dz) + omeg * omeg / (c[i + 1] * c[i + 1]));
-
-		// special case of the point at the interface
-		if (i == next_interface_idx)
-		{	 
-			// Magic!
+		if ((layer_number < interface_idcs_sz) && (i == (interface_idcs[layer_number]-1)))
+		{
+			// special case of the point at the interface
 			++layer_number;
 			float cp = c[i + 1];
 			float dp = rho[i + 1];
 			float cm = c[i];
 			float dm = rho[i];
+			// FIXME: dz_next=dz always for this line!!
 			float q = 1 / (dz_next * dm + dz * dp);
 
 			dz_next = meshsizes[layer_number];
 
 			ld[i] = 2 * q * dp / dz;
+			// Magic!
 			md[i] = -2 * q * (dz_next * dp + dz * dm) / (dz * dz_next) +
 						omeg * omeg * q * (dz * dp * cp * cp + dz_next * dm * cm * cm) /
 							(cp * cp * cm * cm);
 			ud[i] = 2 * q * dm / dz_next;
-
-			next_interface_idx = (interface_idcs_sz > layer_number) 
-				? interface_idcs[layer_number] - 1
-			       	: N_points;
-
 			dz = dz_next;
+		} 
+		else 
+		{
+			// ordinary point
+			ud[i] = (1 / (dz * dz)); 
+			ld[i] = ud[i];
+			md[i] = (-2 / (dz * dz) + omeg * omeg / (c[i + 1] * c[i + 1]));
 		}
 	}
 
+	// TODO: merge me with ud-ld-md cycle and remove ld array!
 	// Symmetrize the matrix
 	for (int i = 0; i < N_points - 3; i++)
 		ud[i] = sqrt(ud[i] * ld(i + 1));
