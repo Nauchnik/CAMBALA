@@ -204,7 +204,6 @@ void FillLayers(const int rr,
 		}
 		if (i < n_layers - 1)
 			interface_idcs[i] = n - 1;
-
 		zp = zc;
 	}
 	interface_idcs_sz = n_layers - 1;
@@ -250,12 +249,6 @@ int ComputeWnumbers(float omega,
 // This procedure computes MGV for a _single_ frequency
 void ComputeModalGroupVelocities (float freq, )
 {
-	float rhos[MAX_MAT_SIZE];
-	float c1s[MAX_MAT_SIZE];
-	float c2s[MAX_MAT_SIZE];
-	FillLocalArrays(tid, batch_sz, cws_sz, cws, cb, rhob, 
-			rhos, c1s, c2s)
-
 	// magic number for numerical differentiation procedure
 	float deltaf = 0.05;
 	float omega1 = 2 * LOCAL_M_PI * freq + deltaf;
@@ -274,7 +267,8 @@ void ComputeModalGroupVelocities (float freq, )
 float getResidual(
 		const float* freqs, 
 		const float* exp_delays,
-	       	const float calc_mgv[][], const float calc_mgv_sz[])
+	       	const float calc_mgv[][], const float calc_mgv_sz[],
+		const float tau)
 {
 	// Calculate avg distance between experimental and model delays
 	// TODO: compare velocities instead of delays to speedup the
@@ -311,17 +305,23 @@ void EvalPointsGPU(const int size, const int size_cws,
 		const float* exp_delays,
 		float* residuals)
 {
+
 	float residual;
 	for (int tid = 0; tid < size; ++tid)
 	{
+		float rhos[MAX_MAT_SIZE];
+		float c1s[MAX_MAT_SIZE];
+		float c2s[MAX_MAT_SIZE];
+		FillLocalArrays(tid, batch_sz, cws_sz, cws, cb, rhob, 
+				rhos, c1s, c2s)
+
 		float calc_mgv[MAX_FREQS][MAX_WNUMS];
 		float calc_mgv_sz[MAX_FREQS];
 		// Compute mgvs for all frequencies
 		for (int i = 0; i < freqs_sz; ++i)
-			ComputeModalGroupVelocities(freqs[i],
-				R, tau, rhob, cws, cws_sz,
+			ComputeModalGroupVelocities(freqs[i], rhos, c1s, c2s, 
 				calc_mgv[i], calc_mgv_sz[i]);
 
-		residuals[tid] = getResidual(freqs, exp_delays, calc_mgv, calc_mgv_sz);
+		residuals[tid] = getResidual(freqs, exp_delays, calc_mgv, calc_mgv_sz, tau);
 	}
 }
