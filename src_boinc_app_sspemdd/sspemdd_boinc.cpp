@@ -25,6 +25,8 @@
 #include "mfile.h"
 
 #include <sstream>
+#include <string>
+#include <fstream>
 
 #include "sspemdd_sequential.h"
 #include "sspemdd_utils.h"
@@ -35,14 +37,14 @@
 
 search_space_point fromStrToPoint(std::string str);
 bool do_work( const std::string &input_file_name, 
-	          const &unsigned long long processed_points, 
+	          const unsigned long long &processed_points, 
 	          search_space_point &current_record_point );
 int do_checkpoint( const unsigned long long &total_points, 
 	               const unsigned long long &processed_points, 
 	               const search_space_point &current_record_point );
 void fromPointToFile(const search_space_point &point, std::ofstream &ofile);
 
-int main(int argc, char **argv) 
+int main() 
 {
     char buf[256];
 	int retval = boinc_init();
@@ -64,9 +66,9 @@ int main(int argc, char **argv)
 	
 	// read data from the checkpoint file if such exists
 	search_space_point cur_record_point;
-	cur_record_point.residual = 1e100;
+	cur_record_point.residual = START_HUGE_VALUE;
     boinc_resolve_filename_s( CHECKPOINT_FILE, chpt_file_name);
-	chpt_file.open( chpt_file_name.c_str(), ios_base :: in );
+	chpt_file.open( chpt_file_name.c_str(), std::ios_base::in );
 	if ( chpt_file.is_open() ) {
 		chpt_file >> processed_points;
 		getline(chpt_file, str);
@@ -110,8 +112,8 @@ search_space_point fromStrToPoint(std::string str)
 }
 
 bool do_work( const std::string &input_file_name, 
-	          const &unsigned long long processed_points, 
-	          search_space_point &current_record_point );
+	          const unsigned long long &processed_points,
+	          search_space_point &current_record_point)
 {
 	sspemdd_sequential sspemdd_seq;
 
@@ -119,18 +121,25 @@ bool do_work( const std::string &input_file_name,
 	sspemdd_seq.readInputDataFromFiles();
 	sspemdd_seq.init();
 
-	std::vector<std::vector<double>> points_vec;
-	std::vector<double> cur_point;
 	std::vector<int> index_arr;
-	while (SSPEMDD_utils::next_cartesian(sspemdd_seq.search_space, index_arr, cur_point))
-		points_vec.push_back(cur_point);
+	search_space_point cur_point;
+	std::vector<unsigned> cur_point_indexes;
+	std::vector<std::vector<unsigned>> search_space_indexes;
+	search_space_indexes.resize(sspemdd_seq.search_space.size());
+	for (unsigned i = 0; i < sspemdd_seq.search_space.size(); i++)
+		for (unsigned j = 0; j < sspemdd_seq.search_space[i].size(); j++)
+			search_space_indexes[i].push_back(j);
 
+	std::vector<search_space_point> points_vec;
+	while (SSPEMDD_utils::next_cartesian(search_space_indexes, index_arr, cur_point_indexes))
+		points_vec.push_back(sspemdd_seq.fromPointIndexesToPoint(cur_point_indexes));
+	
 	unsigned long long total_points = points_vec.size();
 	if (processed_points == total_points) // exit if all points already processed
 		return true;
 	
 	int retval;
-	search_space current_loop_record_point;
+	search_space_point current_loop_record_point;
 	double dval;
 
 	for ( unsigned long long i = processed_points; i < points_vec.size(); i++) {
@@ -157,9 +166,9 @@ int do_checkpoint( const unsigned long long &total_points,
 	               const search_space_point &current_record_point )
 {
 	int retval = 0;
-    string resolved_name;
+    std::string resolved_name;
 	
-	ofstream temp_ofile( "temp" );
+	std::ofstream temp_ofile( "temp" );
 	if ( !temp_ofile.is_open() ) return 1;
 
 	temp_ofile << processed_points << std::endl;
@@ -176,10 +185,10 @@ int do_checkpoint( const unsigned long long &total_points,
 
 void fromPointToFile(const search_space_point &point, std::ofstream &ofile)
 {
-	temp_ofile << point.residual << " " << point.cb << " " << point.rhob << " " 
+	ofile << point.residual << " " << point.cb << " " << point.rhob << " "
 		       << point.R << " " << point.tau << " ";
 	for (unsigned i = 0; i < point.cws.size(); i++)
-		temp_ofile << point.cws[i] << " ";
+		ofile << point.cws[i] << " ";
 }
 
 #ifdef _WIN32
