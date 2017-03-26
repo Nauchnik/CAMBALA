@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 	
 	//sspemdd_seq.findGlobalMinBruteForce();
 	sspemdd_seq.findLocalMinHillClimbing();
-	sspemdd_seq.report_final_result();
+	sspemdd_seq.reportFinalResult();
 
 	t2 = std::chrono::high_resolution_clock::now();
 	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);

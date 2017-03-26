@@ -730,7 +730,7 @@ void sspemdd_sequential::init()
 		std::cout << "init() finished" << std::endl;
 }
 
-void sspemdd_sequential::report_final_result()
+void sspemdd_sequential::reportFinalResult()
 {
 	// fix final time
 	std::chrono::high_resolution_clock::time_point t2;
@@ -758,22 +758,31 @@ void sspemdd_sequential::findGlobalMinBruteForce()
 {
 	std::cout << "findGlobalMinBruteForce()" << std::endl;
 
+	std::vector<search_space_point> search_space_points_vec = getSearchSpacePointsVec();
+	std::cout << "search_space_points_vec.size() " << search_space_points_vec.size() << std::endl;
+	
+	for (auto &x : search_space_points_vec)
+		fillDataComputeResidual(x); // calculated residual is written to cur_point
+}
+
+std::vector<search_space_point> sspemdd_sequential::getSearchSpacePointsVec()
+{
 	std::vector<int> index_arr;
-	search_space_point cur_point;
 	std::vector<unsigned> cur_point_indexes;
 	std::vector<std::vector<unsigned>> search_space_indexes;
 	search_space_indexes.resize(search_space.size());
-	for (unsigned variable_index = 0; variable_index < search_space.size(); variable_index++)
-		for ( unsigned j=0; j < search_space[variable_index].size(); j++)
-			search_space_indexes[variable_index].push_back(j);
+	for (unsigned i = 0; i < search_space.size(); i++)
+		for (unsigned j = 0; j < search_space[i].size(); j++)
+			search_space_indexes[i].push_back(j);
 
-	while (SSPEMDD_utils::next_cartesian(search_space_indexes, index_arr, cur_point_indexes)) {
-		cur_point = fromPointIndexesToPoint(cur_point_indexes);
-		fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
-	}
+	std::vector<search_space_point> points_vec;
+	while (SSPEMDD_utils::next_cartesian(search_space_indexes, index_arr, cur_point_indexes))
+		points_vec.push_back(fromPointIndexesToPoint(cur_point_indexes));
+
+	return points_vec;
 }
 
-double sspemdd_sequential::fill_data_compute_residual( search_space_point &point)
+double sspemdd_sequential::fillDataComputeResidual( search_space_point &point)
 { // finally specify sound speed in water
   // the parameters are transformed into the arrays c1s, c2s, rhos
 	for (unsigned jj = 0; jj < n_layers_w - 1; jj++) {
@@ -894,7 +903,7 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 	// calculate residual in the start point
 	cur_point = fromPointIndexesToPoint( cur_point_indexes );
 
-	fill_data_compute_residual( cur_point ); // calculated residual is written to cur_point
+	fillDataComputeResidual( cur_point ); // calculated residual is written to cur_point
 	global_record_point = record_point;
 	global_record_point_indexes = record_point_indexes;
 
@@ -938,7 +947,7 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 						skipped_points++;
 						continue;
 					}
-					fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
+					fillDataComputeResidual(cur_point); // calculated residual is written to cur_point
 					checked_points.push_back(cur_point);
 					if (record_point.residual < old_record_residual) { // new record was found
 						record_point_indexes = cur_point_indexes;
@@ -979,7 +988,7 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 		std::cout << std::endl;
 
 		cur_point = fromPointIndexesToPoint(cur_point_indexes);
-		fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
+		fillDataComputeResidual(cur_point); // calculated residual is written to cur_point
 		record_point = cur_point;
 		record_point_indexes = cur_point_indexes;
 

@@ -70,10 +70,11 @@ public:
 	void init();
 	double getRecordResidual();
 	double fillDataComputeResidual(search_space_point &point);
+	std::vector<search_space_point> getSearchSpacePointsVec();
 	void findGlobalMinBruteForce();
 	void loadValuesToSearchSpaceVariables();
 	void findLocalMinHillClimbing();
-	void report_final_result();
+	void reportFinalResult();
 	void getThreeValuesFromStr(std::string str, double &val1, double &val2, double &val3);
 
 	// functions by Pavel

@@ -120,30 +120,19 @@ bool do_work( const std::string &input_file_name,
 	sspemdd_seq.readScenario(input_file_name);
 	sspemdd_seq.readInputDataFromFiles();
 	sspemdd_seq.init();
-
-	std::vector<int> index_arr;
-	search_space_point cur_point;
-	std::vector<unsigned> cur_point_indexes;
-	std::vector<std::vector<unsigned>> search_space_indexes;
-	search_space_indexes.resize(sspemdd_seq.search_space.size());
-	for (unsigned i = 0; i < sspemdd_seq.search_space.size(); i++)
-		for (unsigned j = 0; j < sspemdd_seq.search_space[i].size(); j++)
-			search_space_indexes[i].push_back(j);
-
-	std::vector<search_space_point> points_vec;
-	while (SSPEMDD_utils::next_cartesian(search_space_indexes, index_arr, cur_point_indexes))
-		points_vec.push_back(sspemdd_seq.fromPointIndexesToPoint(cur_point_indexes));
+	std::vector<search_space_point> points_vec = sspemdd_seq.getSearchSpacePointsVec();
 	
 	unsigned long long total_points = points_vec.size();
 	if (processed_points == total_points) // exit if all points already processed
 		return true;
+
+	fprintf(stderr, "total_points %llu\n", total_points);
 	
 	int retval;
-	search_space_point current_loop_record_point;
 	double dval;
 
 	for ( unsigned long long i = processed_points; i < points_vec.size(); i++) {
-		dval = sspemdd_seq.fill_data_compute_residual(points_vec[i]);
+		dval = sspemdd_seq.fillDataComputeResidual(points_vec[i]);
 		if (dval < current_record_point.residual)
 			current_record_point = points_vec[i];
 		
