@@ -69,7 +69,7 @@ public:
 	void readInputDataFromFiles();
 	void init();
 	double getRecordResidual();
-	double fill_data_compute_residual(search_space_point &point);
+	double fillDataComputeResidual(search_space_point &point);
 	void findGlobalMinBruteForce();
 	void loadValuesToSearchSpaceVariables();
 	void findLocalMinHillClimbing();
