@@ -32,7 +32,7 @@ void EvalPointBatchGPU(std::vector <Point> &batch)
 	}
 
 	float *residuals = malloc(sz*sizeof(float));
-	EvalPointsCPU(sz, sz_cws, R, tau, rhob, cb, cws, residuals);
+	EvalPointsGPU(sz, sz_cws, R, tau, rhob, cb, cws, residuals);
 
 	for (size_t i = 0; i < sz; ++i)
 		batch[i].residual = residuals[i];
@@ -98,28 +98,31 @@ void PointToMatrixStrided (int batch_sz, int cws_sz, int mat_size,
 }
 
 
-void FillDiagonals()
+void FillDiagonals(
+		const float c[], const int c_sz,
+		const float rho[],
+		const int interface_idcs[], const int interface_idcs_sz,
+		const float meshsizes[],
+		float md[], 
+		float ud[] /*sd*/, 
+		int& mat_size)
 {
-	float (&ud)[] = sd;
 	int N_points = c_sz;
 	int layer_number = 0;
 
 	float dz = meshsizes[layer_number];
-	float dz_next = dz;
 	for (int i = 0; i < N_points - 2; i++)
 	{
 		if ((layer_number < interface_idcs_sz) && (i == (interface_idcs[layer_number]-1)))
 		{
 			// special case of the point at the interface
 			++layer_number;
+			float dz_next = meshsizes[layer_number];
 			float cp = c[i + 1];
 			float dp = rho[i + 1];
 			float cm = c[i];
 			float dm = rho[i];
-			// FIXME: dz_next=dz always for this line!!
 			float q = 1 / (dz_next * dm + dz * dp);
-
-			dz_next = meshsizes[layer_number];
 
 			ld[i] = 2 * q * dp / dz;
 			// Magic!
@@ -142,40 +145,98 @@ void FillDiagonals()
 	// Symmetrize the matrix
 	for (int i = 0; i < N_points - 3; i++)
 		ud[i] = sqrt(ud[i] * ld(i + 1));
+	mat_size = N_points - 2;
 	// DIAGONALS!!!
 
 }
 
 
-ComputeWavenumsLimits(float omega, c, float& ll, float& rl)
+Interval ComputeWavenumsLimits(
+		const float omega, 
+		const float c[], const int c_sz)
 {
 	float cmin = c[0], cmax = c[0];
-	for (int ii = 0; ii < N_points; ii++)
+	for (int i = 0; i < c_sz; i++)
 	{
-		if (c.at(ii) < cmin)
-			cmin = c[ii];
-		if (c.at(ii) > cmax)
-			cmax = c[ii];
+		if (c[i] < cmin)
+			cmin = c[i];
+		if (c[i] > cmax)
+			cmax = c[i];
 	}
 	float kappamax = omeg / cmin;
 	float kappamin = omeg / cmax;
-	ll = kappamin * kappamin;
-	rl = kappamin * kappamin;
+	return Interval {kappamin*kappamin, kappamax*kappamax};
 }
 
-void ComputeWnumbers(float omega,
-		float* wnums,
-		float* wnums_sz)
 
+void FillLayers(const int rr, 
+		const float* depths, 
+		const float* rhos, 
+		const float* c1s,
+		const float* c2s, 
+		const float* Ns_points, 
+		float mesh[], 
+		int interface_idcs[], int& interface_idcs_sz,
+		float c[], int& c_sz, float rho[])
+{
+	c[0] = 0;
+	rho[0] = 0;
+
+	// TODO: Rewrite me, i am UGLY ((
+	int n = 0; //total number of points
+	float zp = 0;
+	for (unsigned i = 0; i < n_layers; ++i)
+	{
+		int n_points_layer = Ns_points[i] / rr;
+		float zc = depths[i];
+		mesh[i] = (zc - zp) / n_points_layer; // dz
+
+		++n;
+		c[n - 1] = c1s[i];
+		rho[n - 1] = rhos[i];
+
+		for (unsigned k = 1; k <= n_points_layer; ++k)
+		{
+			++n;
+			rho[n] = rhos[i];
+			c[n] = (c1s[i] + (c2s[i] - c1s[i]) * k / n_points_layer);
+		}
+		if (i < n_layers - 1)
+			interface_idcs[i] = n - 1;
+
+		zp = zc;
+	}
+	interface_idcs_sz = n_layers - 1;
+	c_sz = n;
+}
+int ComputeWnumbers(float omega,
+		float wnums[])
+
+	c1s
+	Ns_points
+	const float *rhos,
+	const float *depths,
 {
 	int mat_size = depths_sz;
 
+	// Strange things happen here...
+	for (int i = 0; i < n_layers; ++i)
+		Ns_points[ii] = 12 * (Ns_points[ii] / 12);
 
-	FillDiagonals(md, sd);
-
-	ComputeWavenumsLimits(omega, c, ll, ul);
-
-	bisectCpu (md, sd, mat_size, ll, rl, eigenvalues);
+	float c [MAX_MAT_SIZE]; int c_sz;
+	float rho [MAX_MAT_SIZE];
+	float mesh [MAX_MAT_SIZE];
+	int interface_idcs [MAX_INTERFACES]; int interface_idcs_sz;
+	FillLayers(1 /*rr*/, depths, rhos, c1s, c2s, Ns_points, 
+			mesh, interface_idcs, interface_idcs_sz, 
+			c, c_sz, rho);
+	int mat_size;
+	float md [MAX_MAT_SIZE];
+	float sd [MAX_MAT_SIZE];
+	FillDiagonals(c, c_sz, rho, interface_idcs, interface_idcs_sz, mesh, 
+			md, sd, mat_size);
+	Interval lim = ComputeWavenumsLimits(omega, c, c_sz);
+	return bisectCpu(md, sd, mat_size, lim.ll, lim.rl, wnums);
 }
 
 
@@ -185,22 +246,23 @@ void ComputeModalGroupVelocities (float freq, )
 {
 	// magic number for numerical differentiation procedure
 	float deltaf = 0.05;
+	float omega1 = 2 * LOCAL_M_PI * freq + deltaf;
 	float omega2 = 2 * LOCAL_M_PI * freq;
-	float omega1 = omega1 + deltaf;
-	ComputeWnumbers(omega1, wnum1, wnum1_sz);
-	ComputeWnumbers(omega2, wnum2, wnum2_sz);
+	int wnum1_sz = ComputeWnumbers(omega1, wnum1);
+	int wnum2_sz = ComputeWnumbers(omega2, wnum2);
 
 	// Since with increase of omega the number of wave numbers
-	// can only increase,  wnum2 <= wnum1
-	for (int i = 0; i < wnum2; j++)
-		mgv[i] = (omega1 - omega2) / (wnum1[i] - wnum2[i]);
+	// can only increase,  wnum2_sz <= wnum1_sz
+	for (int i = 0; i < wnum2_sz; j++)
+		mgv[i] = (omega1 - omega2) / (sqrt(wnum1[i]) - sqrt(wnum2[i]));
 
 }
 
-void ComputeMGVResidual ()
+float ComputeMGVResidual ()
 {
 	float calc_mgv[MAX_FREQS][MAX_WNUMS];
 	float calc_mgv_sz[MAX_FREQS];
+
 	// Compute mgvs for all frequencies
 	for (int i = 0; i < freqs_sz; ++i)
 		ComputeModalGroupVelocities( freqs[i],
@@ -233,37 +295,23 @@ void ComputeMGVResidual ()
 	residual = sqrt(residual / n);
 }
 
-void EvalPointsStridedCPU(int size, int size_cws, 
+void EvalPointsGPU(int size, int size_cws, 
 		const float* R, 
 		const float* tau, 
 		const float* rhob, 
 		const float cws[size_cws][size], 
 		float* residuals)
 {
-	const int mat_size = ???????;
-
-	float* md = malloc(size * mat_size * sizeof(float));
-	float* sd = malloc(size * mat_size * sizeof(float));
 
 	PointToMatrixStrided(size, size_cws, mat_size, R, tau, rhob, cws,
 			/*outputs*/
 			md, sd);
 
-	float* eigenvalues = malloc(size * mat_size * sizeof(float));
-	int*   eiv_size    = malloc(size * mat_size * sizeof(int));
-	BisectCpuStrided(md, sd, mat_size,
-		       /*outputs*/
-			eigenvalues, eiv_sizes);
-
-		
-
-	ComputeMGVResidual(
+	residual = ComputeMGVResidual(
 		freqs_sz,
 		exp_mode_numbers, exp_mode_numbers_sz,
 		exp_delays, exp_delays_sz, 
-		calc_mgv, calc_mgv_sz,
-		/*outputs*/
-		residual); 
+		calc_mgv, calc_mgv_sz); 
 
 	free (md);
 	free (sd);
