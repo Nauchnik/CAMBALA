@@ -68,33 +68,34 @@ void sspemdd_sequential::ILSGPU()
 }
 
 
-void PointToMatrixStrided (int batch_sz, int cws_sz, int mat_size,
-		const float* R, 
-		const float* tau, 
-		const float* rhob, 
+void FillLocalArrays (
+		const int tid,
+		const int batch_sz, const int cws_sz, 
 		const float cws[cws_sz][batch_sz], 
-		float* md,
-		float* sd)
+		const float* cb,
+		const float* rhob, 
+		float rhos[],
+		float c1s[],
+		float c2s[])
 {
-	c1s.resize(n_layers_w + 1);
-	for (auto &x : c1s)
-		x = 1500;
-	c2s.resize(n_layers_w + 1);
+	// FIXME: magic constant!
+	for (int i = 0; i < cws_sz +1; ++i)
+		c1s[i] = 1500;
 
-	for (unsigned jj = 0; jj < n_layers_w - 1; jj++)
+	for (unsigned i = 0; i < cws_sz - 1; i++)
 	{
-		c1s.at(jj) = point.cws.at(jj);
-		c2s.at(jj) = point.cws.at(jj + 1);
-		rhos.at(jj) = 1;
+		c1s[i] = cws[i][tid];
+		c2s[i] = cws[i + 1][tid];
+		rhos[i] = 1;
 	}
 
-	c1s.at(n_layers_w - 1) = point.cws.at(n_layers_w - 1);
-	c2s.at(n_layers_w - 1) = point.cws.at(n_layers_w - 1);
-	rhos.at(n_layers_w - 1) = 1;
-	c1s.at(n_layers_w) = point.cb;
-	c2s.at(n_layers_w) = point.cb;
-	rhos.at(n_layers_w) = point.rhob;
+	c1s[cws_sz - 1] = cws[cws_sz - 1][tid];
+	c2s[cws_sz - 1] = cws[cws_sz - 1][tid];
+	rhos[cws_sz - 1] = 1;
 
+	c1s[cws_sz] = cb[tid];
+	c2s[cws_sz] = cb[tid];
+	rhos[cws_sz] = rhob[tid];
 }
 
 
@@ -115,7 +116,7 @@ void FillDiagonals(
 	{
 		if ((layer_number < interface_idcs_sz) && (i == (interface_idcs[layer_number]-1)))
 		{
-			// special case of the point at the interface
+			/ special case of the point at the interface
 			++layer_number;
 			float dz_next = meshsizes[layer_number];
 			float cp = c[i + 1];
@@ -209,6 +210,8 @@ void FillLayers(const int rr,
 	interface_idcs_sz = n_layers - 1;
 	c_sz = n;
 }
+
+
 int ComputeWnumbers(float omega,
 		float wnums[])
 
@@ -227,14 +230,17 @@ int ComputeWnumbers(float omega,
 	float rho [MAX_MAT_SIZE];
 	float mesh [MAX_MAT_SIZE];
 	int interface_idcs [MAX_INTERFACES]; int interface_idcs_sz;
+
 	FillLayers(1 /*rr*/, depths, rhos, c1s, c2s, Ns_points, 
 			mesh, interface_idcs, interface_idcs_sz, 
 			c, c_sz, rho);
 	int mat_size;
 	float md [MAX_MAT_SIZE];
 	float sd [MAX_MAT_SIZE];
+
 	FillDiagonals(c, c_sz, rho, interface_idcs, interface_idcs_sz, mesh, 
 			md, sd, mat_size);
+
 	Interval lim = ComputeWavenumsLimits(omega, c, c_sz);
 	return bisectCpu(md, sd, mat_size, lim.ll, lim.rl, wnums);
 }
@@ -244,6 +250,12 @@ int ComputeWnumbers(float omega,
 // This procedure computes MGV for a _single_ frequency
 void ComputeModalGroupVelocities (float freq, )
 {
+	float rhos[MAX_MAT_SIZE];
+	float c1s[MAX_MAT_SIZE];
+	float c2s[MAX_MAT_SIZE];
+	FillLocalArrays(tid, batch_sz, cws_sz, cws, cb, rhob, 
+			rhos, c1s, c2s)
+
 	// magic number for numerical differentiation procedure
 	float deltaf = 0.05;
 	float omega1 = 2 * LOCAL_M_PI * freq + deltaf;
@@ -258,17 +270,12 @@ void ComputeModalGroupVelocities (float freq, )
 
 }
 
-float ComputeMGVResidual ()
+
+float getResidual(
+		const float* freqs, 
+		const float* exp_delays,
+	       	const float calc_mgv[][], const float calc_mgv_sz[])
 {
-	float calc_mgv[MAX_FREQS][MAX_WNUMS];
-	float calc_mgv_sz[MAX_FREQS];
-
-	// Compute mgvs for all frequencies
-	for (int i = 0; i < freqs_sz; ++i)
-		ComputeModalGroupVelocities( freqs[i],
-			R, tau, rhob, cws, cws_sz,
-			calc_mgv[i], calc_mgv_sz[i]);
-
 	// Calculate avg distance between experimental and model delays
 	// TODO: compare velocities instead of delays to speedup the
 	// procedure
@@ -293,28 +300,28 @@ float ComputeMGVResidual ()
 		}
 	}
 	residual = sqrt(residual / n);
+	return residual;
 }
 
-void EvalPointsGPU(int size, int size_cws, 
+void EvalPointsGPU(const int size, const int size_cws, 
 		const float* R, 
 		const float* tau, 
 		const float* rhob, 
 		const float cws[size_cws][size], 
+		const float* exp_delays,
 		float* residuals)
 {
+	float residual;
+	for (int tid = 0; tid < size; ++tid)
+	{
+		float calc_mgv[MAX_FREQS][MAX_WNUMS];
+		float calc_mgv_sz[MAX_FREQS];
+		// Compute mgvs for all frequencies
+		for (int i = 0; i < freqs_sz; ++i)
+			ComputeModalGroupVelocities(freqs[i],
+				R, tau, rhob, cws, cws_sz,
+				calc_mgv[i], calc_mgv_sz[i]);
 
-	PointToMatrixStrided(size, size_cws, mat_size, R, tau, rhob, cws,
-			/*outputs*/
-			md, sd);
-
-	residual = ComputeMGVResidual(
-		freqs_sz,
-		exp_mode_numbers, exp_mode_numbers_sz,
-		exp_delays, exp_delays_sz, 
-		calc_mgv, calc_mgv_sz); 
-
-	free (md);
-	free (sd);
-	free (eigenvalues);
-	free (eiv_sizes);
+		residuals[tid] = getResidual(freqs, exp_delays, calc_mgv, calc_mgv_sz);
+	}
 }
