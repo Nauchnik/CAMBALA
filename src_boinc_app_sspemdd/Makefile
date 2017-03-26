@@ -1,6 +1,6 @@
-SSPEMDD = ../
-ALGLIB = ../../alglib/
-BOINC_DIR = ../../../
+SSPEMDD = ..
+ALGLIB = ../../alglib
+BOINC_DIR = ../../boinc
 BOINC_API_DIR = $(BOINC_DIR)/api
 BOINC_LIB_DIR = $(BOINC_DIR)/lib
 BOINC_ZIP_DIR = $(BOINC_DIR)/zip
@@ -16,7 +16,7 @@ CPPFLAGS = -O3 \
     -I$(BOINC_ZIP_DIR) \
     -I$(FREETYPE_DIR) \
     -I$(SSPEMDD) \
-	-I$(ALGLIB) \
+    -I$(ALGLIB) \
     -L /usr/X11R6/lib \
     -L.
 
@@ -33,28 +33,29 @@ clean: distclean
 distclean:
 	/bin/rm -f $(PROGS) *.o libstdc++.a
 
-sspemdd_boinc: sspemdd_boinc.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o libstdc++.a $(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a
-	$(CPP) $(CPPFLAGS) sspemdd_boinc.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o -o sspemdd_boinc libstdc++.a -pthread \
-	$(BOINC_API_DIR)/libboinc_api.a \
+sspemdd_boinc: sspemdd_boinc.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o \
+	libstdc++.a $(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a
+	$(CPP) $(CPPFLAGS) sspemdd_boinc.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o -o sspemdd_boinc \
+	libstdc++.a -pthread $(BOINC_API_DIR)/libboinc_api.a \
 	$(BOINC_LIB_DIR)/libboinc.a
 	
-specialfunctions.o: $(ALGLIB)specialfunctions.cpp 
-	${CPP} ${CPPFLAGS} $(ALGLIB)specialfunctions.cpp -c
+specialfunctions.o: $(ALGLIB)/specialfunctions.cpp 
+	${CPP} ${CPPFLAGS} $(ALGLIB)/specialfunctions.cpp -c
 
-linalg.o: $(ALGLIB)linalg.cpp 
-	${CPP} ${CPPFLAGS} $(ALGLIB)linalg.cpp -c
+linalg.o: $(ALGLIB)/linalg.cpp 
+	${CPP} ${CPPFLAGS} $(ALGLIB)/linalg.cpp -c
 
-ap.o: $(ALGLIB)ap.cpp 
-	${CPP} ${CPPFLAGS} $(ALGLIB)ap.cpp -c
+ap.o: $(ALGLIB)/ap.cpp 
+	${CPP} ${CPPFLAGS} $(ALGLIB)/ap.cpp -c
 
-alglibmisc.o: $(ALGLIB)alglibmisc.cpp 
-	${CPP} ${CPPFLAGS} $(ALGLIB)alglibmisc.cpp -c
+alglibmisc.o: $(ALGLIB)/alglibmisc.cpp 
+	${CPP} ${CPPFLAGS} $(ALGLIB)/alglibmisc.cpp -c
 
-alglibinternal.o: $(ALGLIB)alglibinternal.cpp 
-	${CPP} ${CPPFLAGS} $(ALGLIB)alglibinternal.cpp -c
+alglibinternal.o: $(ALGLIB)/alglibinternal.cpp 
+	${CPP} ${CPPFLAGS} $(ALGLIB)/alglibinternal.cpp -c
 
-sspemdd_sequential.o: $(SSPEMDD)sspemdd_sequential.cpp
-	${CPP} ${CPPFLAGS} $(SSPEMDD)sspemdd_sequential.cpp -c
+sspemdd_sequential.o: $(SSPEMDD)/sspemdd_sequential.cpp
+	${CPP} ${CPPFLAGS} $(SSPEMDD)/sspemdd_sequential.cpp -c
 
 sspemdd_boinc.o: sspemdd_boinc.cpp
 	${CPP} ${CPPFLAGS} sspemdd_boinc.cpp -c

@@ -70,10 +70,13 @@ int main()
     boinc_resolve_filename_s( CHECKPOINT_FILE, chpt_file_name);
 	chpt_file.open( chpt_file_name.c_str(), std::ios_base::in );
 	if ( chpt_file.is_open() ) {
-		chpt_file >> processed_points;
+		getline(chpt_file, str);
+		std::istringstream(str) >> processed_points;
 		getline(chpt_file, str);
 		cur_record_point = fromStrToPoint(str);
 		chpt_file.close();
+		std::cout << "point from chpt file" << std::endl;
+		std::cout << "cur_record_point.cb " << cur_record_point.cb << std::endl;
 	}
 	
 	if ( !do_work( input_file_name, processed_points, cur_record_point ) ) {
@@ -123,27 +126,30 @@ bool do_work( const std::string &input_file_name,
 	std::vector<search_space_point> points_vec = sspemdd_seq.getSearchSpacePointsVec();
 	
 	unsigned long long total_points = points_vec.size();
+
 	if (processed_points == total_points) // exit if all points already processed
 		return true;
-
-	fprintf(stderr, "total_points %llu\n", total_points);
+	int retval = -1;
+	if (!total_points) {
+		fprintf(stderr, "APP: total_points == 0", retval);
+		exit(retval);
+	}
 	
-	int retval;
 	double dval;
-
-	for ( unsigned long long i = processed_points; i < points_vec.size(); i++) {
+	for ( unsigned long long i = processed_points; i < total_points; i++) {
 		dval = sspemdd_seq.fillDataComputeResidual(points_vec[i]);
 		if (dval < current_record_point.residual)
 			current_record_point = points_vec[i];
 		
 		// checkpoint current results
 		//if ( ( boinc_is_standalone() ) || ( boinc_time_to_checkpoint() ) ) {
-		retval = do_checkpoint(total_points, i, current_record_point );
+		retval = do_checkpoint(total_points, i+1, current_record_point );
         if (retval) {
 			fprintf(stderr, "APP: checkpoint failed %d\n", retval );
             exit(retval);
         }
 		boinc_checkpoint_completed();
+		std::cout << "processed " << i+1 << " out from " << total_points << std::endl;
         //}
 	}
 
