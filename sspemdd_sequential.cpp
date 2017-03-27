@@ -15,6 +15,8 @@ sspemdd_sequential::sspemdd_sequential()
 	record_point.residual = START_HUGE_VALUE;
 	srand((unsigned)time(NULL));
 	start_chrono_time = std::chrono::high_resolution_clock::now();
+	//rng.seed(std::random_device());
+	rng.seed(1234567);
 }
 
 /*
@@ -42,8 +44,8 @@ the most "adequate" model.
 // tau_comment: tau is appended here as a new argument for residual computation
 
 double sspemdd_sequential::compute_modal_delays_residual_uniform(
-	std::vector<double> &freqs, std::vector<double> &depths, std::vector<double> &c1s,
-	std::vector<double> &c2s, std::vector<double> &rhos, std::vector<unsigned> &Ns_points, double R,
+	std::vector<double> &freqs, std::vector<double> &depths, std::vector<double> &c1s_l,
+	std::vector<double> &c2s_l, std::vector<double> &rhos, std::vector<unsigned> &Ns_points, double R,
 	double tau, std::vector<std::vector<double>> &experimental_delays,
 	std::vector<unsigned> &experimental_mode_numbers)
 {
@@ -59,7 +61,7 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(
 	std::vector<std::vector<double>> modal_group_velocities;
 	std::vector<unsigned> mode_numbers;
 
-	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, flTrappedOnly,
+	compute_modal_grop_velocities(freqs, deltaf, depths, c1s_l, c2s_l, rhos, Ns_points, flTrappedOnly,
 								  rord, modal_group_velocities, mode_numbers);
 
 	for (unsigned ii = 0; ii < freqs.size(); ii++)
@@ -112,8 +114,8 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(
 // this is a simplest nonuniform residual function
 
 double sspemdd_sequential::compute_modal_delays_residual_weighted(
-	std::vector<double> &freqs, std::vector<double> &depths, std::vector<double> &c1s,
-	std::vector<double> &c2s, std::vector<double> &rhos, std::vector<unsigned> &Ns_points, double R,
+	std::vector<double> &freqs, std::vector<double> &depths, std::vector<double> &c1s_l,
+	std::vector<double> &c2s_l, std::vector<double> &rhos, std::vector<unsigned> &Ns_points, double R,
 	double tau, std::vector<std::vector<double>> &experimental_delays,
 	std::vector<std::vector<double>>
 		&weight_coeffs, // 2016.12.31:Pavel: this is a key parameter controlling the weights
@@ -131,7 +133,7 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(
 	std::vector<std::vector<double>> modal_group_velocities;
 	std::vector<unsigned> mode_numbers;
 
-	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, flTrappedOnly,
+	compute_modal_grop_velocities(freqs, deltaf, depths, c1s_l, c2s_l, rhos, Ns_points, flTrappedOnly,
 								  rord, modal_group_velocities, mode_numbers);
 
 	for (unsigned ii = 0; ii < freqs.size(); ii++)
@@ -185,7 +187,7 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(
 
 int sspemdd_sequential::compute_wnumbers_bb(
 	std::vector<double> &freqs, double deltaf, std::vector<double> &depths,
-	std::vector<double> &c1s, std::vector<double> &c2s, std::vector<double> &rhos,
+	std::vector<double> &c1s_l, std::vector<double> &c2s_l, std::vector<double> &rhos,
 	std::vector<unsigned> &Ns_points, unsigned flOnlyTrapped, unsigned &ordRich,
 	std::vector<std::vector<double>> &modal_group_velocities, std::vector<unsigned> &mode_numbers)
 {
@@ -204,7 +206,7 @@ int sspemdd_sequential::compute_wnumbers_bb(
 		mgv_ii.clear();
 		omeg1 = 2 * LOCAL_M_PI * (freqs.at(ii) + deltaf / 2);
 		out_wnum1 =
-			compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
+			compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s_l, c2s_l, rhos, Ns_points, 1, ordRich);
 		nwnum = (unsigned)out_wnum1.size();
 
 		for (unsigned jj = 0; jj < nwnum; jj++)
@@ -241,8 +243,7 @@ int sspemdd_sequential::compute_modal_grop_velocities(
 		out_wnum2.clear();
 		mgv_ii.clear();
 		omeg1 = 2 * LOCAL_M_PI * (freqs.at(ii) + deltaf);
-		out_wnum1 =
-			compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
+		out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
 		nwnum = (unsigned)out_wnum1.size();
 
 		/*
@@ -255,8 +256,9 @@ int sspemdd_sequential::compute_modal_grop_velocities(
 		*/
 
 		omeg2 = 2 * LOCAL_M_PI * (freqs.at(ii));
-		out_wnum2 =
-			compute_wnumbers_extrap_lin_dz(omeg2, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
+		out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
+		// Since with increase of omega the number of wave numbers
+		// can only increase, we can omit the following check:
 		// nwnum = std::min(nwnum, (unsigned)out_wnum2.size());
 		nwnum = (unsigned)out_wnum2.size();
 
@@ -823,9 +825,9 @@ double sspemdd_sequential::fill_data_compute_residual(Point &point)
 	// tau_comment: added tau to function call
 	if (object_function_type == "uniform")
 	{
-		point.residual =
-			compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points, point.R,
-												  point.tau, modal_delays, mode_numbers);
+		point.residual = compute_modal_delays_residual_uniform(
+				freqs, depths, c1s, c2s, rhos, Ns_points, point.R,
+				point.tau, modal_delays, mode_numbers);
 	}
 	else if (object_function_type == "weighted")
 	{
@@ -979,14 +981,12 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 					}
 					cur_point = fromPointIndexesToPoint(cur_point_indexes);
 					isRecordUpdateInDimension = false;
-					if (std::find(checked_points.begin(), checked_points.end(), cur_point) !=
-						checked_points.end())
+					if (std::find(checked_points.begin(), checked_points.end(), cur_point) != checked_points.end())
 					{
 						skipped_points++;
 						continue;
 					}
-					fill_data_compute_residual(
-						cur_point); // calculated residual is written to cur_point
+					fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
 					checked_points.push_back(cur_point);
 					if (record_point.residual < old_record_residual)
 					{ // new record was found

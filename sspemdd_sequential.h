@@ -6,6 +6,8 @@
 #include <chrono>
 #include <fstream>
 #include <vector>
+#include <tuple>
+#include <random>
 
 const double LOCAL_M_PI = 3.14159265358979323846;
 const double START_HUGE_VALUE = 1e100;
@@ -22,6 +24,12 @@ struct Point
 	bool operator==(const Point &a) const
 	{
 		return (R == a.R && tau == a.tau && rhob == a.rhob && cb == a.cb && cws == a.cws);
+	}
+	bool operator<(const Point& r)
+	{
+		return ((residual < r.residual) || 
+			// strict weak ordering
+			(std::tie(R, tau, rhob, cb, cws) < (std::tie(r.R, r.tau, r.rhob, r.cb, r.cws))));
 	}
 };
 
@@ -47,14 +55,14 @@ class sspemdd_sequential
 	unsigned long long n_layers_w;
 	unsigned long long iterated_local_search_runs;
 	std::vector<unsigned> mode_numbers;
-	std::vector<std::vector<double>> modal_delays;
+	std::vector<std::vector<double> > modal_delays;
 	std::vector<double> freqs;
 	std::vector<double> depths;
 	std::vector<double> c1s;
 	std::vector<double> c2s;
 	std::vector<double> rhos;
 	std::vector<unsigned> Ns_points;
-	std::vector<std::vector<double>> weight_coeffs;
+	std::vector<std::vector<double> > weight_coeffs;
 	int verbosity;
 	std::string dtimesFileName;
 	std::string spmagFileName;
@@ -62,6 +70,8 @@ class sspemdd_sequential
 	std::vector<double> cw1_arr;
 	std::vector<double> cw2_arr;
 	std::vector<unsigned long long> ncpl_arr;
+
+	std::mt19937 rng;
 
 	// functions by Oleg
 	std::vector<std::vector<double>> search_space; // values of variables which form a search space
@@ -75,6 +85,10 @@ class sspemdd_sequential
 	void findLocalMinHillClimbing();
 	void report_final_result();
 	void getThreeValuesFromStr(std::string str, double &val1, double &val2, double &val3);
+
+	// methods by Vader
+	Point generateRandomPoint();
+	void ILSGPU(int ils_runs=1);
 
 	// functions by Pavel
 	// tau_comment: added tau to the arguments of compute_modal_delays_residual_uniform()
