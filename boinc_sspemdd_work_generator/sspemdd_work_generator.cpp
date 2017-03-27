@@ -70,7 +70,7 @@ int main( int argc, char **argv )
 
 	std::fstream temp_wu_file;
 	for (unsigned long long i = 0; i < points_vec.size(); i++) {
-		sstream << "310_hydro_R_uniform260" << "-wu" << i+1;
+		sstream << "310_hydro_r_uniform260" << "_2" << "-wu" << i+1;
 		std::string wu_name = sstream.str();
 		sstream.str(""); sstream.clear();
 		std::string cur_wu_input_file_name = "input_" + wu_name;

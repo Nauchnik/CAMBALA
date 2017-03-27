@@ -76,7 +76,6 @@ int main()
 		cur_record_point = fromStrToPoint(str);
 		chpt_file.close();
 		std::cout << "point from chpt file" << std::endl;
-		std::cout << "cur_record_point.cb " << cur_record_point.cb << std::endl;
 	}
 	
 	if ( !do_work( input_file_name, processed_points, cur_record_point ) ) {

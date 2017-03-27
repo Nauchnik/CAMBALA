@@ -31,7 +31,7 @@ ttfont.cpp:
 clean: distclean
 
 distclean:
-	/bin/rm -f $(PROGS) *.o libstdc++.a
+	/bin/rm -f $(PROGS) *.o libstdc++.a sspemdd_boinc
 
 sspemdd_boinc: sspemdd_boinc.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o \
 	libstdc++.a $(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a
