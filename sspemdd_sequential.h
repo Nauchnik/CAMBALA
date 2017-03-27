@@ -25,6 +25,15 @@ struct search_space_point
 	}
 };
 
+struct reduced_search_space_attribute
+{
+	bool R;
+	bool tau;
+	bool rhob;
+	bool cb;
+	std::vector<bool> cws;
+};
+
 class sspemdd_sequential
 {
 public:
@@ -76,6 +85,7 @@ public:
 	void findLocalMinHillClimbing();
 	void reportFinalResult();
 	void getThreeValuesFromStr(std::string str, double &val1, double &val2, double &val3);
+	void reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a);
 
 	// functions by Pavel
 	//tau_comment: added tau to the arguments of compute_modal_delays_residual_uniform()

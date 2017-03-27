@@ -37,7 +37,7 @@ namespace SSPEMDD_utils{
 			index_arr[0] = -1; // condition of stopping
 		else {
 			// find last changable row to increase its value
-			unsigned last_changable = (unsigned)index_arr.size() - 1;
+			int last_changable = index_arr.size() - 1;
 			while (last_changable != -1){
 				if (index_arr[last_changable] < (int)(vii[last_changable].size() - 1))
 					break;

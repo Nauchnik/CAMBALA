@@ -724,6 +724,10 @@ void sspemdd_sequential::init()
 	if ( (!rank) && (verbosity > 0) )
 		std::cout << "N_total " << N_total << std::endl;
 
+	record_point.cws.resize(n_layers_w);
+	for (unsigned long long i = 0; i < record_point.cws.size(); i++)
+		record_point.cws[i] = cw1_arr[i];
+
 	loadValuesToSearchSpaceVariables();
 
 	if ( (!rank) && (verbosity > 0) )
@@ -780,6 +784,37 @@ std::vector<search_space_point> sspemdd_sequential::getSearchSpacePointsVec()
 		points_vec.push_back(fromPointIndexesToPoint(cur_point_indexes));
 
 	return points_vec;
+}
+
+void sspemdd_sequential::reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a)
+{
+	// search_space_variables[0] - cb
+	// search_space_variables[1] - rhob
+	// search_space_variables[2] - R
+	// search_space_variables[3] - tau
+	// search_space_variables[4...] - cws
+	if (reduced_s_s_a.cb == false) {
+		search_space[0].resize(1);
+		search_space[0][0] = cb1;
+	}
+	if (reduced_s_s_a.rhob == false) {
+		search_space[1].resize(1);
+		search_space[1][0] = rhob1;
+	}
+	if (reduced_s_s_a.R == false) {
+		search_space[2].resize(1);
+		search_space[2][0] = R1;
+	}
+	if (reduced_s_s_a.tau == false) {
+		search_space[3].resize(1);
+		search_space[3][0] = tau1;
+	}
+	for (unsigned i=0; i < reduced_s_s_a.cws.size(); i++) {
+		if (reduced_s_s_a.cws[i] == false) {
+			search_space[4 + i].resize(1);
+			search_space[4 + i][0] = cw1_arr[i];
+		}
+	}
 }
 
 double sspemdd_sequential::fillDataComputeResidual( search_space_point &point)
@@ -848,10 +883,6 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 	// search_space_variables[4...] - cws
 	std::vector<double> tmp_vec;
 	search_space.clear();
-	
-	record_point.cws.resize(n_layers_w);
-	for (unsigned long long i = 0; i < record_point.cws.size(); i++)
-		record_point.cws[i] = cw1_arr[i];
 	
 	// fill search_space_variables[0] with cb
 	tmp_vec.resize(ncb);
@@ -1052,9 +1083,7 @@ void sspemdd_sequential::getThreeValuesFromStr(std::string str, double &val1, do
 
 void sspemdd_sequential::readScenario(std::string scenarioFileName)
 {
-/*
-	read constant and variable values from a scenario file
-*/
+// read constant and variable values from a scenario file
 	if ( (!rank) && (verbosity > 0) )
 		std::cout << "scenarioFileName " << scenarioFileName << std::endl;
 	std::ifstream scenarioFile(scenarioFileName.c_str());
