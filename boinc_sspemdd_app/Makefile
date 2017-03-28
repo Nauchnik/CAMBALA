@@ -8,7 +8,7 @@ FREETYPE_DIR = /usr/include/freetype2
 
 CPP = g++
 CPPFLAGS = -O3 \
-    -std=c++0x -Wall -W -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -fno-common \
+    -std=c++0x -static -Wall -W -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -fno-common \
     -DAPP_GRAPHICS -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -D NDEBUG \
     -I$(BOINC_DIR) \
     -I$(BOINC_LIB_DIR) \

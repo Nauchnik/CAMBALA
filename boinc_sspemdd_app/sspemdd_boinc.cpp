@@ -119,17 +119,31 @@ bool do_work( const std::string &input_file_name,
 {
 	sspemdd_sequential sspemdd_seq;
 
-	sspemdd_seq.readScenario(input_file_name);
-	sspemdd_seq.readInputDataFromFiles();
-	sspemdd_seq.init();
+	int retval;
+	retval = sspemdd_seq.readScenario(input_file_name);
+	if (retval) {
+		fprintf(stderr, "APP: readScenario() failed %d\n", retval);
+		exit(retval);
+	}
+	retval = sspemdd_seq.readInputDataFromFiles();
+	if (retval) {
+		fprintf(stderr, "APP: readInputDataFromFiles() failed %d\n", retval);
+		exit(retval);
+	}
+	retval = sspemdd_seq.init();
+	if (retval) {
+		fprintf(stderr, "APP: init() failed %d\n", retval);
+		exit(retval);
+	}
 	std::vector<search_space_point> points_vec = sspemdd_seq.getSearchSpacePointsVec();
 	
 	unsigned long long total_points = points_vec.size();
-
+	
 	if (processed_points == total_points) // exit if all points already processed
 		return true;
-	int retval = -1;
+
 	if (!total_points) {
+		retval = -1;
 		fprintf(stderr, "APP: total_points == 0", retval);
 		exit(retval);
 	}

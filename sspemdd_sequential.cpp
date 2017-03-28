@@ -9,7 +9,7 @@ sspemdd_sequential::sspemdd_sequential() :
 	H(0),
 	ncb(1),
 	nrhob(1),
-	nR(41),
+	nR(1),
 	ntau(1),
 	cb1(2000.0),
 	cb2(2000.0),
@@ -22,8 +22,8 @@ sspemdd_sequential::sspemdd_sequential() :
 	n_layers_w(1),
 	iterated_local_search_runs(10),
 	verbosity(1),
-	N_total (1),
-	rank (0)
+	N_total(1),
+	rank(0)
 {
 	record_point.cb       = START_HUGE_VALUE;
 	record_point.rhob     = START_HUGE_VALUE;
@@ -694,8 +694,13 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 //tau_comment: search and output,
 //check for tau!
 
-void sspemdd_sequential::init()
+int sspemdd_sequential::init()
 {
+	if (!n_layers_w) {
+		std::cerr << "n_layers_w == 0" << std::endl;
+		return -1;
+	}
+
 	unsigned ppm = 2;
 	double layer_thickness_w = h / n_layers_w;
 
@@ -721,6 +726,11 @@ void sspemdd_sequential::init()
 	for (auto &x : ncpl_arr)
 		N_total *= (unsigned long long)x;
 
+	if (!N_total) {
+		std::cerr << "N_total == 0" << std::endl;
+		return -1;
+	}
+
 	if ( (!rank) && (verbosity > 0) )
 		std::cout << "N_total " << N_total << std::endl;
 
@@ -732,6 +742,8 @@ void sspemdd_sequential::init()
 
 	if ( (!rank) && (verbosity > 0) )
 		std::cout << "init() finished" << std::endl;
+
+	return 0;
 }
 
 void sspemdd_sequential::reportFinalResult()
@@ -1081,7 +1093,7 @@ void sspemdd_sequential::getThreeValuesFromStr(std::string str, double &val1, do
 		val3 = val1;
 }
 
-void sspemdd_sequential::readScenario(std::string scenarioFileName)
+int sspemdd_sequential::readScenario(std::string scenarioFileName)
 {
 // read constant and variable values from a scenario file
 	if ( (!rank) && (verbosity > 0) )
@@ -1090,7 +1102,7 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 
 	if (!scenarioFile.is_open()) {
 		std::cerr << "scenarioFile with the name " << scenarioFileName << " wasn't openend" << std::endl;
-		exit(1);
+		return -1;
 	}
 
 	std::string str, word, tmp_word;
@@ -1172,6 +1184,15 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 	}
 	n_layers_w = cw1_arr.size();
 
+	if (!cw1_arr.size()) {
+		std::cerr << "!cw1_arr.size()" << std::endl;
+		return -1;
+	}
+	if (!h || !H) {
+		std::cerr << "!h || !H" << std::endl;
+		return -1;
+	}
+
 	if ( (!rank) && (verbosity > 0) ) {
 		std::cout << "Parameters :" << std::endl;
 		std::cout << "cw1_arr :" << std::endl;
@@ -1204,14 +1225,16 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 
 		std::cout << "readScenario() finished" << std::endl;
 	}
+
+	return 0;
 }
 
-void sspemdd_sequential::readInputDataFromFiles()
+int sspemdd_sequential::readInputDataFromFiles()
 {	
 	std::ifstream dtimesFile(dtimesFileName.c_str());
 	if (!dtimesFile.is_open()) {
 		std::cerr << "dtimesFile " << dtimesFileName << " wasn't opened" << std::endl;
-		exit(1);
+		return -1;
 	}
 	std::stringstream myLineStream;
 	std::string myLine;
@@ -1276,4 +1299,5 @@ void sspemdd_sequential::readInputDataFromFiles()
 		std::cout << "object_function_type changed to " << object_function_type << std::endl;
 		std::cout << "readInputDataFromFiles() finished " << std::endl;
 	}
+	return 0;
 }

@@ -74,9 +74,9 @@ public:
 
 	// functions by Oleg
 	std::vector<std::vector<double>> search_space; // values of variables which form a search space
-	void readScenario(std::string scenarioFileName);
-	void readInputDataFromFiles();
-	void init();
+	int readScenario(std::string scenarioFileName);
+	int readInputDataFromFiles();
+	int init();
 	double getRecordResidual();
 	double fillDataComputeResidual(search_space_point &point);
 	std::vector<search_space_point> getSearchSpacePointsVec();

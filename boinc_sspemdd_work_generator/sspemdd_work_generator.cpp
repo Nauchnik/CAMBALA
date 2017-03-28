@@ -26,9 +26,18 @@ int main( int argc, char **argv )
 	std::string scenario_file_name = argv[1];
 	
 	sspemdd_sequential sspemdd_seq;
-	sspemdd_seq.readScenario(scenario_file_name);
-	sspemdd_seq.init();
-
+	int retval;
+	retval = sspemdd_seq.readScenario(scenario_file_name);
+	if (retval) {
+		std::cerr << "sspemdd_seq.readScenario() falied " << std::endl;
+		exit(retval);
+	}
+	retval = sspemdd_seq.init();
+	if (retval) {
+		std::cerr << "sspemdd_seq.init() falied " << std::endl;
+		exit(retval);
+	}
+	
 	std::stringstream sstream_static_strings, sstream;
 	std::ifstream ifile(scenario_file_name.c_str());
 	std::string str, word, word1, word2, word3;
