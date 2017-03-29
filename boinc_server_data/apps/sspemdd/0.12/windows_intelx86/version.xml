@@ -1,0 +1,36 @@
+<version>
+    <file>
+	<physical_name>sspemdd_0.12_windows_intelx86.exe</physical_name>
+	<main_program/>
+    </file>
+    <file>
+	<physical_name>160_dtimes.txt</physical_name>
+	<copy_file/>
+	<logical_name>160_dtimes.txt</logical_name>
+    </file>
+    <file>
+	<physical_name>160_spmag.txt</physical_name>
+	<copy_file/>
+	<logical_name>160_spmag.txt</logical_name>
+    </file>
+    <file>
+	<physical_name>210_dtimes.txt</physical_name>
+	<copy_file/>
+	<logical_name>210_dtimes.txt</logical_name>
+    </file>
+    <file>
+	<physical_name>210_spmag.txt</physical_name>
+	<copy_file/>
+	<logical_name>210_spmag.txt</logical_name>
+    </file>
+    <file>
+	<physical_name>260_dtimes.txt</physical_name>
+	<copy_file/>
+	<logical_name>260_dtimes.txt</logical_name>
+    </file>
+    <file>
+	<physical_name>260_spmag.txt</physical_name>
+	<copy_file/>
+	<logical_name>260_spmag.txt</logical_name>
+    </file>
+</version>
