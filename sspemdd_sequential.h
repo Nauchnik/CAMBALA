@@ -5,6 +5,7 @@
 #include <fstream>
 #include <algorithm>
 #include <chrono>
+#include <math.h>
 #include "linalg.h"
 
 const double LOCAL_M_PI = 3.14159265358979323846;

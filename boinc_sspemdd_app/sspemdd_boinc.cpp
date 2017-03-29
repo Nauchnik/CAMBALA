@@ -44,7 +44,7 @@ int do_checkpoint( const unsigned long long &total_points,
 	               const search_space_point &current_record_point );
 void fromPointToFile(const search_space_point &point, std::ofstream &ofile);
 
-int main() 
+int main(int argc, char **argv) 
 {
     char buf[256];
 	int retval = boinc_init();
