@@ -8,6 +8,7 @@
 #include <vector>
 #include <tuple>
 #include <random>
+#include <limits>
 
 const double LOCAL_M_PI = 3.14159265358979323846;
 const double START_HUGE_VALUE = 1e100;
@@ -19,7 +20,7 @@ struct Point
 	double rhob;
 	double cb;
 	std::vector<double> cws;
-	double residual;
+	double residual = std::numeric_limits<double>::infinity();
 
 	bool operator==(const Point &a) const
 	{
@@ -27,9 +28,12 @@ struct Point
 	}
 	bool operator<(const Point& r)
 	{
+		return (residual < r.residual);
+		/*
 		return ((residual < r.residual) || 
 			// strict weak ordering
 			(std::tie(R, tau, rhob, cb, cws) < (std::tie(r.R, r.tau, r.rhob, r.cb, r.cws))));
+			*/
 	}
 };
 

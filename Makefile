@@ -1,10 +1,10 @@
 CPP = g++
 INC1 = ../alglib/
 INCDIRS = -I${INC1}
-CPPFLAGS = -Wall -O0 -std=c++11 ${INCDIRS} -g -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS 
+CPPFLAGS = -Wall -std=c++11 ${INCDIRS} -g -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS 
 
-pd-sat: main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o sspemdd_parallel.o
-	${CPP} ${CPPFLAGS} main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o sspemdd_parallel.o -o SSPEMDD_parallel
+pd-sat: main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o sspemdd_parallel.o ils_gpu.o bisect_cpu.o
+	${CPP} ${CPPFLAGS} main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o sspemdd_parallel.o ils_gpu.o bisect_cpu.o -o SSPEMDD_parallel
 
 specialfunctions.o: ../alglib/specialfunctions.cpp 
 	${CPP} ${CPPFLAGS} ../alglib/specialfunctions.cpp -c
@@ -27,12 +27,16 @@ sspemdd_parallel.o: sspemdd_parallel.cpp
 sspemdd_sequential.o: sspemdd_sequential.cpp
 	${CPP} ${CPPFLAGS} sspemdd_sequential.cpp -c
 
+ils_gpu.o: ils_gpu.cpp
+	${CPP} ${CPPFLAGS} ils_gpu.cpp -c
+
 main.o: main.cpp
 	${CPP} ${CPPFLAGS} main.cpp -c
 	
 clean:
 	rm -rf *.o
 	rm SSPEMDD_parallel
+	rm SSPEMDD
 	clear
 
 bisect_cpu.o: bisect_cpu.cpp
