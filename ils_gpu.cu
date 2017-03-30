@@ -3,13 +3,13 @@
 #include "assert.h"
 #include "helper_cuda.h"
 
-#define BLOCKSIZE 1
+#define BLOCKSIZE 8
 
 #define MAX_MAT_SIZE 2048
 #define MAX_FREQS 1000
 #define MAX_INTERFACES 10
 #define MAX_WNUMS 100
-#define ORD_RICH 3
+#define ORD_RICH 1
 
 #include "bisect_gpu.h"
 
@@ -440,7 +440,7 @@ void sspemdd_sequential::ILSGPU(int ils_runs)
 {
 	std::cout << "Start ILS GPU" << std::endl;
 
-	const size_t batch_size = 1024;
+	const size_t batch_size = 4*1280;
 	Point global_record;
 
 	std::cout << "Global record" << global_record.residual << std::endl;

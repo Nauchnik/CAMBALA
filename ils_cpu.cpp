@@ -7,7 +7,7 @@
 #define MAX_FREQS 1000
 #define MAX_INTERFACES 10
 #define MAX_WNUMS 100
-#define ORD_RICH 3
+#define ORD_RICH 1
 
 void FillLocalArrays (
 		const int tid,
@@ -353,8 +353,16 @@ void EvalPointBatchCPU(
 		Ns_points[i] = Ns_points_d[i];
 
 	float *residuals = (float*) malloc(sz*sizeof(float));
+
+
+	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+	std::chrono::high_resolution_clock::time_point t2;
+	std::chrono::duration<double> time_span;
 	EvalPointsCPU(sz, cws_sz, dmaxsz, cws, Ns_points, depths, R, tau, rhob, cb, freqs, freqs_sz,
 			exp_delays, exp_delays_sz, residuals);
+	t2 = std::chrono::high_resolution_clock::now();
+	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+	std::cout << "Time " << time_span.count() << " s" << std::endl;
 
 	for (size_t i = 0; i < sz; ++i)
 		batch[i].residual = residuals[i];
