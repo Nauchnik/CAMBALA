@@ -15,7 +15,7 @@ int main( int argc, char **argv )
 {
 #ifdef _DEBUG
 	argc = 2;
-	argv[1] = "310_hydro_R_uniform260_work_generator.txt";
+	argv[1] = "./43_hydro_R_uniform260.txt";
 #endif
 
 	if (argc < 2) {
@@ -50,6 +50,7 @@ int main( int argc, char **argv )
 	unsigned cw_index;
 	while (getline(ifile, str)) {
 		sstream << str;
+		word1 = word2 = word3 = "";
 		sstream >> word1 >> word2 >> word3;
 		if (word3 == "server") {
 			if ( word1 == "R" )
@@ -77,9 +78,13 @@ int main( int argc, char **argv )
 	std::vector<search_space_point> points_vec = sspemdd_seq.getSearchSpacePointsVec();
 	std::cout << "points_vec.size() " << points_vec.size() << std::endl;
 
+	std::string str_to_remove = "./";
+	unsigned pos = scenario_file_name.find(str_to_remove);
+	if (pos != std::string::npos)
+		scenario_file_name.erase(pos, str_to_remove.length());
 	std::fstream temp_wu_file;
 	for (unsigned long long i = 0; i < points_vec.size(); i++) {
-		sstream << "310_hydro_r_uniform260" << "_2" << "-wu" << i+1;
+		sstream << scenario_file_name << "-wu" << i+1;
 		std::string wu_name = sstream.str();
 		sstream.str(""); sstream.clear();
 		std::string cur_wu_input_file_name = "input_" + wu_name;

@@ -1,4 +1,4 @@
-% SSPEMDD scenario № 32
+% SSPEMDD scenario № 43
 % constant parameters
 dtimes_file 260_dtimes.txt
 spmag_file(string|no) no
@@ -10,7 +10,8 @@ rhob 1.7
 cb 1700
 tau 0
 cw0 1500
-cw1 1500
-cw2 1500
-cw3 1500
-cw4 1500
+cw1 1450
+cw2 1450
+cw3 1450
+cw4 1450
+cw5 1450
