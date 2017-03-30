@@ -233,48 +233,6 @@ void ComputeModalGroupVelocities (
 	mgv_sz = wnums2_sz;
 }
 
-
-float getResidual(
-		const float R,
-		const int freqs_sz, 
-		const float* exp_delays,
-		const int* exp_delays_sz,
-		const int dmaxsz,
-	       	const float calc_mgv[MAX_FREQS][MAX_WNUMS], 
-		const int calc_mgv_sz[],
-		const float tau)
-{
-	// Calculate avg distance between experimental and model delays
-	// TODO: compare velocities instead of delays to speedup the
-	// procedure
-	std::cout << " diff "<< std::endl;
-	float residual = 0;
-	int n = 0;
-	for (int i = 0; i < freqs_sz; ++i) //iterate over frequencies
-	{
-		for (int j = 0; j < exp_delays_sz[i]; ++j) //iterate over modal velocities
-		{
-			if (exp_delays[i*dmaxsz + j] <= 0)
-				continue;
-
-			float calc_delay = 0;
-			if (j < calc_mgv_sz[i]) // mode exists
-				calc_delay = R / calc_mgv[i][j];
-			else if ((i+1 < freqs_sz) && (j < calc_mgv_sz[i + 1])) // next freqs mode exists
-				calc_delay = R / calc_mgv[i + 1][j];
-
-
-			std::cout << " " << exp_delays[i*dmaxsz + j] + tau - calc_delay ;
-			++n;
-			// tau_comment: tau usage starts here 
-			residual += pow(exp_delays[i*dmaxsz + j] + tau - calc_delay, 2);
-		}
-	}
-	std::cout << " "<< std::endl;
-	residual = sqrt(residual / n);
-	return residual;
-}
-
 void EvalPointsCPU(
 		const int batch_sz, 
 		const int cws_sz, 
@@ -305,15 +263,33 @@ void EvalPointsCPU(
 		FillLocalArrays(tid, cb[tid], rhob[tid], batch_sz, cws_sz, cws,  
 				rhos, c1s, c2s);
 
-		float calc_mgv[MAX_FREQS][MAX_WNUMS];
-		int calc_mgv_sz[MAX_FREQS];
+		int n_residuals = 0;
+		float residuals_local = 0;
 		// Compute mgvs for all frequencies
 		assert (freqs_sz < MAX_FREQS);
 		for (int i = 0; i < freqs_sz; ++i)
+		{
+			float calc_mgv[MAX_WNUMS];
+			int calc_mgv_sz;
 			ComputeModalGroupVelocities(freqs[i], n_layers, Ns_points, depths, rhos, c1s, c2s, 
-				&calc_mgv[i][0], calc_mgv_sz[i]);
+				calc_mgv, calc_mgv_sz);
 
-		residuals[tid] = getResidual(R[tid], freqs_sz, exp_delays, exp_delays_sz, dmaxsz, calc_mgv, calc_mgv_sz, tau[tid]);
+			int min_size = calc_mgv_sz < exp_delays_sz[i] ? 
+				calc_mgv_sz : exp_delays_sz[i];
+
+			for (int j = 0; j < min_size; ++j) //iterate over modal velocities
+			{
+				float exp_delay = exp_delays[i*dmaxsz + j];
+				float calc_delay = R[tid] / calc_mgv[j];
+				if (exp_delay > 0)
+				{
+					residuals_local += pow(exp_delay + tau[tid] - calc_delay, 2);
+					++n_residuals;
+				}
+			}
+
+		}
+		residuals[tid] = sqrt(residuals_local/n_residuals);
 	}
 }
 
