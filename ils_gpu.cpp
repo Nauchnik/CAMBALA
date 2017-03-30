@@ -247,6 +247,7 @@ float getResidual(
 	// Calculate avg distance between experimental and model delays
 	// TODO: compare velocities instead of delays to speedup the
 	// procedure
+	std::cout << " diff "<< std::endl;
 	float residual = 0;
 	int n = 0;
 	for (int i = 0; i < freqs_sz; ++i) //iterate over frequencies
@@ -262,11 +263,14 @@ float getResidual(
 			else if ((i+1 < freqs_sz) && (j < calc_mgv_sz[i + 1])) // next freqs mode exists
 				calc_delay = R / calc_mgv[i + 1][j];
 
+
+			std::cout << " " << exp_delays[i*dmaxsz + j] + tau - calc_delay ;
 			++n;
 			// tau_comment: tau usage starts here 
 			residual += pow(exp_delays[i*dmaxsz + j] + tau - calc_delay, 2);
 		}
 	}
+	std::cout << " "<< std::endl;
 	residual = sqrt(residual / n);
 	return residual;
 }
@@ -306,15 +310,8 @@ void EvalPointsCPU(
 		// Compute mgvs for all frequencies
 		assert (freqs_sz < MAX_FREQS);
 		for (int i = 0; i < freqs_sz; ++i)
-		{
-			float mgv_local[MAX_WNUMS];
 			ComputeModalGroupVelocities(freqs[i], n_layers, Ns_points, depths, rhos, c1s, c2s, 
-				//&calc_mgv[i][0], calc_mgv_sz[i]);
-				mgv_local, calc_mgv_sz[i]);
-			assert (calc_mgv_sz[i] < MAX_WNUMS);
-			for (int j=0; j<calc_mgv_sz[i]; ++j)
-				calc_mgv[i][j]=mgv_local[j];
-		}
+				&calc_mgv[i][0], calc_mgv_sz[i]);
 
 		residuals[tid] = getResidual(R[tid], freqs_sz, exp_delays, exp_delays_sz, dmaxsz, calc_mgv, calc_mgv_sz, tau[tid]);
 	}
