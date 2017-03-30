@@ -7,7 +7,7 @@
 #define MAX_FREQS 1000
 #define MAX_INTERFACES 10
 #define MAX_WNUMS 100
-
+#define ORD_RICH 3
 
 void FillLocalArrays (
 		const int tid,
@@ -15,7 +15,6 @@ void FillLocalArrays (
 		const float rhob, 
 		const int batch_sz, 
 		const int cws_sz, 
-		//const float cws[cws_sz][batch_sz], 
 		const float* cws, 
 		float rhos[],
 		float c1s[],
@@ -40,7 +39,6 @@ void FillLocalArrays (
 	c2s[cws_sz] = cb;
 	rhos[cws_sz] = rhob;
 }
-
 
 void FillDiagonals(
 		const float omega,
@@ -95,9 +93,7 @@ void FillDiagonals(
 		ud[i] = sqrt(ud[i] * ld[i + 1]);
 	mat_size = N_points - 2;
 	// DIAGONALS!!!
-
 }
-
 
 Interval ComputeWavenumsLimits(
 		const float omega, 
@@ -117,7 +113,6 @@ Interval ComputeWavenumsLimits(
 	return Interval {kappamin*kappamin, kappamax*kappamax};
 }
 
-
 void FillLayers(const int rr, 
 		const int n_layers,
 		const float* depths, 
@@ -131,9 +126,6 @@ void FillLayers(const int rr,
 {
 	c[0] = 0;
 	rho[0] = 0;
-
-
-	//for (int i = 1; i<MAX_MAT_SIZE; ++i) c[i]=-1234567;
 
 	// TODO: Rewrite me, i am UGLY ((
 	int n = 1; //total number of points
@@ -158,11 +150,8 @@ void FillLayers(const int rr,
 		zp = zc;
 	}
 
-
-
 	interface_idcs_sz = n_layers - 1;
 	c_sz = n;
-//for (int i =0 ; i < c_sz; ++i) std::cout << "c" << c[i] << "  " ;
 }
 
 void ComputeWavenums(
@@ -176,33 +165,44 @@ void ComputeWavenums(
 		float wnums[],
 		int& wnums_sz)
 {
-
-	int mat_size = n_layers;
-
 	// Strange things happen here...
 	int  Ns_points_aligned [MAX_MAT_SIZE];
 	for (int i = 0; i < n_layers; ++i)
 		Ns_points_aligned[i] = 12 * (Ns_points[i] / 12);
 
-	float mesh [MAX_MAT_SIZE];
-	int interface_idcs [MAX_INTERFACES]; 
-	int interface_idcs_sz;
-	float c [MAX_MAT_SIZE];
-	int   c_sz;
-	float rho [MAX_MAT_SIZE];
-	FillLayers(1 /*rr*/, n_layers, depths, rhos, c1s, c2s, Ns_points_aligned, 
-			mesh, interface_idcs, interface_idcs_sz, c, c_sz, rho);
+	float coeff_extrap[4][4] = {
+			{1,0,0,0},
+			{-1, 2, 0, 0},
+			{0.5, -4, 4.5, 0},
+			{-1 / float(6), 4, -13.5, 32 / float(3)}};
 
-	float md [MAX_MAT_SIZE];
-	float sd [MAX_MAT_SIZE];
-	FillDiagonals(omega, c, c_sz, rho, interface_idcs, interface_idcs_sz, mesh, 
-			md, sd, mat_size);
+	for (int rr = 1; rr <= ORD_RICH; ++rr)
+	{
+		float mesh [MAX_MAT_SIZE];
+		int interface_idcs [MAX_INTERFACES]; 
+		int interface_idcs_sz;
+		float c [MAX_MAT_SIZE];
+		int   c_sz;
+		float rho [MAX_MAT_SIZE];
+		FillLayers(rr, n_layers, depths, rhos, c1s, c2s, Ns_points_aligned, 
+				mesh, interface_idcs, interface_idcs_sz, c, c_sz, rho);
 
-	Interval lim = ComputeWavenumsLimits(omega, c, c_sz);
-	wnums_sz = bisectCpu(md, sd, mat_size, lim.ll, lim.rl, wnums);
+		int mat_size;
+		float md [MAX_MAT_SIZE];
+		float sd [MAX_MAT_SIZE];
+		FillDiagonals(omega, c, c_sz, rho, interface_idcs, interface_idcs_sz, mesh, 
+				md, sd, mat_size);
+
+		float wnums_rr [MAX_WNUMS];
+		int wnums_rr_sz;
+		Interval lim = ComputeWavenumsLimits(omega, c, c_sz);
+		wnums_rr_sz = bisectCpu(md, sd, mat_size, lim.ll, lim.rl, wnums_rr);
+		if (rr == 1) 
+			wnums_sz = wnums_rr_sz;
+		for (int i = 0; i < wnums_rr_sz; ++i)
+			wnums[i] += (wnums_rr[i] * coeff_extrap[ORD_RICH-1][rr-1]);
+	}
 }
-
-
 
 // This procedure computes MGV for a _single_ frequency
 void ComputeModalGroupVelocities (
@@ -216,8 +216,8 @@ void ComputeModalGroupVelocities (
 		float mgv[MAX_WNUMS],
 		int& mgv_sz)
 {
-	float wnums1 [MAX_WNUMS]; int wnums1_sz;
-	float wnums2 [MAX_WNUMS]; int wnums2_sz;
+	float wnums1 [MAX_WNUMS] = {0}; int wnums1_sz;
+	float wnums2 [MAX_WNUMS] = {0}; int wnums2_sz;
 	// magic number for numerical differentiation procedure
 	float deltaf = 0.05;
 	float omega1 = 2 * LOCAL_M_PI * freq + deltaf;
@@ -237,7 +237,6 @@ void EvalPointsCPU(
 		const int batch_sz, 
 		const int cws_sz, 
 		const int dmaxsz,
-		//const float cws[cws_sz][batch_sz], 
 		const float* cws, 
 		const int* Ns_points,
 		const float* depths,
@@ -360,8 +359,6 @@ void EvalPointBatchCPU(
 	for (size_t i = 0; i < sz; ++i)
 		batch[i].residual = residuals[i];
 
-
-
 	free(Ns_points);
 	free(depths);
 	free(exp_delays_sz);
@@ -388,7 +385,6 @@ Point sspemdd_sequential::generateRandomPoint()
 	Point point = fromPointIndexesToPoint(point_indexes);
 	return std::move(point);
 }
-
 
 void sspemdd_sequential::ILSGPU(int ils_runs)
 {
