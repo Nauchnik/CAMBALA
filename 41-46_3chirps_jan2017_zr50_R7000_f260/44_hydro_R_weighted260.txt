@@ -1,4 +1,4 @@
-% SSPEMDD scenario â„– 44
+% SSPEMDD scenario ¹ 44
 % constant parameters
 dtimes_file 260_dtimes.txt
 spmag_file(string|no) 260_spmag.txt
