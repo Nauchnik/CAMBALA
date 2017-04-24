@@ -49,6 +49,8 @@ public:
 	double cb2;
 	std::vector<double> cw1_arr;
 	std::vector<double> cw2_arr;
+	std::vector<double> d1_arr;
+	std::vector<double> d2_arr;
 	std::vector<unsigned long long> ncpl_arr;
 	std::string object_function_type;
 	double R1;

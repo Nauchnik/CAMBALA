@@ -1107,7 +1107,7 @@ int sspemdd_sequential::readScenario(std::string scenarioFileName)
 
 	std::string str, word, tmp_word;
 	std::stringstream sstream;
-	unsigned cw_index = 0;
+	unsigned cw_index = 0, d_index = 0;
 	double cur_val_step = 0, cur_val1 = 0, cur_val2 = 0;
 	while (getline(scenarioFile, str)) {
 		if ((str == "") || (str[0] == '%'))
@@ -1125,13 +1125,13 @@ int sspemdd_sequential::readScenario(std::string scenarioFileName)
 		else if ((word.size() >= 2) && (word[0] == 'c') && (word[1] == 'w')) {
 			word = word.substr(2, word.size()-2);
 			std::istringstream(word) >> cw_index;
-			sstream >> word;
 			if (cw1_arr.size() < cw_index + 1)
 				cw1_arr.resize(cw_index + 1);
 			if (cw2_arr.size() < cw_index + 1)
 				cw2_arr.resize(cw_index + 1);
 			if (ncpl_arr.size() < cw_index + 1)
 				ncpl_arr.resize(cw_index + 1);
+			sstream >> word;
 			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			cw1_arr[cw_index] = cur_val1;
 			cw2_arr[cw_index] = cur_val2;
@@ -1139,6 +1139,18 @@ int sspemdd_sequential::readScenario(std::string scenarioFileName)
 				ncpl_arr[cw_index] = 1;
 			else
 				ncpl_arr[cw_index] = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+		}
+		else if ((word.size() == 2) && (word[0] == 'd') && (isdigit(word[1]))) {
+			word = word[1];
+			std::istringstream(word) >> d_index;
+			if (d1_arr.size() < d_index + 1)
+				d1_arr.resize(d_index + 1);
+			if (d2_arr.size() < d_index + 1)
+				d2_arr.resize(d_index + 1);
+			sstream >> word;
+			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			d1_arr[d_index] = cur_val1;
+			d2_arr[d_index] = cur_val2;
 		}
 		else if (word == "R") {
 			sstream >> word;
