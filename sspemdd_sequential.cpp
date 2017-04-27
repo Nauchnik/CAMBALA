@@ -705,7 +705,7 @@ int sspemdd_sequential::init()
 	double layer_thickness_w = h / n_layers_w;
 
 	for (unsigned jj = 1; jj <= n_layers_w; jj++)
-	depths.push_back(layer_thickness_w*jj);
+		depths.push_back(layer_thickness_w*jj);
 	depths.push_back(H);
 
 	c1s.resize(n_layers_w + 1);
@@ -1141,12 +1141,16 @@ int sspemdd_sequential::readScenario(std::string scenarioFileName)
 				ncpl_arr[cw_index] = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
 		}
 		else if ((word.size() == 2) && (word[0] == 'd') && (isdigit(word[1]))) {
-			word = word[1];
+			word = word.substr(1, word.size() - 1);
 			std::istringstream(word) >> d_index;
 			if (d1_arr.size() < d_index + 1)
 				d1_arr.resize(d_index + 1);
 			if (d2_arr.size() < d_index + 1)
 				d2_arr.resize(d_index + 1);
+			if (d_index == 1) {
+				d1_arr[0] = 0;
+				d2_arr[0] = 0;
+			}
 			sstream >> word;
 			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			d1_arr[d_index] = cur_val1;

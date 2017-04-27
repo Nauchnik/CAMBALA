@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 
 #ifdef _DEBUG
 	argc = 2;
-	argv[1] = "13_hydro_R_uniform.txt";
+	argv[1] = "51_hydro_r_uniform260.txt";
 	argv[2] = "10"; // iterated_local_search_runs
 #endif
 	
