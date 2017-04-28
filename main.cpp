@@ -34,6 +34,7 @@ int main(int argc, char **argv)
 #ifdef _DEBUG
 	argc = 2;
 	argv[1] = "51_hydro_r_uniform260.txt";
+	//argv[1] = "41_hydro_r_uniform260.txt";
 	argv[2] = "10"; // iterated_local_search_runs
 #endif
 	
@@ -67,10 +68,15 @@ int main(int argc, char **argv)
 	// read scenario, modal_delays, mode_numbers and freqs, then determine the search space
 	sspemdd_seq.readScenario(scenarioFileName);
 	sspemdd_seq.readInputDataFromFiles();
-	sspemdd_seq.init();
+	std::vector<std::vector<double>> depths_vec;
+	sspemdd_seq.createDepthsArray(depths_vec);
 	
-	//sspemdd_seq.findGlobalMinBruteForce();
-	sspemdd_seq.findLocalMinHillClimbing();
+	for (auto &x : depths_vec) {
+		sspemdd_seq.init(x);
+		//sspemdd_seq.findGlobalMinBruteForce();
+		sspemdd_seq.findLocalMinHillClimbing(x);
+	}
+
 	sspemdd_seq.reportFinalResult();
 
 	t2 = std::chrono::high_resolution_clock::now();

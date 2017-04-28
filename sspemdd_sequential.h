@@ -65,8 +65,6 @@ public:
 	std::vector<unsigned> mode_numbers;
 	std::vector<std::vector<double>> modal_delays;
 	std::vector<double> freqs;
-	std::vector<double> depths;
-	std::vector<std::vector<double>> depths_vec;
 	std::vector<double> c1s;
 	std::vector<double> c2s;
 	std::vector<double> rhos;
@@ -81,13 +79,14 @@ public:
 	std::vector<std::vector<double>> search_space; // values of variables which form a search space
 	int readScenario(std::string scenarioFileName);
 	int readInputDataFromFiles();
-	int init();
+	int init(std::vector<double> depths);
+	int createDepthsArray(std::vector<std::vector<double>> &depths_vec);
 	double getRecordResidual();
-	double fillDataComputeResidual(search_space_point &point);
+	double fillDataComputeResidual(search_space_point &point, std::vector<double> depths);
 	std::vector<search_space_point> getSearchSpacePointsVec();
-	void findGlobalMinBruteForce();
+	void findGlobalMinBruteForce(std::vector<double> depths);
 	void loadValuesToSearchSpaceVariables();
-	void findLocalMinHillClimbing();
+	void findLocalMinHillClimbing(std::vector<double> depths);
 	void reportFinalResult();
 	void getThreeValuesFromStr(std::string str, double &val1, double &val2, double &val3);
 	void reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a);
