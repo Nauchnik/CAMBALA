@@ -693,33 +693,32 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 
 //tau_comment: search and output,
 //check for tau!
-
 int sspemdd_sequential::init()
 {
+	n_layers_w = cw1_arr.size();
 	if (!n_layers_w) {
 		std::cerr << "n_layers_w == 0" << std::endl;
 		return -1;
 	}
-
-	unsigned ppm = 2;
 	double layer_thickness_w = h / n_layers_w;
-
+	depths.clear();
 	for (unsigned jj = 1; jj <= n_layers_w; jj++)
 		depths.push_back(layer_thickness_w*jj);
 	depths.push_back(H);
 
 	c1s.resize(n_layers_w + 1);
 	for (auto &x : c1s)
-	x = 1500;
+		x = 1500;
 	c2s.resize(n_layers_w + 1);
 	for (auto &x : c2s)
-	x = 1500;
+		x = 1500;
 	rhos.resize(n_layers_w + 1);
 	for (auto &x : rhos)
-	x = 1;
+		x = 1;
 	Ns_points.resize(n_layers_w + 1);
+	unsigned ppm = 2;
 	for (auto &x : Ns_points)
-	x = (unsigned)round(ppm*layer_thickness_w);
+		x = (unsigned)round(ppm*layer_thickness_w);
 	Ns_points.at(n_layers_w) = (unsigned)round(ppm*(H - h));
 
 	N_total = nR*nrhob*ncb*ntau;
@@ -733,11 +732,7 @@ int sspemdd_sequential::init()
 
 	if ( (!rank) && (verbosity > 0) )
 		std::cout << "N_total " << N_total << std::endl;
-
-	record_point.cws.resize(n_layers_w);
-	for (unsigned long long i = 0; i < record_point.cws.size(); i++)
-		record_point.cws[i] = cw1_arr[i];
-
+	
 	loadValuesToSearchSpaceVariables();
 
 	if ( (!rank) && (verbosity > 0) )
@@ -1143,18 +1138,17 @@ int sspemdd_sequential::readScenario(std::string scenarioFileName)
 		else if ((word.size() == 2) && (word[0] == 'd') && (isdigit(word[1]))) {
 			word = word.substr(1, word.size() - 1);
 			std::istringstream(word) >> d_index;
-			if (d1_arr.size() < d_index + 1)
+			d_index--;
+			if (d1_arr.size() < d_index + 1) {
 				d1_arr.resize(d_index + 1);
-			if (d2_arr.size() < d_index + 1)
 				d2_arr.resize(d_index + 1);
-			if (d_index == 1) {
-				d1_arr[0] = 0;
-				d2_arr[0] = 0;
+				d_step.resize(d_index + 1);
 			}
 			sstream >> word;
 			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			d1_arr[d_index] = cur_val1;
 			d2_arr[d_index] = cur_val2;
+			d_step[d_index] = cur_val_step;
 		}
 		else if (word == "R") {
 			sstream >> word;
@@ -1198,8 +1192,7 @@ int sspemdd_sequential::readScenario(std::string scenarioFileName)
 		}
 		sstream.str(""); sstream.clear();
 	}
-	n_layers_w = cw1_arr.size();
-
+	
 	if (!cw1_arr.size()) {
 		std::cerr << "!cw1_arr.size()" << std::endl;
 		return -1;

@@ -51,6 +51,7 @@ public:
 	std::vector<double> cw2_arr;
 	std::vector<double> d1_arr;
 	std::vector<double> d2_arr;
+	std::vector<double> d_step;
 	std::vector<unsigned long long> ncpl_arr;
 	std::string object_function_type;
 	double R1;
@@ -65,6 +66,7 @@ public:
 	std::vector<std::vector<double>> modal_delays;
 	std::vector<double> freqs;
 	std::vector<double> depths;
+	std::vector<std::vector<double>> depths_vec;
 	std::vector<double> c1s;
 	std::vector<double> c2s;
 	std::vector<double> rhos;
