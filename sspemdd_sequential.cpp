@@ -249,7 +249,7 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 	std::vector<double> out_wnum1;
 	std::vector<double> out_wnum2;
 	std::vector<double> mgv_ii;
-	unsigned nwnum;
+	unsigned nwnum, out_wnum1_size;
 	unsigned nfr = (unsigned)freqs.size();
 	double omeg1, omeg2;
 
@@ -260,6 +260,7 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 		omeg1 = 2 * LOCAL_M_PI*(freqs.at(ii) + deltaf);
 		out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
 		nwnum = (unsigned)out_wnum1.size();
+		out_wnum1_size = nwnum;
 
 		/*
 		cout << "f=" << freqs.at(ii) << "Hz" << endl;
@@ -274,6 +275,10 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 		out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
 		//nwnum = std::min(nwnum, (unsigned)out_wnum2.size());
         nwnum = (unsigned)out_wnum2.size();
+		if (out_wnum1_size < nwnum) {
+			std::cerr << "out_wnum1_size != nwnum " << std::endl;
+			std::cerr << out_wnum1_size << " != " << nwnum << std::endl;
+		}
 
 		for (unsigned jj = 0; jj < nwnum; jj++)
 		{
@@ -713,7 +718,6 @@ int sspemdd_sequential::init(std::vector<double> depths)
 		x = 1;
 	Ns_points.resize(n_layers_w + 1);
 	unsigned ppm = 2;
-
 	Ns_points[0] = (unsigned)round(ppm*depths[0]);
 	for (unsigned i=1; i < depths.size(); i++ )
 		Ns_points[i] = (unsigned)round(ppm*(depths[i] - depths[i-1]));
@@ -752,27 +756,42 @@ int sspemdd_sequential::createDepthsArray(std::vector<std::vector<double>> &dept
 	else {
 		std::vector<std::vector<double>> search_space_depths;
 		search_space_depths.resize(d1_arr.size());
-		for (unsigned i = 0; i < d1_arr.size(); i++) {
-			double cur_val = d1_arr[i];
-			do {
+		for (unsigned i = 0; i < d2_arr.size(); i++) {
+			double cur_val = d2_arr[i];
+			for (;;) {
 				search_space_depths[i].push_back(cur_val);
-				cur_val += d_step[i];
+				cur_val -= d_step[i];
+				if (cur_val <= d1_arr[i])
+					break;
 			}
-			while (cur_val != d2_arr[i]+1);
 		}
 
 		std::vector<int> index_arr;
-		std::vector<double> depths;
-		while (SSPEMDD_utils::next_cartesian(search_space_depths, index_arr, depths)) {
-			bool isAdd = true;
-			for (unsigned i = 1; i < depths.size(); i++)
-				if (depths[i] < depths[i - 1] + 3)
-					isAdd = false;
-			if (isAdd)
+		std::vector<double> tmp_depths;
+		std::vector<std::vector<double>> ::iterator it;
+		double cur_treshold;
+		while (SSPEMDD_utils::next_cartesian(search_space_depths, index_arr, tmp_depths)) {
+			std::vector<double> depths;
+			cur_treshold = tmp_depths[0] + 3;
+			depths.push_back(tmp_depths[0]); // at least 1 water layer must exist
+			for (unsigned i = 1; i < tmp_depths.size(); i++) {
+				if (tmp_depths[i] >= cur_treshold) {
+					depths.push_back(tmp_depths[i]);
+					cur_treshold = tmp_depths[i] + 3;
+				}
+			}
+			it = find(depths_vec.begin(), depths_vec.end(), depths);
+			if (it == depths_vec.end())
 				depths_vec.push_back(depths);
 		}
-	}
 
+		for (auto &x : depths_vec) {
+			x.push_back(h);
+			x.push_back(H);
+		}
+	}
+	std::cout << "depths_vec.size() " << depths_vec.size() << std::endl;
+	
 	return 0;
 }
 
@@ -797,6 +816,9 @@ void sspemdd_sequential::reportFinalResult()
 	for (auto &x : record_point.cws)
 		std::cout << x << " ";
 	std::cout << std::endl;
+	std::cout << "depths " << std::endl;
+	for (auto &x : record_point.depths)
+		std::cout << x << " ";
 	std::cout << "total solving time " << time_span.count() << std::endl;
 }
 
@@ -808,7 +830,7 @@ void sspemdd_sequential::findGlobalMinBruteForce(std::vector<double> depths)
 	std::cout << "search_space_points_vec.size() " << search_space_points_vec.size() << std::endl;
 	
 	for (auto &x : search_space_points_vec)
-		fillDataComputeResidual(x, depths); // calculated residual is written to cur_point
+		fillDataComputeResidual(x); // calculated residual is written to cur_point
 }
 
 std::vector<search_space_point> sspemdd_sequential::getSearchSpacePointsVec()
@@ -859,7 +881,7 @@ void sspemdd_sequential::reduceSearchSpace(reduced_search_space_attribute &reduc
 	}
 }
 
-double sspemdd_sequential::fillDataComputeResidual( search_space_point &point, std::vector<double> depths)
+double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 { // finally specify sound speed in water
   // the parameters are transformed into the arrays c1s, c2s, rhos
 	for (unsigned jj = 0; jj < n_layers_w - 1; jj++) {
@@ -873,6 +895,11 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point, s
 	c1s.at(n_layers_w) = point.cb;
 	c2s.at(n_layers_w) = point.cb;
 	rhos.at(n_layers_w) = point.rhob;
+	std::vector<double> depths = point.depths;
+	if (depths.size() == 0) {
+		std::cerr << "depths.size() == 0" << std::endl;
+		exit(-1);
+	}
 
 	//for (unsigned jj = 0; jj <= n_layers_w; jj++)
 	//	std::cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << std::endl;
@@ -890,14 +917,12 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point, s
 		std::cerr << "unknown object_function_type " << object_function_type << std::endl;
 		exit(1);
 	}
+
+	if ( verbosity > 0 )
+		std::cout << "point.residual " << point.residual << std::endl;
 	
 	if (point.residual < record_point.residual) {
-		record_point.residual = point.residual;
-		record_point.cb       = point.cb;
-		record_point.rhob     = point.rhob;
-		record_point.R        = point.R;
-		record_point.tau      = point.tau;
-		record_point.cws      = point.cws;
+		record_point = point;
 		if (verbosity > 0) {
 			std::cout << std::endl;
 			std::cout << std::endl << "New residual minimum:" << std::endl;
@@ -910,6 +935,9 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point, s
 			for (auto &x : record_point.cws)
 				std::cout << x << " ";
 			std::cout << std::endl;
+			std::cout << "depths " << std::endl;
+			for (auto &x : record_point.depths)
+				std::cout << x << " ";
 		}
 	}
 
@@ -975,8 +1003,9 @@ void sspemdd_sequential::findLocalMinHillClimbing(std::vector<double> depths)
 
 	// calculate residual in the start point
 	cur_point = fromPointIndexesToPoint( cur_point_indexes );
+	cur_point.depths = depths;
 
-	fillDataComputeResidual( cur_point, depths ); // calculated residual is written to cur_point
+	fillDataComputeResidual( cur_point ); // calculated residual is written to cur_point
 	global_record_point = record_point;
 	global_record_point_indexes = record_point_indexes;
 
@@ -1015,12 +1044,13 @@ void sspemdd_sequential::findLocalMinHillClimbing(std::vector<double> depths)
 							", max index " << search_space[i].size() - 1 << std::endl;
 					}
 					cur_point = fromPointIndexesToPoint(cur_point_indexes);
+					cur_point.depths = depths;
 					isRecordUpdateInDimension = false;
 					if (std::find(checked_points.begin(), checked_points.end(), cur_point) != checked_points.end()) {
 						skipped_points++;
 						continue;
 					}
-					fillDataComputeResidual(cur_point, depths); // calculated residual is written to cur_point
+					fillDataComputeResidual(cur_point); // calculated residual is written to cur_point
 					checked_points.push_back(cur_point);
 					if (record_point.residual < old_record_residual) { // new record was found
 						record_point_indexes = cur_point_indexes;
@@ -1061,7 +1091,8 @@ void sspemdd_sequential::findLocalMinHillClimbing(std::vector<double> depths)
 		std::cout << std::endl;
 
 		cur_point = fromPointIndexesToPoint(cur_point_indexes);
-		fillDataComputeResidual(cur_point, depths); // calculated residual is written to cur_point
+		cur_point.depths = depths;
+		fillDataComputeResidual(cur_point); // calculated residual is written to cur_point
 		record_point = cur_point;
 		record_point_indexes = cur_point_indexes;
 

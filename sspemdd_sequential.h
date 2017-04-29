@@ -19,10 +19,11 @@ struct search_space_point
 	double cb;
 	std::vector<double> cws;
 	double residual;
-
+	std::vector<double> depths;
+	
 	bool operator==(const search_space_point& a) const
 	{
-		return (R == a.R && tau == a.tau && rhob == a.rhob && cb == a.cb && cws == a.cws);
+		return (R == a.R && tau == a.tau && rhob == a.rhob && cb == a.cb && cws == a.cws && depths == a.depths);
 	}
 };
 
@@ -82,7 +83,7 @@ public:
 	int init(std::vector<double> depths);
 	int createDepthsArray(std::vector<std::vector<double>> &depths_vec);
 	double getRecordResidual();
-	double fillDataComputeResidual(search_space_point &point, std::vector<double> depths);
+	double fillDataComputeResidual(search_space_point &point );
 	std::vector<search_space_point> getSearchSpacePointsVec();
 	void findGlobalMinBruteForce(std::vector<double> depths);
 	void loadValuesToSearchSpaceVariables();

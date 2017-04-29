@@ -33,9 +33,10 @@ int main(int argc, char **argv)
 
 #ifdef _DEBUG
 	argc = 2;
-	argv[1] = "51_hydro_r_uniform260.txt";
+	argv[1] = "test_hydro_r_uniform260_3layers.txt";
 	//argv[1] = "41_hydro_r_uniform260.txt";
 	argv[2] = "10"; // iterated_local_search_runs
+	verbosity = 2;
 #endif
 	
 	if (argc >= 2)
@@ -71,10 +72,11 @@ int main(int argc, char **argv)
 	std::vector<std::vector<double>> depths_vec;
 	sspemdd_seq.createDepthsArray(depths_vec);
 	
-	for (auto &x : depths_vec) {
-		sspemdd_seq.init(x);
-		//sspemdd_seq.findGlobalMinBruteForce();
-		sspemdd_seq.findLocalMinHillClimbing(x);
+	for (unsigned i = 0; i < depths_vec.size(); i++) {
+		sspemdd_seq.init(depths_vec[i]);
+		//sspemdd_seq.findGlobalMinBruteForce(depths_vec[i]);
+		sspemdd_seq.findLocalMinHillClimbing(depths_vec[i]);
+		std::cout << "Processed " << i + 1 << " out of " << depths_vec.size() << " depths" << std::endl;
 	}
 
 	sspemdd_seq.reportFinalResult();
@@ -86,7 +88,7 @@ int main(int argc, char **argv)
 #else
 	int rank = 0;
 	int corecount = 1;
-	
+
 	// parallel mode
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &corecount);
