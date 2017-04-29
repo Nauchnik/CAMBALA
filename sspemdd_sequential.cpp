@@ -69,7 +69,7 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 {
 	unsigned rord = 3;
 	unsigned flTrappedOnly = 1;
-	double deltaf = 0.05;
+	double deltaf = 0.1;
 	double residual = 0;
 	unsigned mnumb;
 	double mdelay;
@@ -275,11 +275,36 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 		out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
 		//nwnum = std::min(nwnum, (unsigned)out_wnum2.size());
         nwnum = (unsigned)out_wnum2.size();
-		if (out_wnum1_size < nwnum) {
-			std::cerr << "out_wnum1_size != nwnum " << std::endl;
-			std::cerr << out_wnum1_size << " != " << nwnum << std::endl;
-		}
 
+		if (nwnum > out_wnum1.size()) { 
+			nwnum = out_wnum1.size();
+			std::cout << "Warning. out_wnum2.size() > out_wnum1.size() " << std::endl;
+			std::cout << out_wnum2.size() << " != " << out_wnum1.size() << std::endl;
+			std::cout << "nwnum changed to " << nwnum << std::endl;
+			std::cout << "freq " << freqs.at(ii) << std::endl;
+			std::cout << "depths : ";
+			for (auto &x : depths)
+				std::cout << x << " ";
+			std::cout << std::endl;
+			std::cout << "c1s : ";
+			for (auto &x : c1s)
+				std::cout << x << " ";
+			std::cout << std::endl;
+			std::cout << "c2s : ";
+			for (auto &x : c2s)
+				std::cout << x << " ";
+			std::cout << std::endl;
+			std::cout << "rhos : ";
+			for (auto &x : depths)
+				std::cout << x << " ";
+			std::cout << std::endl;
+			std::cout << "Ns_points : ";
+			for (auto &x : depths)
+				std::cout << x << " ";
+			std::cout << std::endl;
+			std::cout << std::endl;
+		}
+		
 		for (unsigned jj = 0; jj < nwnum; jj++)
 		{
 			mgv_ii.push_back((omeg1 - omeg2) / (out_wnum1.at(jj) - out_wnum2.at(jj)));
@@ -819,6 +844,7 @@ void sspemdd_sequential::reportFinalResult()
 	std::cout << "depths " << std::endl;
 	for (auto &x : record_point.depths)
 		std::cout << x << " ";
+	std::cout << std::endl;
 	std::cout << "total solving time " << time_span.count() << std::endl;
 }
 
@@ -938,6 +964,7 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 			std::cout << "depths " << std::endl;
 			for (auto &x : record_point.depths)
 				std::cout << x << " ";
+			std::cout << std::endl;
 		}
 	}
 
