@@ -295,11 +295,11 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 				std::cout << x << " ";
 			std::cout << std::endl;
 			std::cout << "rhos : ";
-			for (auto &x : depths)
+			for (auto &x : rhos)
 				std::cout << x << " ";
 			std::cout << std::endl;
 			std::cout << "Ns_points : ";
-			for (auto &x : depths)
+			for (auto &x : Ns_points)
 				std::cout << x << " ";
 			std::cout << std::endl;
 			std::cout << std::endl;
@@ -388,11 +388,11 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, //
 	double zc = 0;
 	double zp = 0;
 	double dz = 0;
-	unsigned m_wnum = 1000;
 
 	unsigned n_layers = (unsigned)depths.size();
 	unsigned n_points_total = 0;
 	unsigned n_points_layer = 0;
+	unsigned m_wnum = M_WNUM_DEFAULT;
 
 	// outer loop for Richardson coefficient rr
 	for (unsigned rr = 1; rr <= ordRich; rr++){
@@ -435,9 +435,8 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, //
 
 		if (rr == 1) { wnum_extrapR.assign(m_wnum, 0); }
 
-		for (unsigned mm = 0; mm<m_wnum; mm++) {
+		for (unsigned mm = 0; mm<m_wnum; mm++)
 			wnum_extrapR.at(mm) = wnum_extrapR.at(mm) + out_wnum2.at(mm)*coeff_extrap.at(rr - 1);
-		}
 
 		/*
 		for (unsigned ii=0; ii<out_wnum2.size();  ii++) {
@@ -446,9 +445,8 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, //
 		*/
 	}
 
-	for (unsigned mm = 0; mm<m_wnum; mm++) {
+	for (unsigned mm = 0; mm<m_wnum; mm++)
 		wnum_extrapR.at(mm) = sqrt(wnum_extrapR.at(mm));
-	}
 
 	return wnum_extrapR;
 }
@@ -492,11 +490,11 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &o
 	double zc = 0;
 	double zp = 0;
 	double dz = 0;
-	unsigned m_wnum = 1000;
 
 	unsigned n_layers = (unsigned)depths.size();
 	unsigned n_points_total = 0;
 	unsigned n_points_layer = 0;
+	unsigned m_wnum = M_WNUM_DEFAULT;
 
 	std::vector<double> coeff_extrap;
 	switch (ordRich) {
