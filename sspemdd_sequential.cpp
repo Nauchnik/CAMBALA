@@ -1,7 +1,157 @@
 #include "sspemdd_sequential.h"
 #include "sspemdd_utils.h"
 #include <iostream>
+#include <complex>
 #include <time.h>
+#include <stdexcept>
+
+
+double RK4(double omeg2, // sound frequency
+    double kh2,
+	double deltah,
+	double c1,
+	double c2,
+	unsigned Np,
+	std::vector<double> &phi0,
+	std::vector<double> &dphi0)
+{
+
+    double f11,f12,f21,f22,f31,f32,f41,f42, cc;
+    double h = deltah/Np;
+    double layer_int = 0.0;
+
+
+    for (unsigned kk = 0; kk <Np; kk++) {
+
+        layer_int = layer_int + 0.5*h*phi0.back()*phi0.back();
+
+        f11 = dphi0.back();
+        cc = c1 + (c2-c1)*kk*h/deltah;
+        cc = cc*cc;
+        f12 = (kh2 - omeg2/cc  )*phi0.back();
+
+        f21 = dphi0.back() + 0.5*f12*h;
+        cc = c1 + (c2-c1)*(kk + 0.5)*h/deltah;
+        cc = cc*cc;
+        f22 = (kh2 - omeg2/cc  )*(phi0.back() + 0.5*f11*h) ;
+
+        f31 = dphi0.back() + 0.5*f22*h;
+        cc = c1 + (c2-c1)*(kk + 0.5)*h/deltah;
+        cc = cc*cc;
+        f32 = (kh2 - omeg2/cc  )*(phi0.back() + 0.5*f21*h) ;
+
+        f41 = dphi0.back() + f32*h;
+        cc = c1 + (c2-c1)*(kk + 1)*h/deltah;
+        cc = cc*cc;
+        f42 = (kh2 - omeg2/cc  )*(phi0.back() + f31*h) ;
+
+        phi0.push_back( phi0.back() + h*( f11 + 2*f21 + 2*f31 + f41 )/6 );
+        dphi0.push_back( dphi0.back() + h*( f12 + 2*f22 + 2*f32 + f42 )/6 );
+
+        layer_int = layer_int + 0.5*h*phi0.back()*phi0.back();
+
+    }
+
+    return layer_int;
+}
+
+
+double Layer_an_exp(double omeg2, // sound frequency
+    double kh2,
+	double deltah,
+	double c,
+	unsigned Np,
+	std::vector<double> &phi0,
+	std::vector<double> &dphi0)
+{
+
+    double c1, c2, kv;
+    double h = deltah/Np;
+    double layer_int = 0.0;
+
+    kv = sqrt( kh2 - omeg2/(c*c) );
+    c1 = 0.5*(phi0.back() - dphi0.back()/kv);
+    c2 = 0.5*(phi0.back() + dphi0.back()/kv);
+    c2 = 0;
+
+
+/*
+    std::cout << "kv c1 c2" << std::endl;
+    std::cout << kv << std::endl;
+    std::cout << c1 << std::endl;
+    std::cout << c2 << std::endl;
+    std::cout << h << std::endl;
+    std::cout << "-----" << std::endl;
+    std::cout << phi0.back() << std::endl;
+    std::cout << dphi0.back()/kv << std::endl;
+*/
+    for (unsigned kk = 0; kk <Np; kk++) {
+
+        layer_int = layer_int + 0.5*h*phi0.back()*phi0.back();
+
+
+
+        phi0.push_back(     c1*exp( -kv*((kk+1)*h) )    +   c2*exp( kv*((kk+1)*h) )      ) ;
+        dphi0.push_back(    -c1*kv*exp( -kv*((kk+1)*h) )    +   c2*kv*exp( kv*((kk+1)*h) )  ) ;
+
+        layer_int = layer_int + 0.5*h*phi0.back()*phi0.back();
+        //std::cout << layer_int << std::endl;
+    }
+
+    return layer_int;
+}
+
+
+
+
+
+/*
+double Euler(double omeg2, // sound frequency
+    double kh2,
+	double deltah,
+	double c1,
+	double c2,
+	unsigned Np,
+	std::vector<double> &phi0,
+	std::vector<double> &dphi0)
+{
+
+    double f11,f12,f21,f22,f31,f32,f41,f42, cc;
+    double h = deltah/Np;
+    double layer_int = 0.0;
+
+    std::cout << "h value" << std::endl;
+    std::cout << h << std::endl;
+
+    for (unsigned kk = 0; kk <Np; kk++) {
+
+        layer_int = layer_int + 0.5*h*phi0.back()*phi0.back();
+
+        f11 = dphi0.back();
+        cc = c1 + (c2-c1)*kk*h/deltah;
+        cc = cc*cc;
+        f12 = (kh2 - omeg2/cc  )*phi0.back();
+
+        if (kk<2){
+            std::cout << "f11 f12 value" << std::endl;
+            std::cout << phi0.back() << std::endl;
+            std::cout << dphi0.back() << std::endl;
+            std::cout << f11 << std::endl;
+            std::cout << f12 << std::endl;
+            std::cout << phi0.back() + h*f11 << std::endl;
+            std::cout << dphi0.back() + h*f12 << std::endl;
+        }
+
+        phi0.push_back( phi0.back() + h*f11 );
+        dphi0.push_back( dphi0.back() + h*f12 );
+
+        layer_int = layer_int + 0.5*h*phi0.back()*phi0.back();
+
+    }
+
+    return layer_int;
+}
+*/
 
 sspemdd_sequential::sspemdd_sequential() :
 	object_function_type("weighted"),
@@ -55,6 +205,84 @@ the most "adequate" model.
 
 //tau_comment: tau is appended here as a new argument for residual computation
 
+void sspemdd_sequential::load_layers_data(
+    std::string LayersFName,
+	std::vector<double> &depths,
+	std::vector<double> &c1s,
+	std::vector<double> &c2s,
+	std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points)
+{
+    std::ifstream Myfile(LayersFName);
+    double d, c1,c2,rho;
+    unsigned nsp;
+
+    depths.clear();
+    c1s.clear();
+    c2s.clear();
+    rhos.clear();
+    Ns_points.clear();
+
+	while (!(Myfile.eof()))
+	{
+		Myfile >> d;
+		Myfile >> c1;
+		Myfile >> c2;
+		Myfile >> rho;
+		Myfile >> nsp;
+
+        depths.push_back(d);
+        c1s.push_back(c1);
+        c2s.push_back(c2);
+        rhos.push_back(rho);
+        Ns_points.push_back(nsp);
+
+	}
+	Myfile.close();
+
+}
+
+void sspemdd_sequential::load_profile_deep_water(
+    std::string ProfileFName,
+    unsigned ppm,
+	std::vector<double> &depths,
+	std::vector<double> &c1s,
+	std::vector<double> &c2s,
+	std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points)
+{
+    std::ifstream Myfile(ProfileFName);
+    double cp, cc, dc, dp;
+
+    Myfile >> dp;
+    Myfile >> cp;
+
+    unsigned npc;
+
+	while (!(Myfile.eof()))
+	{
+		Myfile >> dc;
+		Myfile >> cc;
+
+        depths.push_back(dc);
+        c1s.push_back(cp);
+        c2s.push_back(cc);
+        rhos.push_back(1);
+
+        npc = (unsigned)ppm*(dc - dp);
+        Ns_points.push_back(npc);
+
+        cp = cc;
+        dp = dc;
+
+	}
+	Myfile.close();
+
+
+}
+
+
+
 double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<double> &freqs,
 	std::vector<double> &depths,
 	std::vector<double> &c1s,
@@ -68,7 +296,7 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 	)
 {
 	unsigned rord = 3;
-	unsigned flTrappedOnly = 1;
+	double iModesSubset = -1.0;
 	double deltaf = 0.05;
 	double residual = 0;
 	unsigned mnumb;
@@ -79,7 +307,7 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 	std::vector<std::vector<double>> modal_group_velocities;
 	std::vector<unsigned> mode_numbers;
 
-	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, flTrappedOnly, rord, modal_group_velocities, mode_numbers);
+	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
 
 	for (unsigned ii = 0; ii<freqs.size(); ii++) {
 		//2016.04.27:Pavel: mnumb = std::min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
@@ -119,6 +347,73 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 	return residual;
 }
 
+// New version from 17.05.2017, group velocities computed using perturbative approach
+
+double sspemdd_sequential::compute_modal_delays_residual_uniform2(std::vector<double> &freqs,
+	std::vector<double> &depths,
+	std::vector<double> &c1s,
+	std::vector<double> &c2s,
+	std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points,
+	double R,
+	double tau,
+	std::vector<std::vector<double>> &experimental_delays,
+	std::vector<unsigned> &experimental_mode_numbers
+	)
+{
+	unsigned rord = 3;
+	double iModesSubset = 1/sqrt(2);
+	double deltaf = 0.05;
+	double residual = 0;
+	unsigned mnumb;
+	double mdelay;
+	//2016.04.27:Pavel: now we use RMS as the residual
+    unsigned nRes = 0;
+
+	std::vector<std::vector<double>> modal_group_velocities;
+	std::vector<unsigned> mode_numbers;
+
+	compute_modal_grop_velocities2(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
+
+	for (unsigned ii = 0; ii<freqs.size(); ii++) {
+		//2016.04.27:Pavel: mnumb = std::min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
+		mnumb = experimental_mode_numbers.at(ii);
+		for (unsigned jj = 0; jj<mnumb; jj++) {
+			if (experimental_delays[ii][jj]>0) {
+                nRes = nRes + 1;
+                //2016.04.27:Pavel:
+                if ( jj<mode_numbers.at(ii) ) {
+                    mdelay = R / modal_group_velocities[ii][jj];
+                }
+                else {
+                    mdelay = R / modal_group_velocities[ii][mode_numbers.at(ii)-1];
+                }
+				//tau_comment: this is the very place where it comes into play in the computation
+				//please check the search block!
+				residual = residual + pow(experimental_delays[ii][jj] + tau - mdelay, 2);
+			}
+		}
+	}
+    //2016.04.27:Pavel: RMS
+	residual = sqrt(residual/nRes);
+
+	/*std::ofstream ofile("R_mgv");
+	for (unsigned ii = 0; ii < freqs.size(); ii++) {
+		mnumb = mode_numbers.at(ii);
+		ofile << freqs.at(ii) << "\t";
+		for (unsigned jj = 0; jj < mnumb; jj++)
+			ofile << R / modal_group_velocities[ii][jj] << "\t";
+		ofile << std::endl;
+	}
+	ofile.close();*/
+
+	return residual;
+}
+
+
+
+
+
 //2016.12.31:Pavel: a residual functions where the "experimental" spectrogram modulud is taken as the weight coefficients
 //this is a simplest nonuniform residual function
 
@@ -136,7 +431,7 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(std::vector<do
 	)
 {
 	unsigned rord = 3;
-	unsigned flTrappedOnly = 1;
+	double iModesSubset = -1.0;
 	double deltaf = 0.05;
 	double residual = 0;
 	unsigned mnumb;
@@ -147,7 +442,7 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(std::vector<do
 	std::vector<std::vector<double>> modal_group_velocities;
 	std::vector<unsigned> mode_numbers;
 
-	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, flTrappedOnly, rord, modal_group_velocities, mode_numbers);
+	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
 
 	for (unsigned ii = 0; ii<freqs.size(); ii++) {
 		//2016.04.27:Pavel: mnumb = std::min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
@@ -215,7 +510,7 @@ int sspemdd_sequential::compute_wnumbers_bb(std::vector<double> &freqs,
 		out_wnum1.clear();
 		mgv_ii.clear();
 		omeg1 = 2 * LOCAL_M_PI*(freqs.at(ii) + deltaf / 2);
-		out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
+		out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s, c2s, rhos, Ns_points, -1.0, ordRich);
 		nwnum = (unsigned)out_wnum1.size();
 
 		for (unsigned jj = 0; jj < nwnum; jj++)
@@ -237,7 +532,7 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 	std::vector<double> &c2s,
 	std::vector<double> &rhos,
 	std::vector<unsigned> &Ns_points,
-	unsigned flOnlyTrapped,
+	double iModesSubset,
 	unsigned &ordRich,
 	std::vector<std::vector<double>> &modal_group_velocities,
 	std::vector<unsigned> &mode_numbers
@@ -258,7 +553,7 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 		out_wnum2.clear();
 		mgv_ii.clear();
 		omeg1 = 2 * LOCAL_M_PI*(freqs.at(ii) + deltaf);
-		out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
+		out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s, c2s, rhos, Ns_points, -1.0, ordRich);
 		nwnum = (unsigned)out_wnum1.size();
 
 		/*
@@ -271,7 +566,7 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 		*/
 
 		omeg2 = 2 * LOCAL_M_PI*(freqs.at(ii));
-		out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
+		out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2, depths, c1s, c2s, rhos, Ns_points, -1.0, ordRich);
 		//nwnum = std::min(nwnum, (unsigned)out_wnum2.size());
         nwnum = (unsigned)out_wnum2.size();
 
@@ -286,6 +581,602 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 
 	return 0;
 }
+
+
+int sspemdd_sequential::compute_modal_grop_velocities2(std::vector<double> &freqs,
+	double deltaf,
+	std::vector<double> &depths,
+	std::vector<double> &c1s,
+	std::vector<double> &c2s,
+	std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points,
+	double iModesSubset,
+	unsigned &ordRich,
+	std::vector<std::vector<double>> &modal_group_velocities,
+	std::vector<unsigned> &mode_numbers
+)
+{
+	mode_numbers.clear();
+	modal_group_velocities.clear();
+
+	std::vector<double> out_wnum;
+
+	std::vector<double> mgv_ii, phi, dphi;
+	unsigned nwnum;
+	unsigned nfr = (unsigned)freqs.size();
+	double omeg, vgc;
+
+	for (unsigned ii = 0; ii<nfr; ii++) {
+		out_wnum.clear();
+
+		mgv_ii.clear();
+		omeg = 2 * LOCAL_M_PI*freqs.at(ii);
+		out_wnum = compute_wnumbers_extrap2(omeg, depths, c1s, c2s, rhos, Ns_points, iModesSubset , ordRich);
+		nwnum = (unsigned)out_wnum.size();
+
+		for (unsigned jj = 0; jj < nwnum; jj++)
+		{
+
+			    compute_wmode1(omeg, depths, c1s, c2s, rhos, Ns_points, out_wnum.at(jj), phi, dphi);
+
+                vgc = compute_wmode_vg(omeg, depths, c1s, c2s, rhos, Ns_points, out_wnum.at(jj), phi);
+                mgv_ii.push_back( vgc );
+		}
+
+		modal_group_velocities.push_back(mgv_ii);
+		mode_numbers.push_back(nwnum);
+	}
+
+	return 0;
+}
+
+
+
+
+/*
+
+compute_mfunctions_zr() computs the mode functions corresponding to the media parameters described by
+the arrays [depths,c1s,c2s,rhos,Ns_points] for a given set of the wavenumbers (e.g. obtained from the function
+compute_wnumbers_extrap() ). The functions are computed at the receiver depths from the array "zr". The values in zr are assumed to be
+sorted in ascending order
+
+*/
+void sspemdd_sequential::compute_mfunctions_zr(double &omeg, // sound frequency
+	std::vector<double> &depths,
+	std::vector<double> &c1s,
+	std::vector<double> &c2s,
+	std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points,
+	std::vector<double> &khs,
+	std::vector<double> &zr,
+	std::vector<std::vector<double>> &mfunctions_zr)
+	{
+        std::vector<double> phi;
+        std::vector<double> dphi;
+
+        std::vector<unsigned> i_zr;
+        std::vector<double> t_zr;
+
+
+        std::vector<double> z, phim_zr;
+
+        double zp;
+        unsigned cur_layer = 0;
+        unsigned cur_points = 0;
+        unsigned nzr = zr.size();
+        unsigned i_inside_l = 0;
+
+
+
+    mfunctions_zr.clear();
+
+    zp = 0;
+
+    for (unsigned jj=0; jj<nzr; jj++ ){
+
+        while ( depths.at(cur_layer)< zr.at(jj) ) {
+            cur_points = cur_points + Ns_points.at(cur_layer);
+            zp = depths.at(cur_layer);
+            cur_layer = cur_layer + 1;
+        }
+
+        i_inside_l = (unsigned) ( (zr.at(jj) - zp)*Ns_points.at(cur_layer)/( depths.at(cur_layer) - zp ) );
+        i_inside_l = std::min(i_inside_l , Ns_points.at(cur_layer) );
+        i_zr.push_back( cur_points + i_inside_l );
+        t_zr.push_back( (zr.at(jj) - zp)*Ns_points.at(cur_layer)/( depths.at(cur_layer) - zp ) - i_inside_l );
+
+
+
+        // For non-ordered set of zr!!!! Slows the interpolation down!
+        cur_layer = 0;
+        cur_points = 0;
+    }
+
+
+    for (unsigned ii = 0; ii < khs.size(); ii++) {
+		double kh = khs.at(ii);
+		compute_wmode1(omeg, depths, c1s, c2s, rhos, Ns_points, kh, phi, dphi);
+
+        phim_zr.clear();
+		for (unsigned jj=0; jj<nzr; jj++ ) {
+
+            phim_zr.push_back(  (1-t_zr.at(jj))*phi.at( i_zr.at(jj)) + t_zr.at(jj)*phi.at(i_zr.at(jj)+1)   );
+
+		}
+
+        mfunctions_zr.push_back( phim_zr );
+	}
+
+//    //mfunctions output to a file
+//    std::ofstream ofile("mfunctionszr.txt");
+//
+//    for (unsigned jj = 0; jj < nzr; jj++) {
+//			ofile << zr.at(jj) << " ";
+//	}
+//	ofile << std::endl;
+//
+//	for (unsigned ii = 0; ii < khs.size(); ii++) {
+//		for (unsigned jj = 0; jj < nzr; jj++)
+//			ofile << mfunctions_zr[ii][jj] << " ";
+//		ofile << std::endl;
+//	}
+//	ofile.close();
+
+
+	}
+
+std::vector<std::complex<double>> sspemdd_sequential::compute_cpl_pressure(double f,
+	std::vector<double> &depths,
+	std::vector<double> &c1s,
+	std::vector<double> &c2s,
+	std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points,
+	std::vector<double> &Rr,
+	std::vector<double> &zr,
+    double iModesSubset,
+	unsigned ordRich)
+	{
+
+        std::vector<std::vector<double>> modefunctions;
+        std::vector<double> khs;
+        std::vector<std::complex<double>> PHelm;
+
+
+        double omeg = 2 * LOCAL_M_PI*f;
+        double kh, R;
+        unsigned nzr = zr.size();
+        std::complex<double> Prc;
+
+
+        khs = compute_wnumbers_extrap_lin_dz(omeg, depths, c1s, c2s, rhos, Ns_points, iModesSubset, ordRich);
+
+        unsigned nmod = khs.size();
+
+
+//        // TEST
+//        std::cout << nmod << " modes " << std::endl;
+//
+//        // TEST
+//        //for (unsigned qq=0; qq<nmod; qq++){
+//        for (unsigned qq=0; qq<20; qq++){
+//
+//            std::cout  << " kh" << qq <<" = " << khs.at(qq) << std::endl;
+//
+//        }
+
+
+        if (nmod>0) {
+
+
+
+            compute_mfunctions_zr(omeg, depths, c1s, c2s, rhos, Ns_points, khs,zr, modefunctions);
+
+//            // TEST
+//            for (unsigned ss=0; ss<20; ss++){
+//            //for (unsigned ss=0; ss<nmod; ss++){
+//
+//                    std::cout  << " mf" << ss << " = " << modefunctions.at(ss).at(0) << std::endl;
+//
+//            }
+
+
+            //PHelm(1:nr) = PHelm(1:nr) + psiz*psizs*(1i*exp(-1i*pi/4)./sqrt(8*pi*R) ).*exp(1i*wnum(mm)*R)/sqrt(wnum(mm));
+
+            //modefunctions -- vector of vectors, that represent the values of certain mode at all zr
+            for (unsigned ii = 1; ii < nzr; ii++) {
+                Prc = std::complex<double>(0.0,0.0);
+                R = Rr.at(ii);
+
+                for (unsigned jj = 0; jj < nmod; jj++) {
+                    //PHelm.back() = PHelm.back() +
+
+                    /*
+                    //TEST
+                    std::cout << "phi1zr=" << modefunctions.at(jj).at(ii) << std::endl;
+                    std::cout << "phi1zs=" << modefunctions.at(jj).at(0) << std::endl;
+                    std::cout << "R=" << R << std::endl;
+                    std::cout << "k=" << khs.at(jj) << std::endl;
+                    std::cout << "exp=" << exp( Iu*khs.at(jj)*R ) << std::endl;
+                    */
+
+                    Prc = Prc + exp( Iu*khs.at(jj)*R )*modefunctions.at(jj).at(ii)*modefunctions.at(jj).at(0)/sqrt(khs.at(jj));
+                }
+                Prc = Iu*exp(-Iu*LOCAL_M_PI/4.0)*Prc/sqrt(8*LOCAL_M_PI*R);
+                PHelm.push_back( Prc );
+            }
+
+        } else {
+            // TEST
+            std::cout << 0 << " modes " << std::endl;
+
+            Prc = std::complex<double>(0.0,0.0);
+            for (unsigned ii = 1; ii < nzr; ii++) {
+                PHelm.push_back( Prc );
+            }
+        }
+
+
+        return PHelm;
+
+	}
+
+
+
+/*
+
+compute_all_mfunctions() computs the mode functions corresponding to the media parameters described by
+the arrays [depths,c1s,c2s,rhos,Ns_points] for a given set of the wavenumbers (e.g. obtained from the function
+compute_wnumbers_extrap() ). The functions are written to the file "mfunctions.txt" line-by-line, the first line contains
+the values of depth
+
+*/
+void sspemdd_sequential::compute_all_mfunctions(double &omeg, // sound frequency
+	std::vector<double> &depths,
+	std::vector<double> &c1s,
+	std::vector<double> &c2s,
+	std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points,
+	std::vector<double> &khs)
+	{
+        std::vector<double> phi;
+        std::vector<double> dphi;
+
+        std::vector<double> z;
+        double h,z0;
+
+
+    std::ofstream ofile("mfunctions.txt");
+
+
+
+	for (unsigned ii = 0; ii < depths.size(); ii++) {
+
+		if (ii>0){
+            h = (depths.at(ii) - depths.at(ii-1))/Ns_points.at(ii);
+            z0 = depths.at(ii-1);
+		}
+		else {
+		    h = (depths.at(ii))/Ns_points.at(ii);
+		    z0 = 0;
+		}
+
+		for (unsigned jj = 0; jj < Ns_points.at(ii); jj++){
+            z.push_back( z0 + h*jj );
+            ofile << z.back() << " ";
+		}
+	}
+	z.push_back( depths.back() );
+	ofile << z.back() << std::endl;
+    ofile << std::endl;
+
+	for (unsigned i = 0; i < khs.size(); i++) {
+		double kh = khs[i];
+		compute_wmode1(omeg, depths, c1s, c2s, rhos, Ns_points, kh, phi, dphi);
+		for (unsigned j = 0; j < phi.size(); j++)
+			ofile << phi[j] << " ";
+		ofile << std::endl;
+	}
+	ofile.close();
+
+
+	}
+
+
+/*
+
+compute_wmode() computs the mode function "phi" and its derivative "dphi" for media parameters described by
+the arrays [depths,c1s,c2s,rhos,Ns_points] and for a given horizontal wavenumber "kh". The functions are normalized in
+the standard way (using inverse density as a weight function). The Runge-Kutta (4th order) scheme is used for solving the
+ODE in the matrix formulation. Due to the round-off errors it is unstable in the bottom for the discrete spectrum modes, as
+the ODE is stiff there (solution involves a decaying exponential).
+
+*/
+
+void sspemdd_sequential::compute_wmode(double &omeg, // sound frequency
+	std::vector<double> &depths,
+	std::vector<double> &c1s,
+	std::vector<double> &c2s,
+	std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points,
+	double kh,
+	std::vector<double> &phi,
+	std::vector<double> &dphi)
+{
+    double deltah;
+    double phi2int =0;
+    double layer_int =0;
+
+    phi.clear();
+    dphi.clear();
+
+    phi.push_back(0.0);
+    dphi.push_back(1.0);
+
+
+    unsigned n_layers = (unsigned)depths.size();
+
+    for (unsigned ll=0; ll<n_layers; ll++) {
+
+        if (ll == 0 ){ deltah = depths.at(0);}
+        else {
+            deltah = depths.at(ll) - depths.at(ll-1);
+            dphi.back() = rhos.at(ll)*dphi.back()/rhos.at(ll-1);
+        }
+
+        if ((ll==n_layers-1) && ( omeg/c1s.at(ll) < kh  )) {
+            // in the bottom layer where the mode functions exhibits decay use
+            layer_int = Layer_an_exp(omeg*omeg, kh*kh, deltah, c1s.at(ll), Ns_points.at(ll) , phi, dphi);
+        } else {
+            // use the Runge-Kutta 4th order scheme in regular layers
+            layer_int = RK4(omeg*omeg, kh*kh, deltah, c1s.at(ll), c2s.at(ll), Ns_points.at(ll) , phi, dphi);
+        }
+
+        phi2int = phi2int + layer_int/rhos.at(ll);
+
+        // TEST
+        //std::cout << layer_int << std::endl;
+        // TEST
+    }
+
+    double phiNorm = sqrt(phi2int);
+    unsigned nz = (unsigned)phi.size();
+
+    // TEST
+
+    //std::cout << phi2int << std::endl;
+    //std::cout << phiNorm << std::endl;
+    // TEST
+
+    for (unsigned ll = 0; ll < nz; ll++ ) {
+        phi.at(ll) = phi.at(ll)/phiNorm;
+        dphi.at(ll) = dphi.at(ll)/phiNorm;
+    }
+
+}
+
+/*
+
+compute_wmode1() computs the mode function "phi" and its derivative "dphi" for media parameters described by
+the arrays [depths,c1s,c2s,rhos,Ns_points] and for a given horizontal wavenumber "kh". The functions are normalized in
+the standard way (using inverse density as a weight function). The Runge-Kutta (4th order) scheme is used for solving the
+ODE in the matrix formulation.
+
+The parallel shooting is used in this version. For the discrete spectrum modes (refracted-refracted modes). We find the last layer L
+(from the bottom) where k(z) <  kh  (hence we have the decaying exponent). Starting from the bottom layer we solve the ODE to L-1 th layer
+going in the negative direction of z axis. Then we match the solutions coming from the top and the bottom.
+
+*/
+
+void sspemdd_sequential::compute_wmode1(double &omeg, // sound frequency
+	std::vector<double> &depths,
+	std::vector<double> &c1s,
+	std::vector<double> &c2s,
+	std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points,
+	double kh,
+	std::vector<double> &phi,
+	std::vector<double> &dphi)
+{
+    double deltah,phiNorm;
+    double phi2int =0.0;
+    double bphi2int =0.0;
+
+    double layer_int =0.0;
+
+    std::vector<double> bphi, bdphi;
+
+    phi.clear();
+    dphi.clear();
+
+    phi.push_back(0.0);
+    dphi.push_back(1.0);
+
+
+
+
+    unsigned n_layers = (unsigned)depths.size();
+    unsigned L = n_layers;
+
+    while ((  kh > omeg/( std::min( c1s.at(L-1), c2s.at(L-1) ) )  ) && (L>1) ) {
+        L = L - 1;
+    }
+
+
+
+    // shooting from the surface
+    for (unsigned ll=0; ll<L; ll++) {
+
+        if (ll == 0 ){ deltah = depths.at(0);}
+        else {
+            deltah = depths.at(ll) - depths.at(ll-1);
+            dphi.back() = rhos.at(ll)*dphi.back()/rhos.at(ll-1);
+        }
+
+        layer_int = RK4(omeg*omeg, kh*kh, deltah, c1s.at(ll), c2s.at(ll), Ns_points.at(ll) , phi, dphi);
+
+        phi2int = phi2int + layer_int/rhos.at(ll);
+
+        //TEST --> overflow problem
+        if (phi2int >  1.0e+50) {
+            for (unsigned qq=0; qq<phi.size(); qq++) {
+                phi.at(qq) = phi.at(qq)/(1.0e+20);
+                dphi.at(qq) = dphi.at(qq)/(1.0e+20);
+            }
+            phi2int = phi2int/(1.0e+40);
+        }
+
+    }
+
+    // shooting from the bottom
+
+    if (L < n_layers){
+
+        bphi.push_back(0.0);
+        bdphi.push_back(1.0);
+
+        for (unsigned ll=n_layers-1; ll>=L; ll--) {
+
+            deltah = depths.at(ll) - depths.at(ll-1);
+
+            layer_int = RK4(omeg*omeg, kh*kh, deltah, c2s.at(ll), c1s.at(ll), Ns_points.at(ll) , bphi, bdphi);
+            bphi2int = bphi2int + layer_int/rhos.at(ll);
+
+
+//            //TEST
+//            std::cout  << "ll="<< ll <<" bphi2int " << bphi2int  << std::endl;
+//            std::cout  << "ll="<< ll <<" layer_int " << layer_int  << std::endl;
+//            std::cout  << "ll="<< ll <<" deltah " << deltah  << std::endl;
+//            std::cout  << "ll="<< ll <<" kh " << kh  << std::endl;
+//            std::cout  << "ll="<< ll <<" c2 " << c2s.at(ll)  << std::endl;
+//            std::cout  << "ll="<< ll <<" c1 " << c1s.at(ll)  << std::endl;
+//            std::cout  << "ll="<< ll <<" nsp " << Ns_points.at(ll)  << std::endl;
+//            std::cout  << "ll="<< ll <<" nsp-1 " << Ns_points.at(ll-1)  << std::endl;
+//            std::cout  << "ll="<< ll <<" nsp-2 " << Ns_points.at(ll-2)  << std::endl;
+//            for (unsigned qq=0; qq<bphi.size(); qq++  ){
+//                std::cout  << "qq="<< qq <<" bphi " << bphi.at(qq) <<" bdphi " << bdphi.at(qq)  << std::endl;
+//            }
+
+            bdphi.back() = rhos.at(ll-1)*bdphi.back()/rhos.at(ll);
+
+            //TEST --> overflow problem
+            if (bphi2int >  1.0e+50) {
+
+                for (unsigned qq=0; qq<bphi.size(); qq++) {
+                    bphi.at(qq) = bphi.at(qq)/(1.0e+20);
+                    bdphi.at(qq) = bdphi.at(qq)/(1.0e+20);
+                }
+                bphi2int = bphi2int/(1.0e+40);
+            }
+
+        }
+
+        // matching the shooting solutions
+
+        double cmatching = phi.back()/bphi.back();
+
+
+
+        for (int ll = bphi.size()-2; ll>=0; ll-- ){
+
+            phi.push_back( cmatching*bphi.at(ll) );
+            dphi.push_back( cmatching*bdphi.at(ll) );
+
+
+        }
+
+        cmatching = cmatching*cmatching;
+        phiNorm = sqrt(phi2int + bphi2int*cmatching);
+
+    } else {
+
+        phiNorm = sqrt(phi2int);
+
+    }
+//    //TEST
+//    std::cout  << " phiNorm " << phiNorm  << std::endl;
+//    std::cout  << " phi2int " << phi2int  << std::endl;
+//    std::cout  << " bphi2int " << bphi2int  << std::endl;
+//    std::cout  << " cmatching " << phi.back()/bphi.back()  << std::endl;
+//    std::cout  << " L " << L  << std::endl;
+//    std::cout  << " n_layers " << n_layers  << std::endl;
+//
+//    throw std::invalid_argument("Ururu");
+
+//        // TEST
+//        for (unsigned qq=0; qq<nmod; qq++){
+//
+//            std::cout  << " kh" << qq <<" = " << khs.at(qq) << std::endl;
+//
+//        }
+
+
+    unsigned nz = (unsigned)phi.size();
+
+
+
+    for (unsigned ll = 0; ll < nz; ll++ ) {
+        phi.at(ll) = phi.at(ll)/phiNorm;
+        dphi.at(ll) = dphi.at(ll)/phiNorm;
+    }
+
+}
+
+
+
+double sspemdd_sequential::compute_wmode_vg(double &omeg, // sound frequency
+	std::vector<double> &depths,
+	std::vector<double> &c1s,
+	std::vector<double> &c2s,
+	std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points,
+	double kh,
+	std::vector<double> &phi)
+{
+    double deltah, h, cc, termc, vg;
+    double vg_int =0.0;
+    double layer_int;
+    unsigned Np, nc;
+
+    unsigned n_layers = (unsigned)depths.size();
+
+    nc = 0;
+
+    for (unsigned ll=0; ll<n_layers; ll++) {
+
+        if (ll == 0 ){ deltah = depths.at(0);}
+        else {
+            deltah = depths.at(ll) - depths.at(ll-1);
+        }
+
+        Np = Ns_points.at(ll);
+        h = deltah/Np;
+
+        cc = c1s.at(ll);
+        layer_int = 0.0;
+
+        termc = phi.at(nc)*phi.at(nc)/( cc*cc);
+
+        for (unsigned jj = 0; jj < Np; jj++){
+            layer_int = layer_int + termc;
+            nc = nc + 1;
+            cc = c1s.at(ll) + ( c2s.at(ll)-c1s.at(ll) )*(jj+1)*h/deltah;
+            termc = phi.at(nc)*phi.at(nc)/( cc*cc );
+            layer_int = layer_int + termc;
+        }
+
+        layer_int = 0.5*layer_int*h/rhos.at(ll);
+
+        vg_int = vg_int + layer_int;
+
+
+    }
+
+    vg = 1/( omeg*vg_int/kh );
+
+    return vg;
+}
+
+
 
 /*
 General considerations:
@@ -302,7 +1193,7 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, //
 	std::vector<double> &c2s,
 	std::vector<double> &rhos,
 	std::vector<unsigned> &Ns_points,
-	unsigned flOnlyTrapped,
+	double iModesSubset,
 	unsigned &ordRich)
 	/*  subroutine for computing wavenumbers for a given waveguide structure
 	the computation is performed by the FD method for certain meshsize,
@@ -320,7 +1211,7 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, //
 
 	Other parameters:
 	omeg -- cyclic frequency, omeg = 2*Pi*f;
-	flOnlyTrapped -- flag to determine the mode subset: set to 0 to compute all propagating modes, i.e. such that k^2>=0, otherwise only trapped modes are computed
+	iModesSubset -- controls the subset of the modes computed: iModesSubset <0 -> trapped modes only; 0<=iModesSubset<1 -> a subset of modes with wavenumbers within [iModesSubset*kmax kmax], in particular iModesSubset = 0 computes all propagating modes
 	ordRich -- order of the Richardson extrapolation;
 
 	the top of the first layer is z=0
@@ -358,7 +1249,7 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, //
 	double zc = 0;
 	double zp = 0;
 	double dz = 0;
-	unsigned m_wnum = 1000;
+	unsigned m_wnum = 100000;
 
 	unsigned n_layers = (unsigned)depths.size();
 	unsigned n_points_total = 0;
@@ -400,7 +1291,7 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, //
 
 		//cout << "rr=" << rr << endl;
 
-		out_wnum2 = compute_wnumbers(omeg, input_c, input_rho, input_interf_idcs, input_mesh, flOnlyTrapped);
+		out_wnum2 = compute_wnumbers(omeg, input_c, input_rho, input_interf_idcs, input_mesh, iModesSubset);
 		m_wnum = std::min(m_wnum, (unsigned)out_wnum2.size());
 
 		if (rr == 1) { wnum_extrapR.assign(m_wnum, 0); }
@@ -423,13 +1314,151 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, //
 	return wnum_extrapR;
 }
 
+
+
+std::vector<double> sspemdd_sequential::compute_wnumbers_extrap2(double &omeg, // sound frequency
+	std::vector<double> &depths,
+	std::vector<double> &c1s,
+	std::vector<double> &c2s,
+	std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points,
+	double iModesSubset,
+	unsigned &ordRich)
+	/*
+	14.05.17 Pavel
+	subroutine for computing wavenumbers for a given waveguide structure
+	the computation is performed by the FD method for certain meshsize,
+	Richardson extrapolation is used to improve the accuracy
+
+    This version features the meshes with 1 x, 2 x, 4 x, 8 x Ns_points numbers of points
+
+	Layer structure:
+
+	depths_{i-1}----c=c1s_i--
+	*
+	*
+	... <-Ns_points_i       rho = rhos_i
+	*
+	*
+	depths_{i}------c=c2s_i--
+
+	Other parameters:
+	omeg -- cyclic frequency, omeg = 2*Pi*f;
+	iModesSubset -- controls the subset of the modes computed: iModesSubset <0 -> trapped modes only; 0<=iModesSubset<1 -> a subset of modes with wavenumbers within [iModesSubset*kmax kmax], in particular iModesSubset = 0 computes all propagating modes
+	ordRich -- order of the Richardson extrapolation;
+
+	the top of the first layer is z=0
+	*/
+{
+	std::vector<double> coeff_extrap;
+	switch (ordRich) {
+	case 1:
+		coeff_extrap.assign({ 1 });
+		break;
+	case 2:
+		coeff_extrap.assign({ -0.333333333333333, 1.333333333333333});
+		break;
+	case 4:
+		coeff_extrap.assign({ -0.000352733686067, 0.029629629629630, -0.474074074074074, 1.444797178130511 });
+		break;
+	default:
+		ordRich = 3;
+		coeff_extrap.assign({ 0.022222222222222, -0.444444444444444, 1.422222222222222 });
+		break;
+	}
+	//
+	//    cout << "Richardson coeffs" << endl;
+	//    for (unsigned ii=0; ii<coeff_extrap.size() ; ii++ ){
+	//        cout << coeff_extrap.at(ii) << endl;
+	//    }
+
+	std::vector<double> input_c;
+	std::vector<double> input_rho;
+	std::vector<double> input_mesh;
+	std::vector<unsigned> input_interf_idcs;
+	std::vector<double> out_wnum2;
+	std::vector<double> wnum_extrapR;
+	double zc = 0;
+	double zp = 0;
+	double dz = 0;
+	unsigned m_wnum = 100000;
+
+	unsigned n_layers = (unsigned)depths.size();
+	unsigned n_points_total = 0;
+	unsigned n_points_layer = 0;
+
+    unsigned r_mult = 1; //Richardson factor for the number of points
+	// outer loop for Richardson coefficient rr
+	for (unsigned rr = 1; rr <= ordRich; rr++){
+		input_c.clear();
+		input_rho.clear();
+		input_interf_idcs.clear();
+		input_mesh.clear();
+		out_wnum2.clear();
+
+		input_c.push_back(0);
+		input_rho.push_back(0);
+		n_points_total = 1;
+		zp = 0;
+
+		for (unsigned ll = 0; ll<n_layers; ll++){
+			zc = depths.at(ll);
+			n_points_layer = Ns_points.at(ll)*r_mult;
+			dz = (zc - zp) / (n_points_layer);
+			input_mesh.push_back(dz);
+			input_c.at(n_points_total - 1) = c1s.at(ll);
+			input_rho.at(n_points_total - 1) = rhos.at(ll);
+
+			n_points_total = n_points_total + n_points_layer;
+
+			for (unsigned kk = 1; kk <= n_points_layer; kk++) {
+				input_rho.push_back(rhos.at(ll));
+				input_c.push_back(c1s.at(ll) + (c2s.at(ll) - c1s.at(ll))*kk / n_points_layer);
+			}
+
+			if (ll < n_layers - 1) {
+				input_interf_idcs.push_back(n_points_total - 1);
+			}
+			zp = zc;
+		}
+
+		//cout << "rr=" << rr << endl;
+
+		out_wnum2 = compute_wnumbers(omeg, input_c, input_rho, input_interf_idcs, input_mesh, iModesSubset);
+		m_wnum = std::min(m_wnum, (unsigned)out_wnum2.size());
+
+		if (rr == 1) { wnum_extrapR.assign(m_wnum, 0); }
+
+		for (unsigned mm = 0; mm<m_wnum; mm++) {
+			wnum_extrapR.at(mm) = wnum_extrapR.at(mm) + out_wnum2.at(mm)*coeff_extrap.at(rr - 1);
+		}
+
+		r_mult = r_mult*2;
+
+		/*
+		for (unsigned ii=0; ii<out_wnum2.size();  ii++) {
+		cout << ii << "->" << sqrt(out_wnum2.at(ii)) << endl;
+		}
+		*/
+	}
+
+	for (unsigned mm = 0; mm<m_wnum; mm++) {
+		wnum_extrapR.at(mm) = sqrt(wnum_extrapR.at(mm));
+	}
+
+	return wnum_extrapR;
+}
+
+
+
+
 std::vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &omeg, // sound frequency
 	std::vector<double> &depths,
 	std::vector<double> &c1s,
 	std::vector<double> &c2s,
 	std::vector<double> &rhos,
 	std::vector<unsigned> &Ns_points,
-	unsigned flOnlyTrapped,
+	double iModesSubset,
 	unsigned &ordRich)
 	/*  subroutine for computing wavenumbers for a given waveguide structure
 	the computation is performed by the FD method for certain meshsize,
@@ -447,7 +1476,7 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &o
 
 	Other parameters:
 	omeg -- cyclic frequency, omeg = 2*Pi*f;
-	flOnlyTrapped -- flag to determine the mode subset: set to 0 to compute all propagating modes, i.e. such that k^2>=0, otherwise only trapped modes are computed
+	iModesSubset -- controls the subset of the modes computed: iModesSubset <0 -> trapped modes only; 0<=iModesSubset<1 -> a subset of modes with wavenumbers within [iModesSubset*kmax kmax], in particular iModesSubset = 0 computes all propagating modes
 	ordRich -- order of the Richardson extrapolation;
 
 	the top of the first layer is z=0
@@ -462,7 +1491,8 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &o
 	double zc = 0;
 	double zp = 0;
 	double dz = 0;
-	unsigned m_wnum = 1000;
+	unsigned m_wnum = 100000;
+
 
 	unsigned n_layers = (unsigned)depths.size();
 	unsigned n_points_total = 0;
@@ -490,7 +1520,9 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &o
 	// number of points in each layer is multiple of 12
 	// this allows us to use nz_ii = nz/ii, ii = 1,2,3,4
 	for (unsigned ii = 0; ii < n_layers; ii++){
-		Ns_points.at(ii) = 12 * (Ns_points.at(ii) / 12);
+        if ( Ns_points.at(ii) % 12 > 0 ){
+            Ns_points.at(ii) = 12 * (1+(Ns_points.at(ii)/12));
+        }
 	}
 
 	//    cout << "Richardson coeffs" << endl;
@@ -537,7 +1569,7 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &o
 
 		//        cout << "rr=" << rr << endl;
 
-		out_wnum2 = compute_wnumbers(omeg, input_c, input_rho, input_interf_idcs, input_mesh, flOnlyTrapped);
+		out_wnum2 = compute_wnumbers(omeg, input_c, input_rho, input_interf_idcs, input_mesh, iModesSubset);
 		m_wnum = std::min(m_wnum, (unsigned)out_wnum2.size());
 
 		if (rr == 1) { wnum_extrapR.assign(m_wnum, 0); }
@@ -564,8 +1596,8 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 	std::vector<double> &rho,
 	std::vector<unsigned> &interface_idcs,
 	std::vector<double> &meshsizes,
-	unsigned flOnlyTrapped                 // set flOnlyTrapped = 0 to compute all propagating modes, i.e. such that k^2>=0
-	)
+	double iModesSubset                 // set iModesSubset <0 -> trapped modes only; 0<=iModesSubset<1 -> a subset of modes with wavenumbers
+	)                                   // within [iModesSubset*kmax kmax], in particular iModesSubset = 0 computes all propagating modes
 {
 	// prepare the three diagonals of the matrix to be passed to the EIG function
 	// for the c = c_j, j=0... N_points
@@ -612,8 +1644,19 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 	kappamax = omeg / cmin;
 	kappamin = omeg / cmax;
 
-	if (flOnlyTrapped == 0)
-		kappamin = 0;
+	if (iModesSubset >= 0) {
+
+        if (iModesSubset < 1) {
+            kappamin = iModesSubset*kappamax;
+        }
+        else {
+            throw std::invalid_argument("Invalid iModeSubset: use either -1 or a value from [0 1)");
+        }
+
+	}
+
+
+
 
 	for (int ii = 0; ii < N_points - 2; ii++){
 		// ordinary point
@@ -630,9 +1673,10 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 			dp = rho.at(ii + 1);
 			cm = c.at(ii);
 			dm = rho.at(ii);
-			q = 1 / (dz_next*dm + dz*dp);
+
 
 			dz_next = meshsizes.at(layer_number);
+            q = 1 / (dz_next*dm + dz*dp);  // Поменять местами с предыдущей строкой??
 
 			ld.at(ii) = 2 * q*dp / dz;
 			md.at(ii) = -2 * q*(dz_next*dp + dz*dm) / (dz*dz_next) + omeg*omeg*q*(dz*dp*cp*cp + dz_next*dm*cm*cm) / (cp*cp*cm*cm);
@@ -670,18 +1714,19 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 	}
 	main_diag[N_points - 3] = md.at(N_points - 3);
 
-	//    ofstream myFile("thematrixdiags.txt");
-	//    for (int ii=0; ii<N_points-2; ii++){
-	//        myFile << std::fixed << std::setprecision(16) << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
-	//    }
-	//    myFile.close();
+/* TEST: the sparse matrix diagonals output
+	    std::ofstream myFile("thematrixdiags.txt");
+	    for (int ii=0; ii<N_points-2; ii++){
+	        myFile << std::fixed  << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << std::endl;
+	    }
+	    myFile.close();
 
-	//    ofstream myFile1("thematrixdiags_sym.txt");
-	//    for (int ii=0; ii<N_points-3; ii++){
-	//        myFile1 << std::fixed << std::setprecision(16) << main_diag[ii] << "  " << second_diag[ii] << endl;
-	//    }
-	//    myFile1.close();
-
+	    std::ofstream myFile1("thematrixdiags_sym.txt");
+	    for (int ii=0; ii<N_points-3; ii++){
+	        myFile1 << std::fixed  << main_diag[ii] << "  " << second_diag[ii] << std::endl;
+	    }
+	    myFile1.close();
+*/
 	alglib::smatrixtdevdr(main_diag, second_diag, N_points - 2, 0, kappamin*kappamin, kappamax*kappamax, eigen_count, eigenvectors);
 
 	for (int ii = 0; ii<eigen_count; ii++) {
@@ -804,7 +1849,7 @@ double sspemdd_sequential::fill_data_compute_residual( search_space_point &point
 		std::cerr << "unknown object_function_type " << object_function_type << std::endl;
 		exit(1);
 	}
-	
+
 	if (point.residual < record_point.residual) {
 		record_point.residual = point.residual;
 		record_point.cb       = point.cb;
@@ -839,11 +1884,11 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 	// search_space_variables[4...] - cws
 	std::vector<double> tmp_vec;
 	search_space.clear();
-	
+
 	record_point.cws.resize(n_layers_w);
 	for (unsigned long long i = 0; i < record_point.cws.size(); i++)
 		record_point.cws[i] = cw1_arr[i];
-	
+
 	// fill search_space_variables[0] with cb
 	tmp_vec.resize(ncb);
 	for (unsigned long long i = 0; i < ncb; i++)
@@ -875,7 +1920,7 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 			tmp_vec[j] = cw1_arr[i] + (ncpl_arr[i] == 1 ? 0 : j*(cw2_arr[i] - cw1_arr[i]) / (ncpl_arr[i] - 1));
 		search_space.push_back(tmp_vec);
 	}
-	
+
 	if (!rank)
 		std::cout << "loadValuesToSearchSpaceVariables() finished" << std::endl;
 }
@@ -899,11 +1944,11 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 	global_record_point_indexes = record_point_indexes;
 
 	// launch hill climbing for variables
-	
+
 	checked_points.reserve(N_total);
 	unsigned skipped_points = 0;
 	bool isRecordUpdateInDimension;
-	
+
 	for (unsigned run_index = 0; run_index < iterated_local_search_runs; run_index++) {
 		bool isLocalMin;
 		std::cout << "iteration " << run_index << " of ILS" << std::endl;
@@ -987,7 +2032,7 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 		std::cout << "skipped_points " << skipped_points << std::endl;
 		std::cout << "---" << std::endl;
 	}
-	
+
 	// during optimization record_point is a local minimum, finaly it's the global minimum
 	record_point = global_record_point;
 }
@@ -1169,7 +2214,7 @@ void sspemdd_sequential::readScenario(std::string scenarioFileName)
 }
 
 void sspemdd_sequential::readInputDataFromFiles()
-{	
+{
 	std::ifstream dtimesFile(dtimesFileName.c_str());
 	if (!dtimesFile.is_open()) {
 		std::cerr << "dtimesFile " << dtimesFileName << " wasn't opened" << std::endl;
@@ -1197,7 +2242,7 @@ void sspemdd_sequential::readInputDataFromFiles()
 		myLineStream.str(""); myLineStream.clear();
 	}
 	dtimesFile.close();
-	
+
 	weight_coeffs.clear();
 	std::ifstream spmagFile(spmagFileName.c_str());
 	if (spmagFile.is_open()) {
