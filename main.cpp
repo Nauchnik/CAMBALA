@@ -33,8 +33,9 @@ int main(int argc, char **argv)
 
 #ifdef _DEBUG
 	argc = 2;
-	argv[1] = "test_hydro_r_uniform260_3layers.txt";
+	//argv[1] = "test_hydro_r_uniform260_3layers.txt";
 	//argv[1] = "41_hydro_r_uniform260.txt";
+	argv[1] = "true_scenario_2.txt";
 	argv[2] = "1"; // iterated_local_search_runs
 	verbosity = 2;
 #endif

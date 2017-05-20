@@ -1,0 +1,19 @@
+% true values
+% inverting for bottom and R,
+% sound speed in water is considered known
+% constant parameters
+dtimes_file 260_dtimes.txt
+spmag_file(string|no) no
+h 50
+H 300
+% variable parameters
+cw0 1500
+cw1 1499
+cw2 1495
+cw3 1487
+cw4 1468
+cw5 1462
+R 7000
+rhob 1.7
+cb 1700
+tau 0
