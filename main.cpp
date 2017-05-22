@@ -69,9 +69,9 @@ int main(int argc, char **argv)
 	sspemdd_seq.readInputDataFromFiles();
 	sspemdd_seq.init();
 	
-	sspemdd_seq.ILSGPU(100);
+	//sspemdd_seq.ILSGPU(1);
 	//sspemdd_seq.findGlobalMinBruteForce();
-	//sspemdd_seq.findLocalMinHillClimbing();
+	sspemdd_seq.findLocalMinHillClimbing();
 	sspemdd_seq.report_final_result();
 
 	t2 = std::chrono::high_resolution_clock::now();

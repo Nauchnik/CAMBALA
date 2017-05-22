@@ -3,6 +3,12 @@
 #include <iostream>
 #include <time.h>
 
+void EvalPointGPU( Point &point,
+		const std::vector<double> &freqs_d,
+		const std::vector<unsigned> &Ns_points_d,
+		const std::vector<double> &depths_d,
+		const std::vector<std::vector<double>> &modal_delays);
+
 sspemdd_sequential::sspemdd_sequential()
 	: object_function_type("weighted"), h(0), H(0), ncb(1), nrhob(1), nR(41), ntau(1), cb1(2000.0),
 	  cb2(2000.0), R1(3400.0), R2(3600.0), tau1(0.0), tau2(0.0), rhob1(2.0), rhob2(2.0),
@@ -825,9 +831,12 @@ double sspemdd_sequential::fill_data_compute_residual(Point &point)
 	// tau_comment: added tau to function call
 	if (object_function_type == "uniform")
 	{
+		/*
 		point.residual = compute_modal_delays_residual_uniform(
 				freqs, depths, c1s, c2s, rhos, Ns_points, point.R,
 				point.tau, modal_delays, mode_numbers);
+				*/
+		EvalPointGPU(point, freqs, Ns_points, depths, modal_delays);
 	}
 	else if (object_function_type == "weighted")
 	{
@@ -918,6 +927,9 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 		std::cout << "loadValuesToSearchSpaceVariables() finished" << std::endl;
 }
 
+
+
+
 void sspemdd_sequential::findLocalMinHillClimbing()
 {
 	std::cout << "findLocalMinHillClimbing" << std::endl;
@@ -942,6 +954,7 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 	unsigned skipped_points = 0;
 	bool isRecordUpdateInDimension;
 
+	int point_counter = 0;
 	for (unsigned run_index = 0; run_index < iterated_local_search_runs; run_index++)
 	{
 		bool isLocalMin;
@@ -987,6 +1000,7 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 						continue;
 					}
 					fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
+					++point_counter;
 					checked_points.push_back(cur_point);
 					if (record_point.residual < old_record_residual)
 					{ // new record was found
@@ -1033,6 +1047,7 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 
 		cur_point = fromPointIndexesToPoint(cur_point_indexes);
 		fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
+		++point_counter;
 		record_point = cur_point;
 		record_point_indexes = cur_point_indexes;
 
@@ -1040,6 +1055,7 @@ void sspemdd_sequential::findLocalMinHillClimbing()
 		std::cout << "skipped_points " << skipped_points << std::endl;
 		std::cout << "---" << std::endl;
 	}
+	std::cout << "point_counter " << point_counter << std::endl;
 
 	// during optimization record_point is a local minimum, finaly it's the global minimum
 	record_point = global_record_point;
