@@ -2,6 +2,7 @@
 #define SSPEMDD_SEQUENTIAL_H
 
 #include <vector>
+#include <complex>
 #include <fstream>
 #include <algorithm>
 #include <chrono>
@@ -9,6 +10,7 @@
 #include "linalg.h"
 
 const double LOCAL_M_PI = 3.14159265358979323846;
+const std::complex<double> Iu(0.0,1.0);
 const double START_HUGE_VALUE = 1e100;
 const unsigned M_WNUM_DEFAULT = 10000;
 
@@ -95,10 +97,26 @@ public:
 
 	// functions by Pavel
 	//tau_comment: added tau to the arguments of compute_modal_delays_residual_uniform()
-	double compute_modal_delays_residual_uniform(std::vector<double> &freqs, std::vector<double> &depths, 
-		std::vector<double> &c1s, std::vector<double> &c2s, std::vector<double> &rhos, 
-		std::vector<unsigned> &Ns_points, double R, double tau, 
+
+    void load_layers_data(std::string LayersFName,
+	std::vector<double> &depths,std::vector<double> &c1s,std::vector<double> &c2s,std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points);
+
+
+	void load_profile_deep_water(std::string ProfileFName,unsigned ppm,
+	std::vector<double> &depths,std::vector<double> &c1s,std::vector<double> &c2s,std::vector<double> &rhos,
+	std::vector<unsigned> &Ns_points);
+
+	double compute_modal_delays_residual_uniform(std::vector<double> &freqs, std::vector<double> &depths,
+		std::vector<double> &c1s, std::vector<double> &c2s, std::vector<double> &rhos,
+		std::vector<unsigned> &Ns_points, double R, double tau,
 		std::vector<std::vector<double>> &experimental_delays, std::vector<unsigned> &experimental_mode_numbers);
+
+    double compute_modal_delays_residual_uniform2(std::vector<double> &freqs, std::vector<double> &depths,
+		std::vector<double> &c1s, std::vector<double> &c2s, std::vector<double> &rhos,
+		std::vector<unsigned> &Ns_points, double R, double tau,
+		std::vector<std::vector<double>> &experimental_delays, std::vector<unsigned> &experimental_mode_numbers);
+
 
 	double compute_modal_delays_residual_weighted(std::vector<double> &freqs,
 		std::vector<double> &depths, std::vector<double> &c1s, std::vector<double> &c2s,
@@ -109,19 +127,50 @@ public:
 
 	std::vector<double> compute_wnumbers(double &omeg, std::vector<double> &c, std::vector<double> &rho,
 		std::vector<unsigned> &interface_idcs, std::vector<double> &meshsizes,
-		unsigned flOnlyTrapped);
+		double iModesSubset);
 
 	std::vector<double> compute_wnumbers_extrap(double &omeg, std::vector<double> &depths, std::vector<double> &c1s,
 		std::vector<double> &c2s, std::vector<double> &rhos,
-		std::vector<unsigned> &Ns_points, unsigned flOnlyTrapped, unsigned &ordRich);
+		std::vector<unsigned> &Ns_points, double iModesSubset, unsigned &ordRich);
+
+    std::vector<double> compute_wnumbers_extrap2(double &omeg, std::vector<double> &depths, std::vector<double> &c1s,
+		std::vector<double> &c2s, std::vector<double> &rhos,
+		std::vector<unsigned> &Ns_points, double iModesSubset, unsigned &ordRich);
 
 	std::vector<double> compute_wnumbers_extrap_lin_dz(double &omeg, std::vector<double> &depths, std::vector<double> &c1s,
 		std::vector<double> &c2s, std::vector<double> &rhos,
-		std::vector<unsigned> &Ns_points, unsigned flOnlyTrapped, unsigned &ordRich);
+		std::vector<unsigned> &Ns_points, double iModesSubset, unsigned &ordRich);
+
+    void compute_wmode(double &omeg, std::vector<double> &depths, std::vector<double> &c1s,
+        std::vector<double> &c2s,std::vector<double> &rhos,std::vector<unsigned> &Ns_points, double kh,	std::vector<double> &phi,
+	std::vector<double> &dphi);
+
+    void compute_wmode1(double &omeg, std::vector<double> &depths, std::vector<double> &c1s,
+        std::vector<double> &c2s,std::vector<double> &rhos,std::vector<unsigned> &Ns_points, double kh,	std::vector<double> &phi,
+	std::vector<double> &dphi);
+
+
+	std::vector<std::complex<double>> compute_cpl_pressure(double f, std::vector<double> &depths, std::vector<double> &c1s,
+	std::vector<double> &c2s, std::vector<double> &rhos, std::vector<unsigned> &Ns_points, std::vector<double> &Rr,
+	std::vector<double> &zr, double iModesSubset, unsigned ordRich);
+
+	void compute_all_mfunctions(double &omeg, std::vector<double> &depths, std::vector<double> &c1s,
+	std::vector<double> &c2s, std::vector<double> &rhos, std::vector<unsigned> &Ns_points, std::vector<double> &khs);
+
+	void compute_mfunctions_zr(double &omeg, std::vector<double> &depths, std::vector<double> &c1s, std::vector<double> &c2s,
+	std::vector<double> &rhos, std::vector<unsigned> &Ns_points, std::vector<double> &khs, std::vector<double> &zr, std::vector<std::vector<double>> &mfunctions_zr);
+
+	double compute_wmode_vg(double &omeg, std::vector<double> &depths, std::vector<double> &c1s, std::vector<double> &c2s,
+    std::vector<double> &rhos, std::vector<unsigned> &Ns_points, double kh, std::vector<double> &phi);
 
 	int compute_modal_grop_velocities(std::vector<double> &freqs, double deltaf, std::vector<double> &depths, std::vector<double> &c1s,
 		std::vector<double> &c2s, std::vector<double> &rhos, std::vector<unsigned> &Ns_points,
-		unsigned flOnlyTrapped, unsigned &ordRich, std::vector<std::vector<double>> &modal_group_velocities,
+		double iModesSubset, unsigned &ordRich, std::vector<std::vector<double>> &modal_group_velocities,
+		std::vector<unsigned> &mode_numbers);
+
+    int compute_modal_grop_velocities2(std::vector<double> &freqs, double deltaf, std::vector<double> &depths, std::vector<double> &c1s,
+		std::vector<double> &c2s, std::vector<double> &rhos, std::vector<unsigned> &Ns_points,
+		double iModesSubset, unsigned &ordRich, std::vector<std::vector<double>> &modal_group_velocities,
 		std::vector<unsigned> &mode_numbers);
 
 	int compute_wnumbers_bb(std::vector<double> &freqs, double deltaf, std::vector<double> &depths, std::vector<double> &c1s,
