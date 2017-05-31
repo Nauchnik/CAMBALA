@@ -33,8 +33,11 @@ int main(int argc, char **argv)
 
 #ifdef _DEBUG
 	argc = 2;
-	argv[1] = "13_hydro_R_uniform.txt";
-	argv[2] = "10"; // iterated_local_search_runs
+	//argv[1] = "test_hydro_r_uniform260_3layers.txt";
+	//argv[1] = "41_hydro_r_uniform260.txt";
+	argv[1] = "true_scenario_2.txt";
+	argv[2] = "1"; // iterated_local_search_runs
+	verbosity = 2;
 #endif
 	
 	if (argc >= 2)
@@ -67,11 +70,17 @@ int main(int argc, char **argv)
 	// read scenario, modal_delays, mode_numbers and freqs, then determine the search space
 	sspemdd_seq.readScenario(scenarioFileName);
 	sspemdd_seq.readInputDataFromFiles();
-	sspemdd_seq.init();
+	std::vector<std::vector<double>> depths_vec;
+	sspemdd_seq.createDepthsArray(depths_vec);
 	
-	//sspemdd_seq.findGlobalMinBruteForce();
-	sspemdd_seq.findLocalMinHillClimbing();
-	sspemdd_seq.report_final_result();
+	for (unsigned i = 0; i < depths_vec.size(); i++) {
+		sspemdd_seq.init(depths_vec[i]);
+		//sspemdd_seq.findGlobalMinBruteForce(depths_vec[i]);
+		sspemdd_seq.findLocalMinHillClimbing(depths_vec[i]);
+		std::cout << "Processed " << i + 1 << " out of " << depths_vec.size() << " depths" << std::endl;
+	}
+
+	sspemdd_seq.reportFinalResult();
 
 	t2 = std::chrono::high_resolution_clock::now();
 	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
@@ -80,7 +89,7 @@ int main(int argc, char **argv)
 #else
 	int rank = 0;
 	int corecount = 1;
-	
+
 	// parallel mode
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &corecount);

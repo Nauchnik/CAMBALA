@@ -6,11 +6,13 @@
 #include <fstream>
 #include <algorithm>
 #include <chrono>
+#include <math.h>
 #include "linalg.h"
 
 const double LOCAL_M_PI = 3.14159265358979323846;
 const std::complex<double> Iu(0.0,1.0);
 const double START_HUGE_VALUE = 1e100;
+const unsigned M_WNUM_DEFAULT = 10000;
 
 struct search_space_point
 {
@@ -20,11 +22,21 @@ struct search_space_point
 	double cb;
 	std::vector<double> cws;
 	double residual;
-
+	std::vector<double> depths;
+	
 	bool operator==(const search_space_point& a) const
 	{
-		return (R == a.R && tau == a.tau && rhob == a.rhob && cb == a.cb && cws == a.cws);
+		return (R == a.R && tau == a.tau && rhob == a.rhob && cb == a.cb && cws == a.cws && depths == a.depths);
 	}
+};
+
+struct reduced_search_space_attribute
+{
+	bool R;
+	bool tau;
+	bool rhob;
+	bool cb;
+	std::vector<bool> cws;
 };
 
 class sspemdd_sequential
@@ -41,6 +53,9 @@ public:
 	double cb2;
 	std::vector<double> cw1_arr;
 	std::vector<double> cw2_arr;
+	std::vector<double> d1_arr;
+	std::vector<double> d2_arr;
+	std::vector<double> d_step;
 	std::vector<unsigned long long> ncpl_arr;
 	std::string object_function_type;
 	double R1;
@@ -54,7 +69,6 @@ public:
 	std::vector<unsigned> mode_numbers;
 	std::vector<std::vector<double>> modal_delays;
 	std::vector<double> freqs;
-	std::vector<double> depths;
 	std::vector<double> c1s;
 	std::vector<double> c2s;
 	std::vector<double> rhos;
@@ -67,16 +81,19 @@ public:
 
 	// functions by Oleg
 	std::vector<std::vector<double>> search_space; // values of variables which form a search space
-	void readScenario(std::string scenarioFileName);
-	void readInputDataFromFiles();
-	void init();
+	int readScenario(std::string scenarioFileName);
+	int readInputDataFromFiles();
+	int init(std::vector<double> depths);
+	int createDepthsArray(std::vector<std::vector<double>> &depths_vec);
 	double getRecordResidual();
-	double fill_data_compute_residual(search_space_point &point);
-	void findGlobalMinBruteForce();
+	double fillDataComputeResidual(search_space_point &point );
+	std::vector<search_space_point> getSearchSpacePointsVec();
+	void findGlobalMinBruteForce(std::vector<double> depths);
 	void loadValuesToSearchSpaceVariables();
-	void findLocalMinHillClimbing();
-	void report_final_result();
+	void findLocalMinHillClimbing(std::vector<double> depths);
+	void reportFinalResult();
 	void getThreeValuesFromStr(std::string str, double &val1, double &val2, double &val3);
+	void reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a);
 
 	// functions by Pavel
 	//tau_comment: added tau to the arguments of compute_modal_delays_residual_uniform()
