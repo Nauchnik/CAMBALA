@@ -234,7 +234,7 @@ void sspemdd_parallel::computing_process()
 		if (rank == 1)
 			std::cout << "received task_index " << task_index << std::endl;
 		
-		fill_data_compute_residual(cur_point); // calculated residual is written to cur_point
+		fillDataComputeResidual(cur_point); // calculated residual is written to cur_point
 
 		cur_process_points_sstream << cur_point.cb << " " 
 			                       << cur_point.rhob << " "

@@ -12,7 +12,6 @@
 const double LOCAL_M_PI = 3.14159265358979323846;
 const std::complex<double> Iu(0.0,1.0);
 const double START_HUGE_VALUE = 1e100;
-const unsigned M_WNUM_DEFAULT = 10000;
 
 struct search_space_point
 {

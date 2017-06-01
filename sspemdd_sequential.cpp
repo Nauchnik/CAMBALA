@@ -1257,7 +1257,6 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, //
 	unsigned n_layers = (unsigned)depths.size();
 	unsigned n_points_total = 0;
 	unsigned n_points_layer = 0;
-	unsigned m_wnum = M_WNUM_DEFAULT;
 
 	// outer loop for Richardson coefficient rr
 	for (unsigned rr = 1; rr <= ordRich; rr++){
@@ -1499,7 +1498,6 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &o
 	unsigned n_layers = (unsigned)depths.size();
 	unsigned n_points_total = 0;
 	unsigned n_points_layer = 0;
-	unsigned m_wnum = M_WNUM_DEFAULT;
 
 	std::vector<double> coeff_extrap;
 	switch (ordRich) {
