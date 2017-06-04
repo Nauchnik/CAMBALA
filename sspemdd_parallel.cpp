@@ -20,12 +20,12 @@ sspemdd_parallel::sspemdd_parallel() :
 sspemdd_parallel::~sspemdd_parallel()
 {}
 
-void sspemdd_parallel::MPI_main()
+void sspemdd_parallel::MPI_main(std::vector<double> depths)
 {
 	if (rank == 0)
 		control_process();
 	else if (rank > 0)
-		computing_process();
+		computing_process(depths);
 }
 
 void sspemdd_parallel::control_process()
@@ -179,7 +179,7 @@ void sspemdd_parallel::control_process()
 #endif
 }
 
-void sspemdd_parallel::computing_process()
+void sspemdd_parallel::computing_process(std::vector<double> depths)
 {
 #ifdef _MPI
 	MPI_Status status;
@@ -201,9 +201,8 @@ void sspemdd_parallel::computing_process()
 	std::stringstream cur_process_points_sstream;
 
 	cur_process_points_sstream << "cb rhob R tau ";
-	for (unsigned i = 0; i < cw1_arr.size(); i++) {
+	for (unsigned i = 0; i < cw1_arr.size(); i++)
 		cur_process_points_sstream << "cw" << i << " ";
-	}
 	cur_process_points_sstream << "residual";
 	cur_process_points_sstream << std::endl;
 	
@@ -229,6 +228,7 @@ void sspemdd_parallel::computing_process()
 		task_index = task[task_len - 1];
 		//std::cout << "3" << std::endl;
 		cur_point = fromDoubleVecToPoint(cur_point_values_vec);
+		cur_point.depths = depths;
 		//std::cout << "4" << std::endl;
 		
 		if (rank == 1)
@@ -236,27 +236,27 @@ void sspemdd_parallel::computing_process()
 		
 		fillDataComputeResidual(cur_point); // calculated residual is written to cur_point
 
-		cur_process_points_sstream << cur_point.cb << " " 
+		result[0] = cur_point.residual;
+		result[1] = task_index;
+		MPI_Send(result, result_len, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+
+		/*cur_process_points_sstream << cur_point.cb << " " 
 			                       << cur_point.rhob << " "
 								   << cur_point.R << " "
 								   << cur_point.tau << " ";
 		for (unsigned i = 0; i < cur_point.cws.size(); i++)
 			cur_process_points_sstream << cur_point.cws[i] << " ";
 		cur_process_points_sstream << cur_point.residual;
-		cur_process_points_sstream << std::endl;
-		
-		result[0] = cur_point.residual;
-		result[1] = task_index;
-		MPI_Send(result, result_len, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+		cur_process_points_sstream << std::endl;*/
 	}
 	delete[] task;
 	delete[] result;
 
-	std::stringstream cur_process_file_name_sstream;
+	/*std::stringstream cur_process_file_name_sstream;
 	cur_process_file_name_sstream << "points_process" << rank;
 	std::ofstream cur_process_file(cur_process_file_name_sstream.str().c_str());
 	cur_process_file << cur_process_points_sstream.rdbuf();
-	cur_process_file.close();
+	cur_process_file.close();*/
 
 	MPI_Finalize();
 

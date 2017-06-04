@@ -34,8 +34,8 @@ int main(int argc, char **argv)
 #ifdef _DEBUG
 	argc = 2;
 	//argv[1] = "test_hydro_r_uniform260_3layers.txt";
-	//argv[1] = "41_hydro_r_uniform260.txt";
-	argv[1] = "true_scenario_2.txt";
+	argv[1] = "39_hydro_r_uniform260.txt";
+	//argv[1] = "true_scenario_2.txt";
 	argv[2] = "1"; // iterated_local_search_runs
 	verbosity = 2;
 #endif
@@ -106,10 +106,10 @@ int main(int argc, char **argv)
 	sspemdd_par.readScenario(scenarioFileName);
 	sspemdd_par.readInputDataFromFiles();
 	sspemdd_par.createDepthsArray(depths_vec);
-	sspemdd_par.init(depths_vec[0]);
 	
 	double cur_time = MPI_Wtime();
-	sspemdd_par.MPI_main();
+	sspemdd_par.init(depths_vec[0]);
+	sspemdd_par.MPI_main(depths_vec[0]);
 	std::cout << "MPI_main() total time " << MPI_Wtime() - cur_time << " s" << std::endl;
 #endif
 	

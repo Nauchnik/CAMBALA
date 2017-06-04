@@ -1942,19 +1942,20 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 		std::cerr << "depths.size() == 0" << std::endl;
 		exit(-1);
 	}
-
-	//for (unsigned jj = 0; jj <= n_layers_w; jj++)
-	//	std::cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << std::endl;
-	//std::cout << residual << std::endl << std::endl;
-	//tau_comment: added tau to function call
-	std::cout << "depths : ";
-	for (auto &x : depths)
-		std::cout << x << " ";
-	std::cout << std::endl;
-	std::cout << "Ns_points : ";
-	for (auto &x : Ns_points)
-		std::cout << x << " ";
-	std::cout << std::endl;
+	
+	if (verbosity > 0) {
+		/*for (unsigned jj = 0; jj <= n_layers_w; jj++)
+			std::cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << std::endl;
+		std::cout << residual << std::endl << std::endl;*/
+		std::cout << "depths : ";
+		for (auto &x : depths)
+			std::cout << x << " ";
+		std::cout << std::endl;
+		std::cout << "Ns_points : ";
+		for (auto &x : Ns_points)
+			std::cout << x << " ";
+		std::cout << std::endl;
+	}
 
 	if (object_function_type == "uniform") {
 		point.residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points,
@@ -1971,11 +1972,11 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 
 	if ( verbosity > 0 ) {
 		std::cout << "point.residual " << point.residual << std::endl;
-    std::cout << "Ns_points : ";
-	  for (auto &x : Ns_points)
-		  std::cout << x << " ";
-	  std::cout << std::endl;
-  }
+		std::cout << "Ns_points : ";
+		  for (auto &x : Ns_points)
+			  std::cout << x << " ";
+		  std::cout << std::endl;
+	}
 	
 	if (point.residual < record_point.residual) {
 		record_point = point;
