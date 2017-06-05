@@ -17,23 +17,27 @@
 #include <algorithm>
 #include <cmath>
 
+using namespace std;
+
 int main()
 {
-	std::string scenarioFileName = "test_scenario.txt";
-	std::vector<double> freqs = { 20, 30, 40, 50, 60, 70 };
+	string scenarioFileName = "test_scenario.txt";
+	vector<double> freqs = { 20, 30, 40, 50, 60, 70 };
+	vector<vector<double>> depths_vec;
 
 	sspemdd_sequential sspemdd;
 	sspemdd.verbosity = 0;
 	sspemdd.readScenario(scenarioFileName);
-	sspemdd.init();
+	sspemdd.createDepthsArray(depths_vec);
+	sspemdd.init(depths_vec[0]);
 
-	std::vector<double> depths = sspemdd.depths;
-	std::vector<double> c1s = sspemdd.c1s;
-	std::vector<double> c2s = sspemdd.c2s;
-	std::vector<double> rhos = sspemdd.rhos;
-	std::vector<unsigned> Ns_points = sspemdd.Ns_points;
+	vector<double> depths = depths_vec[0];
+	vector<double> c1s = sspemdd.c1s;
+	vector<double> c2s = sspemdd.c2s;
+	vector<double> rhos = sspemdd.rhos;
+	vector<unsigned> Ns_points = sspemdd.Ns_points;
 	unsigned long long n_layers_w = sspemdd.n_layers_w;
-	std::vector<double> cws = sspemdd.cw1_arr;
+	vector<double> cws = sspemdd.cw1_arr;
 	double cb = sspemdd.cb1;
 	double rhob = sspemdd.rhob1;
 
@@ -50,18 +54,18 @@ int main()
 	rhos.at(n_layers_w) = rhob;
 	double deltaf = 0.05; // ???
 	unsigned int ordRich = 1; // ???
-	std::vector<double> result_vec;
-	std::ofstream ofile("output.txt");
+	vector<double> result_vec;
+	ofstream ofile("output.txt");
 	for (unsigned i = 0; i < freqs.size(); i++) {
 		double omeg1 = 2 * LOCAL_M_PI*(freqs[i] + deltaf / 2);
 		result_vec = sspemdd.compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s, c2s, rhos, Ns_points, 1, ordRich);
 		for (unsigned j = 0; j < result_vec.size(); j++)
 			ofile << result_vec[j] << " ";
-		ofile << std::endl;
+		ofile << endl;
 	}
 	ofile.close();
 	
-	std::cout << "test passed" << std::endl;
+	cout << "test passed" << endl;
 	
 	return 0;
 }
