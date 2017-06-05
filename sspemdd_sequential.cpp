@@ -1958,7 +1958,7 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 	}
 
 	if (object_function_type == "uniform") {
-		point.residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points,
+		point.residual = compute_modal_delays_residual_uniform2(freqs, depths, c1s, c2s, rhos, Ns_points,
 			point.R, point.tau, modal_delays, mode_numbers);
 	}
 	else if (object_function_type == "weighted") {
