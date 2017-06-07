@@ -1758,7 +1758,7 @@ int sspemdd_sequential::init(std::vector<double> depths)
 	for (auto &x : rhos)
 		x = 1;
 	Ns_points.resize(n_layers_w + 1);
-	unsigned ppm = 2;
+	unsigned ppm = 1;
 	Ns_points[0] = (unsigned)round(ppm*depths[0]);
 	for (unsigned i=1; i < depths.size(); i++ )
 		Ns_points[i] = (unsigned)round(ppm*(depths[i] - depths[i-1]));
