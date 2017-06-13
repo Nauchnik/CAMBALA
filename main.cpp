@@ -73,7 +73,8 @@ int main(int argc, char **argv)
 	sspemdd_seq.readScenario(scenarioFileName);
 	sspemdd_seq.readInputDataFromFiles();
 	sspemdd_seq.createDepthsArray(depths_vec);
-	
+
+	depths_vec.resize(5);
 	for (unsigned i = 0; i < depths_vec.size(); i++) {
 		sspemdd_seq.init(depths_vec[i]);
 		//sspemdd_seq.findGlobalMinBruteForce(depths_vec[i]);
