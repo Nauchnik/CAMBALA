@@ -246,3 +246,4 @@ Release x64/260_dtimes.txt
 *.ipdb
 Release x64/SSPEMDD.tlog/CL.command.1.tlog
 *.tlog
+Release x64/out
