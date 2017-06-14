@@ -93,6 +93,7 @@ public:
 	void reportFinalResult();
 	void getThreeValuesFromStr(std::string str, double &val1, double &val2, double &val3);
 	void reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a);
+	void updateGlobalMin();
 
 	// functions by Pavel
 	//tau_comment: added tau to the arguments of compute_modal_delays_residual_uniform()
@@ -180,6 +181,7 @@ public:
 protected:
 	unsigned long long N_total;
 	search_space_point record_point;
+	search_space_point global_record_point;
 	std::chrono::high_resolution_clock::time_point start_chrono_time;
 	// hill climbing
 	search_space_point fromPointIndexesToPoint( std::vector<unsigned> cur_point_indexes );

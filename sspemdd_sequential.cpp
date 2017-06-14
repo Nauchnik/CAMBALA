@@ -180,6 +180,7 @@ sspemdd_sequential::sspemdd_sequential() :
 	record_point.R        = START_HUGE_VALUE;
 	record_point.tau      = START_HUGE_VALUE;
 	record_point.residual = START_HUGE_VALUE;
+	global_record_point.residual = START_HUGE_VALUE;
 	srand((unsigned)time(NULL));
 	start_chrono_time = std::chrono::high_resolution_clock::now();
 }
@@ -2058,24 +2059,24 @@ void sspemdd_sequential::findLocalMinHillClimbing(std::vector<double> depths)
 {
 	std::cout << "findLocalMinHillClimbing" << std::endl;
 	// choose random point in the search space
-	std::vector<unsigned> cur_point_indexes, record_point_indexes, global_record_point_indexes;
-	search_space_point cur_point, global_record_point;
+	std::vector<unsigned> cur_point_indexes, record_point_indexes;
+	search_space_point cur_point;
 	cur_point_indexes.resize(search_space.size());
 	for (unsigned i = 0; i < search_space.size(); i++) // i stands for variable_index
 		cur_point_indexes[i] = rand() % search_space[i].size(); // get random index
+
 	// calculate residual in the start point
 	cur_point = fromPointIndexesToPoint( cur_point_indexes );
 	cur_point.depths = depths;
 	fillDataComputeResidual( cur_point ); // calculated residual is written to cur_point
-	global_record_point = cur_point;
-	global_record_point_indexes = cur_point_indexes;
-
-	// launch hill climbing for variables
-
+	record_point = cur_point;
+	record_point_indexes = cur_point_indexes;
 	checked_points.reserve(N_total);
+	checked_points.push_back(record_point);
 	unsigned skipped_points = 0;
 	bool isRecordUpdateInDimension;
-
+	
+	// launch iterations of hill climbing
 	for (unsigned run_index = 0; run_index < iterated_local_search_runs; run_index++) {
 		bool isLocalMin;
 		std::cout << "iteration " << run_index << " of ILS" << std::endl;
@@ -2122,15 +2123,6 @@ void sspemdd_sequential::findLocalMinHillClimbing(std::vector<double> depths)
 			}
 		} while (!isLocalMin);
 
-		//std::cout << "record_point.residual " << record_point.residual << std::endl;
-		//std::cout << "global_record_point.residual " << global_record_point.residual << std::endl;
-		if ( record_point.residual < global_record_point.residual ) {
-			global_record_point = record_point;
-			global_record_point_indexes = record_point_indexes;
-			std::cout << "on run_index " << run_index << " new global minimum with residual "
-				      << global_record_point.residual << std::endl;
-		}
-
 		//std::cout << std::endl << "*** local minimum in hill climbing" << std::endl;
 		//std::cout << "local record of residual " << record_point.residual << std::endl;
 		//std::cout << "-----" << std::endl;
@@ -2145,7 +2137,7 @@ void sspemdd_sequential::findLocalMinHillClimbing(std::vector<double> depths)
 			}
 			unsigned rand_numb = rand();
 			if (rand_numb % 3 == 0)
-				cur_point_indexes[i] = global_record_point_indexes[i];
+				cur_point_indexes[i] = record_point_indexes[i];
 			else
 				cur_point_indexes[i] = (rand_numb % search_space[i].size());
 			std::cout << cur_point_indexes[i] << " ";
@@ -2165,6 +2157,20 @@ void sspemdd_sequential::findLocalMinHillClimbing(std::vector<double> depths)
 
 	// during optimization record_point is a local minimum, finaly it's the global minimum
 	record_point = global_record_point;
+}
+
+void sspemdd_sequential::updateGlobalMin()
+{
+	if (verbosity > 1) {
+		std::cout << "updateGlobalMin()" << std::endl;
+		std::cout << "record_point.residual " << record_point.residual << std::endl;
+		std::cout << "global_record_point.residual " << global_record_point.residual << std::endl;
+	}
+	if (record_point.residual < global_record_point.residual) {
+		global_record_point = record_point;
+		std::cout << " *** new global minimum with residual "
+			<< global_record_point.residual << std::endl;
+	}
 }
 
 search_space_point sspemdd_sequential::fromPointIndexesToPoint(std::vector<unsigned> cur_point_indexes)
