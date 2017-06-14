@@ -74,11 +74,12 @@ int main(int argc, char **argv)
 	sspemdd_seq.readInputDataFromFiles();
 	sspemdd_seq.createDepthsArray(depths_vec);
 
-	depths_vec.resize(5);
+	depths_vec.resize(2);
 	for (unsigned i = 0; i < depths_vec.size(); i++) {
 		sspemdd_seq.init(depths_vec[i]);
 		//sspemdd_seq.findGlobalMinBruteForce(depths_vec[i]);
 		sspemdd_seq.findLocalMinHillClimbing(depths_vec[i]);
+		sspemdd_seq.updateGlobalMin();
 		std::cout << "Processed " << i + 1 << " out of " << depths_vec.size() << " depths" << std::endl;
 	}
 
