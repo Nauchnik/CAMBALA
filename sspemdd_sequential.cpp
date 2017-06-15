@@ -1780,12 +1780,6 @@ int sspemdd_sequential::init(std::vector<double> depths)
 	if ( (!rank) && (verbosity > 0) )
 		std::cout << "init() finished" << std::endl;
 
-	record_point.cb = START_HUGE_VALUE;
-	record_point.rhob = START_HUGE_VALUE;
-	record_point.R = START_HUGE_VALUE;
-	record_point.tau = START_HUGE_VALUE;
-	record_point.residual = START_HUGE_VALUE;
-
 	return 0;
 }
 
@@ -2074,7 +2068,7 @@ void sspemdd_sequential::findLocalMinHillClimbing(std::vector<double> depths)
 	for (unsigned i = 0; i < search_space.size(); i++) // i stands for variable_index
 		if (search_space[i].size() > 1)
 			isCheckRequired = true;
-	if (!isCheckRequired) {
+	if ( (!isCheckRequired) && (verbosity > 0) ) {
 		std::cout << "1 element in search space, fast exit" << std::endl;
 		return;
 	}
