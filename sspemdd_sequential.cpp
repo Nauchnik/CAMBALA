@@ -1802,7 +1802,7 @@ int sspemdd_sequential::createDepthsArray(std::vector<std::vector<double>> &dept
 			for (;;) {
 				search_space_depths[i].push_back(cur_val);
 				cur_val -= d_step[i];
-				if (cur_val <= d1_arr[i])
+				if (cur_val < d1_arr[i])
 					break;
 			}
 		}
@@ -1818,7 +1818,7 @@ int sspemdd_sequential::createDepthsArray(std::vector<std::vector<double>> &dept
 			for (unsigned i = 1; i < tmp_depths.size(); i++) {
 				if (tmp_depths[i] >= cur_treshold) {
 					depths.push_back(tmp_depths[i]);
-					cur_treshold = tmp_depths[i] + 3;
+					cur_treshold = tmp_depths[i] + 2;
 				}
 			}
 			it = find(depths_vec.begin(), depths_vec.end(), depths);

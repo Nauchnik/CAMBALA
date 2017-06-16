@@ -33,7 +33,8 @@ int main(int argc, char **argv)
 
 #ifdef _DEBUG
 	argc = 2;
-	argv[1] = "test_hydro_r_uniform260_3layers.txt";
+	//argv[1] = "test_hydro_r_uniform260_3layers.txt";
+	argv[1] = "test_hydro_r_uniform260_4layers_ssp.txt";
 	//argv[1] = "39_hydro_r_uniform260.txt";
 	//argv[1] = "true_scenario_2.txt";
 	argv[2] = "1"; // iterated_local_search_runs
@@ -73,6 +74,14 @@ int main(int argc, char **argv)
 	sspemdd_seq.readScenario(scenarioFileName);
 	sspemdd_seq.readInputDataFromFiles();
 	sspemdd_seq.createDepthsArray(depths_vec);
+
+	ofstream depths_file("depths.txt");
+	depths_file << depths_vec.size() << " depths for the scenario " << scenarioFileName << endl;
+	for (auto &x : depths_vec) {
+		for (auto &y : x)
+			depths_file << y << " ";
+		depths_file << endl;
+	}
 
 	for (unsigned i = 0; i < depths_vec.size(); i++) {
 		sspemdd_seq.init(depths_vec[i]);
