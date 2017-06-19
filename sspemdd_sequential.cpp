@@ -1943,7 +1943,7 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 		exit(-1);
 	}
 	
-	if (verbosity > 0) {
+	if (verbosity > 1) {
 		/*for (unsigned jj = 0; jj <= n_layers_w; jj++)
 			std::cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << std::endl;
 		std::cout << residual << std::endl << std::endl;*/
@@ -1970,7 +1970,7 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 		exit(1);
 	}
 
-	if ( verbosity > 0 )
+	if ( verbosity > 1 )
 		std::cout << "point.residual " << point.residual << std::endl;
 	
 	if (point.residual < record_point.residual) {
@@ -1989,6 +1989,9 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 			std::cout << std::endl;
 			std::cout << "depths " << std::endl;
 			for (auto &x : record_point.depths)
+				std::cout << x << " ";
+			std::cout << "Ns_points " << std::endl;
+			for (auto &x : Ns_points)
 				std::cout << x << " ";
 			std::cout << std::endl;
 		}
