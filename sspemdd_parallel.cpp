@@ -57,16 +57,8 @@ void sspemdd_parallel::control_process()
 		sstream_out << x << " ";
 	sstream_out << std::endl;
 	
-	std::vector<std::vector<double>> point_values_vec;
-	point_values_vec.resize(N_total);
-	sstream_out << "point_values_vec as vector of tasks" << std::endl;
-	sstream_out << "point_values_vec.size() " << point_values_vec.size() << std::endl;
-	unsigned long long index = 0;
-	std::vector<double> cur_point_values;
-	std::vector<int> index_arr;
-	while (SSPEMDD_utils::next_cartesian(search_space, index_arr, cur_point_values))
-		point_values_vec[index++] = cur_point_values;
-	std::cout << "next_cartesian() finished" << std::endl;
+	std::vector<search_space_point> search_space_point_vec;
+	search_space_point_vec = getSearchSpacePointsVec();
 
 	sstream_out << "point_values_vec[0].size() " << point_values_vec[0].size() << std::endl;
 	task_len = point_values_vec[0].size() + 1; // point data + task index

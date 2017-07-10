@@ -1871,8 +1871,10 @@ void sspemdd_sequential::findGlobalMinBruteForce(std::vector<double> depths)
 	std::vector<search_space_point> search_space_points_vec = getSearchSpacePointsVec();
 	std::cout << "search_space_points_vec.size() " << search_space_points_vec.size() << std::endl;
 	
-	for (auto &x : search_space_points_vec)
+	for (auto &x : search_space_points_vec) {
+		x.depths = depths;
 		fillDataComputeResidual(x); // calculated residual is written to cur_point
+	}
 }
 
 std::vector<search_space_point> sspemdd_sequential::getSearchSpacePointsVec()
