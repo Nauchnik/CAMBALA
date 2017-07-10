@@ -23,10 +23,10 @@ public:
 	unsigned result_len;
 	double *task;
 	double *result;
-	void MPI_main(std::vector<double> depths);
+	void MPI_main(vector<double> depths);
 private:
-	void control_process();
-	void computing_process(std::vector<double> depths);
+	void control_process(vector<double> depths);
+	void computing_process();
 };
 
 #endif

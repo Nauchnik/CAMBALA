@@ -75,13 +75,13 @@ int main(int argc, char **argv)
 	sspemdd_seq.readInputDataFromFiles();
 	sspemdd_seq.createDepthsArray(depths_vec);
 
-	ofstream depths_file("depths.txt");
+	/*ofstream depths_file("depths.txt");
 	depths_file << depths_vec.size() << " depths for the scenario " << scenarioFileName << endl;
 	for (auto &x : depths_vec) {
 		for (auto &y : x)
 			depths_file << y << " ";
 		depths_file << endl;
-	}
+	}*/
 
 	for (unsigned i = 0; i < depths_vec.size(); i++) {
 		sspemdd_seq.init(depths_vec[i]);
@@ -117,8 +117,7 @@ int main(int argc, char **argv)
 	sspemdd_par.createDepthsArray(depths_vec);
 	
 	double cur_time = MPI_Wtime();
-	sspemdd_par.init(depths_vec[0]);
-	sspemdd_par.MPI_main(depths_vec[0]);
+	sspemdd_par.MPI_main(depths_vec);
 	std::cout << "MPI_main() total time " << MPI_Wtime() - cur_time << " s" << std::endl;
 #endif
 	

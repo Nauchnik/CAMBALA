@@ -20,52 +20,48 @@ sspemdd_parallel::sspemdd_parallel() :
 sspemdd_parallel::~sspemdd_parallel()
 {}
 
-void sspemdd_parallel::MPI_main(std::vector<double> depths)
+void sspemdd_parallel::MPI_main(vector<double> depths)
 {
 	if (rank == 0)
-		control_process();
+		control_process(depths);
 	else if (rank > 0)
-		computing_process(depths);
+		computing_process();
 }
 
-void sspemdd_parallel::control_process()
+void sspemdd_parallel::control_process(vector<double> depths)
 {
 #ifdef _MPI
 	MPI_Status status;
-	std::stringstream sstream_out;
+	stringstream sstream_out;
 	mpi_start_time = MPI_Wtime();
 	
-	std::cout << "control_process() started" << std::endl;
+	cout << "control_process() started" << endl;
 
-	sstream_out << "MPI control process" << std::endl;
-	sstream_out << "Start residual is: " << record_point.residual << std::endl;
-	sstream_out << "Search space:" << std::endl;
-	sstream_out << cb1 << " < c_b < " << cb2 << std::endl;
-	sstream_out << R1 << " < Range < " << R2 << std::endl;
-	sstream_out << rhob1 << " < rho_b < " << rhob2 << std::endl;
-	sstream_out << tau1 << " < tau < " << tau2 << std::endl;
-	sstream_out << "cw1_arr :" << std::endl;
-	for (auto &x : cw1_arr)
-		sstream_out << x << " ";
-	sstream_out << std::endl;
-	sstream_out << "cw2_arr :" << std::endl;
-	for (auto &x : cw2_arr)
-		sstream_out << x << " ";
-	sstream_out << std::endl;
-	sstream_out << "ncpl_arr :" << std::endl;
-	for (auto &x : ncpl_arr)
-		sstream_out << x << " ";
-	sstream_out << std::endl;
+	sstream_out << "MPI control process" << endl;
+	sstream_out << "Start residual is: " << record_point.residual << endl;
 	
-	std::vector<search_space_point> search_space_point_vec;
-	search_space_point_vec = getSearchSpacePointsVec();
-
-	sstream_out << "point_values_vec[0].size() " << point_values_vec[0].size() << std::endl;
-	task_len = point_values_vec[0].size() + 1; // point data + task index
+	vector<search_space_point> search_space_point_vec;
+	search_space_point_vec = getSearchSpacePointsVec(depths);
+	vector<vector<double>> point_values_vec;
+	point_values_vec.resize(search_space_point_vec.size());
+		std::vector<double> cws;
+		std::vector<double> depths;
+		point_values_vec[i].push_back( search_space_point_vec[i].R );
+		point_values_vec[i].push_back( search_space_point_vec[i].tau );
+		point_values_vec[i].push_back( search_space_point_vec[i].rhob );
+		point_values_vec[i].push_back( search_space_point_vec[i].cb );
+		for (auto &x : search_space_point_vec[i].cws)
+			point_values_vec[i].push_back(x);
+		for (auto &x : search_space_point_vec[i].depths)
+			point_values_vec[i].push_back(x);
+	}
+	
+	sstream_out << "point_values_vec[0].size() " << point_values_vec[0].size() << endl;
+	task_len = point_values_vec[0].size() + 2; // task_index + depths_size + point_data
 	task = new double[task_len];
 	result_len = 2; // calculated residual + index of a task
 	result = new double[result_len];
-	sstream_out << "task_len " << task_len << std::endl;
+	sstream_out << "task_len " << task_len << endl;
 	
 	unsigned send_task_count = 0;
 	
@@ -73,9 +69,10 @@ void sspemdd_parallel::control_process()
 	for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++) {
 		//sstream_out << "before filling task" << std::endl;
 		//std::cout << sstream_out.str();
-		for (unsigned j = 0; j < task_len - 1; j++)
-			task[j] = point_values_vec[send_task_count][j];
-		task[task_len - 1] = (double)send_task_count;
+		task[0] = (double)send_task_count;
+		task[1] = (double)depths.size();
+		for (unsigned j = 0; j < task_len - 3; j++)
+			task[j+2] = point_values_vec[send_task_count][j];
 		//sstream_out << "sending task" << std::endl;
 		//for (unsigned j = 0; j < task_len; j++)
 		//	sstream_out << task[j] << " ";
@@ -171,7 +168,7 @@ void sspemdd_parallel::control_process()
 #endif
 }
 
-void sspemdd_parallel::computing_process(std::vector<double> depths)
+void sspemdd_parallel::computing_process()
 {
 #ifdef _MPI
 	MPI_Status status;

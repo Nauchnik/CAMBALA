@@ -54,9 +54,12 @@ public:
 	double cb2;
 	std::vector<double> cw1_arr;
 	std::vector<double> cw2_arr;
+	std::vector<double> cw1_init_arr;
+	std::vector<double> cw2_init_arr;
 	std::vector<double> d1_arr;
 	std::vector<double> d2_arr;
 	std::vector<double> d_step;
+	std::vector<unsigned long long> ncpl_init_arr;
 	std::vector<unsigned long long> ncpl_arr;
 	std::string object_function_type;
 	double R1;
@@ -88,7 +91,7 @@ public:
 	int createDepthsArray(std::vector<std::vector<double>> &depths_vec);
 	double getRecordResidual();
 	double fillDataComputeResidual(search_space_point &point );
-	std::vector<search_space_point> getSearchSpacePointsVec();
+	std::vector<search_space_point> getSearchSpacePointsVec(std::vector<double> depths);
 	void findGlobalMinBruteForce(std::vector<double> depths);
 	void loadValuesToSearchSpaceVariables();
 	void findLocalMinHillClimbing(std::vector<double> depths);
@@ -117,7 +120,6 @@ public:
 		std::vector<double> &c1s, std::vector<double> &c2s, std::vector<double> &rhos,
 		std::vector<unsigned> &Ns_points, double R, double tau,
 		std::vector<std::vector<double>> &experimental_delays, std::vector<unsigned> &experimental_mode_numbers);
-
 
 	double compute_modal_delays_residual_weighted(std::vector<double> &freqs,
 		std::vector<double> &depths, std::vector<double> &c1s, std::vector<double> &c2s,
@@ -149,7 +151,6 @@ public:
     void compute_wmode1(double &omeg, std::vector<double> &depths, std::vector<double> &c1s,
         std::vector<double> &c2s,std::vector<double> &rhos,std::vector<unsigned> &Ns_points, double kh,	std::vector<double> &phi,
 	std::vector<double> &dphi);
-
 
 	std::vector<std::complex<double>> compute_cpl_pressure(double f, std::vector<double> &depths, std::vector<double> &c1s,
 	std::vector<double> &c2s, std::vector<double> &rhos, std::vector<unsigned> &Ns_points, std::vector<double> &Rr,
@@ -184,7 +185,7 @@ protected:
 	search_space_point record_point;
 	std::chrono::high_resolution_clock::time_point start_chrono_time;
 	// hill climbing
-	search_space_point fromPointIndexesToPoint( std::vector<unsigned> cur_point_indexes );
+	search_space_point fromPointIndexesToPoint( std::vector<unsigned> cur_point_indexes, std::vector<double> depths);
 	search_space_point fromDoubleVecToPoint(std::vector<double> double_vec);
 	std::vector<search_space_point> checked_points;
 };
