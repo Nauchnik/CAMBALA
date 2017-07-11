@@ -11,6 +11,7 @@
 #include "sspemdd_sequential.h"
 
 const double STOP_MESSAGE = -1;
+const unsigned TASK_LEN = 20;
 
 class sspemdd_parallel : public sspemdd_sequential
 {
@@ -23,9 +24,9 @@ public:
 	unsigned result_len;
 	double *task;
 	double *result;
-	void MPI_main(vector<double> depths);
+	void MPI_main();
 private:
-	void control_process(vector<double> depths);
+	void control_process();
 	void computing_process();
 };
 

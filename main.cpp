@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 	std::chrono::high_resolution_clock::time_point t2;
 	std::chrono::duration<double> time_span;
 	
-	std::vector<std::vector<double>> depths_vec;
+	vector<std::vector<double>> depths_vec;
 
 #ifndef _MPI
 	// sequential mode
@@ -114,10 +114,9 @@ int main(int argc, char **argv)
 
 	sspemdd_par.readScenario(scenarioFileName);
 	sspemdd_par.readInputDataFromFiles();
-	sspemdd_par.createDepthsArray(depths_vec);
 	
 	double cur_time = MPI_Wtime();
-	sspemdd_par.MPI_main(depths_vec);
+	sspemdd_par.MPI_main();
 	std::cout << "MPI_main() total time " << MPI_Wtime() - cur_time << " s" << std::endl;
 #endif
 	

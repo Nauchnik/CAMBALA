@@ -2207,8 +2207,11 @@ search_space_point sspemdd_sequential::fromDoubleVecToPoint(std::vector<double> 
 	point.rhob = double_vec[1];
 	point.R    = double_vec[2];
 	point.tau  = double_vec[3];
-	for (unsigned i = 4; i < double_vec.size(); i++)
+	unsigned depths_number = (double_vec.size() - 4) / 2;
+	for (unsigned i = 4; i < 4 + depths_number; i++)
 		point.cws.push_back(double_vec[i]);
+	for (unsigned i = 4 + depths_number; i < double_vec.size(); i++)
+		point.depths.push_back(double_vec[i]);
 	point.residual = START_HUGE_VALUE;
 	return point;
 }
