@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 	std::chrono::high_resolution_clock::time_point t2;
 	std::chrono::duration<double> time_span;
 	
-	vector<std::vector<double>> depths_vec;
+	vector<vector<double>> depths_vec;
 
 #ifndef _MPI
 	// sequential mode

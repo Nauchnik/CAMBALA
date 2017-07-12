@@ -10,13 +10,13 @@
 namespace SSPEMDD_utils{
 	// construct all combinations of some parameters
 	template< typename T >
-	bool next_cartesian(std::vector<T> &vii, std::vector<int> &index_arr, T &cur_vi)
+	bool next_cartesian(vector<T> &vii, vector<int> &index_arr, T &cur_vi)
 	{
 		if (index_arr.size() == 0) { // init
 			index_arr.resize(vii.size());
 			//for( auto &x : index_arr )
 			//	x = 0;
-			for (std::vector<int> ::iterator it = index_arr.begin(); it != index_arr.end(); ++it)
+			for (vector<int> ::iterator it = index_arr.begin(); it != index_arr.end(); ++it)
 				*it = 0;
 		}
 		if (index_arr[0] == -1)

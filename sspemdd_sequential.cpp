@@ -12,8 +12,8 @@ double RK4(double omeg2, // sound frequency
 	double c1,
 	double c2,
 	unsigned Np,
-	std::vector<double> &phi0,
-	std::vector<double> &dphi0)
+	vector<double> &phi0,
+	vector<double> &dphi0)
 {
 
     double f11,f12,f21,f22,f31,f32,f41,f42, cc;
@@ -61,8 +61,8 @@ double Layer_an_exp(double omeg2, // sound frequency
 	double deltah,
 	double c,
 	unsigned Np,
-	std::vector<double> &phi0,
-	std::vector<double> &dphi0)
+	vector<double> &phi0,
+	vector<double> &dphi0)
 {
 
     double c1, c2, kv;
@@ -112,8 +112,8 @@ double Euler(double omeg2, // sound frequency
 	double c1,
 	double c2,
 	unsigned Np,
-	std::vector<double> &phi0,
-	std::vector<double> &dphi0)
+	vector<double> &phi0,
+	vector<double> &dphi0)
 {
 
     double f11,f12,f21,f22,f31,f32,f41,f42, cc;
@@ -207,11 +207,11 @@ the most "adequate" model.
 
 void sspemdd_sequential::load_layers_data(
     std::string LayersFName,
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points)
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points)
 {
     std::ifstream Myfile(LayersFName);
     double d, c1,c2,rho;
@@ -245,11 +245,11 @@ void sspemdd_sequential::load_layers_data(
 void sspemdd_sequential::load_profile_deep_water(
     std::string ProfileFName,
     unsigned ppm,
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points)
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points)
 {
     std::ifstream Myfile(ProfileFName);
     double cp, cc, dc, dp;
@@ -283,16 +283,16 @@ void sspemdd_sequential::load_profile_deep_water(
 
 
 
-double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<double> &freqs,
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
+double sspemdd_sequential::compute_modal_delays_residual_uniform(vector<double> &freqs,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
 	double R,
 	double tau,
-	std::vector<std::vector<double>> &experimental_delays,
-	std::vector<unsigned> &experimental_mode_numbers
+	vector<vector<double>> &experimental_delays,
+	vector<unsigned> &experimental_mode_numbers
 	)
 {
 	unsigned rord = 3;
@@ -306,8 +306,8 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 	//2016.04.27:Pavel: now we use RMS as the residual
     unsigned nRes = 0;
 
-	std::vector<std::vector<double>> modal_group_velocities;
-	std::vector<unsigned> mode_numbers;
+	vector<vector<double>> modal_group_velocities;
+	vector<unsigned> mode_numbers;
 
 	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
 
@@ -351,16 +351,16 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(std::vector<dou
 
 // New version from 17.05.2017, group velocities computed using perturbative approach
 
-double sspemdd_sequential::compute_modal_delays_residual_uniform2(std::vector<double> &freqs,
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
+double sspemdd_sequential::compute_modal_delays_residual_uniform2(vector<double> &freqs,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
 	double R,
 	double tau,
-	std::vector<std::vector<double>> &experimental_delays,
-	std::vector<unsigned> &experimental_mode_numbers
+	vector<vector<double>> &experimental_delays,
+	vector<unsigned> &experimental_mode_numbers
 	)
 {
 	unsigned rord = 3;
@@ -372,8 +372,8 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform2(std::vector<do
 	//2016.04.27:Pavel: now we use RMS as the residual
     unsigned nRes = 0;
 
-	std::vector<std::vector<double>> modal_group_velocities;
-	std::vector<unsigned> mode_numbers;
+	vector<vector<double>> modal_group_velocities;
+	vector<unsigned> mode_numbers;
 
 	compute_modal_grop_velocities2(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
 
@@ -419,17 +419,17 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform2(std::vector<do
 //2016.12.31:Pavel: a residual functions where the "experimental" spectrogram modulud is taken as the weight coefficients
 //this is a simplest nonuniform residual function
 
-double sspemdd_sequential::compute_modal_delays_residual_weighted(std::vector<double> &freqs,
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
+double sspemdd_sequential::compute_modal_delays_residual_weighted(vector<double> &freqs,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
 	double R,
 	double tau,
-	std::vector<std::vector<double>> &experimental_delays,
-    std::vector<std::vector<double>> &weight_coeffs,   //2016.12.31:Pavel: this is a key parameter controlling the weights
-	std::vector<unsigned> &experimental_mode_numbers
+	vector<vector<double>> &experimental_delays,
+    vector<vector<double>> &weight_coeffs,   //2016.12.31:Pavel: this is a key parameter controlling the weights
+	vector<unsigned> &experimental_mode_numbers
 	)
 {
 	unsigned rord = 3;
@@ -441,8 +441,8 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(std::vector<do
 	//2016.04.27:Pavel: now we use RMS as the residual
     unsigned nRes = 0;
 
-	std::vector<std::vector<double>> modal_group_velocities;
-	std::vector<unsigned> mode_numbers;
+	vector<vector<double>> modal_group_velocities;
+	vector<unsigned> mode_numbers;
 
 	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
 
@@ -486,24 +486,24 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(std::vector<do
 	return residual;
 }
 
-int sspemdd_sequential::compute_wnumbers_bb(std::vector<double> &freqs,
+int sspemdd_sequential::compute_wnumbers_bb(vector<double> &freqs,
 	double deltaf,
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
 	unsigned flOnlyTrapped,
 	unsigned &ordRich,
-	std::vector<std::vector<double>> &modal_group_velocities,
-	std::vector<unsigned> &mode_numbers
+	vector<vector<double>> &modal_group_velocities,
+	vector<unsigned> &mode_numbers
 	)
 {
 	mode_numbers.clear();
 	modal_group_velocities.clear();
 
-	std::vector<double> out_wnum1;
-	std::vector<double> mgv_ii;
+	vector<double> out_wnum1;
+	vector<double> mgv_ii;
 	unsigned nwnum;
 	unsigned nfr = (unsigned)freqs.size();
 	double omeg1;
@@ -527,25 +527,25 @@ int sspemdd_sequential::compute_wnumbers_bb(std::vector<double> &freqs,
 	return 0;
 }
 
-int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs,
+int sspemdd_sequential::compute_modal_grop_velocities(vector<double> &freqs,
 	double deltaf,
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
 	double iModesSubset,
 	unsigned &ordRich,
-	std::vector<std::vector<double>> &modal_group_velocities,
-	std::vector<unsigned> &mode_numbers
+	vector<vector<double>> &modal_group_velocities,
+	vector<unsigned> &mode_numbers
 )
 {
 	mode_numbers.clear();
 	modal_group_velocities.clear();
 
-	std::vector<double> out_wnum1;
-	std::vector<double> out_wnum2;
-	std::vector<double> mgv_ii;
+	vector<double> out_wnum1;
+	vector<double> out_wnum2;
+	vector<double> mgv_ii;
 	unsigned nwnum;
 	unsigned nfr = (unsigned)freqs.size();
 	double omeg1, omeg2;
@@ -585,25 +585,25 @@ int sspemdd_sequential::compute_modal_grop_velocities(std::vector<double> &freqs
 }
 
 
-int sspemdd_sequential::compute_modal_grop_velocities2(std::vector<double> &freqs,
+int sspemdd_sequential::compute_modal_grop_velocities2(vector<double> &freqs,
 	double deltaf,
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
 	double iModesSubset,
 	unsigned &ordRich,
-	std::vector<std::vector<double>> &modal_group_velocities,
-	std::vector<unsigned> &mode_numbers
+	vector<vector<double>> &modal_group_velocities,
+	vector<unsigned> &mode_numbers
 )
 {
 	mode_numbers.clear();
 	modal_group_velocities.clear();
 
-	std::vector<double> out_wnum;
+	vector<double> out_wnum;
 
-	std::vector<double> mgv_ii, phi, dphi;
+	vector<double> mgv_ii, phi, dphi;
 	unsigned nwnum;
 	unsigned nfr = (unsigned)freqs.size();
 	double omeg, vgc;
@@ -644,23 +644,23 @@ sorted in ascending order
 
 */
 void sspemdd_sequential::compute_mfunctions_zr(double &omeg, // sound frequency
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
-	std::vector<double> &khs,
-	std::vector<double> &zr,
-	std::vector<std::vector<double>> &mfunctions_zr)
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
+	vector<double> &khs,
+	vector<double> &zr,
+	vector<vector<double>> &mfunctions_zr)
 	{
-        std::vector<double> phi;
-        std::vector<double> dphi;
+        vector<double> phi;
+        vector<double> dphi;
 
-        std::vector<unsigned> i_zr;
-        std::vector<double> t_zr;
+        vector<unsigned> i_zr;
+        vector<double> t_zr;
 
 
-        std::vector<double> z, phim_zr;
+        vector<double> z, phim_zr;
 
         double zp;
         unsigned cur_layer = 0;
@@ -727,21 +727,21 @@ void sspemdd_sequential::compute_mfunctions_zr(double &omeg, // sound frequency
 
 	}
 
-std::vector<std::complex<double>> sspemdd_sequential::compute_cpl_pressure(double f,
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
-	std::vector<double> &Rr,
-	std::vector<double> &zr,
+vector<std::complex<double>> sspemdd_sequential::compute_cpl_pressure(double f,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
+	vector<double> &Rr,
+	vector<double> &zr,
     double iModesSubset,
 	unsigned ordRich)
 	{
 
-        std::vector<std::vector<double>> modefunctions;
-        std::vector<double> khs;
-        std::vector<std::complex<double>> PHelm;
+        vector<vector<double>> modefunctions;
+        vector<double> khs;
+        vector<std::complex<double>> PHelm;
 
 
         double omeg = 2 * LOCAL_M_PI*f;
@@ -833,17 +833,17 @@ the values of depth
 
 */
 void sspemdd_sequential::compute_all_mfunctions(double &omeg, // sound frequency
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
-	std::vector<double> &khs)
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
+	vector<double> &khs)
 	{
-        std::vector<double> phi;
-        std::vector<double> dphi;
+        vector<double> phi;
+        vector<double> dphi;
 
-        std::vector<double> z;
+        vector<double> z;
         double h,z0;
 
 
@@ -895,14 +895,14 @@ the ODE is stiff there (solution involves a decaying exponential).
 */
 
 void sspemdd_sequential::compute_wmode(double &omeg, // sound frequency
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
 	double kh,
-	std::vector<double> &phi,
-	std::vector<double> &dphi)
+	vector<double> &phi,
+	vector<double> &dphi)
 {
     double deltah;
     double phi2int =0;
@@ -970,14 +970,14 @@ going in the negative direction of z axis. Then we match the solutions coming fr
 */
 
 void sspemdd_sequential::compute_wmode1(double &omeg, // sound frequency
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
 	double kh,
-	std::vector<double> &phi,
-	std::vector<double> &dphi)
+	vector<double> &phi,
+	vector<double> &dphi)
 {
     double deltah,phiNorm;
     double phi2int =0.0;
@@ -985,7 +985,7 @@ void sspemdd_sequential::compute_wmode1(double &omeg, // sound frequency
 
     double layer_int =0.0;
 
-    std::vector<double> bphi, bdphi;
+    vector<double> bphi, bdphi;
 
     phi.clear();
     dphi.clear();
@@ -1126,13 +1126,13 @@ void sspemdd_sequential::compute_wmode1(double &omeg, // sound frequency
 
 
 double sspemdd_sequential::compute_wmode_vg(double &omeg, // sound frequency
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
 	double kh,
-	std::vector<double> &phi)
+	vector<double> &phi)
 {
     double deltah, h, cc, termc, vg;
     double vg_int =0.0;
@@ -1189,12 +1189,12 @@ closer are u_j to each other -- the better, ideally they should be equal)
 it is better to set all the numbers to multiple of 12 in advance
 3) Richardson extrapolation of the order 3 gives reasonable accuracy
 */
-std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, // sound frequency
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
+vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, // sound frequency
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
 	double iModesSubset,
 	unsigned &ordRich)
 	/*  subroutine for computing wavenumbers for a given waveguide structure
@@ -1219,7 +1219,7 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, //
 	the top of the first layer is z=0
 	*/
 {
-	std::vector<double> coeff_extrap;
+	vector<double> coeff_extrap;
 	switch (ordRich) {
 	case 1:
 		coeff_extrap.assign({ 1 });
@@ -1242,12 +1242,12 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, //
 	//        cout << coeff_extrap.at(ii) << endl;
 	//    }
 
-	std::vector<double> input_c;
-	std::vector<double> input_rho;
-	std::vector<double> input_mesh;
-	std::vector<unsigned> input_interf_idcs;
-	std::vector<double> out_wnum2;
-	std::vector<double> wnum_extrapR;
+	vector<double> input_c;
+	vector<double> input_rho;
+	vector<double> input_mesh;
+	vector<unsigned> input_interf_idcs;
+	vector<double> out_wnum2;
+	vector<double> wnum_extrapR;
 	double zc = 0;
 	double zp = 0;
 	double dz = 0;
@@ -1319,12 +1319,12 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, //
 
 
 
-std::vector<double> sspemdd_sequential::compute_wnumbers_extrap2(double &omeg, // sound frequency
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
+vector<double> sspemdd_sequential::compute_wnumbers_extrap2(double &omeg, // sound frequency
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
 	double iModesSubset,
 	unsigned &ordRich)
 	/*
@@ -1353,7 +1353,7 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap2(double &omeg, /
 	the top of the first layer is z=0
 	*/
 {
-	std::vector<double> coeff_extrap;
+	vector<double> coeff_extrap;
 	switch (ordRich) {
 	case 1:
 		coeff_extrap.assign({ 1 });
@@ -1375,12 +1375,12 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap2(double &omeg, /
 	//        cout << coeff_extrap.at(ii) << endl;
 	//    }
 
-	std::vector<double> input_c;
-	std::vector<double> input_rho;
-	std::vector<double> input_mesh;
-	std::vector<unsigned> input_interf_idcs;
-	std::vector<double> out_wnum2;
-	std::vector<double> wnum_extrapR;
+	vector<double> input_c;
+	vector<double> input_rho;
+	vector<double> input_mesh;
+	vector<unsigned> input_interf_idcs;
+	vector<double> out_wnum2;
+	vector<double> wnum_extrapR;
 	double zc = 0;
 	double zp = 0;
 	double dz = 0;
@@ -1453,12 +1453,12 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap2(double &omeg, /
 
 
 
-std::vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &omeg, // sound frequency
-	std::vector<double> &depths,
-	std::vector<double> &c1s,
-	std::vector<double> &c2s,
-	std::vector<double> &rhos,
-	std::vector<unsigned> &Ns_points,
+vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &omeg, // sound frequency
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
 	double iModesSubset,
 	unsigned &ordRich)
 	/*  subroutine for computing wavenumbers for a given waveguide structure
@@ -1483,12 +1483,12 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &o
 	the top of the first layer is z=0
 	*/
 {
-	std::vector<double> input_c;
-	std::vector<double> input_rho;
-	std::vector<double> input_mesh;
-	std::vector<unsigned> input_interf_idcs;
-	std::vector<double> out_wnum2;
-	std::vector<double> wnum_extrapR;
+	vector<double> input_c;
+	vector<double> input_rho;
+	vector<double> input_mesh;
+	vector<unsigned> input_interf_idcs;
+	vector<double> out_wnum2;
+	vector<double> wnum_extrapR;
 	double zc = 0;
 	double zp = 0;
 	double dz = 0;
@@ -1499,7 +1499,7 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &o
 	unsigned n_points_total = 0;
 	unsigned n_points_layer = 0;
 
-	std::vector<double> coeff_extrap;
+	vector<double> coeff_extrap;
 	switch (ordRich) {
 	case 1:
 		coeff_extrap.assign({ 1 });
@@ -1592,11 +1592,11 @@ std::vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &o
 	return wnum_extrapR;
 }
 
-std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound frequency
-	std::vector<double> &c,
-	std::vector<double> &rho,
-	std::vector<unsigned> &interface_idcs,
-	std::vector<double> &meshsizes,
+vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound frequency
+	vector<double> &c,
+	vector<double> &rho,
+	vector<unsigned> &interface_idcs,
+	vector<double> &meshsizes,
 	double iModesSubset                 // set iModesSubset <0 -> trapped modes only; 0<=iModesSubset<1 -> a subset of modes with wavenumbers
 	)                                   // within [iModesSubset*kmax kmax], in particular iModesSubset = 0 computes all propagating modes
 {
@@ -1608,10 +1608,10 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 	// for c(interface_idcs.at(k-1)) the value of c is the one BELOW the k-th interface
 	//(i.e. for the water-bottom interface at the boundary we take the value from the bottom)
 
-	std::vector<double> md;
-	std::vector<double> ud;
-	std::vector<double> ld;
-	std::vector<double> wnumbers2;
+	vector<double> md;
+	vector<double> ud;
+	vector<double> ld;
+	vector<double> wnumbers2;
 
 	int N_points = (unsigned)c.size();
 	unsigned layer_number = 0;
@@ -1739,12 +1739,12 @@ std::vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound 
 
 //tau_comment: search and output,
 //check for tau!
-int sspemdd_sequential::init(std::vector<double> depths)
+int sspemdd_sequential::init(vector<double> depths)
 {
 	n_layers_w = depths.size() - 1;
 	
 	if (!n_layers_w) {
-		std::cerr << "n_layers_w == 0" << std::endl;
+		cerr << "n_layers_w == 0" << std::endl;
 		return -1;
 	}
 
@@ -1774,12 +1774,12 @@ int sspemdd_sequential::init(std::vector<double> depths)
 		N_total *= (unsigned long long)x;
 
 	if (!N_total) {
-		std::cerr << "N_total == 0" << std::endl;
+		cerr << "N_total == 0" << std::endl;
 		return -1;
 	}
 
 	if ( (!rank) && (verbosity > 0) )
-		std::cout << "N_total " << N_total << std::endl;
+		cout << "N_total " << N_total << std::endl;
 	
 	if (cw1_arr.size() != depths.size()) {
 		cerr << "cw1_arr.size() != depths.size()";
@@ -1789,24 +1789,24 @@ int sspemdd_sequential::init(std::vector<double> depths)
 	loadValuesToSearchSpaceVariables();
 	
 	if ( (!rank) && (verbosity > 0) )
-		std::cout << "init() finished" << std::endl;
+		cout << "init() finished" << std::endl;
 
 	return 0;
 }
 
-int sspemdd_sequential::createDepthsArray(std::vector<std::vector<double>> &depths_vec)
+int sspemdd_sequential::createDepthsArray(vector<vector<double>> &depths_vec)
 {
 	if (d1_arr.size() == 0) {
 		n_layers_w = cw1_arr.size();
 		double layer_thickness_w = h / n_layers_w;
-		std::vector<double> depths;
+		vector<double> depths;
 		for (unsigned jj = 1; jj <= n_layers_w; jj++)
 			depths.push_back(layer_thickness_w*jj);
 		depths.push_back(H);
 		depths_vec.push_back(depths);
 	}
 	else {
-		std::vector<std::vector<double>> search_space_depths;
+		vector<vector<double>> search_space_depths;
 		search_space_depths.resize(d1_arr.size());
 		for (unsigned i = 0; i < d2_arr.size(); i++) {
 			double cur_val = d2_arr[i];
@@ -1818,12 +1818,12 @@ int sspemdd_sequential::createDepthsArray(std::vector<std::vector<double>> &dept
 			}
 		}
 
-		std::vector<int> index_arr;
-		std::vector<double> tmp_depths;
-		std::vector<std::vector<double>> ::iterator it;
+		vector<int> index_arr;
+		vector<double> tmp_depths;
+		vector<vector<double>> ::iterator it;
 		double cur_treshold;
 		while (SSPEMDD_utils::next_cartesian(search_space_depths, index_arr, tmp_depths)) {
-			std::vector<double> depths;
+			vector<double> depths;
 			cur_treshold = tmp_depths[0] + 3;
 			depths.push_back(tmp_depths[0]); // at least 1 water layer must exist
 			for (unsigned i = 1; i < tmp_depths.size(); i++) {
@@ -1886,17 +1886,17 @@ void sspemdd_sequential::findGlobalMinBruteForce(vector<double> depths)
 		fillDataComputeResidual(x); // calculated residual is written to cur_point
 }
 
-std::vector<search_space_point> sspemdd_sequential::getSearchSpacePointsVec(std::vector<double> depths)
+vector<search_space_point> sspemdd_sequential::getSearchSpacePointsVec(vector<double> depths)
 {
-	std::vector<int> index_arr;
-	std::vector<unsigned> cur_point_indexes;
-	std::vector<std::vector<unsigned>> search_space_indexes;
+	vector<int> index_arr;
+	vector<unsigned> cur_point_indexes;
+	vector<vector<unsigned>> search_space_indexes;
 	search_space_indexes.resize(search_space.size());
 	for (unsigned i = 0; i < search_space.size(); i++)
 		for (unsigned j = 0; j < search_space[i].size(); j++)
 			search_space_indexes[i].push_back(j);
 
-	std::vector<search_space_point> points_vec;
+	vector<search_space_point> points_vec;
 	while (SSPEMDD_utils::next_cartesian(search_space_indexes, index_arr, cur_point_indexes))
 		points_vec.push_back(fromPointIndexesToPoint(cur_point_indexes, depths));
 
@@ -1948,7 +1948,7 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 	c1s.at(n_layers_w) = point.cb;
 	c2s.at(n_layers_w) = point.cb;
 	rhos.at(n_layers_w) = point.rhob;
-	std::vector<double> depths = point.depths;
+	vector<double> depths = point.depths;
 	if (depths.size() == 0) {
 		std::cerr << "depths.size() == 0" << std::endl;
 		exit(-1);
@@ -2018,7 +2018,7 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 	// search_space_variables[2] - R
 	// search_space_variables[3] - tau
 	// search_space_variables[4...] - cws
-	std::vector<double> tmp_vec;
+	vector<double> tmp_vec;
 	search_space.clear();
 
 	// fill search_space_variables[0] with cb
@@ -2057,11 +2057,11 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 		std::cout << "loadValuesToSearchSpaceVariables() finished" << std::endl;
 }
 
-void sspemdd_sequential::findLocalMinHillClimbing(std::vector<double> depths)
+void sspemdd_sequential::findLocalMinHillClimbing(vector<double> depths)
 {
 	std::cout << "findLocalMinHillClimbing" << std::endl;
 	// choose random point in the search space
-	std::vector<unsigned> cur_point_indexes, local_record_point_indexes;
+	vector<unsigned> cur_point_indexes, local_record_point_indexes;
 	search_space_point cur_point, local_record_point;
 	local_record_point_indexes.resize(search_space.size());
 	for (unsigned i = 0; i < search_space.size(); i++) // i stands for variable_index
@@ -2200,7 +2200,7 @@ search_space_point sspemdd_sequential::fromPointIndexesToPoint( vector<unsigned>
 	return point;
 }
 
-search_space_point sspemdd_sequential::fromDoubleVecToPoint(std::vector<double> double_vec)
+search_space_point sspemdd_sequential::fromDoubleVecToPoint(vector<double> double_vec)
 {
 	search_space_point point;
 	point.cb   = double_vec[0];
@@ -2399,7 +2399,7 @@ int sspemdd_sequential::readInputDataFromFiles()
 	std::stringstream myLineStream;
 	std::string myLine;
 	double buff;
-	std::vector<double> buffvect;
+	vector<double> buffvect;
 	// reading the "experimental" delay time data from a file
 	while (std::getline(dtimesFile, myLine)) {
 		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading

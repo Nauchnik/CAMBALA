@@ -4,7 +4,7 @@ INCDIRS = -I${INC1}
 CPPFLAGS = -O3 -std=c++0x ${INCDIRS} -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -D _MPI
 
 pd-sat: main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o sspemdd_parallel.o
-	${CPP} ${CPPFLAGS} main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o sspemdd_parallel.o -o SSPEMDD_parallel
+	${CPP} ${CPPFLAGS} main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o sspemdd_parallel.o -o CAMBALA_parallel
 
 specialfunctions.o: ../alglib/specialfunctions.cpp 
 	${CPP} ${CPPFLAGS} ../alglib/specialfunctions.cpp -c
