@@ -41,35 +41,8 @@ void sspemdd_parallel::control_process()
 	createDepthsArray(depths_vec);
 	cout << "depths_vec.size() " << depths_vec.size() << endl;
 	
-	vector<vector<double>> point_values_vec;
-	//unsigned k = 0;
-	vector<search_space_point> search_space_point_vec;
-	cout << "search_space_point_vec sizes :" << endl;
-	for (auto &cur_depths : depths_vec) {
-		init(cur_depths); // init search space
-		search_space_point_vec = getSearchSpacePointsVec(cur_depths);
-		//if (k < 10)
-		cout << search_space_point_vec.size() << endl;
-		for (unsigned i = 0; i < search_space_point_vec.size(); i++) {
-			vector<double> point_values;
-			point_values.push_back(search_space_point_vec[i].R);
-			point_values.push_back(search_space_point_vec[i].tau);
-			point_values.push_back(search_space_point_vec[i].rhob);
-			point_values.push_back(search_space_point_vec[i].cb);
-			for (auto &x : search_space_point_vec[i].cws)
-				point_values.push_back(x);
-			for (auto &x : search_space_point_vec[i].depths)
-				point_values.push_back(x);
-			point_values_vec.push_back(point_values);
-		}
-		//k++;
-	}
-	cout << "point_values_vec.size() " << point_values_vec.size() << endl;
-	
 	task = new double[TASK_LEN];
-	result_len = 2; // calculated residual + index of a task
-	result = new double[result_len];
-	sstream_out << "task_len " << task_len << endl;
+	result = new double[RESULT_LEN];
 	
 	unsigned send_task_count = 0;
 	
@@ -77,10 +50,10 @@ void sspemdd_parallel::control_process()
 	for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++) {
 		//sstream_out << "before filling task" << std::endl;
 		//std::cout << sstream_out.str();
-		unsigned elements_to_send = point_values_vec[send_task_count].size();
+		unsigned elements_to_send = depths_vec[send_task_count].size() + 1;
 		cout << "elements_to_send " << elements_to_send << endl;
 		for (unsigned j = 0; j < elements_to_send - 1; j++)
-			task[j] = point_values_vec[send_task_count][j];
+			task[j] = depths_vec[send_task_count][j];
 		task[elements_to_send] = (double)send_task_count;
 		for (unsigned j = elements_to_send + 1; j < TASK_LEN; j++)
 			task[j] = -1;
@@ -97,22 +70,32 @@ void sspemdd_parallel::control_process()
 	unsigned processed_task_count = 0;
 	unsigned received_task_index;
 	double received_residual;
-	
+
 	// get results and send new tasks on idle computing processes
-	while (processed_task_count < point_values_vec.size()) {
-		MPI_Recv(result, result_len, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+	while (processed_task_count < depths_vec.size()) {
+		MPI_Recv(result, RESULT_LEN, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		processed_task_count++;
-		if (processed_task_count % 10000 == 0)
+		if (processed_task_count % 10 == 0)
 			sstream_out << std::endl << "processed_task_count " << processed_task_count << std::endl;
 		
-		received_residual = result[0];
-		received_task_index = (unsigned)result[1];
+		received_task_index = (unsigned)result[0];
+		received_residual = result[1];
 		//sstream_out << "received_residual " << received_residual << std::endl;
 		//sstream_out << "received_task_index  " << received_task_index << std::endl;
 		
 		if (received_residual < record_point.residual) {
-			record_point = fromDoubleVecToPoint(point_values_vec[received_task_index]);
 			record_point.residual = received_residual;
+			record_point.R = result[2];
+			record_point.tau = result[3];
+			record_point.rhob = result[4];
+			record_point.cb = result[5];
+			unsigned cur_depths_number = depths_vec[received_task_index];
+			record_point.cws.resize(cur_depths_number);
+			record_point.depths.resize(cur_depths_number);
+			for (unsigned j = 0; j < cur_depths_number; j++)
+				record_point.cws[j] = result[6 + j];
+			for (unsigned j = 0; j < cur_depths_number; j++)
+				record_point.depths[j] = result[6 + cur_depths_number + j];
 			
 			std::cout << "Control process, new residual minimum : "  << received_residual << std::endl;
 			sstream_out << std::endl << "Control process, new residual minimum:" << std::endl;
@@ -133,10 +116,10 @@ void sspemdd_parallel::control_process()
 		}
 		// if free tasks for sending
 		if (send_task_count < point_values_vec.size()) {
-			unsigned elements_to_send = point_values_vec[send_task_count].size();
+			unsigned elements_to_send = depths_vec[send_task_count].size() + 1;
 			cout << "elements_to_send " << elements_to_send << endl;
 			for (unsigned j = 0; j < elements_to_send - 1; j++)
-				task[j] = point_values_vec[send_task_count][j];
+				task[j] = depths_vec[send_task_count][j];
 			task[elements_to_send] = (double)send_task_count;
 			for (unsigned j = elements_to_send + 1; j < TASK_LEN; j++)
 				task[j] = -1;
@@ -147,7 +130,7 @@ void sspemdd_parallel::control_process()
 			// send stop-messages
 			for (unsigned j = 0; j < TASK_LEN; j++)
 				task[j] = STOP_MESSAGE;
-			MPI_Send(task, task_len, MPI_DOUBLE, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
+			MPI_Send(task, TASK_LEN, MPI_DOUBLE, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
 		}
 		
 		ofile.open("mpi_out", std::ios_base::app);
@@ -221,16 +204,7 @@ void sspemdd_parallel::computing_process()
 		task_index = task[task_len - 1];
 		cur_point = fromDoubleVecToPoint(cur_point_values_vec);
 		if (rank == 1) {
-			cout << "cur_point :" << endl;
-			cout << "R " << cur_point.R << endl;
-			cout << "tau " << cur_point.tau << endl;
-			cout << "rhob " << cur_point.rhob << endl;
-			cout << "cb " << cur_point.cb << endl;
-			cout << "cws ";
-			for (auto &x : cur_point.cws)
-				cout << x << " ";
-			cout << endl;
-			cout << "depths";
+			cout << "received depths: ";
 			for (auto &x : cur_point.depths)
 				cout << x << " ";
 			cout << endl;
@@ -240,10 +214,10 @@ void sspemdd_parallel::computing_process()
 		if (rank == 1)
 			std::cout << "received task_index " << task_index << std::endl;
 		
-		fillDataComputeResidual(cur_point); // calculated residual is written to cur_point
+		//fillDataComputeResidual(cur_point); // calculated residual is written to cur_point
 
-		result[0] = cur_point.residual;
-		result[1] = task_index;
+		result[0] = task_index;
+		result[1] = cur_point.residual;
 		MPI_Send(result, result_len, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
 
 		/*cur_process_points_sstream << cur_point.cb << " " 

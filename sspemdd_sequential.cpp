@@ -1741,6 +1741,14 @@ vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound frequ
 //check for tau!
 int sspemdd_sequential::init(vector<double> depths)
 {
+	if ((!rank) && (verbosity > 0)) {
+		cout << "init() started" << endl;
+		cout << "depths: ";
+		for (auto &x : depths)
+			cout << x << " ";
+		cout << endl;
+	}
+	
 	n_layers_w = depths.size() - 1;
 	
 	if (!n_layers_w) {

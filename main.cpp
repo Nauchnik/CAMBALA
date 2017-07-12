@@ -58,21 +58,20 @@ int main(int argc, char **argv)
 		std::cout << "verbosity " << verbosity << std::endl;
 	}
 
+#ifndef _MPI
+	// sequential mode
+
 	// fix start time
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 	std::chrono::high_resolution_clock::time_point t2;
 	std::chrono::duration<double> time_span;
-	
-	vector<vector<double>> depths_vec;
-
-#ifndef _MPI
-	// sequential mode
 
 	sspemdd_seq.iterated_local_search_runs = iterated_local_search_runs;
 	sspemdd_seq.verbosity = verbosity;
 	// read scenario, modal_delays, mode_numbers and freqs, then determine the search space
 	sspemdd_seq.readScenario(scenarioFileName);
 	sspemdd_seq.readInputDataFromFiles();
+	vector<vector<double>> depths_vec;
 	sspemdd_seq.createDepthsArray(depths_vec);
 
 	/*ofstream depths_file("depths.txt");
