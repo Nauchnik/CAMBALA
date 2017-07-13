@@ -94,7 +94,7 @@ public:
 	vector<search_space_point> getSearchSpacePointsVec(vector<double> depths);
 	void findGlobalMinBruteForce(vector<double> depths);
 	void loadValuesToSearchSpaceVariables();
-	void findLocalMinHillClimbing(vector<double> depths);
+	search_space_point findLocalMinHillClimbing(vector<double> depths);
 	void reportFinalResult();
 	void getThreeValuesFromStr(std::string str, double &val1, double &val2, double &val3);
 	void reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a);

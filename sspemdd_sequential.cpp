@@ -281,8 +281,6 @@ void sspemdd_sequential::load_profile_deep_water(
 
 }
 
-
-
 double sspemdd_sequential::compute_modal_delays_residual_uniform(vector<double> &freqs,
 	vector<double> &depths,
 	vector<double> &c1s,
@@ -411,10 +409,6 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform2(vector<double>
 
 	return residual;
 }
-
-
-
-
 
 //2016.12.31:Pavel: a residual functions where the "experimental" spectrogram modulud is taken as the weight coefficients
 //this is a simplest nonuniform residual function
@@ -632,9 +626,6 @@ int sspemdd_sequential::compute_modal_grop_velocities2(vector<double> &freqs,
 	return 0;
 }
 
-
-
-
 /*
 
 compute_mfunctions_zr() computs the mode functions corresponding to the media parameters described by
@@ -723,9 +714,7 @@ void sspemdd_sequential::compute_mfunctions_zr(double &omeg, // sound frequency
 //		ofile << std::endl;
 //	}
 //	ofile.close();
-
-
-	}
+}
 
 vector<std::complex<double>> sspemdd_sequential::compute_cpl_pressure(double f,
 	vector<double> &depths,
@@ -745,7 +734,7 @@ vector<std::complex<double>> sspemdd_sequential::compute_cpl_pressure(double f,
 
 
         double omeg = 2 * LOCAL_M_PI*f;
-        double kh, R;
+        double R;
         unsigned nzr = zr.size();
         std::complex<double> Prc;
 
@@ -1917,7 +1906,8 @@ void sspemdd_sequential::reduceSearchSpace(reduced_search_space_attribute &reduc
 	// search_space_variables[1] - rhob
 	// search_space_variables[2] - R
 	// search_space_variables[3] - tau
-	// search_space_variables[4...] - cws
+	// search_space_variables[4, ...] - cws
+	// search_space_variables[..., ...] - depths
 	if (reduced_s_s_a.cb == false) {
 		search_space[0].resize(1);
 		search_space[0][0] = cb1;
@@ -2065,7 +2055,7 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 		std::cout << "loadValuesToSearchSpaceVariables() finished" << std::endl;
 }
 
-void sspemdd_sequential::findLocalMinHillClimbing(vector<double> depths)
+search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> depths)
 {
 	std::cout << "findLocalMinHillClimbing" << std::endl;
 	// choose random point in the search space
@@ -2091,7 +2081,7 @@ void sspemdd_sequential::findLocalMinHillClimbing(vector<double> depths)
 			isCheckRequired = true;
 	if ( (!isCheckRequired) && (verbosity > 0) ) {
 		std::cout << "1 element in search space, fast exit" << std::endl;
-		return;
+		return local_record_point;
 	}
 
 	checked_points.reserve(N_total);
@@ -2191,6 +2181,8 @@ void sspemdd_sequential::findLocalMinHillClimbing(vector<double> depths)
 		std::cout << "skipped_points " << skipped_points << std::endl;
 		std::cout << "---" << std::endl;
 	}
+
+	return local_record_point;
 }
 
 search_space_point sspemdd_sequential::fromPointIndexesToPoint( vector<unsigned> cur_point_indexes, 
