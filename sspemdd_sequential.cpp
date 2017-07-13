@@ -76,14 +76,14 @@ double Layer_an_exp(double omeg2, // sound frequency
 
 
 /*
-    std::cout << "kv c1 c2" << std::endl;
-    std::cout << kv << std::endl;
-    std::cout << c1 << std::endl;
-    std::cout << c2 << std::endl;
-    std::cout << h << std::endl;
-    std::cout << "-----" << std::endl;
-    std::cout << phi0.back() << std::endl;
-    std::cout << dphi0.back()/kv << std::endl;
+    cout << "kv c1 c2" << endl;
+    cout << kv << endl;
+    cout << c1 << endl;
+    cout << c2 << endl;
+    cout << h << endl;
+    cout << "-----" << endl;
+    cout << phi0.back() << endl;
+    cout << dphi0.back()/kv << endl;
 */
     for (unsigned kk = 0; kk <Np; kk++) {
 
@@ -95,7 +95,7 @@ double Layer_an_exp(double omeg2, // sound frequency
         dphi0.push_back(    -c1*kv*exp( -kv*((kk+1)*h) )    +   c2*kv*exp( kv*((kk+1)*h) )  ) ;
 
         layer_int = layer_int + 0.5*h*phi0.back()*phi0.back();
-        //std::cout << layer_int << std::endl;
+        //cout << layer_int << endl;
     }
 
     return layer_int;
@@ -120,8 +120,8 @@ double Euler(double omeg2, // sound frequency
     double h = deltah/Np;
     double layer_int = 0.0;
 
-    std::cout << "h value" << std::endl;
-    std::cout << h << std::endl;
+    cout << "h value" << endl;
+    cout << h << endl;
 
     for (unsigned kk = 0; kk <Np; kk++) {
 
@@ -133,13 +133,13 @@ double Euler(double omeg2, // sound frequency
         f12 = (kh2 - omeg2/cc  )*phi0.back();
 
         if (kk<2){
-            std::cout << "f11 f12 value" << std::endl;
-            std::cout << phi0.back() << std::endl;
-            std::cout << dphi0.back() << std::endl;
-            std::cout << f11 << std::endl;
-            std::cout << f12 << std::endl;
-            std::cout << phi0.back() + h*f11 << std::endl;
-            std::cout << dphi0.back() + h*f12 << std::endl;
+            cout << "f11 f12 value" << endl;
+            cout << phi0.back() << endl;
+            cout << dphi0.back() << endl;
+            cout << f11 << endl;
+            cout << f12 << endl;
+            cout << phi0.back() + h*f11 << endl;
+            cout << dphi0.back() + h*f12 << endl;
         }
 
         phi0.push_back( phi0.back() + h*f11 );
@@ -340,7 +340,7 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(vector<double> 
 		ofile << freqs.at(ii) << "\t";
 		for (unsigned jj = 0; jj < mnumb; jj++)
 			ofile << R / modal_group_velocities[ii][jj] << "\t";
-		ofile << std::endl;
+		ofile << endl;
 	}
 	ofile.close();*/
 
@@ -403,7 +403,7 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform2(vector<double>
 		ofile << freqs.at(ii) << "\t";
 		for (unsigned jj = 0; jj < mnumb; jj++)
 			ofile << R / modal_group_velocities[ii][jj] << "\t";
-		ofile << std::endl;
+		ofile << endl;
 	}
 	ofile.close();*/
 
@@ -473,7 +473,7 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(vector<double>
 		ofile << freqs.at(ii) << "\t";
 		for (unsigned jj = 0; jj < mnumb; jj++)
 			ofile << R / modal_group_velocities[ii][jj] << "\t";
-		ofile << std::endl;
+		ofile << endl;
 	}
 	ofile.close();*/
 
@@ -706,12 +706,12 @@ void sspemdd_sequential::compute_mfunctions_zr(double &omeg, // sound frequency
 //    for (unsigned jj = 0; jj < nzr; jj++) {
 //			ofile << zr.at(jj) << " ";
 //	}
-//	ofile << std::endl;
+//	ofile << endl;
 //
 //	for (unsigned ii = 0; ii < khs.size(); ii++) {
 //		for (unsigned jj = 0; jj < nzr; jj++)
 //			ofile << mfunctions_zr[ii][jj] << " ";
-//		ofile << std::endl;
+//		ofile << endl;
 //	}
 //	ofile.close();
 }
@@ -745,13 +745,13 @@ vector<std::complex<double>> sspemdd_sequential::compute_cpl_pressure(double f,
 
 
 //        // TEST
-//        std::cout << nmod << " modes " << std::endl;
+//        cout << nmod << " modes " << endl;
 //
 //        // TEST
 //        //for (unsigned qq=0; qq<nmod; qq++){
 //        for (unsigned qq=0; qq<20; qq++){
 //
-//            std::cout  << " kh" << qq <<" = " << khs.at(qq) << std::endl;
+//            cout  << " kh" << qq <<" = " << khs.at(qq) << endl;
 //
 //        }
 
@@ -766,7 +766,7 @@ vector<std::complex<double>> sspemdd_sequential::compute_cpl_pressure(double f,
 //            for (unsigned ss=0; ss<20; ss++){
 //            //for (unsigned ss=0; ss<nmod; ss++){
 //
-//                    std::cout  << " mf" << ss << " = " << modefunctions.at(ss).at(0) << std::endl;
+//                    cout  << " mf" << ss << " = " << modefunctions.at(ss).at(0) << endl;
 //
 //            }
 
@@ -783,11 +783,11 @@ vector<std::complex<double>> sspemdd_sequential::compute_cpl_pressure(double f,
 
                     /*
                     //TEST
-                    std::cout << "phi1zr=" << modefunctions.at(jj).at(ii) << std::endl;
-                    std::cout << "phi1zs=" << modefunctions.at(jj).at(0) << std::endl;
-                    std::cout << "R=" << R << std::endl;
-                    std::cout << "k=" << khs.at(jj) << std::endl;
-                    std::cout << "exp=" << exp( Iu*khs.at(jj)*R ) << std::endl;
+                    cout << "phi1zr=" << modefunctions.at(jj).at(ii) << endl;
+                    cout << "phi1zs=" << modefunctions.at(jj).at(0) << endl;
+                    cout << "R=" << R << endl;
+                    cout << "k=" << khs.at(jj) << endl;
+                    cout << "exp=" << exp( Iu*khs.at(jj)*R ) << endl;
                     */
 
                     Prc = Prc + exp( Iu*khs.at(jj)*R )*modefunctions.at(jj).at(ii)*modefunctions.at(jj).at(0)/sqrt(khs.at(jj));
@@ -798,7 +798,7 @@ vector<std::complex<double>> sspemdd_sequential::compute_cpl_pressure(double f,
 
         } else {
             // TEST
-            std::cout << 0 << " modes " << std::endl;
+            cout << 0 << " modes " << endl;
 
             Prc = std::complex<double>(0.0,0.0);
             for (unsigned ii = 1; ii < nzr; ii++) {
@@ -857,15 +857,15 @@ void sspemdd_sequential::compute_all_mfunctions(double &omeg, // sound frequency
 		}
 	}
 	z.push_back( depths.back() );
-	ofile << z.back() << std::endl;
-    ofile << std::endl;
+	ofile << z.back() << endl;
+    ofile << endl;
 
 	for (unsigned i = 0; i < khs.size(); i++) {
 		double kh = khs[i];
 		compute_wmode1(omeg, depths, c1s, c2s, rhos, Ns_points, kh, phi, dphi);
 		for (unsigned j = 0; j < phi.size(); j++)
 			ofile << phi[j] << " ";
-		ofile << std::endl;
+		ofile << endl;
 	}
 	ofile.close();
 
@@ -925,7 +925,7 @@ void sspemdd_sequential::compute_wmode(double &omeg, // sound frequency
         phi2int = phi2int + layer_int/rhos.at(ll);
 
         // TEST
-        //std::cout << layer_int << std::endl;
+        //cout << layer_int << endl;
         // TEST
     }
 
@@ -934,8 +934,8 @@ void sspemdd_sequential::compute_wmode(double &omeg, // sound frequency
 
     // TEST
 
-    //std::cout << phi2int << std::endl;
-    //std::cout << phiNorm << std::endl;
+    //cout << phi2int << endl;
+    //cout << phiNorm << endl;
     // TEST
 
     for (unsigned ll = 0; ll < nz; ll++ ) {
@@ -1034,17 +1034,17 @@ void sspemdd_sequential::compute_wmode1(double &omeg, // sound frequency
 
 
 //            //TEST
-//            std::cout  << "ll="<< ll <<" bphi2int " << bphi2int  << std::endl;
-//            std::cout  << "ll="<< ll <<" layer_int " << layer_int  << std::endl;
-//            std::cout  << "ll="<< ll <<" deltah " << deltah  << std::endl;
-//            std::cout  << "ll="<< ll <<" kh " << kh  << std::endl;
-//            std::cout  << "ll="<< ll <<" c2 " << c2s.at(ll)  << std::endl;
-//            std::cout  << "ll="<< ll <<" c1 " << c1s.at(ll)  << std::endl;
-//            std::cout  << "ll="<< ll <<" nsp " << Ns_points.at(ll)  << std::endl;
-//            std::cout  << "ll="<< ll <<" nsp-1 " << Ns_points.at(ll-1)  << std::endl;
-//            std::cout  << "ll="<< ll <<" nsp-2 " << Ns_points.at(ll-2)  << std::endl;
+//            cout  << "ll="<< ll <<" bphi2int " << bphi2int  << endl;
+//            cout  << "ll="<< ll <<" layer_int " << layer_int  << endl;
+//            cout  << "ll="<< ll <<" deltah " << deltah  << endl;
+//            cout  << "ll="<< ll <<" kh " << kh  << endl;
+//            cout  << "ll="<< ll <<" c2 " << c2s.at(ll)  << endl;
+//            cout  << "ll="<< ll <<" c1 " << c1s.at(ll)  << endl;
+//            cout  << "ll="<< ll <<" nsp " << Ns_points.at(ll)  << endl;
+//            cout  << "ll="<< ll <<" nsp-1 " << Ns_points.at(ll-1)  << endl;
+//            cout  << "ll="<< ll <<" nsp-2 " << Ns_points.at(ll-2)  << endl;
 //            for (unsigned qq=0; qq<bphi.size(); qq++  ){
-//                std::cout  << "qq="<< qq <<" bphi " << bphi.at(qq) <<" bdphi " << bdphi.at(qq)  << std::endl;
+//                cout  << "qq="<< qq <<" bphi " << bphi.at(qq) <<" bdphi " << bdphi.at(qq)  << endl;
 //            }
 
             bdphi.back() = rhos.at(ll-1)*bdphi.back()/rhos.at(ll);
@@ -1084,19 +1084,19 @@ void sspemdd_sequential::compute_wmode1(double &omeg, // sound frequency
 
     }
 //    //TEST
-//    std::cout  << " phiNorm " << phiNorm  << std::endl;
-//    std::cout  << " phi2int " << phi2int  << std::endl;
-//    std::cout  << " bphi2int " << bphi2int  << std::endl;
-//    std::cout  << " cmatching " << phi.back()/bphi.back()  << std::endl;
-//    std::cout  << " L " << L  << std::endl;
-//    std::cout  << " n_layers " << n_layers  << std::endl;
+//    cout  << " phiNorm " << phiNorm  << endl;
+//    cout  << " phi2int " << phi2int  << endl;
+//    cout  << " bphi2int " << bphi2int  << endl;
+//    cout  << " cmatching " << phi.back()/bphi.back()  << endl;
+//    cout  << " L " << L  << endl;
+//    cout  << " n_layers " << n_layers  << endl;
 //
 //    throw std::invalid_argument("Ururu");
 
 //        // TEST
 //        for (unsigned qq=0; qq<nmod; qq++){
 //
-//            std::cout  << " kh" << qq <<" = " << khs.at(qq) << std::endl;
+//            cout  << " kh" << qq <<" = " << khs.at(qq) << endl;
 //
 //        }
 
@@ -1707,13 +1707,13 @@ vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound frequ
 /* TEST: the sparse matrix diagonals output
 	    std::ofstream myFile("thematrixdiags.txt");
 	    for (int ii=0; ii<N_points-2; ii++){
-	        myFile << std::fixed  << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << std::endl;
+	        myFile << std::fixed  << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
 	    }
 	    myFile.close();
 
 	    std::ofstream myFile1("thematrixdiags_sym.txt");
 	    for (int ii=0; ii<N_points-3; ii++){
-	        myFile1 << std::fixed  << main_diag[ii] << "  " << second_diag[ii] << std::endl;
+	        myFile1 << std::fixed  << main_diag[ii] << "  " << second_diag[ii] << endl;
 	    }
 	    myFile1.close();
 */
@@ -1741,16 +1741,17 @@ int sspemdd_sequential::init(vector<double> depths)
 	n_layers_w = depths.size() - 1;
 	
 	if (!n_layers_w) {
-		cerr << "n_layers_w == 0" << std::endl;
+		cerr << "n_layers_w == 0" << endl;
 		return -1;
 	}
 
 	ncpl_arr = ncpl_init_arr;
-	ncpl_arr.resize(n_layers_w + 1);
+	ncpl_arr.resize(n_layers_w);
 	cw1_arr = cw1_init_arr;
-	cw1_arr.resize(n_layers_w + 1);
+	cw1_arr.resize(n_layers_w);
 	cw2_arr = cw2_init_arr;
-	cw2_arr.resize(n_layers_w + 1);
+	cw2_arr.resize(n_layers_w);
+
 	c1s.resize(n_layers_w + 1);
 	for (auto &x : c1s)
 		x = 1500;
@@ -1771,22 +1772,32 @@ int sspemdd_sequential::init(vector<double> depths)
 		N_total *= (unsigned long long)x;
 
 	if (!N_total) {
-		cerr << "N_total == 0" << std::endl;
+		cerr << "N_total == 0" << endl;
+		cerr << "nR nrhob ncb ntau : " << endl;
+		cerr << nR << " " << nrhob << " " << ncb << " " << ntau << endl;
+		cerr << "ncpl_arr : " << endl;
+		for (auto &x : ncpl_arr)
+			cerr << x << " ";
+		cerr << endl;
+		cerr << "depths : " << endl;
+		for (auto &x : depths)
+			cerr << x << " ";
+		cerr << endl;
 		return -1;
 	}
-
-	if ( (!rank) && (verbosity > 0) )
-		cout << "N_total " << N_total << std::endl;
 	
-	if (cw1_arr.size() != depths.size()) {
-		cerr << "cw1_arr.size() != depths.size()";
+	if ( (!rank) && (verbosity > 0) )
+		cout << "N_total " << N_total << endl;
+	
+	if (cw1_arr.size() != (depths.size() - 1)) {
+		cerr << "cw1_arr.size() != (depths.size() - 1)";
 		cerr << endl;
 		exit(1);
 	}
 	loadValuesToSearchSpaceVariables();
 	
 	if ( (!rank) && (verbosity > 0) )
-		cout << "init() finished" << std::endl;
+		cout << "init() finished" << endl;
 
 	return 0;
 }
@@ -1839,7 +1850,7 @@ int sspemdd_sequential::createDepthsArray(vector<vector<double>> &depths_vec)
 			x.push_back(H);
 		}
 	}
-	std::cout << "depths_vec.size() " << depths_vec.size() << std::endl;
+	cout << "depths_vec.size() " << depths_vec.size() << endl;
 	
 	return 0;
 }
@@ -1852,24 +1863,24 @@ void sspemdd_sequential::reportFinalResult()
 	t2 = std::chrono::high_resolution_clock::now();
 	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - start_chrono_time);
 
-	std::cout << std::endl;
-	std::cout << "total solving time " << time_span.count() << std::endl;
-	std::cout << "SEARCH ENDED!" << std::endl;
-	std::cout << "RESULTING VALUE:" << std::endl;
-	std::cout << "err = " << record_point.residual << ", parameters:" << std::endl;
-	std::cout << "c_b = " << record_point.cb << std::endl
-			  << "tau = " << record_point.tau << std::endl
-			  << "rho_b = " << record_point.rhob << std::endl
-			  << "R = " << record_point.R << std::endl;
-	std::cout << "cws :" << std::endl;
+	cout << endl;
+	cout << "total solving time " << time_span.count() << endl;
+	cout << "SEARCH ENDED!" << endl;
+	cout << "RESULTING VALUE:" << endl;
+	cout << "err = " << record_point.residual << ", parameters:" << endl;
+	cout << "c_b = " << record_point.cb << endl
+			  << "tau = " << record_point.tau << endl
+			  << "rho_b = " << record_point.rhob << endl
+			  << "R = " << record_point.R << endl;
+	cout << "cws :" << endl;
 	for (auto &x : record_point.cws)
-		std::cout << x << " ";
-	std::cout << std::endl;
-	std::cout << "depths " << std::endl;
+		cout << x << " ";
+	cout << endl;
+	cout << "depths " << endl;
 	for (auto &x : record_point.depths)
-		std::cout << x << " ";
-	std::cout << std::endl;
-	std::cout << "total solving time " << time_span.count() << std::endl;
+		cout << x << " ";
+	cout << endl;
+	cout << "total solving time " << time_span.count() << endl;
 }
 
 void sspemdd_sequential::findGlobalMinBruteForce(vector<double> depths)
@@ -1877,7 +1888,7 @@ void sspemdd_sequential::findGlobalMinBruteForce(vector<double> depths)
 	cout << "findGlobalMinBruteForce()" << endl;
 
 	vector<search_space_point> search_space_points_vec = getSearchSpacePointsVec(depths);
-	cout << "search_space_points_vec.size() " << search_space_points_vec.size() << std::endl;
+	cout << "search_space_points_vec.size() " << search_space_points_vec.size() << endl;
 	
 	for (auto &x : search_space_points_vec)
 		fillDataComputeResidual(x); // calculated residual is written to cur_point
@@ -1948,22 +1959,22 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 	rhos.at(n_layers_w) = point.rhob;
 	vector<double> depths = point.depths;
 	if (depths.size() == 0) {
-		std::cerr << "depths.size() == 0" << std::endl;
+		std::cerr << "depths.size() == 0" << endl;
 		exit(-1);
 	}
 	
 	if (verbosity > 1) {
 		/*for (unsigned jj = 0; jj <= n_layers_w; jj++)
-			std::cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << std::endl;
-		std::cout << residual << std::endl << std::endl;*/
-		std::cout << "depths : ";
+			cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << endl;
+		cout << residual << endl << endl;*/
+		cout << "depths : ";
 		for (auto &x : depths)
-			std::cout << x << " ";
-		std::cout << std::endl;
-		std::cout << "Ns_points : ";
+			cout << x << " ";
+		cout << endl;
+		cout << "Ns_points : ";
 		for (auto &x : Ns_points)
-			std::cout << x << " ";
-		std::cout << std::endl;
+			cout << x << " ";
+		cout << endl;
 	}
 
 	if (object_function_type == "uniform") {
@@ -1975,34 +1986,34 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 			point.R, point.tau, modal_delays, weight_coeffs, mode_numbers);
 	}
 	else {
-		std::cerr << "unknown object_function_type " << object_function_type << std::endl;
+		std::cerr << "unknown object_function_type " << object_function_type << endl;
 		exit(1);
 	}
 
 	if ( verbosity > 1 )
-		std::cout << "point.residual " << point.residual << std::endl;
+		cout << "point.residual " << point.residual << endl;
 	
 	if (point.residual < record_point.residual) {
 		record_point = point;
 		if (verbosity > 0) {
-			std::cout << std::endl;
-			std::cout << std::endl << "New residual minimum:" << std::endl;
-			std::cout << "err = " << record_point.residual << ", parameters:" << std::endl;
-			std::cout << "c_b = " << record_point.cb
+			cout << endl;
+			cout << endl << "New residual minimum:" << endl;
+			cout << "err = " << record_point.residual << ", parameters:" << endl;
+			cout << "c_b = " << record_point.cb
 				<< ", rho_b = " << record_point.rhob
 				<< ", tau = " << record_point.tau
-				<< ", R = " << record_point.R << std::endl;
-			std::cout << "cws_min :" << std::endl;
+				<< ", R = " << record_point.R << endl;
+			cout << "cws_min :" << endl;
 			for (auto &x : record_point.cws)
-				std::cout << x << " ";
-			std::cout << std::endl;
-			std::cout << "depths " << std::endl;
+				cout << x << " ";
+			cout << endl;
+			cout << "depths " << endl;
 			for (auto &x : record_point.depths)
-				std::cout << x << " ";
-			std::cout << "Ns_points " << std::endl;
+				cout << x << " ";
+			cout << "Ns_points " << endl;
 			for (auto &x : Ns_points)
-				std::cout << x << " ";
-			std::cout << std::endl;
+				cout << x << " ";
+			cout << endl;
 		}
 	}
 
@@ -2052,12 +2063,12 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 	}
 
 	if (!rank)
-		std::cout << "loadValuesToSearchSpaceVariables() finished" << std::endl;
+		cout << "loadValuesToSearchSpaceVariables() finished" << endl;
 }
 
 search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> depths)
 {
-	std::cout << "findLocalMinHillClimbing" << std::endl;
+	cout << "findLocalMinHillClimbing" << endl;
 	// choose random point in the search space
 	vector<unsigned> cur_point_indexes, local_record_point_indexes;
 	search_space_point cur_point, local_record_point;
@@ -2080,7 +2091,7 @@ search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> d
 		if (search_space[i].size() > 1)
 			isCheckRequired = true;
 	if ( (!isCheckRequired) && (verbosity > 0) ) {
-		std::cout << "1 element in search space, fast exit" << std::endl;
+		cout << "1 element in search space, fast exit" << endl;
 		return local_record_point;
 	}
 
@@ -2091,19 +2102,19 @@ search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> d
 	// launch iterations of hill climbing
 	for (unsigned run_index = 0; run_index < iterated_local_search_runs; run_index++) {
 		bool isLocalMin;
-		std::cout << "iteration " << run_index << " of ILS" << std::endl;
+		cout << "iteration " << run_index << " of ILS" << endl;
 		do { // do while local min not reached
 			isLocalMin = true; // if changing of every variable will not lead to a record updata, then a local min reached
 			for (unsigned i = 0; i < search_space.size(); i++) { // i stands for variable_index
 				if (search_space[i].size() == 1) {
-					//std::cout << "one value of a variable, skip it" << std::endl;
+					//cout << "one value of a variable, skip it" << endl;
 					continue;
 				}
-				//std::cout << "variable_index " << variable_index << std::endl;
+				//cout << "variable_index " << variable_index << endl;
 				cur_point_indexes = local_record_point_indexes;
 				unsigned index_from = cur_point_indexes[i]; // don't check index twice
 				if (verbosity > 0)
-					std::cout << "index_from " << index_from << std::endl;
+					cout << "index_from " << index_from << endl;
 				do { // change value of a variabble while it leads to updating of a record
 					double old_record_residual = local_record_point.residual;
 					cur_point_indexes[i]++;
@@ -2112,12 +2123,12 @@ search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> d
 					if (cur_point_indexes[i] == 0)
 						cur_point_indexes[i] = search_space[i].size() - 1;
 					if (cur_point_indexes[i] == index_from) {
-						std::cout << "cur_point_indexes[i] == index_from. Break iteration." << std::endl;
+						cout << "cur_point_indexes[i] == index_from. Break iteration." << endl;
 						break;
 					}
 					if (verbosity > 0) {
-						std::cout << "checking index " << cur_point_indexes[i] <<
-							", max index " << search_space[i].size() - 1 << std::endl;
+						cout << "checking index " << cur_point_indexes[i] <<
+							", max index " << search_space[i].size() - 1 << endl;
 						cout << "cur_point_indexes" << endl;
 						for (unsigned j = 0; j < cur_point_indexes.size(); j++)
 							cout << cur_point_indexes[j] << " ";
@@ -2141,17 +2152,17 @@ search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> d
 			}
 		} while (!isLocalMin);
 
-		//std::cout << std::endl << "*** local minimum in hill climbing" << std::endl;
-		//std::cout << "local record of residual " << record_point.residual << std::endl;
-		//std::cout << "-----" << std::endl;
-		std::cout << "new random cur_point_indexes : " << std::endl;
+		//cout << endl << "*** local minimum in hill climbing" << endl;
+		//cout << "local record of residual " << record_point.residual << endl;
+		//cout << "-----" << endl;
+		cout << "new random cur_point_indexes : " << endl;
 		
 		for(;;) {
 			// prmutate current global minimum point to obtain a new start point
 			for (unsigned i = 0; i < search_space.size(); i++) {
 				if (search_space[i].size() == 1) {
 					cur_point_indexes[i] = 0;
-					std::cout << cur_point_indexes[i] << " ";
+					cout << cur_point_indexes[i] << " ";
 					continue;
 				}
 				unsigned rand_numb = rand();
@@ -2177,9 +2188,9 @@ search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> d
 		local_record_point = cur_point;
 		local_record_point_indexes = cur_point_indexes;
 
-		std::cout << "checked_points size " << checked_points.size() << std::endl;
-		std::cout << "skipped_points " << skipped_points << std::endl;
-		std::cout << "---" << std::endl;
+		cout << "checked_points size " << checked_points.size() << endl;
+		cout << "skipped_points " << skipped_points << endl;
+		cout << "---" << endl;
 	}
 
 	return local_record_point;
@@ -2243,11 +2254,11 @@ int sspemdd_sequential::readScenario(std::string scenarioFileName)
 {
 // read constant and variable values from a scenario file
 	if ( (!rank) && (verbosity > 0) )
-		std::cout << "scenarioFileName " << scenarioFileName << std::endl;
+		cout << "scenarioFileName " << scenarioFileName << endl;
 	std::ifstream scenarioFile(scenarioFileName.c_str());
 
 	if (!scenarioFile.is_open()) {
-		std::cerr << "scenarioFile with the name " << scenarioFileName << " wasn't openend" << std::endl;
+		std::cerr << "scenarioFile with the name " << scenarioFileName << " wasn't openend" << endl;
 		return -1;
 	}
 
@@ -2345,45 +2356,45 @@ int sspemdd_sequential::readScenario(std::string scenarioFileName)
 	}
 	
 	if (!cw1_init_arr.size()) {
-		std::cerr << "!cw1_init_arr.size()" << std::endl;
+		std::cerr << "!cw1_init_arr.size()" << endl;
 		return -1;
 	}
 	if (!h || !H) {
-		std::cerr << "!h || !H" << std::endl;
+		std::cerr << "!h || !H" << endl;
 		return -1;
 	}
 
-	if ( (!rank) && (verbosity > 0) ) {
-		std::cout << "Parameters :" << std::endl;
-		std::cout << "cw1_init_arr :" << std::endl;
+	if ( ((rank == 0) || (rank == 1)) && (verbosity > 0) ) {
+		cout << "Parameters :" << endl;
+		cout << "cw1_init_arr :" << endl;
 		for (auto &x : cw1_init_arr)
-			std::cout << x << " ";
-		std::cout << std::endl;
-		std::cout << "cw2_init_arr :" << std::endl;
+			cout << x << " ";
+		cout << endl;
+		cout << "cw2_init_arr :" << endl;
 		for (auto &x : cw2_init_arr)
-			std::cout << x << " ";
-		std::cout << std::endl;
-		std::cout << "ncpl_init_arr :" << std::endl;
+			cout << x << " ";
+		cout << endl;
+		cout << "ncpl_init_arr :" << endl;
 		for (auto &x : ncpl_init_arr)
-			std::cout << x << " ";
-		std::cout << std::endl;
-		std::cout << "n_layers_w " << n_layers_w << std::endl;
-		std::cout << "nR " << nR << std::endl;
-		std::cout << "R1 " << R1 << std::endl;
-		std::cout << "R2 " << R2 << std::endl;
-		std::cout << "ntau " << ntau << std::endl;
-		std::cout << "tau1 " << tau1 << std::endl;
-		std::cout << "tau2 " << tau2 << std::endl;
-		std::cout << "nrhob " << nrhob << std::endl;
-		std::cout << "rhob1 " << rhob1 << std::endl;
-		std::cout << "rhob2 " << rhob2 << std::endl;
-		std::cout << "ncb " << ncb << std::endl;
-		std::cout << "cb1 " << cb1 << std::endl;
-		std::cout << "cb2 " << cb2 << std::endl;
-		std::cout << "dtimes_file " << dtimesFileName << std::endl;
-		std::cout << "spmag_file " << spmagFileName << std::endl;
+			cout << x << " ";
+		cout << endl;
+		cout << "n_layers_w " << n_layers_w << endl;
+		cout << "nR " << nR << endl;
+		cout << "R1 " << R1 << endl;
+		cout << "R2 " << R2 << endl;
+		cout << "ntau " << ntau << endl;
+		cout << "tau1 " << tau1 << endl;
+		cout << "tau2 " << tau2 << endl;
+		cout << "nrhob " << nrhob << endl;
+		cout << "rhob1 " << rhob1 << endl;
+		cout << "rhob2 " << rhob2 << endl;
+		cout << "ncb " << ncb << endl;
+		cout << "cb1 " << cb1 << endl;
+		cout << "cb2 " << cb2 << endl;
+		cout << "dtimes_file " << dtimesFileName << endl;
+		cout << "spmag_file " << spmagFileName << endl;
 
-		std::cout << "readScenario() finished" << std::endl;
+		cout << "readScenario() finished" << endl;
 	}
 
 	return 0;
@@ -2393,7 +2404,7 @@ int sspemdd_sequential::readInputDataFromFiles()
 {	
 	std::ifstream dtimesFile(dtimesFileName.c_str());
 	if (!dtimesFile.is_open()) {
-		std::cerr << "dtimesFile " << dtimesFileName << " wasn't opened" << std::endl;
+		std::cerr << "dtimesFile " << dtimesFileName << " wasn't opened" << endl;
 		return -1;
 	}
 	std::stringstream myLineStream;
@@ -2440,24 +2451,24 @@ int sspemdd_sequential::readInputDataFromFiles()
 		spmagFile.close();
 
 		if ( (!rank) && (verbosity > 0) ) {
-			std::cout << "weight_coeffs.size() " << weight_coeffs.size() << std::endl;
-			std::cout << "weight_coeffs first 10 lines : " << std::endl;
+			cout << "weight_coeffs.size() " << weight_coeffs.size() << endl;
+			cout << "weight_coeffs first 10 lines : " << endl;
 			for (unsigned i = 0; i < 10; i++) {
 				for (auto &x : weight_coeffs[i])
-					std::cout << x << " ";
-				std::cout << std::endl;
+					cout << x << " ";
+				cout << endl;
 			}
 		}
 	}
 	else {
 		object_function_type = "uniform";
 		if ( (!rank) && (verbosity > 0) )
-			std::cout << "spmagFile " << spmagFileName << " wasn't opened" << std::endl;
+			cout << "spmagFile " << spmagFileName << " wasn't opened" << endl;
 	}
 
 	if ( (!rank) && (verbosity > 0) ){
-		std::cout << "object_function_type changed to " << object_function_type << std::endl;
-		std::cout << "readInputDataFromFiles() finished " << std::endl;
+		cout << "object_function_type changed to " << object_function_type << endl;
+		cout << "readInputDataFromFiles() finished " << endl;
 	}
 	return 0;
 }

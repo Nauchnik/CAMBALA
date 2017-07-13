@@ -25,6 +25,7 @@ public:
 private:
 	void control_process();
 	void computing_process();
+	void sendTask(double *task, unsigned task_index, unsigned process_index, vector<double> depths);
 };
 
 #endif

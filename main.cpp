@@ -25,7 +25,7 @@
 int main(int argc, char **argv)
 {
 	unsigned ncpl = 0; // search mesh within each water layer
-	
+
 	std::string scenarioFileName = "";
 	sspemdd_sequential sspemdd_seq;
 	unsigned iterated_local_search_runs = 10;
@@ -40,26 +40,22 @@ int main(int argc, char **argv)
 	argv[2] = "1"; // iterated_local_search_runs
 	verbosity = 2;
 #endif
-	
+
 	if (argc >= 2)
 		scenarioFileName = argv[1];
 	else {
-		std::cout << "Usage : scenarioFileName [iterated_local_search_runs] [verbosity]" << std::endl;
+		cout << "Usage : scenarioFileName [iterated_local_search_runs] [verbosity]" << endl;
 		exit(1);
 	}
-	
-	if (argc >= 3) {
+	if (argc >= 3)
 		iterated_local_search_runs = atoi(argv[2]);
-		std::cout << "iterated_local_search_runs " << iterated_local_search_runs << std::endl;
-	}
-
-	if (argc >= 4) {
+	if (argc >= 4)
 		verbosity = atoi(argv[3]);
-		std::cout << "verbosity " << verbosity << std::endl;
-	}
 
 #ifndef _MPI
 	// sequential mode
+	cout << "iterated_local_search_runs " << iterated_local_search_runs << endl;
+	cout << "verbosity " << verbosity << endl;
 
 	// fix start time
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
@@ -86,14 +82,14 @@ int main(int argc, char **argv)
 		sspemdd_seq.init(depths_vec[i]);
 		//sspemdd_seq.findGlobalMinBruteForce(depths_vec[i]);
 		sspemdd_seq.findLocalMinHillClimbing(depths_vec[i]);
-		std::cout << "Processed " << i + 1 << " out of " << depths_vec.size() << " depths" << std::endl;
+		cout << "Processed " << i + 1 << " out of " << depths_vec.size() << " depths" << endl;
 	}
 
 	sspemdd_seq.reportFinalResult();
 
 	t2 = std::chrono::high_resolution_clock::now();
 	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-	std::cout << "main() total time " << time_span.count() << " s" << std::endl;
+	cout << "main() total time " << time_span.count() << " s" << endl;
 
 #else
 	int rank = 0;
@@ -103,6 +99,11 @@ int main(int argc, char **argv)
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &corecount);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	if (!rank) {
+		cout << "iterated_local_search_runs " << iterated_local_search_runs << endl;
+		cout << "verbosity " << verbosity << endl;
+	}
 
 	sspemdd_parallel sspemdd_par;
 	sspemdd_par.rank = rank;
@@ -116,7 +117,7 @@ int main(int argc, char **argv)
 	
 	double cur_time = MPI_Wtime();
 	sspemdd_par.MPI_main();
-	std::cout << "MPI_main() total time " << MPI_Wtime() - cur_time << " s" << std::endl;
+	cout << "MPI_main() total time " << MPI_Wtime() - cur_time << " s" << endl;
 #endif
 	
 	return 0;
