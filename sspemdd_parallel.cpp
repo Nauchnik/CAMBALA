@@ -42,7 +42,7 @@ void sspemdd_parallel::control_process()
 	double *task = new double[TASK_LEN];
 	double *result = new double[RESULT_LEN];
 	
-	unsigned send_task_count = 0;
+	int send_task_count = 0;
 	
 	// sending first part of tasks
 	for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++) {
@@ -57,13 +57,14 @@ void sspemdd_parallel::control_process()
 	ofile.close(); ofile.clear();
 	
 	unsigned processed_task_count = 0;
-	unsigned received_task_index;
+	int received_task_index;
 	double received_residual;
 	double task_processing_time;
-
+	int stop_message = -1;
+	
 	// get results and send new tasks on idle computing processes
 	while (processed_task_count < depths_vec.size()) {
-		MPI_Recv( &received_task_index,  1, MPI_UNSIGNED, MPI_ANY_SOURCE,    MPI_ANY_TAG, MPI_COMM_WORLD, &status );
+		MPI_Recv( &received_task_index,  1, MPI_INT, MPI_ANY_SOURCE,    MPI_ANY_TAG, MPI_COMM_WORLD, &status );
 		cur_status = status;
 		MPI_Recv( &task_processing_time, 1, MPI_DOUBLE, cur_status.MPI_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
 		MPI_Recv( result, RESULT_LEN, MPI_DOUBLE, cur_status.MPI_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
@@ -120,12 +121,8 @@ void sspemdd_parallel::control_process()
 			sendTask(task, send_task_count, status.MPI_SOURCE, depths_vec[send_task_count]);
 			send_task_count++;
 		}
-		else {
-			// send stop-messages
-			for (unsigned j = 0; j < TASK_LEN; j++)
-				task[j] = STOP_MESSAGE;
-			MPI_Send(task, TASK_LEN, MPI_DOUBLE, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
-		}
+		else
+			MPI_Send( &stop_message, 1, MPI_INT, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
 		
 		ofile.open("mpi_out", std::ios_base::app);
 		ofile << sstream_out.rdbuf();
@@ -158,7 +155,7 @@ void sspemdd_parallel::control_process()
 #endif
 }
 
-void sspemdd_parallel::sendTask(double *task, unsigned task_index, unsigned process_index, vector<double> depths)
+void sspemdd_parallel::sendTask(double *task, int task_index, unsigned process_index, vector<double> depths)
 {
 	unsigned cur_depths_size = depths.size();
 	for (unsigned j = 0; j < cur_depths_size; j++)
@@ -166,7 +163,7 @@ void sspemdd_parallel::sendTask(double *task, unsigned task_index, unsigned proc
 	for (unsigned j = cur_depths_size; j < TASK_LEN; j++)
 		task[j] = -1;
 #ifdef _MPI
-	MPI_Send( &task_index, 1,        MPI_UNSIGNED, process_index, 0, MPI_COMM_WORLD);
+	MPI_Send( &task_index, 1,        MPI_INT, process_index, 0, MPI_COMM_WORLD);
 	MPI_Send( task,        TASK_LEN, MPI_DOUBLE,   process_index, 0, MPI_COMM_WORLD);
 #endif
 }
@@ -177,14 +174,19 @@ void sspemdd_parallel::computing_process()
 	MPI_Status status;
 	double *task = new double[TASK_LEN];
 	double *result = new double[RESULT_LEN];
-	unsigned task_index;
+	int task_index;
 	vector<double> depths;
 
 	stringstream cur_process_points_sstream;
 	search_space_point local_point_record;
 	
 	for (;;) {
-		MPI_Recv( &task_index, 1,        MPI_UNSIGNED, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
+		MPI_Recv( &task_index, 1,        MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
+		// if stop-message then finalize
+		if (task_index == -1) {
+			cout << "rank " << rank << " received stop-message" << endl;
+			break;
+		}
 		MPI_Recv( task,        TASK_LEN, MPI_DOUBLE,   0, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
 
 		if (rank == 1) {
@@ -207,12 +209,6 @@ void sspemdd_parallel::computing_process()
 				cout << x << " " << endl;
 			cout << endl;
 			cout << "received task_index " << task_index << endl;
-		}
-		
-		// if stop-message then finalize
-		if (task_index == -1) {
-			cout << "rank " << rank << " received stop-message" << endl;
-			break;
 		}
 
 		init(depths);
