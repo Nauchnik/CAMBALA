@@ -50,6 +50,7 @@ void sspemdd_parallel::control_process()
 		send_task_count++;
 	}
 	sstream_out << "send_task_count " << send_task_count << endl;
+	sstream_out << "tasks number " << depths_vec.size() << endl;
 
 	std::ofstream ofile("mpi_out");
 	ofile << sstream_out.rdbuf();
@@ -101,6 +102,7 @@ void sspemdd_parallel::control_process()
 			//cout << "Control process, new residual minimum : "  << received_residual << endl;
 			sstream_out << endl << "Control process, new residual minimum:" << endl;
 			sstream_out << "task processing time " << task_processing_time << " s" << endl;
+			sstream_out << "task index " << received_task_index << endl;
 			sstream_out << "err = " << record_point.residual << ", parameters:" << endl;
 			sstream_out << "c_b = " << record_point.cb << 
 				           ", rho_b= " << record_point.rhob << 
@@ -138,6 +140,10 @@ void sspemdd_parallel::control_process()
 		", tau = " << record_point.tau << endl;
 	sstream_out << "cws :" << endl;
 	for (auto &x : record_point.cws)
+		sstream_out << x << " ";
+	sstream_out << endl;
+	sstream_out << "depths :" << endl;
+	for (auto &x : record_point.depths)
 		sstream_out << x << " ";
 	sstream_out << endl;
 	sstream_out << "final time " << MPI_Wtime() - mpi_start_time << " s" << endl;
