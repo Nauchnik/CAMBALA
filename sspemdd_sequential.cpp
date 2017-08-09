@@ -2067,7 +2067,7 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 
 search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> depths)
 {
-	if (verbosity > 10
+	if (verbosity > 1)
 		cout << "findLocalMinHillClimbing" << endl;
 	unsigned u_val = 1;
 	for (unsigned i = 0; i < depths.size() - 2; i++)
