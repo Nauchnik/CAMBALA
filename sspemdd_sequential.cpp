@@ -335,11 +335,13 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(vector<double> 
     //2016.04.27:Pavel: RMS
 	residual = sqrt(residual/nRes);
 
+	if (isTimeDelayPrinting)
+		printDelayTime(R, mode_numbers, modal_group_velocities);
+
 	return residual;
 }
 
 // New version from 17.05.2017, group velocities computed using perturbative approach
-
 double sspemdd_sequential::compute_modal_delays_residual_uniform2(vector<double> &freqs,
 	vector<double> &depths,
 	vector<double> &c1s,
@@ -460,15 +462,8 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(vector<double>
 	double d = (double)(residual / (double)nRes);
 	residual = sqrt(d);
 
-	/*std::ofstream ofile("R_mgv");
-	for (unsigned ii = 0; ii < freqs.size(); ii++) {
-		mnumb = mode_numbers.at(ii);
-		ofile << freqs.at(ii) << "\t";
-		for (unsigned jj = 0; jj < mnumb; jj++)
-			ofile << R / modal_group_velocities[ii][jj] << "\t";
-		ofile << endl;
-	}
-	ofile.close();*/
+	if (isTimeDelayPrinting)
+		printDelayTime(R, mode_numbers, modal_group_velocities);
 
 	return residual;
 }
@@ -2568,7 +2563,8 @@ search_space_point sspemdd_sequential::getNonRandomStartPoint( vector<double> de
 
 void sspemdd_sequential::printDelayTime(double R, vector<unsigned> mode_numbers, vector<vector<double>> modal_group_velocities)
 {
-	ofstream ofile("delayTimeOutput.txt");
+	string ofile_name = "delayTimeOutput_" + object_function_type + ".txt";
+	ofstream ofile(ofile_name);
 	for (unsigned ii = 0; ii < freqs.size(); ii++) {
 		unsigned mnumb = mode_numbers.at(ii);
 		ofile << freqs.at(ii) << "\t";

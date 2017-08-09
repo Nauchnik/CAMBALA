@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 		point.cws = { 1500, 1498, 1493, 1472, 1462 };
 		point.depths = { 10, 20, 30, 40, 50 };
 		sspemdd_seq.init(point.depths);
-		sspemdd_seq.object_function_type = "uniform2";
+		sspemdd_seq.object_function_type = "uniform";
 		sspemdd_seq.directPointCalc( point );
 		sspemdd_seq.reportFinalResult();
 		cout << "true value test" << endl;
