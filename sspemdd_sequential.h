@@ -9,11 +9,12 @@
 #include <math.h>
 #include "linalg.h"
 
-const double LOCAL_M_PI = 3.14159265358979323846;
-const std::complex<double> Iu(0.0,1.0);
-const double START_HUGE_VALUE = 1e100;
-
 using namespace std;
+
+const double LOCAL_M_PI = 3.14159265358979323846;
+const complex<double> Iu(0.0,1.0);
+const double START_HUGE_VALUE = 1e100;
+const double START_CW_VALUE = 1481;
 
 struct search_space_point
 {
@@ -82,6 +83,7 @@ public:
 	std::string dtimesFileName;
 	std::string spmagFileName;
 	int rank;
+	bool isTimeDelayPrinting;
 
 	// functions by Oleg
 	vector<vector<double>> search_space; // values of variables which form a search space
@@ -89,23 +91,25 @@ public:
 	int readInputDataFromFiles();
 	int init(vector<double> depths);
 	int createDepthsArray(vector<vector<double>> &depths_vec);
+	void loadValuesToSearchSpaceVariables();
 	double getRecordResidual();
+	search_space_point getNonRandomStartPoint( vector<double> depths );
 	double fillDataComputeResidual( search_space_point &point );
 	vector<search_space_point> getSearchSpacePointsVec(vector<double> depths);
-	void findGlobalMinBruteForce(vector<double> depths);
-	void loadValuesToSearchSpaceVariables();
 	search_space_point findLocalMinHillClimbing(vector<double> depths);
+	void findGlobalMinBruteForce(vector<double> depths);
 	void reportFinalResult();
 	void getThreeValuesFromStr(std::string str, double &val1, double &val2, double &val3);
 	void reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a);
-
+	void directPointCalc( search_space_point point );
+	void sspemdd_sequential::printDelayTime(double R, vector<unsigned> mode_numbers, vector<vector<double>> modal_group_velocities);
+	
 	// functions by Pavel
 	//tau_comment: added tau to the arguments of compute_modal_delays_residual_uniform()
 
     void load_layers_data(std::string LayersFName,
 	vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,
 	vector<unsigned> &Ns_points);
-
 
 	void load_profile_deep_water(std::string ProfileFName,unsigned ppm,
 	vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,
@@ -186,6 +190,7 @@ protected:
 	std::chrono::high_resolution_clock::time_point start_chrono_time;
 	// hill climbing
 	search_space_point fromPointIndexesToPoint( vector<unsigned> cur_point_indexes, vector<double> depths);
+	vector<unsigned> fromPointToPointIndexes(search_space_point point);
 	search_space_point fromDoubleVecToPoint(vector<double> double_vec);
 	vector<search_space_point> checked_points;
 };

@@ -44,14 +44,20 @@ int main(int argc, char **argv)
 	if (argc >= 2)
 		scenarioFileName = argv[1];
 	else {
-		cout << "Usage : scenarioFileName [iterated_local_search_runs] [verbosity]" << endl;
+		cout << "Usage : scenarioFileName [iterated_local_search_runs] [verbosity] [-test]" << endl;
 		exit(1);
 	}
 	if (argc >= 3)
 		iterated_local_search_runs = atoi(argv[2]);
 	if (argc >= 4)
 		verbosity = atoi(argv[3]);
-
+	bool isTestLaunch = false;
+	if (argc >= 5) {
+		string test_str= argv[4];
+		if (test_str == "-test")
+			isTestLaunch = true;
+	}
+	
 #ifndef _MPI
 	// sequential mode
 	cout << "iterated_local_search_runs " << iterated_local_search_runs << endl;
@@ -70,6 +76,23 @@ int main(int argc, char **argv)
 	vector<vector<double>> depths_vec;
 	sspemdd_seq.createDepthsArray(depths_vec);
 
+	if (isTestLaunch) {
+		search_space_point point;
+		// true values
+		point.cb = 1700;
+		point.R = 7000;
+		point.rhob = 1.7;
+		point.tau = 0;
+		point.cws = { 1500, 1498, 1493, 1472, 1462 };
+		point.depths = { 10, 20, 30, 40, 50 };
+		sspemdd_seq.init(point.depths);
+		sspemdd_seq.object_function_type = "uniform2";
+		sspemdd_seq.directPointCalc( point );
+		sspemdd_seq.reportFinalResult();
+		cout << "true value test" << endl;
+		return 0;
+	}
+	
 	/*ofstream depths_file("depths.txt");
 	depths_file << depths_vec.size() << " depths for the scenario " << scenarioFileName << endl;
 	for (auto &x : depths_vec) {

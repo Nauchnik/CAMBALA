@@ -173,6 +173,7 @@ sspemdd_sequential::sspemdd_sequential() :
 	iterated_local_search_runs(10),
 	verbosity(1),
 	N_total(1),
+	isTimeDelayPrinting(false),
 	rank(0)
 {
 	record_point.cb       = START_HUGE_VALUE;
@@ -334,16 +335,6 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(vector<double> 
     //2016.04.27:Pavel: RMS
 	residual = sqrt(residual/nRes);
 
-	/*std::ofstream ofile("R_mgv");
-	for (unsigned ii = 0; ii < freqs.size(); ii++) {
-		mnumb = mode_numbers.at(ii);
-		ofile << freqs.at(ii) << "\t";
-		for (unsigned jj = 0; jj < mnumb; jj++)
-			ofile << R / modal_group_velocities[ii][jj] << "\t";
-		ofile << endl;
-	}
-	ofile.close();*/
-
 	return residual;
 }
 
@@ -374,7 +365,16 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform2(vector<double>
 	vector<unsigned> mode_numbers;
 
 	compute_modal_grop_velocities2(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
-
+	/*cout << "iModesSubset " << iModesSubset << endl;
+	cout << "freqs" << endl;
+	for (unsigned i = 0; i < 100; i++)
+		cout << freqs[i] << " ";
+	cout << endl;
+	cout << "mode_numbers" << endl;
+	for (unsigned i=0; i < 100; i++)
+		cout << mode_numbers[i] << " ";
+	cout << endl;*/
+	
 	for (unsigned ii = 0; ii<freqs.size(); ii++) {
 		//2016.04.27:Pavel: mnumb = std::min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
 		mnumb = experimental_mode_numbers.at(ii);
@@ -397,15 +397,8 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform2(vector<double>
     //2016.04.27:Pavel: RMS
 	residual = sqrt(residual/nRes);
 
-	/*std::ofstream ofile("R_mgv");
-	for (unsigned ii = 0; ii < freqs.size(); ii++) {
-		mnumb = mode_numbers.at(ii);
-		ofile << freqs.at(ii) << "\t";
-		for (unsigned jj = 0; jj < mnumb; jj++)
-			ofile << R / modal_group_velocities[ii][jj] << "\t";
-		ofile << endl;
-	}
-	ofile.close();*/
+	if (isTimeDelayPrinting)
+		printDelayTime(R, mode_numbers, modal_group_velocities);
 
 	return residual;
 }
@@ -1978,6 +1971,10 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 	}
 
 	if (object_function_type == "uniform") {
+		point.residual = compute_modal_delays_residual_uniform(freqs, depths, c1s, c2s, rhos, Ns_points,
+			point.R, point.tau, modal_delays, mode_numbers);
+	}
+	else if (object_function_type == "uniform2") {
 		point.residual = compute_modal_delays_residual_uniform2(freqs, depths, c1s, c2s, rhos, Ns_points,
 			point.R, point.tau, modal_delays, mode_numbers);
 	}
@@ -2010,9 +2007,11 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 			cout << "depths " << endl;
 			for (auto &x : record_point.depths)
 				cout << x << " ";
+			cout << endl;
 			cout << "Ns_points " << endl;
 			for (auto &x : Ns_points)
 				cout << x << " ";
+			cout << endl;
 			cout << endl;
 		}
 	}
@@ -2069,39 +2068,38 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> depths)
 {
 	cout << "findLocalMinHillClimbing" << endl;
-	// choose random point in the search space
-	vector<unsigned> cur_point_indexes, local_record_point_indexes;
-	search_space_point cur_point, local_record_point;
-	local_record_point_indexes.resize(search_space.size());
-	for (unsigned i = 0; i < search_space.size(); i++) // i stands for variable_index
-		local_record_point_indexes[i] = rand() % search_space[i].size(); // get random index
-	cur_point_indexes = local_record_point_indexes;
 
-	// calculate residual in the start point
-	local_record_point = fromPointIndexesToPoint(local_record_point_indexes, depths);
+	// choose random point in the search space
+	/*for (unsigned i = 0; i < search_space.size(); i++) // i stands for variable_index
+	local_record_point_indexes[i] = rand() % search_space[i].size(); // get random index
+	cur_point_indexes = local_record_point_indexes;*/
+	
+	search_space_point local_record_point = getNonRandomStartPoint(depths);
+	vector<unsigned> local_record_point_indexes = fromPointToPointIndexes( local_record_point );
 	fillDataComputeResidual(local_record_point); // calculated residual is written to cur_point
 
-	cout << "cur_point_indexes" << endl;
-	for (unsigned j = 0; j < cur_point_indexes.size(); j++)
-		cout << cur_point_indexes[j] << " ";
-	cout << endl;
-
 	bool isCheckRequired = false;
-	for (unsigned i = 0; i < search_space.size(); i++) // i stands for variable_index
-		if (search_space[i].size() > 1)
+	for (unsigned i = 0; i < search_space.size(); i++) { // i stands for variable_index
+		if (search_space[i].size() > 1) {
 			isCheckRequired = true;
+			break;
+		}
+	}
 	if ( (!isCheckRequired) && (verbosity > 0) ) {
-		cout << "1 element in search space, fast exit" << endl;
+		cout << "1 element in a search space, fast exit" << endl;
 		return local_record_point;
 	}
 
 	checked_points.reserve(N_total);
 	checked_points.push_back(local_record_point);
 	unsigned skipped_points = 0;
-	bool isRecordUpdateInDimension;
+	bool isContinueDimension;
+	vector<unsigned> cur_point_indexes;
+	search_space_point cur_point;
 	// launch iterations of hill climbing
 	for (unsigned run_index = 0; run_index < iterated_local_search_runs; run_index++) {
 		bool isLocalMin;
+		cout << endl;
 		cout << "iteration " << run_index << " of ILS" << endl;
 		do { // do while local min not reached
 			isLocalMin = true; // if changing of every variable will not lead to a record updata, then a local min reached
@@ -2112,18 +2110,32 @@ search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> d
 				}
 				//cout << "variable_index " << variable_index << endl;
 				cur_point_indexes = local_record_point_indexes;
+				vector<unsigned> point_indexes_before_increase = cur_point_indexes;
 				unsigned index_from = cur_point_indexes[i]; // don't check index twice
 				if (verbosity > 0)
 					cout << "index_from " << index_from << endl;
+				bool isDecreaseTurn = false;
+				bool isTriggerIncToDec = false;
 				do { // change value of a variabble while it leads to updating of a record
 					double old_record_residual = local_record_point.residual;
-					cur_point_indexes[i]++;
-					if (cur_point_indexes[i] == search_space[i].size())
-						cur_point_indexes[i] = 0;
-					if (cur_point_indexes[i] == 0)
-						cur_point_indexes[i] = search_space[i].size() - 1;
+					if (isDecreaseTurn) {
+						if (isTriggerIncToDec) { // move to a point before increase
+							cur_point_indexes = point_indexes_before_increase;
+							isTriggerIncToDec = false;
+						}
+						if (cur_point_indexes[i] == 0)
+							cur_point_indexes[i] = search_space[i].size() - 1;
+						else
+							cur_point_indexes[i]--;
+					}
+					else {
+						cur_point_indexes[i]++;
+						if (cur_point_indexes[i] == search_space[i].size())
+							cur_point_indexes[i] = 0;
+					}
 					if (cur_point_indexes[i] == index_from) {
-						cout << "cur_point_indexes[i] == index_from. Break iteration." << endl;
+						if (verbosity > 0)
+							cout << "cur_point_indexes[i] == index_from. Break iteration." << endl;
 						break;
 					}
 					if (verbosity > 0) {
@@ -2135,34 +2147,44 @@ search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> d
 						cout << endl;
 					}
 					cur_point = fromPointIndexesToPoint(cur_point_indexes, depths);
-					isRecordUpdateInDimension = false;
 					if (std::find(checked_points.begin(), checked_points.end(), cur_point) != checked_points.end()) {
 						skipped_points++;
 						continue;
 					}
 					double d_val = fillDataComputeResidual(cur_point); // calculated residual is written to cur_point
 					checked_points.push_back(cur_point);
+					isContinueDimension = false;
 					if (d_val < old_record_residual) { // new record was found
 						local_record_point.residual = d_val;
 						local_record_point_indexes = cur_point_indexes;
 						isLocalMin = false;
-						isRecordUpdateInDimension = true;
+						isContinueDimension = true;
 					}
-				} while (isRecordUpdateInDimension);
+					if ((!isContinueDimension) && (!isDecreaseTurn)) {
+						isDecreaseTurn = true; // try to decrease current value
+						if (verbosity > 0)
+							cout << "isDecreaseTurn " << isDecreaseTurn << endl;
+						isContinueDimension = true;
+						isTriggerIncToDec = true;
+						continue;
+					}
+				} while (isContinueDimension);
 			}
 		} while (!isLocalMin);
 
 		//cout << endl << "*** local minimum in hill climbing" << endl;
 		//cout << "local record of residual " << record_point.residual << endl;
 		//cout << "-----" << endl;
-		cout << "new random cur_point_indexes : " << endl;
+		if (verbosity > 0)
+			cout << "new random cur_point_indexes : " << endl;
 		
 		for(;;) {
 			// prmutate current global minimum point to obtain a new start point
 			for (unsigned i = 0; i < search_space.size(); i++) {
 				if (search_space[i].size() == 1) {
 					cur_point_indexes[i] = 0;
-					cout << cur_point_indexes[i] << " ";
+					if (verbosity > 0)
+						cout << cur_point_indexes[i] << " ";
 					continue;
 				}
 				unsigned rand_numb = rand();
@@ -2209,6 +2231,42 @@ search_space_point sspemdd_sequential::fromPointIndexesToPoint( vector<unsigned>
 	point.depths = depths;
 	point.residual = START_HUGE_VALUE;
 	return point;
+}
+
+vector<unsigned> sspemdd_sequential::fromPointToPointIndexes( search_space_point point )
+{
+	vector<unsigned> cur_point_indexes;
+	cur_point_indexes.resize(search_space.size());
+
+	for (unsigned j = 0; j<search_space[0].size(); j++)
+		if ( search_space[0][j] == point.cb ) {
+			cur_point_indexes[0] = j;
+			break;
+		}
+	for (unsigned j = 0; j<search_space[1].size(); j++)
+		if (search_space[1][j] == point.rhob) {
+			cur_point_indexes[1] = j;
+			break;
+		}
+	for (unsigned j = 0; j<search_space[2].size(); j++)
+		if (search_space[2][j] == point.R) {
+			cur_point_indexes[2] = j;
+			break;
+		}
+	for (unsigned j = 0; j<search_space[3].size(); j++)
+		if (search_space[3][j] == point.tau) {
+			cur_point_indexes[3] = j;
+			break;
+		}
+	for (unsigned i = 4; i < search_space.size(); i++) {
+		for (unsigned j = 0; j < search_space[i].size(); j++)
+			if (search_space[i][j] == point.cws[i - 4]) {
+				cur_point_indexes[i] = j;
+				break;
+			}
+	}
+
+	return cur_point_indexes;
 }
 
 search_space_point sspemdd_sequential::fromDoubleVecToPoint(vector<double> double_vec)
@@ -2461,7 +2519,7 @@ int sspemdd_sequential::readInputDataFromFiles()
 		}
 	}
 	else {
-		object_function_type = "uniform";
+		object_function_type = "uniform2";
 		if ( (!rank) && (verbosity > 0) )
 			cout << "spmagFile " << spmagFileName << " wasn't opened" << endl;
 	}
@@ -2471,4 +2529,53 @@ int sspemdd_sequential::readInputDataFromFiles()
 		cout << "readInputDataFromFiles() finished " << endl;
 	}
 	return 0;
+}
+
+search_space_point sspemdd_sequential::getNonRandomStartPoint( vector<double> depths )
+{
+	// search_space_variables[0] - cb
+	// search_space_variables[1] - rhob
+	// search_space_variables[2] - R
+	// search_space_variables[3] - tau
+	// search_space_variables[4...] - cws
+
+	search_space_point point;
+
+	point.cb = (cb1 == cb2) ? cb1 : (cb2 - cb1) / 2;
+	point.rhob = (rhob1 == rhob2) ? rhob1 : (rhob2 - rhob1) / 2;
+	point.R = (R1 == R2) ? R1 : (R2 - R1) / 2;
+	point.tau = (tau1 == tau2) ? tau1 : (tau2 - tau1) / 2;
+	
+	point.cws.resize(cw1_arr.size());
+	for ( unsigned i = 0; i < point.cws.size(); i++ ) {
+		if (cw1_arr[i] == cw2_arr[i])
+			point.cws[i] = cw1_arr[i];
+		else if ((START_CW_VALUE >= cw1_arr[i]) && (START_CW_VALUE <= cw2_arr[i])) // if cws should be modified
+			point.cws[i] = START_CW_VALUE;
+		else
+			point.cws[i] = (cw2_arr[i] - cw1_arr[i]) / 2;
+	}
+
+	point.depths = depths;
+
+	return point;
+}
+
+void sspemdd_sequential::printDelayTime(double R, vector<unsigned> mode_numbers, vector<vector<double>> modal_group_velocities)
+{
+	ofstream ofile("delayTimeOutput.txt");
+	for (unsigned ii = 0; ii < freqs.size(); ii++) {
+		unsigned mnumb = mode_numbers.at(ii);
+		ofile << freqs.at(ii) << "\t";
+		for (unsigned jj = 0; jj < mnumb; jj++)
+			ofile << R / modal_group_velocities[ii][jj] << "\t";
+		ofile << endl;
+	}
+	ofile.close();
+}
+
+void sspemdd_sequential::directPointCalc( search_space_point point )
+{
+	isTimeDelayPrinting = true;
+	fillDataComputeResidual(point);
 }
