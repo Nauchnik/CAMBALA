@@ -101,6 +101,21 @@ int main(int argc, char **argv)
 		depths_file << endl;
 	}*/
 
+	/*cout << "Unit test" << endl;
+	vector<double> test_depths = { 9, 16, 36, 50, 300 };
+	sspemdd_seq.init(test_depths);
+	search_space_point test_point;
+	test_point.cb = 1700;
+	test_point.rhob = 1.7;
+	test_point.tau = 0;
+	test_point.R = 7000;
+	test_point.cws = { 1459, 1487, 1488, 1467 };
+	test_point.depths = test_depths;
+	double test_residual = sspemdd_seq.fillDataComputeResidual(test_point);
+	cout << "*** test_residual" << test_residual << endl;
+	cout << "*** canonical residual " << 0.0113626 << endl;
+	cout << endl;*/
+	
 	for (unsigned i = 0; i < depths_vec.size(); i++) {
 		sspemdd_seq.init(depths_vec[i]);
 		//sspemdd_seq.findGlobalMinBruteForce(depths_vec[i]);
