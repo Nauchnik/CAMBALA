@@ -29,6 +29,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2953DAFA-1E85-4ED0-88A7-F1A935DB1AD9}</ProjectGuid>
     <RootNamespace>SSPEMDD</RootNamespace>
+    <ProjectName>CAMBALA</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -196,8 +197,8 @@
     <ClCompile Include="..\alglib\linalg.cpp" />
     <ClCompile Include="..\alglib\specialfunctions.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="sspemdd_parallel.cpp" />
-    <ClCompile Include="sspemdd_sequential.cpp" />
+    <ClCompile Include="cambala_parallel.cpp" />
+    <ClCompile Include="cambala_sequential.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\alglib\alglibinternal.h" />
@@ -205,9 +206,12 @@
     <ClInclude Include="..\alglib\ap.h" />
     <ClInclude Include="..\alglib\linalg.h" />
     <ClInclude Include="..\alglib\specialfunctions.h" />
-    <ClInclude Include="sspemdd_parallel.h" />
-    <ClInclude Include="sspemdd_sequential.h" />
-    <ClInclude Include="sspemdd_utils.h" />
+    <ClInclude Include="cambala_parallel.h" />
+    <ClInclude Include="cambala_sequential.h" />
+    <ClInclude Include="cambala_utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="test_hydro_r_uniform260_3layers.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

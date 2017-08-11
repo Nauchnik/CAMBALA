@@ -1,5 +1,5 @@
-#ifndef SSPEMDD_UTILS
-#define SSPEMDD_UTILS
+#ifndef CAMBALA_UTILS
+#define CAMBALA_UTILS
 
 #include <iostream>
 #include <vector>
@@ -7,7 +7,7 @@
 #include <sstream>
 #include <algorithm>
 
-namespace SSPEMDD_utils{
+namespace CAMBALA_utils{
 	// construct all combinations of some parameters
 	template< typename T >
 	bool next_cartesian(vector<T> &vii, vector<int> &index_arr, T &cur_vi)

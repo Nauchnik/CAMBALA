@@ -2,6 +2,7 @@
 % constant parameters
 dtimes_file 260_dtimes.txt
 spmag_file(string|no) no
+function_type uniform
 h 50
 H 300
 % variable parameters

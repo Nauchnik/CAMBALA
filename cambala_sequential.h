@@ -1,5 +1,5 @@
-#ifndef SSPEMDD_SEQUENTIAL_H
-#define SSPEMDD_SEQUENTIAL_H
+#ifndef CAMBALA_SEQUENTIAL_H
+#define CAMBALA_SEQUENTIAL_H
 
 #include <vector>
 #include <complex>
@@ -41,10 +41,10 @@ struct reduced_search_space_attribute
 	vector<bool> cws;
 };
 
-class sspemdd_sequential
+class CAMBALA_sequential
 {
 public:
-	sspemdd_sequential();
+	CAMBALA_sequential();
 	double h;
 	double H;
 	unsigned long long ncb;
@@ -62,7 +62,7 @@ public:
 	vector<double> d_step;
 	vector<unsigned long long> ncpl_init_arr;
 	vector<unsigned long long> ncpl_arr;
-	std::string object_function_type;
+	string object_function_type;
 	double R1;
 	double R2;
 	double tau1;    //tau_comment: added tau to the class declaration
@@ -80,14 +80,18 @@ public:
 	vector<unsigned> Ns_points;
 	vector<vector<double>> weight_coeffs;
 	int verbosity;
-	std::string dtimesFileName;
-	std::string spmagFileName;
+	string dtimesFileName;
+	string spmagFileName;
 	int rank;
 	bool isTimeDelayPrinting;
-
+	string launch_type; // bruteforce | ils
+	stringstream input_params_sstream;
+	string output_filename;
+	string depths_filename;
+	
 	// functions by Oleg
 	vector<vector<double>> search_space; // values of variables which form a search space
-	int readScenario(std::string scenarioFileName);
+	int readScenario(string scenarioFileName);
 	int readInputDataFromFiles();
 	int init(vector<double> depths);
 	int createDepthsArray(vector<vector<double>> &depths_vec);
@@ -99,19 +103,26 @@ public:
 	search_space_point findLocalMinHillClimbing(vector<double> depths);
 	void findGlobalMinBruteForce(vector<double> depths);
 	void reportFinalResult();
-	void getThreeValuesFromStr(std::string str, double &val1, double &val2, double &val3);
+	void getThreeValuesFromStr(string str, double &val1, double &val2, double &val3);
 	void reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a);
 	void directPointCalc( search_space_point point );
-	void sspemdd_sequential::printDelayTime(double R, vector<unsigned> mode_numbers, vector<vector<double>> modal_group_velocities);
+	void printDelayTime(double R, vector<unsigned> mode_numbers, vector<vector<double>> modal_group_velocities);
+
+	//
+	search_space_point fromPointIndexesToPoint(vector<unsigned> cur_point_indexes, vector<double> depths);
+	vector<unsigned> fromPointToPointIndexes(search_space_point point);
+	search_space_point fromDoubleVecToPoint(vector<double> double_vec);
+	search_space_point fromStrToPoint(string str); // BOINC client application
+	void fromPointToFile(const search_space_point &point, ofstream &ofile); // BOINC client application
 	
 	// functions by Pavel
-	//tau_comment: added tau to the arguments of compute_modal_delays_residual_uniform()
+	// tau_comment: added tau to the arguments of compute_modal_delays_residual_uniform()
 
-    void load_layers_data(std::string LayersFName,
+    void load_layers_data(string LayersFName,
 	vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,
 	vector<unsigned> &Ns_points);
 
-	void load_profile_deep_water(std::string ProfileFName,unsigned ppm,
+	void load_profile_deep_water(string ProfileFName,unsigned ppm,
 	vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,
 	vector<unsigned> &Ns_points);
 
@@ -156,7 +167,7 @@ public:
         vector<double> &c2s,vector<double> &rhos,vector<unsigned> &Ns_points, double kh,	vector<double> &phi,
 	vector<double> &dphi);
 
-	vector<std::complex<double>> compute_cpl_pressure(double f, vector<double> &depths, vector<double> &c1s,
+	vector<complex<double>> compute_cpl_pressure(double f, vector<double> &depths, vector<double> &c1s,
 	vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, vector<double> &Rr,
 	vector<double> &zr, double iModesSubset, unsigned ordRich);
 
@@ -187,11 +198,8 @@ public:
 protected:
 	unsigned long long N_total;
 	search_space_point record_point;
-	std::chrono::high_resolution_clock::time_point start_chrono_time;
+	chrono::high_resolution_clock::time_point start_chrono_time;
 	// hill climbing
-	search_space_point fromPointIndexesToPoint( vector<unsigned> cur_point_indexes, vector<double> depths);
-	vector<unsigned> fromPointToPointIndexes(search_space_point point);
-	search_space_point fromDoubleVecToPoint(vector<double> double_vec);
 	vector<search_space_point> checked_points;
 };
 

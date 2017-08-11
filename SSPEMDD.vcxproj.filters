@@ -26,9 +26,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sspemdd_parallel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\alglib\linalg.cpp">
       <Filter>alglib</Filter>
     </ClCompile>
@@ -44,17 +41,14 @@
     <ClCompile Include="..\alglib\alglibinternal.cpp">
       <Filter>alglib</Filter>
     </ClCompile>
-    <ClCompile Include="sspemdd_sequential.cpp">
+    <ClCompile Include="cambala_parallel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cambala_sequential.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sspemdd_parallel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sspemdd_sequential.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\alglib\linalg.h">
       <Filter>alglib</Filter>
     </ClInclude>
@@ -70,8 +64,17 @@
     <ClInclude Include="..\alglib\alglibinternal.h">
       <Filter>alglib</Filter>
     </ClInclude>
-    <ClInclude Include="sspemdd_utils.h">
+    <ClInclude Include="cambala_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cambala_sequential.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cambala_parallel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="test_hydro_r_uniform260_3layers.txt" />
   </ItemGroup>
 </Project>

@@ -3,8 +3,8 @@ INC1 = ../alglib/
 INCDIRS = -I${INC1}
 CPPFLAGS = -O3 -std=c++0x ${INCDIRS}
 
-pd-sat: main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o
-	${CPP} ${CPPFLAGS} main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o -o SSPEMDD
+pd-sat: main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o CAMBALA_sequential.o
+	${CPP} ${CPPFLAGS} main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o CAMBALA_sequential.o -o CAMBALA
 	
 specialfunctions.o: ../alglib/specialfunctions.cpp 
 	${CPP} ${CPPFLAGS} ../alglib/specialfunctions.cpp -c
@@ -21,8 +21,8 @@ alglibmisc.o: ../alglib/alglibmisc.cpp
 alglibinternal.o: ../alglib/alglibinternal.cpp 
 	${CPP} ${CPPFLAGS} ../alglib/alglibinternal.cpp -c
 
-sspemdd_sequential.o: sspemdd_sequential.cpp
-	${CPP} ${CPPFLAGS} sspemdd_sequential.cpp -c
+CAMBALA_sequential.o: CAMBALA_sequential.cpp
+	${CPP} ${CPPFLAGS} CAMBALA_sequential.cpp -c
 
 main.o: main.cpp
 	${CPP} ${CPPFLAGS} main.cpp -c

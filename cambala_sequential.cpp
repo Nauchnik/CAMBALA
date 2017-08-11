@@ -1,10 +1,9 @@
-#include "sspemdd_sequential.h"
-#include "sspemdd_utils.h"
+#include "cambala_sequential.h"
+#include "cambala_utils.h"
 #include <iostream>
 #include <complex>
 #include <time.h>
 #include <stdexcept>
-
 
 double RK4(double omeg2, // sound frequency
     double kh2,
@@ -101,10 +100,6 @@ double Layer_an_exp(double omeg2, // sound frequency
     return layer_int;
 }
 
-
-
-
-
 /*
 double Euler(double omeg2, // sound frequency
     double kh2,
@@ -153,8 +148,11 @@ double Euler(double omeg2, // sound frequency
 }
 */
 
-sspemdd_sequential::sspemdd_sequential() :
-	object_function_type("weighted"),
+CAMBALA_sequential::CAMBALA_sequential() :
+	launch_type("bruteforce"),
+	object_function_type("uniform"),
+	output_filename("cambala_out"),
+	depths_filename("cambala_depths_out"),
 	h(0),
 	H(0),
 	ncb(1),
@@ -182,7 +180,7 @@ sspemdd_sequential::sspemdd_sequential() :
 	record_point.tau      = START_HUGE_VALUE;
 	record_point.residual = START_HUGE_VALUE;
 	srand((unsigned)time(NULL));
-	start_chrono_time = std::chrono::high_resolution_clock::now();
+	start_chrono_time = chrono::high_resolution_clock::now();
 }
 
 /*
@@ -206,15 +204,15 @@ the most "adequate" model.
 
 //tau_comment: tau is appended here as a new argument for residual computation
 
-void sspemdd_sequential::load_layers_data(
-    std::string LayersFName,
+void CAMBALA_sequential::load_layers_data(
+    string LayersFName,
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
 	vector<double> &rhos,
 	vector<unsigned> &Ns_points)
 {
-    std::ifstream Myfile(LayersFName);
+    ifstream Myfile(LayersFName);
     double d, c1,c2,rho;
     unsigned nsp;
 
@@ -243,8 +241,8 @@ void sspemdd_sequential::load_layers_data(
 
 }
 
-void sspemdd_sequential::load_profile_deep_water(
-    std::string ProfileFName,
+void CAMBALA_sequential::load_profile_deep_water(
+    string ProfileFName,
     unsigned ppm,
 	vector<double> &depths,
 	vector<double> &c1s,
@@ -252,7 +250,7 @@ void sspemdd_sequential::load_profile_deep_water(
 	vector<double> &rhos,
 	vector<unsigned> &Ns_points)
 {
-    std::ifstream Myfile(ProfileFName);
+    ifstream Myfile(ProfileFName);
     double cp, cc, dc, dp;
 
     Myfile >> dp;
@@ -282,7 +280,7 @@ void sspemdd_sequential::load_profile_deep_water(
 
 }
 
-double sspemdd_sequential::compute_modal_delays_residual_uniform(vector<double> &freqs,
+double CAMBALA_sequential::compute_modal_delays_residual_uniform(vector<double> &freqs,
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
@@ -311,7 +309,7 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(vector<double> 
 	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
 
 	for (unsigned ii = 0; ii<freqs.size(); ii++) {
-		//2016.04.27:Pavel: mnumb = std::min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
+		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
 		mnumb = experimental_mode_numbers.at(ii);
 		for (unsigned jj = 0; jj<mnumb; jj++) {
 			if (experimental_delays[ii][jj]>0) {
@@ -342,7 +340,7 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform(vector<double> 
 }
 
 // New version from 17.05.2017, group velocities computed using perturbative approach
-double sspemdd_sequential::compute_modal_delays_residual_uniform2(vector<double> &freqs,
+double CAMBALA_sequential::compute_modal_delays_residual_uniform2(vector<double> &freqs,
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
@@ -378,7 +376,7 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform2(vector<double>
 	cout << endl;*/
 	
 	for (unsigned ii = 0; ii<freqs.size(); ii++) {
-		//2016.04.27:Pavel: mnumb = std::min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
+		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
 		mnumb = experimental_mode_numbers.at(ii);
 		for (unsigned jj = 0; jj<mnumb; jj++) {
 			if (experimental_delays[ii][jj]>0) {
@@ -408,7 +406,7 @@ double sspemdd_sequential::compute_modal_delays_residual_uniform2(vector<double>
 //2016.12.31:Pavel: a residual functions where the "experimental" spectrogram modulud is taken as the weight coefficients
 //this is a simplest nonuniform residual function
 
-double sspemdd_sequential::compute_modal_delays_residual_weighted(vector<double> &freqs,
+double CAMBALA_sequential::compute_modal_delays_residual_weighted(vector<double> &freqs,
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
@@ -436,7 +434,7 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(vector<double>
 	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
 
 	for (unsigned ii = 0; ii<freqs.size(); ii++) {
-		//2016.04.27:Pavel: mnumb = std::min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
+		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
 		mnumb = experimental_mode_numbers.at(ii);
 		for (unsigned jj = 0; jj<mnumb; jj++) {
 			if (experimental_delays[ii][jj]>0) {
@@ -468,7 +466,7 @@ double sspemdd_sequential::compute_modal_delays_residual_weighted(vector<double>
 	return residual;
 }
 
-int sspemdd_sequential::compute_wnumbers_bb(vector<double> &freqs,
+int CAMBALA_sequential::compute_wnumbers_bb(vector<double> &freqs,
 	double deltaf,
 	vector<double> &depths,
 	vector<double> &c1s,
@@ -509,7 +507,7 @@ int sspemdd_sequential::compute_wnumbers_bb(vector<double> &freqs,
 	return 0;
 }
 
-int sspemdd_sequential::compute_modal_grop_velocities(vector<double> &freqs,
+int CAMBALA_sequential::compute_modal_grop_velocities(vector<double> &freqs,
 	double deltaf,
 	vector<double> &depths,
 	vector<double> &c1s,
@@ -551,7 +549,7 @@ int sspemdd_sequential::compute_modal_grop_velocities(vector<double> &freqs,
 
 		omeg2 = 2 * LOCAL_M_PI*(freqs.at(ii));
 		out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2, depths, c1s, c2s, rhos, Ns_points, -1.0, ordRich);
-		//nwnum = std::min(nwnum, (unsigned)out_wnum2.size());
+		//nwnum = min(nwnum, (unsigned)out_wnum2.size());
         nwnum = (unsigned)out_wnum2.size();
 
 		for (unsigned jj = 0; jj < nwnum; jj++)
@@ -567,7 +565,7 @@ int sspemdd_sequential::compute_modal_grop_velocities(vector<double> &freqs,
 }
 
 
-int sspemdd_sequential::compute_modal_grop_velocities2(vector<double> &freqs,
+int CAMBALA_sequential::compute_modal_grop_velocities2(vector<double> &freqs,
 	double deltaf,
 	vector<double> &depths,
 	vector<double> &c1s,
@@ -622,7 +620,7 @@ compute_wnumbers_extrap() ). The functions are computed at the receiver depths f
 sorted in ascending order
 
 */
-void sspemdd_sequential::compute_mfunctions_zr(double &omeg, // sound frequency
+void CAMBALA_sequential::compute_mfunctions_zr(double &omeg, // sound frequency
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
@@ -662,7 +660,7 @@ void sspemdd_sequential::compute_mfunctions_zr(double &omeg, // sound frequency
         }
 
         i_inside_l = (unsigned) ( (zr.at(jj) - zp)*Ns_points.at(cur_layer)/( depths.at(cur_layer) - zp ) );
-        i_inside_l = std::min(i_inside_l , Ns_points.at(cur_layer) );
+        i_inside_l = min(i_inside_l , Ns_points.at(cur_layer) );
         i_zr.push_back( cur_points + i_inside_l );
         t_zr.push_back( (zr.at(jj) - zp)*Ns_points.at(cur_layer)/( depths.at(cur_layer) - zp ) - i_inside_l );
 
@@ -689,7 +687,7 @@ void sspemdd_sequential::compute_mfunctions_zr(double &omeg, // sound frequency
 	}
 
 //    //mfunctions output to a file
-//    std::ofstream ofile("mfunctionszr.txt");
+//    ofstream ofile("mfunctionszr.txt");
 //
 //    for (unsigned jj = 0; jj < nzr; jj++) {
 //			ofile << zr.at(jj) << " ";
@@ -704,7 +702,7 @@ void sspemdd_sequential::compute_mfunctions_zr(double &omeg, // sound frequency
 //	ofile.close();
 }
 
-vector<std::complex<double>> sspemdd_sequential::compute_cpl_pressure(double f,
+vector<complex<double>> CAMBALA_sequential::compute_cpl_pressure(double f,
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
@@ -718,13 +716,13 @@ vector<std::complex<double>> sspemdd_sequential::compute_cpl_pressure(double f,
 
         vector<vector<double>> modefunctions;
         vector<double> khs;
-        vector<std::complex<double>> PHelm;
+        vector<complex<double>> PHelm;
 
 
         double omeg = 2 * LOCAL_M_PI*f;
         double R;
         unsigned nzr = zr.size();
-        std::complex<double> Prc;
+        complex<double> Prc;
 
 
         khs = compute_wnumbers_extrap_lin_dz(omeg, depths, c1s, c2s, rhos, Ns_points, iModesSubset, ordRich);
@@ -763,7 +761,7 @@ vector<std::complex<double>> sspemdd_sequential::compute_cpl_pressure(double f,
 
             //modefunctions -- vector of vectors, that represent the values of certain mode at all zr
             for (unsigned ii = 1; ii < nzr; ii++) {
-                Prc = std::complex<double>(0.0,0.0);
+                Prc = complex<double>(0.0,0.0);
                 R = Rr.at(ii);
 
                 for (unsigned jj = 0; jj < nmod; jj++) {
@@ -788,7 +786,7 @@ vector<std::complex<double>> sspemdd_sequential::compute_cpl_pressure(double f,
             // TEST
             cout << 0 << " modes " << endl;
 
-            Prc = std::complex<double>(0.0,0.0);
+            Prc = complex<double>(0.0,0.0);
             for (unsigned ii = 1; ii < nzr; ii++) {
                 PHelm.push_back( Prc );
             }
@@ -809,7 +807,7 @@ compute_wnumbers_extrap() ). The functions are written to the file "mfunctions.t
 the values of depth
 
 */
-void sspemdd_sequential::compute_all_mfunctions(double &omeg, // sound frequency
+void CAMBALA_sequential::compute_all_mfunctions(double &omeg, // sound frequency
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
@@ -824,7 +822,7 @@ void sspemdd_sequential::compute_all_mfunctions(double &omeg, // sound frequency
         double h,z0;
 
 
-    std::ofstream ofile("mfunctions.txt");
+    ofstream ofile("mfunctions.txt");
 
 
 
@@ -871,7 +869,7 @@ the ODE is stiff there (solution involves a decaying exponential).
 
 */
 
-void sspemdd_sequential::compute_wmode(double &omeg, // sound frequency
+void CAMBALA_sequential::compute_wmode(double &omeg, // sound frequency
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
@@ -946,7 +944,7 @@ going in the negative direction of z axis. Then we match the solutions coming fr
 
 */
 
-void sspemdd_sequential::compute_wmode1(double &omeg, // sound frequency
+void CAMBALA_sequential::compute_wmode1(double &omeg, // sound frequency
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
@@ -976,7 +974,7 @@ void sspemdd_sequential::compute_wmode1(double &omeg, // sound frequency
     unsigned n_layers = (unsigned)depths.size();
     unsigned L = n_layers;
 
-    while ((  kh > omeg/( std::min( c1s.at(L-1), c2s.at(L-1) ) )  ) && (L>1) ) {
+    while ((  kh > omeg/( min( c1s.at(L-1), c2s.at(L-1) ) )  ) && (L>1) ) {
         L = L - 1;
     }
 
@@ -1079,7 +1077,7 @@ void sspemdd_sequential::compute_wmode1(double &omeg, // sound frequency
 //    cout  << " L " << L  << endl;
 //    cout  << " n_layers " << n_layers  << endl;
 //
-//    throw std::invalid_argument("Ururu");
+//    throw invalid_argument("Ururu");
 
 //        // TEST
 //        for (unsigned qq=0; qq<nmod; qq++){
@@ -1102,7 +1100,7 @@ void sspemdd_sequential::compute_wmode1(double &omeg, // sound frequency
 
 
 
-double sspemdd_sequential::compute_wmode_vg(double &omeg, // sound frequency
+double CAMBALA_sequential::compute_wmode_vg(double &omeg, // sound frequency
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
@@ -1166,7 +1164,7 @@ closer are u_j to each other -- the better, ideally they should be equal)
 it is better to set all the numbers to multiple of 12 in advance
 3) Richardson extrapolation of the order 3 gives reasonable accuracy
 */
-vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, // sound frequency
+vector<double> CAMBALA_sequential::compute_wnumbers_extrap(double &omeg, // sound frequency
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
@@ -1272,7 +1270,7 @@ vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, // soun
 		//cout << "rr=" << rr << endl;
 
 		out_wnum2 = compute_wnumbers(omeg, input_c, input_rho, input_interf_idcs, input_mesh, iModesSubset);
-		m_wnum = std::min(m_wnum, (unsigned)out_wnum2.size());
+		m_wnum = min(m_wnum, (unsigned)out_wnum2.size());
 
 		if (rr == 1) { wnum_extrapR.assign(m_wnum, 0); }
 
@@ -1296,7 +1294,7 @@ vector<double> sspemdd_sequential::compute_wnumbers_extrap(double &omeg, // soun
 
 
 
-vector<double> sspemdd_sequential::compute_wnumbers_extrap2(double &omeg, // sound frequency
+vector<double> CAMBALA_sequential::compute_wnumbers_extrap2(double &omeg, // sound frequency
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
@@ -1405,7 +1403,7 @@ vector<double> sspemdd_sequential::compute_wnumbers_extrap2(double &omeg, // sou
 		//cout << "rr=" << rr << endl;
 
 		out_wnum2 = compute_wnumbers(omeg, input_c, input_rho, input_interf_idcs, input_mesh, iModesSubset);
-		m_wnum = std::min(m_wnum, (unsigned)out_wnum2.size());
+		m_wnum = min(m_wnum, (unsigned)out_wnum2.size());
 
 		if (rr == 1) { wnum_extrapR.assign(m_wnum, 0); }
 
@@ -1430,7 +1428,7 @@ vector<double> sspemdd_sequential::compute_wnumbers_extrap2(double &omeg, // sou
 
 
 
-vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &omeg, // sound frequency
+vector<double> CAMBALA_sequential::compute_wnumbers_extrap_lin_dz(double &omeg, // sound frequency
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
@@ -1548,7 +1546,7 @@ vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &omeg, 
 		//        cout << "rr=" << rr << endl;
 
 		out_wnum2 = compute_wnumbers(omeg, input_c, input_rho, input_interf_idcs, input_mesh, iModesSubset);
-		m_wnum = std::min(m_wnum, (unsigned)out_wnum2.size());
+		m_wnum = min(m_wnum, (unsigned)out_wnum2.size());
 
 		if (rr == 1) { wnum_extrapR.assign(m_wnum, 0); }
 
@@ -1569,7 +1567,7 @@ vector<double> sspemdd_sequential::compute_wnumbers_extrap_lin_dz(double &omeg, 
 	return wnum_extrapR;
 }
 
-vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound frequency
+vector<double> CAMBALA_sequential::compute_wnumbers(double &omeg, // sound frequency
 	vector<double> &c,
 	vector<double> &rho,
 	vector<unsigned> &interface_idcs,
@@ -1595,7 +1593,7 @@ vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound frequ
 	double dz = meshsizes.at(layer_number);
 	double dz_next = dz;//    ofstream myFile("thematrixdiags.txt");
 	//    for (int ii=0; ii<N_points-2; ii++){
-	//        myFile << std::fixed << std::setprecision(16) << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
+	//        myFile << fixed << setprecision(16) << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
 	//    }
 	//    myFile.close();
 	double q = 0;
@@ -1628,7 +1626,7 @@ vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound frequ
             kappamin = iModesSubset*kappamax;
         }
         else {
-            throw std::invalid_argument("Invalid iModeSubset: use either -1 or a value from [0 1)");
+            throw invalid_argument("Invalid iModeSubset: use either -1 or a value from [0 1)");
         }
 
 	}
@@ -1693,15 +1691,15 @@ vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound frequ
 	main_diag[N_points - 3] = md.at(N_points - 3);
 
 /* TEST: the sparse matrix diagonals output
-	    std::ofstream myFile("thematrixdiags.txt");
+	    ofstream myFile("thematrixdiags.txt");
 	    for (int ii=0; ii<N_points-2; ii++){
-	        myFile << std::fixed  << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
+	        myFile << fixed  << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
 	    }
 	    myFile.close();
 
-	    std::ofstream myFile1("thematrixdiags_sym.txt");
+	    ofstream myFile1("thematrixdiags_sym.txt");
 	    for (int ii=0; ii<N_points-3; ii++){
-	        myFile1 << std::fixed  << main_diag[ii] << "  " << second_diag[ii] << endl;
+	        myFile1 << fixed  << main_diag[ii] << "  " << second_diag[ii] << endl;
 	    }
 	    myFile1.close();
 */
@@ -1716,7 +1714,7 @@ vector<double> sspemdd_sequential::compute_wnumbers(double &omeg, // sound frequ
 
 //tau_comment: search and output,
 //check for tau!
-int sspemdd_sequential::init(vector<double> depths)
+int CAMBALA_sequential::init(vector<double> depths)
 {
 	if ((!rank) && (verbosity > 0)) {
 		cout << "init() started" << endl;
@@ -1790,88 +1788,110 @@ int sspemdd_sequential::init(vector<double> depths)
 	return 0;
 }
 
-int sspemdd_sequential::createDepthsArray(vector<vector<double>> &depths_vec)
+int CAMBALA_sequential::createDepthsArray(vector<vector<double>> &depths_vec)
 {
-	if (d1_arr.size() == 0) {
-		n_layers_w = cw1_arr.size();
+	if (launch_type == "bruteforce") {
+		n_layers_w = cw1_init_arr.size();
 		double layer_thickness_w = h / n_layers_w;
 		vector<double> depths;
 		for (unsigned jj = 1; jj <= n_layers_w; jj++)
 			depths.push_back(layer_thickness_w*jj);
 		depths.push_back(H);
 		depths_vec.push_back(depths);
-	}
-	else {
-		vector<vector<double>> search_space_depths;
-		search_space_depths.resize(d1_arr.size());
-		for (unsigned i = 0; i < d2_arr.size(); i++) {
-			double cur_val = d2_arr[i];
-			for (;;) {
-				search_space_depths[i].push_back(cur_val);
-				cur_val -= d_step[i];
-				if (cur_val < d1_arr[i])
-					break;
-			}
-		}
-
-		vector<int> index_arr;
-		vector<double> tmp_depths;
-		vector<vector<double>> ::iterator it;
-		double cur_treshold;
-		while (SSPEMDD_utils::next_cartesian(search_space_depths, index_arr, tmp_depths)) {
+	} else if (launch_type == "ils") {
+		if (d1_arr.size() == 0) {
+			n_layers_w = cw1_arr.size();
+			double layer_thickness_w = h / n_layers_w;
 			vector<double> depths;
-			cur_treshold = tmp_depths[0] + 3;
-			depths.push_back(tmp_depths[0]); // at least 1 water layer must exist
-			for (unsigned i = 1; i < tmp_depths.size(); i++) {
-				if (tmp_depths[i] >= cur_treshold) {
-					depths.push_back(tmp_depths[i]);
-					cur_treshold = tmp_depths[i] + 2;
+			for (unsigned jj = 1; jj <= n_layers_w; jj++)
+				depths.push_back(layer_thickness_w*jj);
+			depths.push_back(H);
+			depths_vec.push_back(depths);
+		}
+		else {
+			vector<vector<double>> search_space_depths;
+			search_space_depths.resize(d1_arr.size());
+			for (unsigned i = 0; i < d2_arr.size(); i++) {
+				double cur_val = d2_arr[i];
+				for (;;) {
+					search_space_depths[i].push_back(cur_val);
+					cur_val -= d_step[i];
+					if (cur_val < d1_arr[i])
+						break;
 				}
 			}
-			it = find(depths_vec.begin(), depths_vec.end(), depths);
-			if (it == depths_vec.end())
-				depths_vec.push_back(depths);
-		}
 
-		for (auto &x : depths_vec) {
-			x.push_back(h);
-			x.push_back(H);
+			vector<int> index_arr;
+			vector<double> tmp_depths;
+			vector<vector<double>> ::iterator it;
+			double cur_treshold;
+			while (CAMBALA_utils::next_cartesian(search_space_depths, index_arr, tmp_depths)) {
+				vector<double> depths;
+				cur_treshold = tmp_depths[0] + 3;
+				depths.push_back(tmp_depths[0]); // at least 1 water layer must exist
+				for (unsigned i = 1; i < tmp_depths.size(); i++) {
+					if (tmp_depths[i] >= cur_treshold) {
+						depths.push_back(tmp_depths[i]);
+						cur_treshold = tmp_depths[i] + 2;
+					}
+				}
+				it = find(depths_vec.begin(), depths_vec.end(), depths);
+				if (it == depths_vec.end())
+					depths_vec.push_back(depths);
+			}
+
+			for (auto &x : depths_vec) {
+				x.push_back(h);
+				x.push_back(H);
+			}
 		}
 	}
+
+	ofstream ofile(depths_filename);
+	for (auto &x : depths_vec) {
+		for (auto &y : x)
+			ofile << y << " ";
+		ofile << endl;
+	}
+	ofile.close();
 	cout << "depths_vec.size() " << depths_vec.size() << endl;
 	
 	return 0;
 }
 
-void sspemdd_sequential::reportFinalResult()
+void CAMBALA_sequential::reportFinalResult()
 {
 	// fix final time
-	std::chrono::high_resolution_clock::time_point t2;
-	std::chrono::duration<double> time_span;
-	t2 = std::chrono::high_resolution_clock::now();
-	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - start_chrono_time);
+	chrono::high_resolution_clock::time_point t2;
+	chrono::duration<double> time_span;
+	t2 = chrono::high_resolution_clock::now();
+	time_span = chrono::duration_cast<chrono::duration<double>>(t2 - start_chrono_time);
 
-	cout << endl;
-	cout << "total solving time " << time_span.count() << endl;
-	cout << "SEARCH ENDED!" << endl;
-	cout << "RESULTING VALUE:" << endl;
-	cout << "err = " << record_point.residual << ", parameters:" << endl;
-	cout << "c_b = " << record_point.cb << endl
+	ofstream ofile(output_filename, ios_base::app);
+	
+	ofile << endl;
+	ofile << "total solving time (chrono) " << time_span.count() << endl;
+	ofile << "SEARCH ENDED!" << endl;
+	ofile << "RESULTING VALUE:" << endl;
+	ofile << "err = " << record_point.residual << ", parameters:" << endl;
+	ofile << "c_b = " << record_point.cb << endl
 			  << "tau = " << record_point.tau << endl
 			  << "rho_b = " << record_point.rhob << endl
 			  << "R = " << record_point.R << endl;
-	cout << "cws :" << endl;
+	ofile << "cws :" << endl;
 	for (auto &x : record_point.cws)
-		cout << x << " ";
-	cout << endl;
-	cout << "depths " << endl;
+		ofile << x << " ";
+	ofile << endl;
+	ofile << "depths " << endl;
 	for (auto &x : record_point.depths)
-		cout << x << " ";
-	cout << endl;
-	cout << "total solving time " << time_span.count() << endl;
+		ofile << x << " ";
+	ofile << endl;
+	ofile << "total solving time " << time_span.count() << endl;
+
+	ofile.close();
 }
 
-void sspemdd_sequential::findGlobalMinBruteForce(vector<double> depths)
+void CAMBALA_sequential::findGlobalMinBruteForce(vector<double> depths)
 {
 	cout << "findGlobalMinBruteForce()" << endl;
 
@@ -1882,7 +1902,7 @@ void sspemdd_sequential::findGlobalMinBruteForce(vector<double> depths)
 		fillDataComputeResidual(x); // calculated residual is written to cur_point
 }
 
-vector<search_space_point> sspemdd_sequential::getSearchSpacePointsVec(vector<double> depths)
+vector<search_space_point> CAMBALA_sequential::getSearchSpacePointsVec(vector<double> depths)
 {
 	vector<int> index_arr;
 	vector<unsigned> cur_point_indexes;
@@ -1893,13 +1913,13 @@ vector<search_space_point> sspemdd_sequential::getSearchSpacePointsVec(vector<do
 			search_space_indexes[i].push_back(j);
 
 	vector<search_space_point> points_vec;
-	while (SSPEMDD_utils::next_cartesian(search_space_indexes, index_arr, cur_point_indexes))
+	while (CAMBALA_utils::next_cartesian(search_space_indexes, index_arr, cur_point_indexes))
 		points_vec.push_back(fromPointIndexesToPoint(cur_point_indexes, depths));
 
 	return points_vec;
 }
 
-void sspemdd_sequential::reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a)
+void CAMBALA_sequential::reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a)
 {
 	// search_space_variables[0] - cb
 	// search_space_variables[1] - rhob
@@ -1931,9 +1951,14 @@ void sspemdd_sequential::reduceSearchSpace(reduced_search_space_attribute &reduc
 	}
 }
 
-double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
+double CAMBALA_sequential::fillDataComputeResidual( search_space_point &point )
 { // finally specify sound speed in water
   // the parameters are transformed into the arrays c1s, c2s, rhos
+	if (point.cws.size() != point.depths.size() - 1) {
+		cerr << "point.cws.size() != point.depths.size() - 1" << endl;
+		cerr << point.cws.size() << " " << point.depths.size() - 1 << endl;
+		exit(1);
+	}
 	for (unsigned jj = 0; jj < n_layers_w - 1; jj++) {
 		c1s.at(jj) = point.cws.at(jj);
 		c2s.at(jj) = point.cws.at(jj + 1);
@@ -1947,7 +1972,7 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 	rhos.at(n_layers_w) = point.rhob;
 	vector<double> depths = point.depths;
 	if (depths.size() == 0) {
-		std::cerr << "depths.size() == 0" << endl;
+		cerr << "depths.size() == 0" << endl;
 		exit(-1);
 	}
 	
@@ -1978,7 +2003,7 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 			point.R, point.tau, modal_delays, weight_coeffs, mode_numbers);
 	}
 	else {
-		std::cerr << "unknown object_function_type " << object_function_type << endl;
+		cerr << "unknown object_function_type " << object_function_type << endl;
 		exit(1);
 	}
 
@@ -2014,7 +2039,7 @@ double sspemdd_sequential::fillDataComputeResidual( search_space_point &point )
 	return point.residual;
 }
 
-void sspemdd_sequential::loadValuesToSearchSpaceVariables()
+void CAMBALA_sequential::loadValuesToSearchSpaceVariables()
 {
 	// search_space_variables[0] - cb
 	// search_space_variables[1] - rhob
@@ -2060,7 +2085,7 @@ void sspemdd_sequential::loadValuesToSearchSpaceVariables()
 		cout << "loadValuesToSearchSpaceVariables() finished" << endl;
 }
 
-search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> depths)
+search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> depths)
 {
 	if (verbosity > 1)
 		cout << "findLocalMinHillClimbing" << endl;
@@ -2147,7 +2172,7 @@ search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> d
 						cout << endl;
 					}
 					cur_point = fromPointIndexesToPoint(cur_point_indexes, depths);
-					if (std::find(checked_points.begin(), checked_points.end(), cur_point) != checked_points.end()) {
+					if (find(checked_points.begin(), checked_points.end(), cur_point) != checked_points.end()) {
 						skipped_points++;
 						continue;
 					}
@@ -2194,7 +2219,7 @@ search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> d
 					cur_point_indexes[i] = (rand_numb % search_space[i].size());
 			}
 			cur_point = fromPointIndexesToPoint(cur_point_indexes, depths);
-			if (std::find(checked_points.begin(), checked_points.end(), cur_point) == checked_points.end())
+			if (find(checked_points.begin(), checked_points.end(), cur_point) == checked_points.end())
 				break;
 		}
 		if (verbosity > 0) {
@@ -2218,7 +2243,7 @@ search_space_point sspemdd_sequential::findLocalMinHillClimbing(vector<double> d
 	return local_record_point;
 }
 
-search_space_point sspemdd_sequential::fromPointIndexesToPoint( vector<unsigned> cur_point_indexes, 
+search_space_point CAMBALA_sequential::fromPointIndexesToPoint( vector<unsigned> cur_point_indexes, 
 	                                                            vector<double> depths)
 {
 	search_space_point point;
@@ -2233,7 +2258,7 @@ search_space_point sspemdd_sequential::fromPointIndexesToPoint( vector<unsigned>
 	return point;
 }
 
-vector<unsigned> sspemdd_sequential::fromPointToPointIndexes( search_space_point point )
+vector<unsigned> CAMBALA_sequential::fromPointToPointIndexes( search_space_point point )
 {
 	vector<unsigned> cur_point_indexes;
 	cur_point_indexes.resize(search_space.size());
@@ -2269,59 +2294,77 @@ vector<unsigned> sspemdd_sequential::fromPointToPointIndexes( search_space_point
 	return cur_point_indexes;
 }
 
-search_space_point sspemdd_sequential::fromDoubleVecToPoint(vector<double> double_vec)
+search_space_point CAMBALA_sequential::fromDoubleVecToPoint(vector<double> double_vec)
 {
 	search_space_point point;
 	point.cb   = double_vec[0];
 	point.rhob = double_vec[1];
 	point.R    = double_vec[2];
 	point.tau  = double_vec[3];
-	unsigned depths_number = (double_vec.size() - 4) / 2;
-	for (unsigned i = 4; i < 4 + depths_number; i++)
+	for (unsigned i = 4; i < double_vec.size(); i++)
 		point.cws.push_back(double_vec[i]);
-	for (unsigned i = 4 + depths_number; i < double_vec.size(); i++)
-		point.depths.push_back(double_vec[i]);
 	point.residual = START_HUGE_VALUE;
 	return point;
 }
 
-double sspemdd_sequential::getRecordResidual()
+// function for BOINC client application
+search_space_point CAMBALA_sequential::fromStrToPoint(string str)
+{
+	search_space_point point;
+	stringstream sstream;
+	sstream << str;
+	sstream >> point.residual >> point.cb >> point.rhob >> point.R >> point.tau;
+	double val;
+	while (sstream >> val)
+		point.cws.push_back(val);
+	return point;
+}
+
+void CAMBALA_sequential::fromPointToFile(const search_space_point &point, ofstream &ofile)
+{
+	ofile << point.residual << " " << point.cb << " " << point.rhob << " "
+		<< point.R << " " << point.tau << " ";
+	for (unsigned i = 0; i < point.cws.size(); i++)
+		ofile << point.cws[i] << " ";
+}
+
+double CAMBALA_sequential::getRecordResidual()
 {
 	return record_point.residual;
 }
 
-void sspemdd_sequential::getThreeValuesFromStr(std::string str, double &val1, double &val2, double &val3)
+void CAMBALA_sequential::getThreeValuesFromStr(string str, double &val1, double &val2, double &val3)
 {
 	val1 = val3 = -1;
 	val2 = 1;
-	std::string word1, word2, word3;
+	string word1, word2, word3;
 	for (auto &x : str)
 		if (x == ':')
 			x = ' ';
-	std::stringstream sstream;
+	stringstream sstream;
 	sstream << str;
 	sstream >> word1 >> word2 >> word3;
-	std::istringstream(word1) >> val1;
-	std::istringstream(word2) >> val2;
-	std::istringstream(word3) >> val3;
+	istringstream(word1) >> val1;
+	istringstream(word2) >> val2;
+	istringstream(word3) >> val3;
 	if (val3 == -1)
 		val3 = val1;
 }
 
-int sspemdd_sequential::readScenario(std::string scenarioFileName)
+int CAMBALA_sequential::readScenario(string scenarioFileName)
 {
 // read constant and variable values from a scenario file
 	if ( (!rank) && (verbosity > 0) )
 		cout << "scenarioFileName " << scenarioFileName << endl;
-	std::ifstream scenarioFile(scenarioFileName.c_str());
+	ifstream scenarioFile(scenarioFileName.c_str());
 
 	if (!scenarioFile.is_open()) {
-		std::cerr << "scenarioFile with the name " << scenarioFileName << " wasn't openend" << endl;
+		cerr << "scenarioFile with the name " << scenarioFileName << " wasn't openend" << endl;
 		return -1;
 	}
 
-	std::string str, word, tmp_word;
-	std::stringstream sstream;
+	string str, word, tmp_word;
+	stringstream sstream;
 	unsigned cw_index = 0, d_index = 0;
 	double cur_val_step = 0, cur_val1 = 0, cur_val2 = 0;
 	while (getline(scenarioFile, str)) {
@@ -2329,17 +2372,17 @@ int sspemdd_sequential::readScenario(std::string scenarioFileName)
 			continue;
 		sstream << str;
 		sstream >> word;
-		if (word.find("dtimes_file") != std::string::npos)
+		if (word.find("dtimes_file") != string::npos)
 			sstream >> dtimesFileName;
-		else if (word.find("spmag_file") != std::string::npos)
+		else if (word.find("spmag_file") != string::npos)
 			sstream >> spmagFileName;
 		else if (word == "h")
 			sstream >> h;
 		else if (word == "H")
 			sstream >> H;
 		else if ((word.size() >= 2) && (word[0] == 'c') && (word[1] == 'w')) {
-			word = word.substr(2, word.size()-2);
-			std::istringstream(word) >> cw_index;
+			word = word.substr(2, word.size() - 2);
+			istringstream(word) >> cw_index;
 			if (cw1_init_arr.size() < cw_index + 1)
 				cw1_init_arr.resize(cw_index + 1);
 			if (cw2_init_arr.size() < cw_index + 1)
@@ -2357,7 +2400,7 @@ int sspemdd_sequential::readScenario(std::string scenarioFileName)
 		}
 		else if ((word.size() == 2) && (word[0] == 'd') && (isdigit(word[1]))) {
 			word = word.substr(1, word.size() - 1);
-			std::istringstream(word) >> d_index;
+			istringstream(word) >> d_index;
 			d_index--;
 			if (d1_arr.size() < d_index + 1) {
 				d1_arr.resize(d_index + 1);
@@ -2410,68 +2453,82 @@ int sspemdd_sequential::readScenario(std::string scenarioFileName)
 			else
 				ntau = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
 		}
+		else if (word == "ils_iterations")
+			sstream >> iterated_local_search_runs;
+		else if (word == "function_type")
+			sstream >> object_function_type;
 		sstream.str(""); sstream.clear();
 	}
 	
 	if (!cw1_init_arr.size()) {
-		std::cerr << "!cw1_init_arr.size()" << endl;
+		cerr << "!cw1_init_arr.size()" << endl;
 		return -1;
 	}
 	if (!h || !H) {
-		std::cerr << "!h || !H" << endl;
+		cerr << "!h || !H" << endl;
 		return -1;
 	}
+	cw1_arr = cw1_init_arr;
+	cw2_arr = cw2_init_arr;
 
-	if ( ((rank == 0) || (rank == 1)) && (verbosity > 0) ) {
-		cout << "Parameters :" << endl;
-		cout << "cw1_init_arr :" << endl;
-		for (auto &x : cw1_init_arr)
-			cout << x << " ";
-		cout << endl;
-		cout << "cw2_init_arr :" << endl;
-		for (auto &x : cw2_init_arr)
-			cout << x << " ";
-		cout << endl;
-		cout << "ncpl_init_arr :" << endl;
-		for (auto &x : ncpl_init_arr)
-			cout << x << " ";
-		cout << endl;
-		cout << "n_layers_w " << n_layers_w << endl;
-		cout << "nR " << nR << endl;
-		cout << "R1 " << R1 << endl;
-		cout << "R2 " << R2 << endl;
-		cout << "ntau " << ntau << endl;
-		cout << "tau1 " << tau1 << endl;
-		cout << "tau2 " << tau2 << endl;
-		cout << "nrhob " << nrhob << endl;
-		cout << "rhob1 " << rhob1 << endl;
-		cout << "rhob2 " << rhob2 << endl;
-		cout << "ncb " << ncb << endl;
-		cout << "cb1 " << cb1 << endl;
-		cout << "cb2 " << cb2 << endl;
-		cout << "dtimes_file " << dtimesFileName << endl;
-		cout << "spmag_file " << spmagFileName << endl;
-
-		cout << "readScenario() finished" << endl;
+	input_params_sstream << "Parameters :" << endl;
+	input_params_sstream << "launch_type " << launch_type << endl;
+	input_params_sstream << "object_function_type " << object_function_type << endl;
+	input_params_sstream << "iterated_local_search_runs " << iterated_local_search_runs << endl;
+	input_params_sstream << "cw1_init_arr :" << endl;
+	for (auto &x : cw1_init_arr)
+		input_params_sstream << x << " ";
+	input_params_sstream << endl;
+	input_params_sstream << "cw2_init_arr :" << endl;
+	for (auto &x : cw2_init_arr)
+		input_params_sstream << x << " ";
+	input_params_sstream << endl;
+	input_params_sstream << "ncpl_init_arr :" << endl;
+	for (auto &x : ncpl_init_arr)
+		input_params_sstream << x << " ";
+	input_params_sstream << endl;
+	input_params_sstream << "n_layers_w " << n_layers_w << endl;
+	input_params_sstream << "nR " << nR << endl;
+	input_params_sstream << "R1 " << R1 << endl;
+	input_params_sstream << "R2 " << R2 << endl;
+	input_params_sstream << "ntau " << ntau << endl;
+	input_params_sstream << "tau1 " << tau1 << endl;
+	input_params_sstream << "tau2 " << tau2 << endl;
+	input_params_sstream << "nrhob " << nrhob << endl;
+	input_params_sstream << "rhob1 " << rhob1 << endl;
+	input_params_sstream << "rhob2 " << rhob2 << endl;
+	input_params_sstream << "ncb " << ncb << endl;
+	input_params_sstream << "cb1 " << cb1 << endl;
+	input_params_sstream << "cb2 " << cb2 << endl;
+	input_params_sstream << "dtimes_file " << dtimesFileName << endl;
+	input_params_sstream << "spmag_file " << spmagFileName << endl;
+	
+	if (!rank) {
+		ofstream ofile(output_filename, ios_base::out);
+		ofile << input_params_sstream.str();
+		ofile.close();
 	}
-
+	
+	if (((rank == 0) || (rank == 1)) && (verbosity > 0))
+		cout << "readScenario() finished" << endl;
+	
 	return 0;
 }
 
-int sspemdd_sequential::readInputDataFromFiles()
+int CAMBALA_sequential::readInputDataFromFiles()
 {	
-	std::ifstream dtimesFile(dtimesFileName.c_str());
+	ifstream dtimesFile(dtimesFileName.c_str());
 	if (!dtimesFile.is_open()) {
-		std::cerr << "dtimesFile " << dtimesFileName << " wasn't opened" << endl;
+		cerr << "dtimesFile " << dtimesFileName << " wasn't opened" << endl;
 		return -1;
 	}
-	std::stringstream myLineStream;
-	std::string myLine;
+	stringstream myLineStream;
+	string myLine;
 	double buff;
 	vector<double> buffvect;
 	// reading the "experimental" delay time data from a file
-	while (std::getline(dtimesFile, myLine)) {
-		myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading
+	while (getline(dtimesFile, myLine)) {
+		myLine.erase(remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading
 		myLineStream << myLine;
 		myLineStream >> buff;
 		freqs.push_back(buff);
@@ -2488,50 +2545,50 @@ int sspemdd_sequential::readInputDataFromFiles()
 	}
 	dtimesFile.close();
 
-	weight_coeffs.clear();
-	std::ifstream spmagFile(spmagFileName.c_str());
-	if (spmagFile.is_open()) {
-		buffvect.clear();
-		while (std::getline(spmagFile, myLine)) {
-			myLine.erase(std::remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading
-			myLineStream << myLine;
-			myLineStream >> buff;
-
+	if (object_function_type == "weighted") {
+		weight_coeffs.clear();
+		ifstream spmagFile(spmagFileName.c_str());
+		if (spmagFile.is_open()) {
 			buffvect.clear();
-			while (!myLineStream.eof()) {
+			while (getline(spmagFile, myLine)) {
+				myLine.erase(remove(myLine.begin(), myLine.end(), '\r'), myLine.end()); // delete windows endline symbol for correct reading
+				myLineStream << myLine;
 				myLineStream >> buff;
-				buffvect.push_back(buff);
-			}
 
-			weight_coeffs.push_back(buffvect);
-			myLineStream.str(""); myLineStream.clear();
+				buffvect.clear();
+				while (!myLineStream.eof()) {
+					myLineStream >> buff;
+					buffvect.push_back(buff);
+				}
+
+				weight_coeffs.push_back(buffvect);
+				myLineStream.str(""); myLineStream.clear();
+			}
+			spmagFile.close();
+
+			if ((!rank) && (verbosity > 0)) {
+				cout << "weight_coeffs.size() " << weight_coeffs.size() << endl;
+				cout << "weight_coeffs first 10 lines : " << endl;
+				for (unsigned i = 0; i < 10; i++) {
+					for (auto &x : weight_coeffs[i])
+						cout << x << " ";
+					cout << endl;
+				}
+			}
 		}
-		spmagFile.close();
-
-		if ( (!rank) && (verbosity > 0) ) {
-			cout << "weight_coeffs.size() " << weight_coeffs.size() << endl;
-			cout << "weight_coeffs first 10 lines : " << endl;
-			for (unsigned i = 0; i < 10; i++) {
-				for (auto &x : weight_coeffs[i])
-					cout << x << " ";
-				cout << endl;
-			}
+		else {
+			object_function_type = "uniform";
+			if ((!rank) && (verbosity > 0))
+				cout << "object_function_type changed to " << object_function_type << endl;
 		}
 	}
-	else {
-		object_function_type = "uniform2";
-		if ( (!rank) && (verbosity > 0) )
-			cout << "spmagFile " << spmagFileName << " wasn't opened" << endl;
-	}
 
-	if ( (!rank) && (verbosity > 0) ){
-		cout << "object_function_type changed to " << object_function_type << endl;
+	if ( (!rank) && (verbosity > 0) )
 		cout << "readInputDataFromFiles() finished " << endl;
-	}
 	return 0;
 }
 
-search_space_point sspemdd_sequential::getNonRandomStartPoint( vector<double> depths )
+search_space_point CAMBALA_sequential::getNonRandomStartPoint( vector<double> depths )
 {
 	// search_space_variables[0] - cb
 	// search_space_variables[1] - rhob
@@ -2561,7 +2618,7 @@ search_space_point sspemdd_sequential::getNonRandomStartPoint( vector<double> de
 	return point;
 }
 
-void sspemdd_sequential::printDelayTime(double R, vector<unsigned> mode_numbers, vector<vector<double>> modal_group_velocities)
+void CAMBALA_sequential::printDelayTime(double R, vector<unsigned> mode_numbers, vector<vector<double>> modal_group_velocities)
 {
 	string ofile_name = "delayTimeOutput_" + object_function_type + ".txt";
 	ofstream ofile(ofile_name);
@@ -2575,7 +2632,7 @@ void sspemdd_sequential::printDelayTime(double R, vector<unsigned> mode_numbers,
 	ofile.close();
 }
 
-void sspemdd_sequential::directPointCalc( search_space_point point )
+void CAMBALA_sequential::directPointCalc( search_space_point point )
 {
 	isTimeDelayPrinting = true;
 	fillDataComputeResidual(point);
