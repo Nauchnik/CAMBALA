@@ -1,8 +1,8 @@
 /*****************************************************************************************
-// SSPEMDD-based BOINC client application for Acoustics@home -- Copyright(c) 2017
-// SSPEMDD stands for Sound Speed Profile Estimator from Modal Delay Data
+// CAMBALA-based BOINC client application for Acoustics@home -- Copyright(c) 2017
+// CAMBALA stands for Coupled Acoustic Modes
 // Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory of SB RAS)
-// Pavel Petrov (Il'ichev Pacific Oceanological Institute of FEB RAS),
+// Pavel Petrov (Il'ichev Pacific Oceanological Institute of FEB RAS)
 *****************************************************************************************/
 
 #ifdef _WIN32
@@ -28,16 +28,17 @@
 #include <string>
 #include <fstream>
 
-#include "sspemdd_sequential.h"
-#include "sspemdd_utils.h"
+#include "cambala_sequential.h"
+#include "cambala_utils.h"
 
 #define CHECKPOINT_FILE "chpt"
 #define INPUT_FILENAME "in"
 #define OUTPUT_FILENAME "out"
 
 using namespace std;
+CAMBALA_sequential cambala_seq;
 
-const int CHECKPOINT_EVERY_POINT = 10;
+const unsigned long long CHECKPOINT_EVERY_POINT = 10;
 
 bool do_work( const string &input_file_name, 
 	          const unsigned long long &processed_points, 
@@ -75,11 +76,12 @@ int main(int argc, char **argv)
 		getline(chpt_file, str);
 		istringstream(str) >> processed_points;
 		getline(chpt_file, str);
-		cur_record_point = fromStrToPoint(str);
+		cur_record_point = cambala_seq.fromStrToPoint(str);
 		chpt_file.close();
 		cout << "point from chpt file" << endl;
 	}
 	
+	cambala_seq.verbosity = 0;
 	if ( !do_work( input_file_name, processed_points, cur_record_point ) ) {
 		fprintf( stderr, "APP: do_work() failed:\n" );
 		perror("do_work");
@@ -96,7 +98,7 @@ int main(int argc, char **argv)
 		exit(-1);
     }
 	
-	fromPointToFile(cur_record_point, output_file);
+	cambala_seq.fromPointToFile(cur_record_point, output_file);
 	
 	output_file.close();
 	
@@ -107,25 +109,25 @@ bool do_work( const string &input_file_name,
 	          const unsigned long long &processed_points,
 	          search_space_point &current_record_point)
 {
-	sspemdd_sequential sspemdd_seq;
-
 	int retval;
-	retval = sspemdd_seq.readScenario(input_file_name);
+	retval = cambala_seq.readScenario(input_file_name);
 	if (retval) {
 		fprintf(stderr, "APP: readScenario() failed %d\n", retval);
 		exit(retval);
 	}
-	retval = sspemdd_seq.readInputDataFromFiles();
+	retval = cambala_seq.readInputDataFromFiles();
 	if (retval) {
 		fprintf(stderr, "APP: readInputDataFromFiles() failed %d\n", retval);
 		exit(retval);
 	}
-	retval = sspemdd_seq.init();
+	vector<vector<double>> depths_vec;
+	cambala_seq.createDepthsArray(cambala_seq.h1, depths_vec);
+	retval = cambala_seq.init(depths_vec[0]);
 	if (retval) {
 		fprintf(stderr, "APP: init() failed %d\n", retval);
 		exit(retval);
 	}
-	vector<search_space_point> points_vec = sspemdd_seq.getSearchSpacePointsVec();
+	vector<search_space_point> points_vec = cambala_seq.getSearchSpacePointsVec(depths_vec[0]);
 	
 	unsigned long long total_points = points_vec.size();
 	
@@ -140,13 +142,13 @@ bool do_work( const string &input_file_name,
 	
 	double dval;
 	for ( unsigned long long i = processed_points; i < total_points; i++) {
-		dval = sspemdd_seq.fillDataComputeResidual(points_vec[i]);
+		dval = cambala_seq.fillDataComputeResidual(points_vec[i]);
 		if (dval < current_record_point.residual)
 			current_record_point = points_vec[i];
 		
 		// checkpoint current results
 		//if ( ( boinc_is_standalone() ) || ( boinc_time_to_checkpoint() ) ) {
-		if (processed_points % CHECKPOINT_EVERY_POINT == 0) {
+		if ((i+1) % CHECKPOINT_EVERY_POINT == 0) {
 			retval = do_checkpoint(total_points, i + 1, current_record_point);
 			if (retval) {
 				fprintf(stderr, "APP: checkpoint failed %d\n", retval);
@@ -172,7 +174,7 @@ int do_checkpoint( const unsigned long long &total_points,
 	if ( !temp_ofile.is_open() ) return 1;
 
 	temp_ofile << processed_points << endl;
-	fromPointToFile(current_record_point, temp_ofile);
+	cambala_seq.fromPointToFile(current_record_point, temp_ofile);
     temp_ofile.close();
 	
     boinc_resolve_filename_s(CHECKPOINT_FILE, resolved_name);

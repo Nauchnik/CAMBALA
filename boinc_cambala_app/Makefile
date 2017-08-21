@@ -1,4 +1,4 @@
-SSPEMDD = ..
+CAMBALA = ..
 ALGLIB = ../../alglib
 BOINC_DIR = ../../boinc
 BOINC_API_DIR = $(BOINC_DIR)/api
@@ -15,12 +15,12 @@ CPPFLAGS = -O3 \
     -I$(BOINC_API_DIR) \
     -I$(BOINC_ZIP_DIR) \
     -I$(FREETYPE_DIR) \
-    -I$(SSPEMDD) \
+    -I$(CAMBALA) \
     -I$(ALGLIB) \
     -L /usr/X11R6/lib \
     -L.
 
-release: sspemdd_boinc
+release: cambala_boinc
 
 libstdc++.a:
 	ln -s `g++ -print-file-name=libstdc++.a`
@@ -31,11 +31,11 @@ ttfont.cpp:
 clean: distclean
 
 distclean:
-	/bin/rm -f $(PROGS) *.o libstdc++.a sspemdd_boinc
+	/bin/rm -f $(PROGS) *.o libstdc++.a cambala_boinc
 
-sspemdd_boinc: sspemdd_boinc.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o \
+cambala_boinc: cambala_boinc.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o cambala_sequential.o \
 	libstdc++.a $(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a
-	$(CPP) $(CPPFLAGS) sspemdd_boinc.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sspemdd_sequential.o -o sspemdd_boinc \
+	$(CPP) $(CPPFLAGS) cambala_boinc.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o cambala_sequential.o -o cambala_boinc \
 	libstdc++.a -pthread $(BOINC_API_DIR)/libboinc_api.a \
 	$(BOINC_LIB_DIR)/libboinc.a
 	
@@ -54,8 +54,8 @@ alglibmisc.o: $(ALGLIB)/alglibmisc.cpp
 alglibinternal.o: $(ALGLIB)/alglibinternal.cpp 
 	${CPP} ${CPPFLAGS} $(ALGLIB)/alglibinternal.cpp -c
 
-sspemdd_sequential.o: $(SSPEMDD)/sspemdd_sequential.cpp
-	${CPP} ${CPPFLAGS} $(SSPEMDD)/sspemdd_sequential.cpp -c
+cambala_sequential.o: $(CAMBALA)/cambala_sequential.cpp
+	${CPP} ${CPPFLAGS} $(CAMBALA)/cambala_sequential.cpp -c
 
-sspemdd_boinc.o: sspemdd_boinc.cpp
-	${CPP} ${CPPFLAGS} sspemdd_boinc.cpp -c
+cambala_boinc.o: cambala_boinc.cpp
+	${CPP} ${CPPFLAGS} cambala_boinc.cpp -c
