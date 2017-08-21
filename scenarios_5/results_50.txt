@@ -1,0 +1,85 @@
+*** scenario 501 uniform
+err = 0.00667653, parameters:
+c_b = 1742, rho_b = 1.15, R = 6984, tau = 0
+cws :
+1500 1498 1493 1472 1462.
+final time 237.689 s
+
+*** scenario 502 weighted
+err = 2.09553e-07, parameters:
+c_b = 1712, rho_b = 1.6, R = 6994, tau = 0
+cws :
+1500 1498 1493 1472 1462.
+final time 237.711 s
+
+*** scenario 501.1 uniform2
+err = 0.00672929, parameters:
+c_b = 1738, rho_b= 1.2, tau = 0, R = 6986
+cws :
+1500 1498 1493 1472 1462 depths :
+10 20 30 40 50 300.
+time from start 2267.49 s
+
+*** scenario 503
+err = 0.00666299, parameters:
+c_b = 1740, rho_b = 1.2, R = 6985, tau = 0
+cws :
+1500 1498 1493 1472 1462.
+final time 19404.6 s
+
+*** scenario 504
+err = 2.0934e-07, parameters:
+c_b = 1715, rho_b = 1.56, R = 6993, tau = 0
+cws :
+1500 1498 1493 1472 1462.
+final time 17544.4 s
+
+*** scenario 507 uniform
+err = 0.00744994, parameters:
+c_b = 1700, rho_b = 1.7, R = 7000, tau = 0
+cws :
+1490 1495 1490 1460 1480.
+final time 3703.44 s
+
+*** scenario 508 weighted
+err = 2.26756e-07, parameters:
+c_b = 1700, rho_b = 1.7, R = 7000, tau = 0
+cws :
+1490 1500 1490 1475 1465.
+final time 3776.2 s
+
+*** scenario 511 uniform
+err = 0.00700118, parameters:
+c_b = 1734, rho_b = 1.25, R = 6990, tau = 0
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462.
+final time 270.436 s
+
+*** scenario 511.1 uniform2
+err = 0.00704543, parameters:
+c_b = 1736, rho_b = 1.25, R = 6990, tau = 0
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462.
+final time 2339.04 s
+
+
+*** scenario 512 weighted
+err = 2.10193e-07, parameters:
+c_b = 1706, rho_b = 1.7, R = 6998, tau = 0
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462.
+final time 270.351 s
+
+*** scenario 513 uniform
+err = 0.00535112, parameters:
+c_b = 1724, rho_b = 1.35, R = 6992, tau = 0
+cws :
+1500 1498 1493 1472 1462.
+final time 242.612 s
+
+*** scenario 514 weighted
+err = 1.90282e-07, parameters:
+c_b = 1698, rho_b = 1.8, R = 6998, tau = 0
+cws :
+1500 1498 1493 1472 1462.
+final time 242.984 s
