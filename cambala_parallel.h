@@ -13,6 +13,7 @@
 const double STOP_MESSAGE = -1;
 const unsigned ILS_TASK_LEN = 10;
 const unsigned ILS_RESULT_LEN = 20;
+const unsigned MAX_DEPTHS_VECTORS = 1000000;
 
 class CAMBALA_parallel : public CAMBALA_sequential
 {
@@ -28,8 +29,9 @@ private:
 	void sendTaskIls(double *task, int task_index, unsigned process_index, vector<double> depths);
 
 	void controlProcessBruteforce();
+	void controlProcessFixedDepths(const vector<double> depths, const unsigned depths_index);
 	void computingProcessBruteforce();
-
+	
 	void reportRecordPoint( search_space_point record_point, unsigned long long record_count );
 };
 

@@ -31,13 +31,13 @@ int main(int argc, char **argv)
 	int verbosity = 0;
 
 #ifdef _DEBUG
-	argc = 4;
-	argv[1] = "./scenarios/test_hydro_r_uniform260_3layers_ssp.txt";
+	argc = 3;
+	argv[1] = "./scenarios/803_bottom_r_full_uniform.txt";
 	//argv[1] = "./boinc_CAMBALA_app/in";
 	//argv[1] = "39_hydro_r_uniform260.txt";
 	//argv[1] = "true_scenario_2.txt";
 	argv[2] = "1";
-	argv[3] = "-test";
+	//argv[3] = "-test";
 	verbosity = 2;
 #endif
 
@@ -95,22 +95,7 @@ int main(int argc, char **argv)
 		depths_file << endl;
 	}*/
 	
-	vector<vector<double>> depths_vec;
-	CAMBALA_seq.createDepthsArray(depths_vec);
-
-	if (CAMBALA_seq.launch_type == "ils") {
-		for (unsigned i = 0; i < depths_vec.size(); i++) {
-			CAMBALA_seq.init(depths_vec[i]);
-			//CAMBALA_seq.findGlobalMinBruteForce(depths_vec[i]);
-			CAMBALA_seq.findLocalMinHillClimbing(depths_vec[i]);
-			cout << "Processed " << i + 1 << " out of " << depths_vec.size() << " depths" << endl;
-		}
-	}
-	else {
-		CAMBALA_seq.init(depths_vec[0]);
-		CAMBALA_seq.findGlobalMinBruteForce(depths_vec[0]);
-	}
-
+	CAMBALA_seq.solve();
 	CAMBALA_seq.reportFinalResult();
 
 	t2 = std::chrono::high_resolution_clock::now();

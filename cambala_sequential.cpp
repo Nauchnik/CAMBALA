@@ -153,8 +153,8 @@ CAMBALA_sequential::CAMBALA_sequential() :
 	object_function_type("uniform"),
 	output_filename("cambala_out"),
 	depths_filename("cambala_depths_out"),
-	h(0),
 	H(0),
+	nh(1),
 	ncb(1),
 	nrhob(1),
 	nR(1),
@@ -1788,7 +1788,7 @@ int CAMBALA_sequential::init(vector<double> depths)
 	return 0;
 }
 
-int CAMBALA_sequential::createDepthsArray(vector<vector<double>> &depths_vec)
+int CAMBALA_sequential::createDepthsArray(const double h, vector<vector<double>> &depths_vec)
 {
 	if (launch_type == "bruteforce") {
 		n_layers_w = cw1_init_arr.size();
@@ -1926,7 +1926,6 @@ void CAMBALA_sequential::reduceSearchSpace(reduced_search_space_attribute &reduc
 	// search_space_variables[2] - R
 	// search_space_variables[3] - tau
 	// search_space_variables[4, ...] - cws
-	// search_space_variables[..., ...] - depths
 	if (reduced_s_s_a.cb == false) {
 		search_space[0].resize(1);
 		search_space[0][0] = cb1;
@@ -2072,8 +2071,8 @@ void CAMBALA_sequential::loadValuesToSearchSpaceVariables()
 	for (unsigned long long i = 0; i < ntau; i++)
 		tmp_vec[i] = tau1 + (ntau == 1 ? 0 : i*(tau2 - tau1) / (ntau - 1));
 	search_space.push_back(tmp_vec);
-
-	// fill search_space_variables[4-...] with cws
+	
+	// fill search_space_variables[4...] with cws
 	for (unsigned long long i = 0; i < cw1_arr.size(); i++) {
 		tmp_vec.resize(ncpl_arr[i]);
 		for (unsigned long long j = 0; j < ncpl_arr[i]; j++)
@@ -2376,10 +2375,18 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 			sstream >> dtimesFileName;
 		else if (word.find("spmag_file") != string::npos)
 			sstream >> spmagFileName;
-		else if (word == "h")
-			sstream >> h;
 		else if (word == "H")
 			sstream >> H;
+		else if (word == "h") {
+			sstream >> word;
+			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			h1 = cur_val1;
+			h2 = cur_val2;
+			if (h1 == h2)
+				nh = 1;
+			else
+				nh = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+		}
 		else if ((word.size() >= 2) && (word[0] == 'c') && (word[1] == 'w')) {
 			word = word.substr(2, word.size() - 2);
 			istringstream(word) >> cw_index;
@@ -2451,7 +2458,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 			if (tau1 == tau2)
 				ntau = 1;
 			else
-				ntau = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+				ntau = abs(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
 		}
 		else if (word == "ils_iterations")
 			sstream >> iterated_local_search_runs;
@@ -2464,8 +2471,8 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 		cerr << "!cw1_init_arr.size()" << endl;
 		return -1;
 	}
-	if (!h || !H) {
-		cerr << "!h || !H" << endl;
+	if (!H) {
+		cerr << "!H" << endl;
 		return -1;
 	}
 	cw1_arr = cw1_init_arr;
@@ -2636,4 +2643,26 @@ void CAMBALA_sequential::directPointCalc( search_space_point point )
 {
 	isTimeDelayPrinting = true;
 	fillDataComputeResidual(point);
+}
+
+void CAMBALA_sequential::solve()
+{
+	for (unsigned i = 0; i < nh; i++) {
+		double cur_h = h1 + (nh == 1 ? 0 : i*(h2 - h1) / (nh - 1));
+		vector<vector<double>> depths_vec;
+		createDepthsArray(cur_h, depths_vec);
+		if (launch_type == "ils") {
+			for (unsigned j = 0; j < depths_vec.size(); j++) {
+				init(depths_vec[j]);
+				//CAMBALA_seq.findGlobalMinBruteForce(depths_vec[i]);
+				findLocalMinHillClimbing(depths_vec[j]);
+				cout << "Processed " << j + 1 << " out of " << depths_vec.size() << " depths" << endl;
+			}
+		}
+		else {
+			init(depths_vec[0]);
+			findGlobalMinBruteForce(depths_vec[0]);
+		}
+		cout << "Processed " << i + 1 << " out of " << nh << " h (max depths)" << endl;
+	}
 }

@@ -75,6 +75,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="test_hydro_r_uniform260_3layers.txt" />
+    <Text Include="scenarios\803_bottom_r_full_uniform.txt" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,25 @@
+Parameters :
+launch_type bruteforce
+object_function_type uniform
+iterated_local_search_runs 10
+cw1_init_arr :
+1500 1498 1493 1472 1462 
+cw2_init_arr :
+1500 1498 1493 1472 1462 
+ncpl_init_arr :
+1 1 1 1 1 
+n_layers_w 1
+nR 201
+R1 6900
+R2 7100
+ntau 26
+tau1 -0.005
+tau2 -0.03
+nrhob 46
+rhob1 1.1
+rhob2 2
+ncb 101
+cb1 1650
+cb2 1750
+dtimes_file ac_modes_zr50m_R7km_dtimes_0dtau.txt
+spmag_file no

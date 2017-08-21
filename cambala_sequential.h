@@ -19,9 +19,9 @@ const double START_CW_VALUE = 1481;
 struct search_space_point
 {
 	double R;
-	double tau;
 	double rhob;
 	double cb;
+	double tau;
 	vector<double> cws;
 	double residual;
 	vector<double> depths;
@@ -35,9 +35,9 @@ struct search_space_point
 struct reduced_search_space_attribute
 {
 	bool R;
-	bool tau;
 	bool rhob;
 	bool cb;
+	bool tau;
 	vector<bool> cws;
 };
 
@@ -45,8 +45,8 @@ class CAMBALA_sequential
 {
 public:
 	CAMBALA_sequential();
-	double h;
 	double H;
+	unsigned long long nh;
 	unsigned long long ncb;
 	unsigned long long nrhob;
 	unsigned long long nR;
@@ -63,6 +63,8 @@ public:
 	vector<unsigned long long> ncpl_init_arr;
 	vector<unsigned long long> ncpl_arr;
 	string object_function_type;
+	double h1;
+	double h2;
 	double R1;
 	double R2;
 	double tau1;    //tau_comment: added tau to the class declaration
@@ -94,7 +96,8 @@ public:
 	int readScenario(string scenarioFileName);
 	int readInputDataFromFiles();
 	int init(vector<double> depths);
-	int createDepthsArray(vector<vector<double>> &depths_vec);
+	void solve();
+	int createDepthsArray(const double h, vector<vector<double>> &depths_vec);
 	void loadValuesToSearchSpaceVariables();
 	double getRecordResidual();
 	search_space_point getNonRandomStartPoint( vector<double> depths );
