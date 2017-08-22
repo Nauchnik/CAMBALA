@@ -374,7 +374,7 @@ double CAMBALA_sequential::compute_modal_delays_residual_uniform2(vector<double>
 	for (unsigned i=0; i < 100; i++)
 		cout << mode_numbers[i] << " ";
 	cout << endl;*/
-	
+
 	for (unsigned ii = 0; ii<freqs.size(); ii++) {
 		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
 		mnumb = experimental_mode_numbers.at(ii);
@@ -465,6 +465,71 @@ double CAMBALA_sequential::compute_modal_delays_residual_weighted(vector<double>
 
 	return residual;
 }
+
+//2017.08.23:Pavel: a residual functions where the "experimental" spectrogram modulus is taken as the weight coefficients
+//this is a simplest nonuniform residual function
+//in this version (counterpart of _uniform2) the _extrap2 function is used for the computation of eigenvalues
+
+double CAMBALA_sequential::compute_modal_delays_residual_weighted2(vector<double> &freqs,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
+	double R,
+	double tau,
+	vector<vector<double>> &experimental_delays,
+    vector<vector<double>> &weight_coeffs,   //2016.12.31:Pavel: this is a key parameter controlling the weights
+	vector<unsigned> &experimental_mode_numbers
+	)
+{
+
+    //residual = residual + weight_coeffs[ii][jj]*pow(experimental_delays[ii][jj] + tau - mdelay, 2);
+
+    unsigned rord = 3;
+	double iModesSubset = 1/sqrt(2);
+	double deltaf = 0.05;
+	double residual = 0;
+	unsigned mnumb;
+	double mdelay;
+	//2016.04.27:Pavel: now we use RMS as the residual
+    unsigned nRes = 0;
+
+	vector<vector<double>> modal_group_velocities;
+	vector<unsigned> mode_numbers;
+
+	compute_modal_grop_velocities2(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
+
+
+	for (unsigned ii = 0; ii<freqs.size(); ii++) {
+		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
+		mnumb = experimental_mode_numbers.at(ii);
+		for (unsigned jj = 0; jj<mnumb; jj++) {
+			if (experimental_delays[ii][jj]>0) {
+                nRes = nRes + 1;
+                //2016.04.27:Pavel:
+                if ( jj<mode_numbers.at(ii) ) {
+                    mdelay = R / modal_group_velocities[ii][jj];
+                }
+                else {
+                    mdelay = R / modal_group_velocities[ii][mode_numbers.at(ii)-1];
+                }
+				//tau_comment: this is the very place where it comes into play in the computation
+				//please check the search block!
+				residual = residual + weight_coeffs[ii][jj]*pow(experimental_delays[ii][jj] + tau - mdelay, 2);
+			}
+		}
+	}
+    //2016.04.27:Pavel: RMS
+	residual = sqrt(residual/nRes);
+
+	if (isTimeDelayPrinting)
+		printDelayTime(R, mode_numbers, modal_group_velocities);
+
+	return residual;
+}
+
+
 
 int CAMBALA_sequential::compute_wnumbers_bb(vector<double> &freqs,
 	double deltaf,
@@ -584,9 +649,20 @@ int CAMBALA_sequential::compute_modal_grop_velocities2(vector<double> &freqs,
 	vector<double> out_wnum;
 
 	vector<double> mgv_ii, phi, dphi;
-	unsigned nwnum;
+	unsigned nwnum, Ns_mult;
 	unsigned nfr = (unsigned)freqs.size();
 	double omeg, vgc;
+	vector<unsigned> Ns_points_m;
+
+    Ns_mult = 1;
+    for (unsigned ss = 1; ss<ordRich; ss++) {
+        Ns_mult = Ns_mult*2;
+    }
+
+
+    for (unsigned ss=0; ss<Ns_points.size(); ss++) {
+        Ns_points_m.push_back(  Ns_mult*Ns_points.at(ss) );
+    }
 
 	for (unsigned ii = 0; ii<nfr; ii++) {
 		out_wnum.clear();
@@ -596,12 +672,14 @@ int CAMBALA_sequential::compute_modal_grop_velocities2(vector<double> &freqs,
 		out_wnum = compute_wnumbers_extrap2(omeg, depths, c1s, c2s, rhos, Ns_points, iModesSubset , ordRich);
 		nwnum = (unsigned)out_wnum.size();
 
+
+
 		for (unsigned jj = 0; jj < nwnum; jj++)
 		{
 
-			    compute_wmode1(omeg, depths, c1s, c2s, rhos, Ns_points, out_wnum.at(jj), phi, dphi);
+			    compute_wmode1(omeg, depths, c1s, c2s, rhos, Ns_points_m, out_wnum.at(jj), phi, dphi);
 
-                vgc = compute_wmode_vg(omeg, depths, c1s, c2s, rhos, Ns_points, out_wnum.at(jj), phi);
+                vgc = compute_wmode_vg(omeg, depths, c1s, c2s, rhos, Ns_points_m, out_wnum.at(jj), phi);
                 mgv_ii.push_back( vgc );
 		}
 
@@ -1113,7 +1191,7 @@ double CAMBALA_sequential::compute_wmode_vg(double &omeg, // sound frequency
     double vg_int =0.0;
     double layer_int;
     unsigned Np, nc;
-    
+
     unsigned n_layers = (unsigned)depths.size();
 
     nc = 0;
@@ -1723,9 +1801,9 @@ int CAMBALA_sequential::init(vector<double> depths)
 			cout << x << " ";
 		cout << endl;
 	}
-	
+
 	n_layers_w = depths.size() - 1;
-	
+
 	if (!n_layers_w) {
 		cerr << "n_layers_w == 0" << endl;
 		return -1;
@@ -1771,17 +1849,17 @@ int CAMBALA_sequential::init(vector<double> depths)
 		cerr << endl;
 		return -1;
 	}
-	
+
 	if ( (!rank) && (verbosity > 0) )
 		cout << "N_total " << N_total << endl;
-	
+
 	if (cw1_arr.size() != (depths.size() - 1)) {
 		cerr << "cw1_arr.size() != (depths.size() - 1)";
 		cerr << endl;
 		exit(1);
 	}
 	loadValuesToSearchSpaceVariables();
-	
+
 	if ( (!rank) && (verbosity > 0) )
 		cout << "init() finished" << endl;
 
@@ -1855,7 +1933,7 @@ int CAMBALA_sequential::createDepthsArray(const double h, vector<vector<double>>
 	}
 	ofile.close();
 	cout << "depths_vec.size() " << depths_vec.size() << endl;
-	
+
 	return 0;
 }
 
@@ -1868,7 +1946,7 @@ void CAMBALA_sequential::reportFinalResult()
 	time_span = chrono::duration_cast<chrono::duration<double>>(t2 - start_chrono_time);
 
 	ofstream ofile(output_filename, ios_base::app);
-	
+
 	ofile << endl;
 	ofile << "total solving time (chrono) " << time_span.count() << endl;
 	ofile << "SEARCH ENDED!" << endl;
@@ -1897,7 +1975,7 @@ void CAMBALA_sequential::findGlobalMinBruteForce(vector<double> depths)
 
 	vector<search_space_point> search_space_points_vec = getSearchSpacePointsVec(depths);
 	cout << "search_space_points_vec.size() " << search_space_points_vec.size() << endl;
-	
+
 	for (auto &x : search_space_points_vec)
 		fillDataComputeResidual(x); // calculated residual is written to cur_point
 }
@@ -1974,7 +2052,7 @@ double CAMBALA_sequential::fillDataComputeResidual( search_space_point &point )
 		cerr << "depths.size() == 0" << endl;
 		exit(-1);
 	}
-	
+
 	if (verbosity > 1) {
 		/*for (unsigned jj = 0; jj <= n_layers_w; jj++)
 			cout << "Layer #" << jj + 1 << ": c=" << c1s.at(jj) << "..." << c2s.at(jj) << "; rho=" << rhos.at(jj) << "; np=" << Ns_points.at(jj) << endl;
@@ -2008,7 +2086,7 @@ double CAMBALA_sequential::fillDataComputeResidual( search_space_point &point )
 
 	if ( verbosity > 1 )
 		cout << "point.residual " << point.residual << endl;
-	
+
 	if (point.residual < record_point.residual) {
 		record_point = point;
 		if (verbosity > 0) {
@@ -2071,7 +2149,7 @@ void CAMBALA_sequential::loadValuesToSearchSpaceVariables()
 	for (unsigned long long i = 0; i < ntau; i++)
 		tmp_vec[i] = tau1 + (ntau == 1 ? 0 : i*(tau2 - tau1) / (ntau - 1));
 	search_space.push_back(tmp_vec);
-	
+
 	// fill search_space_variables[4...] with cws
 	for (unsigned long long i = 0; i < cw1_arr.size(); i++) {
 		tmp_vec.resize(ncpl_arr[i]);
@@ -2097,7 +2175,7 @@ search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> d
 	/*for (unsigned i = 0; i < search_space.size(); i++) // i stands for variable_index
 	local_record_point_indexes[i] = rand() % search_space[i].size(); // get random index
 	cur_point_indexes = local_record_point_indexes;*/
-	
+
 	search_space_point local_record_point = getNonRandomStartPoint(depths);
 	vector<unsigned> local_record_point_indexes = fromPointToPointIndexes( local_record_point );
 	fillDataComputeResidual(local_record_point); // calculated residual is written to cur_point
@@ -2201,7 +2279,7 @@ search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> d
 		//cout << "-----" << endl;
 		if (verbosity > 0)
 			cout << "new random cur_point_indexes : " << endl;
-		
+
 		for(;;) {
 			// prmutate current global minimum point to obtain a new start point
 			for (unsigned i = 0; i < search_space.size(); i++) {
@@ -2227,7 +2305,7 @@ search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> d
 				cout << cur_point_indexes[j] << " ";
 			cout << endl;
 		}
-		
+
 		fillDataComputeResidual(cur_point); // calculated residual is written to cur_point
 		checked_points.push_back(cur_point);
 		// new start point
@@ -2242,7 +2320,7 @@ search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> d
 	return local_record_point;
 }
 
-search_space_point CAMBALA_sequential::fromPointIndexesToPoint( vector<unsigned> cur_point_indexes, 
+search_space_point CAMBALA_sequential::fromPointIndexesToPoint( vector<unsigned> cur_point_indexes,
 	                                                            vector<double> depths)
 {
 	search_space_point point;
@@ -2466,7 +2544,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 			sstream >> object_function_type;
 		sstream.str(""); sstream.clear();
 	}
-	
+
 	if (!cw1_init_arr.size()) {
 		cerr << "!cw1_init_arr.size()" << endl;
 		return -1;
@@ -2509,21 +2587,21 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 	input_params_sstream << "cb2 " << cb2 << endl;
 	input_params_sstream << "dtimes_file " << dtimesFileName << endl;
 	input_params_sstream << "spmag_file " << spmagFileName << endl;
-	
+
 	if (!rank) {
 		ofstream ofile(output_filename, ios_base::out);
 		ofile << input_params_sstream.str();
 		ofile.close();
 	}
-	
+
 	if (((rank == 0) || (rank == 1)) && (verbosity > 0))
 		cout << "readScenario() finished" << endl;
-	
+
 	return 0;
 }
 
 int CAMBALA_sequential::readInputDataFromFiles()
-{	
+{
 	ifstream dtimesFile(dtimesFileName.c_str());
 	if (!dtimesFile.is_open()) {
 		cerr << "dtimesFile " << dtimesFileName << " wasn't opened" << endl;
@@ -2609,7 +2687,7 @@ search_space_point CAMBALA_sequential::getNonRandomStartPoint( vector<double> de
 	point.rhob = (rhob1 == rhob2) ? rhob1 : (rhob2 - rhob1) / 2;
 	point.R = (R1 == R2) ? R1 : (R2 - R1) / 2;
 	point.tau = (tau1 == tau2) ? tau1 : (tau2 - tau1) / 2;
-	
+
 	point.cws.resize(cw1_arr.size());
 	for ( unsigned i = 0; i < point.cws.size(); i++ ) {
 		if (cw1_arr[i] == cw2_arr[i])

@@ -25,7 +25,7 @@ struct search_space_point
 	vector<double> cws;
 	double residual;
 	vector<double> depths;
-	
+
 	bool operator==(const search_space_point& a) const
 	{
 		return (R == a.R && tau == a.tau && rhob == a.rhob && cb == a.cb && cws == a.cws && depths == a.depths);
@@ -90,7 +90,7 @@ public:
 	stringstream input_params_sstream;
 	string output_filename;
 	string depths_filename;
-	
+
 	// functions by Oleg
 	vector<vector<double>> search_space; // values of variables which form a search space
 	int readScenario(string scenarioFileName);
@@ -117,7 +117,7 @@ public:
 	search_space_point fromDoubleVecToPoint(vector<double> double_vec);
 	search_space_point fromStrToPoint(string str); // BOINC client application
 	void fromPointToFile(const search_space_point &point, ofstream &ofile); // BOINC client application
-	
+
 	// functions by Pavel
 	// tau_comment: added tau to the arguments of compute_modal_delays_residual_uniform()
 
@@ -145,6 +145,14 @@ public:
 		double tau, vector<vector<double>> &experimental_delays,
 		vector<vector<double>> &weight_coeffs, vector<unsigned> &experimental_mode_numbers
 	);
+
+    double compute_modal_delays_residual_weighted2(vector<double> &freqs,
+		vector<double> &depths, vector<double> &c1s, vector<double> &c2s,
+		vector<double> &rhos, vector<unsigned> &Ns_points, double R,
+		double tau, vector<vector<double>> &experimental_delays,
+		vector<vector<double>> &weight_coeffs, vector<unsigned> &experimental_mode_numbers
+	);
+
 
 	vector<double> compute_wnumbers(double &omeg, vector<double> &c, vector<double> &rho,
 		vector<unsigned> &interface_idcs, vector<double> &meshsizes,
