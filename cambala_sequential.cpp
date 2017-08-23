@@ -652,11 +652,7 @@ int CAMBALA_sequential::compute_modal_grop_velocities2(vector<double> &freqs,
 	double omeg, vgc;
 	vector<unsigned> Ns_points_m;
 
-    Ns_mult = 1;
-    for (unsigned ss = 1; ss<ordRich; ss++) {
-        Ns_mult = Ns_mult*2;
-    }
-
+	Ns_mult = pow(2, ordRich - 1);
 
     for (unsigned ss=0; ss<Ns_points.size(); ss++) {
         Ns_points_m.push_back(  Ns_mult*Ns_points.at(ss) );
