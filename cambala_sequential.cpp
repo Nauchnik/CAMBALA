@@ -172,6 +172,7 @@ CAMBALA_sequential::CAMBALA_sequential() :
 	verbosity(1),
 	N_total(1),
 	isTimeDelayPrinting(false),
+	ppm(0),
 	rank(0)
 {
 	record_point.cb       = START_HUGE_VALUE;
@@ -243,7 +244,6 @@ void CAMBALA_sequential::load_layers_data(
 
 void CAMBALA_sequential::load_profile_deep_water(
     string ProfileFName,
-    unsigned ppm,
 	vector<double> &depths,
 	vector<double> &c1s,
 	vector<double> &c2s,
@@ -276,8 +276,6 @@ void CAMBALA_sequential::load_profile_deep_water(
 
 	}
 	Myfile.close();
-
-
 }
 
 double CAMBALA_sequential::compute_modal_delays_residual_uniform(vector<double> &freqs,
@@ -1826,7 +1824,6 @@ int CAMBALA_sequential::init(vector<double> depths)
 	for (auto &x : rhos)
 		x = 1;
 	Ns_points.resize(n_layers_w + 1);
-	unsigned ppm = 1;
 	Ns_points[0] = (unsigned)round(ppm*depths[0]);
 	for (unsigned i=1; i < depths.size(); i++ )
 		Ns_points[i] = (unsigned)round(ppm*(depths[i] - depths[i-1]));
@@ -2077,6 +2074,10 @@ double CAMBALA_sequential::fillDataComputeResidual( search_space_point &point )
 	}
 	else if (object_function_type == "weighted") {
 		point.residual = compute_modal_delays_residual_weighted(freqs, depths, c1s, c2s, rhos, Ns_points,
+			point.R, point.tau, modal_delays, weight_coeffs, mode_numbers);
+	}
+	else if (object_function_type == "weighted2") {
+		point.residual = compute_modal_delays_residual_weighted2(freqs, depths, c1s, c2s, rhos, Ns_points,
 			point.R, point.tau, modal_delays, weight_coeffs, mode_numbers);
 	}
 	else {
@@ -2542,7 +2543,20 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 			sstream >> iterated_local_search_runs;
 		else if (word == "function_type")
 			sstream >> object_function_type;
+		else if (word == "ppm")
+			sstream >> ppm;
 		sstream.str(""); sstream.clear();
+	}
+	
+	if (ppm == 0) { // if ppm wasn't set directly
+		if ((object_function_type == "uniform") || (object_function_type == "weighted"))
+			ppm = 2;
+		else if ((object_function_type == "uniform2") || (object_function_type == "weighted2"))
+			ppm = 1;
+		else {
+			cerr << "unknown object_function_type " << object_function_type << endl;
+			exit(1);
+		}
 	}
 
 	if (!cw1_init_arr.size()) {
@@ -2559,6 +2573,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 	input_params_sstream << "Parameters :" << endl;
 	input_params_sstream << "launch_type " << launch_type << endl;
 	input_params_sstream << "object_function_type " << object_function_type << endl;
+	input_params_sstream << "ppm " << ppm << endl;
 	input_params_sstream << "iterated_local_search_runs " << iterated_local_search_runs << endl;
 	input_params_sstream << "cw1_init_arr :" << endl;
 	for (auto &x : cw1_init_arr)

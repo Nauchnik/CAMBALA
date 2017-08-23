@@ -63,6 +63,7 @@ public:
 	vector<unsigned long long> ncpl_init_arr;
 	vector<unsigned long long> ncpl_arr;
 	string object_function_type;
+	unsigned ppm;
 	double h1;
 	double h2;
 	double R1;
@@ -125,9 +126,8 @@ public:
 	vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,
 	vector<unsigned> &Ns_points);
 
-	void load_profile_deep_water(string ProfileFName,unsigned ppm,
-	vector<double> &depths,vector<double> &c1s,vector<double> &c2s,vector<double> &rhos,
-	vector<unsigned> &Ns_points);
+	void load_profile_deep_water(string ProfileFName, vector<double> &depths, vector<double> &c1s, 
+		vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points);
 
 	double compute_modal_delays_residual_uniform(vector<double> &freqs, vector<double> &depths,
 		vector<double> &c1s, vector<double> &c2s, vector<double> &rhos,
