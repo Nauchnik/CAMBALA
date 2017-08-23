@@ -36,6 +36,7 @@ void CAMBALA_parallel::MPI_main()
 
 void CAMBALA_parallel::controlProcessIls()
 {
+/*
 #ifdef _MPI
 	MPI_Status status, cur_status;
 	stringstream sstream_out;
@@ -167,6 +168,7 @@ void CAMBALA_parallel::controlProcessIls()
 	cout << "finilizing process " << rank << endl;
 	MPI_Finalize();
 #endif
+*/
 }
 
 void CAMBALA_parallel::sendTaskIls(double *task, int task_index, unsigned process_index, vector<double> depths)
@@ -184,6 +186,7 @@ void CAMBALA_parallel::sendTaskIls(double *task, int task_index, unsigned proces
 
 void CAMBALA_parallel::computingProcessIls()
 {
+/*
 #ifdef _MPI
 	MPI_Status status;
 	double *task = new double[ILS_TASK_LEN];
@@ -249,28 +252,14 @@ void CAMBALA_parallel::computingProcessIls()
 		MPI_Send( &task_index,      1,          MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD );
 		MPI_Send( &processing_time, 1,          MPI_DOUBLE,   0, 0, MPI_COMM_WORLD );
 		MPI_Send( result,          ILS_RESULT_LEN, MPI_DOUBLE,   0, 0, MPI_COMM_WORLD );
-		
-		/*cur_process_points_sstream << cur_point.cb << " " 
-			                       << cur_point.rhob << " "
-								   << cur_point.R << " "
-								   << cur_point.tau << " ";
-		for (unsigned i = 0; i < cur_point.cws.size(); i++)
-			cur_process_points_sstream << cur_point.cws[i] << " ";
-		cur_process_points_sstream << cur_point.residual;
-		cur_process_points_sstream << endl;*/
 	}
 	delete[] task;
 	delete[] result;
 
-	/*stringstream cur_process_file_name_sstream;
-	cur_process_file_name_sstream << "points_process" << rank;
-	ofstream cur_process_file(cur_process_file_name_sstream.str().c_str());
-	cur_process_file << cur_process_points_sstream.rdbuf();
-	cur_process_file.close();*/
-
 	MPI_Finalize();
 
 #endif
+	*/
 }
 
 void CAMBALA_parallel::controlProcessBruteforce()
@@ -317,7 +306,7 @@ void CAMBALA_parallel::controlProcessBruteforce()
 #ifdef _MPI
 	// send stop-messages to all computing processes
 	int stop_message = 0;
-	for (unsigned i=1; i< corecoune; i++)
+	for (unsigned i=1; i< corecount; i++)
 		MPI_Send(&stop_message, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
 	cout << "stop-messages were sent" << endl;
 	MPI_Finalize();
@@ -378,24 +367,31 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 	unsigned send_task_count = 0;
 	int depths_p_len = depths.size();
 	double *depths_p = new double[depths_p_len];
+	cout << "depths_p" << endl;
 	for (unsigned i = 0; i < depths_p_len; i++)
 		depths_p[i] = depths[i];
 	
 	// sending first part of tasks
 	for (int computing_process_index = 1; computing_process_index < corecount; computing_process_index++) {
-		MPI_Send(&depths_p_len, 1, MPI_INT, computing_process_index, 0, MPI_COMM_WORLD);
-		MPI_Send(depths_p, depths_p_len, MPI_DOUBLE, computing_process_index, 0, MPI_COMM_WORLD);
-		MPI_Send(&task_len, 1, MPI_INT, computing_process_index, 0, MPI_COMM_WORLD);
-		//sstream_out << "before filling task" << endl;
-		//cout << sstream_out.str();
 		for (unsigned j = 0; j < task_len - 1; j++)
 			task[j] = point_values_vec[send_task_count][j];
 		task[task_len - 1] = (double)send_task_count;
-		//sstream_out << "sending task" << endl;
-		//for (unsigned j = 0; j < task_len; j++)
-		//	sstream_out << task[j] << " ";
-		//sstream_out << endl;
-		//cout << sstream_out.str();
+		if (verbosity > 0) {
+			cout << "Sending from control process" << endl;
+			cout << "depths_p_len " << depths_p_len << endl;
+			cout << "depths_p" << endl;
+			for (unsigned i = 0; i < depths_p_len; i++)
+				cout << depths_p[i] << " ";
+			cout << endl;
+			cout << "task_len " << task_len << endl;
+			cout << "task" << endl;
+			for (unsigned i = 0; i < task_len; i++)
+				cout << task[i] << " ";
+			cout << endl;
+		}
+		MPI_Send(&depths_p_len, 1, MPI_INT, computing_process_index, 0, MPI_COMM_WORLD);
+		MPI_Send(depths_p, depths_p_len, MPI_DOUBLE, computing_process_index, 0, MPI_COMM_WORLD);
+		MPI_Send(&task_len, 1, MPI_INT, computing_process_index, 0, MPI_COMM_WORLD);
 		MPI_Send(task, task_len, MPI_DOUBLE, computing_process_index, 0, MPI_COMM_WORLD);
 		send_task_count++;
 	}
@@ -433,7 +429,7 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 		if (received_residual < record_point.residual) {
 			record_count++;
 			record_point = fromDoubleVecToPoint(point_values_vec[received_task_index]);
-			record_point.depths = depths_vec[0];
+			record_point.depths = depths;
 			record_point.residual = received_residual;
 
 			double current_time = MPI_Wtime();
@@ -485,23 +481,16 @@ void CAMBALA_parallel::computingProcessBruteforce()
 	double *result = new double[result_len];
 	vector<double> cur_point_values_vec;
 	search_space_point cur_point;
-	cur_point_values_vec.resize(task_len - 1);
 	double task_index;
+	double *task;
 
 	if (rank == 1) {
 		cout << "computing process, rank " << rank << endl;
-		cout << "task_len " << task_len << endl;
 		cout << "result_len " << result_len << endl;
 	}
 
 	stringstream cur_process_points_sstream;
 
-	cur_process_points_sstream << "cb rhob R tau ";
-	for (unsigned i = 0; i < cw1_arr.size(); i++) {
-		cur_process_points_sstream << "cw" << i << " ";
-	}
-	cur_process_points_sstream << "residual";
-	cur_process_points_sstream << endl;
 	int message;
 	vector<double> depths;
 	unsigned task_len;
@@ -526,19 +515,27 @@ void CAMBALA_parallel::computingProcessBruteforce()
 				depths.resize(depths_len);
 				for (unsigned j = 0; j < depths_len; j++)
 					depths[j] = depths_p[j];
-				cout << "new depths" << endl;
-				for (auto &x : depths)
-					cout << x << " ";
-				cout << endl;
-				init(depths);
+				if (rank == 1) {
+					cout << "received new depths" << endl;
+					for (auto &x : depths)
+						cout << x << " ";
+					cout << endl;
+				}
 				MPI_Recv(&task_len, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 				if (isTaskReceived)
 					delete[] task;
-				double *task = new double[task_len];
+				task = new double[task_len];
 				isTaskReceived = true;
+
+				init(depths);
+
+				cur_process_points_sstream << "cb rhob R tau ";
+				for (unsigned i = 0; i < cw1_arr.size(); i++)
+					cur_process_points_sstream << "cw" << i << " ";
+				cur_process_points_sstream << "residual";
+				cur_process_points_sstream << endl;
 			}
 		}
-		
 		MPI_Recv(task, task_len, MPI_DOUBLE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
 		if (rank == 1) {
@@ -548,6 +545,7 @@ void CAMBALA_parallel::computingProcessBruteforce()
 			cout << endl;
 		}
 
+		cur_point_values_vec.resize(task_len - 1);
 		for (unsigned i = 0; i < task_len - 1; i++)
 			cur_point_values_vec[i] = task[i];
 		task_index = task[task_len - 1];
@@ -580,9 +578,11 @@ void CAMBALA_parallel::computingProcessBruteforce()
 	
 	stringstream cur_process_file_name_sstream;
 	cur_process_file_name_sstream << "points_process" << rank;
-	ofstream cur_process_file(cur_process_file_name_sstream.str().c_str());
+	ofstream cur_process_file;
+	cur_process_file.open(cur_process_file_name_sstream.str().c_str(),ios_base::app);
 	cur_process_file << cur_process_points_sstream.rdbuf();
 	cur_process_file.close();
+	cur_process_points_sstream.clear(); cur_process_points_sstream.str("");
 
 	MPI_Finalize();
 #endif
