@@ -20,6 +20,7 @@ CAMBALA_parallel::~CAMBALA_parallel()
 
 void CAMBALA_parallel::MPI_main()
 {
+	cout << "corecount " << corecount << endl;
 	if (launch_type == "ils") {
 		if (rank == 0)
 			controlProcessIls();
@@ -305,7 +306,7 @@ void CAMBALA_parallel::controlProcessBruteforce()
 	}
 #ifdef _MPI
 	// send stop-messages to all computing processes
-	int stop_message = 0;
+	int stop_message = -1;
 	for (unsigned i=1; i< corecount; i++)
 		MPI_Send(&stop_message, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
 	cout << "stop-messages were sent" << endl;
@@ -409,6 +410,7 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 	double received_residual;
 	double previous_record_time = MPI_Wtime();
 	unsigned long long record_count = 0;
+	int zero_message = 0;
 	
 	// get results and send new tasks on idle computing processes
 	while (processed_task_count < point_values_vec.size()) {
@@ -443,6 +445,7 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 			for (unsigned j = 0; j < task_len - 1; j++)
 				task[j] = point_values_vec[send_task_count][j];
 			task[task_len - 1] = send_task_count;
+			MPI_Send(&zero_message, 1, MPI_INT, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
 			MPI_Send(task, task_len, MPI_DOUBLE, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
 			send_task_count++;
 		}
@@ -492,49 +495,47 @@ void CAMBALA_parallel::computingProcessBruteforce()
 	stringstream cur_process_points_sstream;
 
 	int message;
+	double d_message;
 	vector<double> depths;
 	unsigned task_len;
 	bool isTaskReceived = false;
-	int message_len;
 
 	for (;;) {
-		MPI_Probe(0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-		MPI_Get_count(&status, MPI_CHAR, &message_len);
-		if (message_len == 1) {
-			MPI_Recv(&message, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-			if (!message) {
-				// if stop-message then finalize
-				cout << "rank " << rank << " received stop-message" << endl;
-				break;
+		MPI_Recv(&message, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		if (verbosity > 1)
+		if (message < 0) {
+			// if stop-message then finalize
+			cout << "rank " << rank << " received stop-message" << endl;
+			break;
+		}
+		else if (message > 0) {
+			// get new depths array
+			unsigned depths_len = message;
+			double *depths_p = new double[depths_len];
+			cout << "depths_p_len " << depths_len << endl;
+			MPI_Recv(depths_p, depths_len, MPI_DOUBLE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+			depths.resize(depths_len);
+			for (unsigned j = 0; j < depths_len; j++)
+				depths[j] = depths_p[j];
+			delete[] depths_p;
+			if (rank == 1) {
+				cout << "received new depths" << endl;
+				for (auto &x : depths)
+					cout << x << " ";
+				cout << endl;
 			}
-			else {
-				int depths_len = message;
-				double *depths_p = new double[depths_len];
-				MPI_Recv(depths_p, depths_len, MPI_DOUBLE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-				delete[] depths_p;
-				depths.resize(depths_len);
-				for (unsigned j = 0; j < depths_len; j++)
-					depths[j] = depths_p[j];
-				if (rank == 1) {
-					cout << "received new depths" << endl;
-					for (auto &x : depths)
-						cout << x << " ";
-					cout << endl;
-				}
-				MPI_Recv(&task_len, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-				if (isTaskReceived)
-					delete[] task;
-				task = new double[task_len];
-				isTaskReceived = true;
+			MPI_Recv(&task_len, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+			if (isTaskReceived)
+				delete[] task;
+			task = new double[task_len];
+			isTaskReceived = true;
 
-				init(depths);
+			init(depths);
 
-				cur_process_points_sstream << "cb rhob R tau ";
-				for (unsigned i = 0; i < cw1_arr.size(); i++)
-					cur_process_points_sstream << "cw" << i << " ";
-				cur_process_points_sstream << "residual";
-				cur_process_points_sstream << endl;
-			}
+			cur_process_points_sstream << "cb rhob R tau ";
+			for (unsigned i = 0; i < cw1_arr.size(); i++)
+				cur_process_points_sstream << "cw" << i << " ";
+			cur_process_points_sstream << "residual";
 		}
 		MPI_Recv(task, task_len, MPI_DOUBLE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
@@ -551,9 +552,8 @@ void CAMBALA_parallel::computingProcessBruteforce()
 		task_index = task[task_len - 1];
 		cur_point = fromDoubleVecToPoint(cur_point_values_vec);
 		cur_point.depths = depths;
-		delete[] task;
 		
-		if (rank == 1)
+		if ( (rank == 1) && ( verbosity > 0 ) )
 			cout << "received task_index " << task_index << endl;
 
 		fillDataComputeResidual(cur_point); // calculated residual is written to cur_point
