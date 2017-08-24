@@ -20,7 +20,6 @@ CAMBALA_parallel::~CAMBALA_parallel()
 
 void CAMBALA_parallel::MPI_main()
 {
-	cout << "corecount " << corecount << endl;
 	if (launch_type == "ils") {
 		if (rank == 0)
 			controlProcessIls();
@@ -265,16 +264,19 @@ void CAMBALA_parallel::computingProcessIls()
 
 void CAMBALA_parallel::controlProcessBruteforce()
 {
-	stringstream sstream_out;
+	cout << "Start of controlProcessBruteforce()" << endl;
+	cout << "corecount " << corecount << endl;
+	
+	stringstream main_sstream_out;
 	
 	vector<double> h_vec;
 	for (unsigned i = 0; i < nh; i++)
 		h_vec.push_back(h1 + (nh == 1 ? 0 : i*(h2 - h1) / (nh - 1)));
 
-	sstream_out << "h_vec.size() " << h_vec.size() << endl;
+	main_sstream_out << "h_vec.size() " << h_vec.size() << endl;
 	for (auto &x : h_vec)
-		sstream_out << x << " ";
-	sstream_out << endl;
+		main_sstream_out << x << " ";
+	main_sstream_out << endl;
 
 	vector<vector<double>> total_depths_vec;
 	
@@ -284,22 +286,23 @@ void CAMBALA_parallel::controlProcessBruteforce()
 		for (auto &depths : depths_vec)
 			total_depths_vec.push_back(depths);
 		if (total_depths_vec.size() >= MAX_DEPTHS_VECTORS) {
-			sstream_out << "WARNING. total_depths_vec.size() >= MAX_DEPTHS_VECTORS" << endl;
-			sstream_out << "total_depths_vec.size() changed to " << MAX_DEPTHS_VECTORS << endl;
+			main_sstream_out << "WARNING. total_depths_vec.size() >= MAX_DEPTHS_VECTORS" << endl;
+			main_sstream_out << "total_depths_vec.size() changed to " << MAX_DEPTHS_VECTORS << endl;
 			total_depths_vec.resize(MAX_DEPTHS_VECTORS);
 			break;
 		}
 	}
-	sstream_out << "total_depths_vec.size() " << total_depths_vec.size() << endl;
-	
-	ofstream ofile(output_filename, ios_base::app);;
-	ofile << sstream_out.rdbuf();
-	sstream_out.clear(); sstream_out.str("");
+	main_sstream_out << "total_depths_vec.size() " << total_depths_vec.size() << endl;
+	string main_output_filename = "cambala_main_out";
+	ofstream ofile;
+	ofile.open(main_output_filename, ios_base::app);;
+	ofile << main_sstream_out.rdbuf();
+	main_sstream_out.clear(); main_sstream_out.str("");
 	ofile.close(); ofile.clear();
 	
 	for (unsigned i = 0; i < total_depths_vec.size(); i++) {
 		controlProcessFixedDepths(total_depths_vec[i], i);
-		ofstream ofile(output_filename, ios_base::app);;
+		ofstream ofile(main_output_filename, ios_base::app);;
 		ofile << endl << "***" << endl << 
 			"depths # " << i << " out of " << total_depths_vec.size() << " processed" << endl;
 		ofile.close(); ofile.clear();
@@ -309,7 +312,8 @@ void CAMBALA_parallel::controlProcessBruteforce()
 	int stop_message = -1;
 	for (unsigned i=1; i< corecount; i++)
 		MPI_Send(&stop_message, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-	cout << "stop-messages were sent" << endl;
+	ofile.open(main_output_filename, ios_base::app);;
+	ofile << "stop-messages were sent" << endl;
 	MPI_Finalize();
 #endif
 }
@@ -470,9 +474,6 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 
 	delete[] task;
 	delete[] result;
-
-	cout << "finilizing process " << rank << endl;
-	MPI_Finalize();
 #endif
 }
 
@@ -503,6 +504,7 @@ void CAMBALA_parallel::computingProcessBruteforce()
 	for (;;) {
 		MPI_Recv(&message, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		if (verbosity > 1)
+			cout << "recv message " << message << endl;
 		if (message < 0) {
 			// if stop-message then finalize
 			cout << "rank " << rank << " received stop-message" << endl;
@@ -512,7 +514,6 @@ void CAMBALA_parallel::computingProcessBruteforce()
 			// get new depths array
 			unsigned depths_len = message;
 			double *depths_p = new double[depths_len];
-			cout << "depths_p_len " << depths_len << endl;
 			MPI_Recv(depths_p, depths_len, MPI_DOUBLE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 			depths.resize(depths_len);
 			for (unsigned j = 0; j < depths_len; j++)
@@ -573,7 +574,8 @@ void CAMBALA_parallel::computingProcessBruteforce()
 		result[1] = task_index;
 		MPI_Send(result, result_len, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
 	}
-	delete[] task;
+	if (isTaskReceived)
+		delete[] task;
 	delete[] result;
 	
 	stringstream cur_process_file_name_sstream;

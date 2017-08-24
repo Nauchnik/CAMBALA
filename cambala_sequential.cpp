@@ -498,7 +498,6 @@ double CAMBALA_sequential::compute_modal_delays_residual_weighted2(vector<double
 
 	compute_modal_grop_velocities2(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
 
-
 	for (unsigned ii = 0; ii<freqs.size(); ii++) {
 		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
 		mnumb = experimental_mode_numbers.at(ii);
@@ -2583,7 +2582,6 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 	for (auto &x : ncpl_init_arr)
 		input_params_sstream << x << " ";
 	input_params_sstream << endl;
-	input_params_sstream << "n_layers_w " << n_layers_w << endl;
 	input_params_sstream << "nR " << nR << endl;
 	input_params_sstream << "R1 " << R1 << endl;
 	input_params_sstream << "R2 " << R2 << endl;

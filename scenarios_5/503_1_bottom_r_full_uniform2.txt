@@ -2,7 +2,7 @@
 % inverting for bottom and R,
 % sound speed in water is considered known
 % constant parameters
-dtimes_file ac_modes_zr50m_R7km_dtimes_avdtau.txt
+dtimes_file 50_ac_modes_R7km_dtimes.txt
 spmag_file(string|no) no
 function_type uniform2
 h 50

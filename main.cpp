@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 
 #ifdef _DEBUG
 	argc = 3;
-	argv[1] = "./scenarios/803_bottom_r_full_uniform.txt";
+	argv[1] = "./scenarios_5/504_1_bottom_r_full_weighted2.txt";
 	//argv[1] = "./boinc_CAMBALA_app/in";
 	//argv[1] = "39_hydro_r_uniform260.txt";
 	//argv[1] = "true_scenario_2.txt";
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 		point.cws = { 1500, 1498, 1493, 1472, 1462 };
 		point.depths = { 10, 20, 30, 40, 50, 300 };
 		CAMBALA_seq.init(point.depths);
-		CAMBALA_seq.object_function_type = "uniform2";
+		CAMBALA_seq.object_function_type = "weighted2";
 		CAMBALA_seq.directPointCalc( point );
 		CAMBALA_seq.reportFinalResult();
 		cout << "true value test" << endl;
