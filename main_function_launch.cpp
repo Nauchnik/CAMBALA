@@ -29,8 +29,12 @@ int main(int argc, char **argv)
 	point.cws = { 1500, 1498, 1493, 1472, 1462 };
 	point.depths = { 10, 20, 30, 40, 50, 300 };
 
-	//scenarioFileName = "./504_bottom_r_full_weighted.txt";
-	scenarioFileName = "./504_1_bottom_r_full_weighted2.txt";
+	if (argc > 1)
+		scenarioFileName = argv[1];
+	else {
+		//scenarioFileName = "./504_bottom_r_full_weighted.txt";
+		scenarioFileName = "./504_1_bottom_r_full_weighted2.txt";
+	}
 	//
 	CAMBALA_sequential CAMBALA_seq;
 	CAMBALA_seq.verbosity = 2;
