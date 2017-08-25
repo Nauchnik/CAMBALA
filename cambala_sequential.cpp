@@ -2647,7 +2647,7 @@ int CAMBALA_sequential::readInputDataFromFiles()
 	}
 	dtimesFile.close();
 
-	if (object_function_type == "weighted") {
+	if (object_function_type.find("weighted") != string::npos) {
 		weight_coeffs.clear();
 		ifstream spmagFile(spmagFileName.c_str());
 		if (spmagFile.is_open()) {
