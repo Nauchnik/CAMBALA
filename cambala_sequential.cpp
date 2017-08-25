@@ -2639,9 +2639,9 @@ int CAMBALA_sequential::readInputDataFromFiles()
 		while (!myLineStream.eof()) {
 			myLineStream >> buff;
 			buffvect.push_back(buff);
-			mode_numbers.push_back((unsigned)buffvect.size());
 		}
 
+		mode_numbers.push_back((unsigned)buffvect.size());
 		modal_delays.push_back(buffvect);
 		myLineStream.str(""); myLineStream.clear();
 	}
