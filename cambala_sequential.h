@@ -109,7 +109,7 @@ public:
 	void reportFinalResult();
 	void getThreeValuesFromStr(string str, double &val1, double &val2, double &val3);
 	void reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a);
-	void directPointCalc( search_space_point point );
+	double directPointCalc( search_space_point point );
 	void printDelayTime(double R, vector<unsigned> mode_numbers, vector<vector<double>> modal_group_velocities);
 
 	//

@@ -481,8 +481,9 @@ double CAMBALA_sequential::compute_modal_delays_residual_weighted2(vector<double
 	vector<unsigned> &experimental_mode_numbers
 	)
 {
-
     //residual = residual + weight_coeffs[ii][jj]*pow(experimental_delays[ii][jj] + tau - mdelay, 2);
+	if (verbosity > 1)
+		cout << "compute_modal_delays_residual_weighted2()" << endl;
 
     unsigned rord = 3;
 	double iModesSubset = 1/sqrt(2);
@@ -517,6 +518,8 @@ double CAMBALA_sequential::compute_modal_delays_residual_weighted2(vector<double
 			}
 		}
 	}
+	if (verbosity > 1)
+		cout << "freqs loop done" << endl;
     //2016.04.27:Pavel: RMS
 	residual = sqrt(residual/nRes);
 
@@ -640,6 +643,9 @@ int CAMBALA_sequential::compute_modal_grop_velocities2(vector<double> &freqs,
 	vector<unsigned> &mode_numbers
 )
 {
+	if (verbosity > 1)
+		cout << "compute_modal_grop_velocities2" << endl;
+
 	mode_numbers.clear();
 	modal_group_velocities.clear();
 
@@ -2023,6 +2029,8 @@ void CAMBALA_sequential::reduceSearchSpace(reduced_search_space_attribute &reduc
 double CAMBALA_sequential::fillDataComputeResidual( search_space_point &point )
 { // finally specify sound speed in water
   // the parameters are transformed into the arrays c1s, c2s, rhos
+	if (verbosity > 1)
+		cout << "fillDataComputeResidual()" << endl;
 	if (point.cws.size() != point.depths.size() - 1) {
 		cerr << "point.cws.size() != point.depths.size() - 1" << endl;
 		cerr << point.cws.size() << " " << point.depths.size() - 1 << endl;
@@ -2726,10 +2734,10 @@ void CAMBALA_sequential::printDelayTime(double R, vector<unsigned> mode_numbers,
 	ofile.close();
 }
 
-void CAMBALA_sequential::directPointCalc( search_space_point point )
+double CAMBALA_sequential::directPointCalc( search_space_point point )
 {
 	isTimeDelayPrinting = true;
-	fillDataComputeResidual(point);
+	return fillDataComputeResidual(point);
 }
 
 void CAMBALA_sequential::solve()
