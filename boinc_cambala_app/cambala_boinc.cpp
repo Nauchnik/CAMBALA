@@ -38,8 +38,6 @@
 using namespace std;
 CAMBALA_sequential cambala_seq;
 
-const unsigned long long CHECKPOINT_EVERY_POINT = 10;
-
 bool do_work( const string &input_file_name, 
 	          const unsigned long long &processed_points, 
 	          search_space_point &current_record_point );
@@ -47,7 +45,7 @@ int do_checkpoint( const unsigned long long &total_points,
 	               const unsigned long long &processed_points, 
 	               const search_space_point &current_record_point );
 
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
     char buf[256];
 	int retval = boinc_init();
@@ -141,6 +139,12 @@ bool do_work( const string &input_file_name,
 	}
 	
 	double dval;
+	unsigned long long checkpoint_every_point;
+	if ((cambala_seq.object_function_type == "uniform") || (cambala_seq.object_function_type == "weighted"))
+		checkpoint_every_point = 10;
+	else 
+		checkpoint_every_point = 1;
+	
 	for ( unsigned long long i = processed_points; i < total_points; i++) {
 		dval = cambala_seq.fillDataComputeResidual(points_vec[i]);
 		if (dval < current_record_point.residual)
@@ -148,7 +152,7 @@ bool do_work( const string &input_file_name,
 		
 		// checkpoint current results
 		//if ( ( boinc_is_standalone() ) || ( boinc_time_to_checkpoint() ) ) {
-		if ((i+1) % CHECKPOINT_EVERY_POINT == 0) {
+		if ((i+1) % checkpoint_every_point == 0) {
 			retval = do_checkpoint(total_points, i + 1, current_record_point);
 			if (retval) {
 				fprintf(stderr, "APP: checkpoint failed %d\n", retval);
@@ -159,7 +163,7 @@ bool do_work( const string &input_file_name,
 		cout << "processed " << i+1 << " out from " << total_points << endl;
         //}
 	}
-
+	
 	return true;
 }
 
