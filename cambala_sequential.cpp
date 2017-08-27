@@ -2679,9 +2679,8 @@ int CAMBALA_sequential::readInputDataFromFiles()
 			}
 		}
 		else {
-			object_function_type = "uniform";
-			if ((!rank) && (verbosity > 0))
-				cout << "object_function_type changed to " << object_function_type << endl;
+			cerr << "spmagfile " << spmagFileName << " wasn't opened" << endl;
+			return -1;
 		}
 	}
 

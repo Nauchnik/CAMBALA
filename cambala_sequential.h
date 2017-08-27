@@ -91,8 +91,8 @@ public:
 	stringstream input_params_sstream;
 	string output_filename;
 	string depths_filename;
-
-	// functions by Oleg
+	
+	// Oleg's functions
 	vector<vector<double>> search_space; // values of variables which form a search space
 	int readScenario(string scenarioFileName);
 	int readInputDataFromFiles();
