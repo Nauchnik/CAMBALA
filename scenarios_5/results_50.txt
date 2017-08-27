@@ -11,3 +11,17 @@ c_b = 1709, rho_b = 1.64, R = 6995, tau = 0
 cws :
 1500 1498 1493 1472 1462.
 final time 33127.3 s
+
+*** scenario 517 uniform
+err = 0.00577488, parameters:
+c_b = 1731, rho_b = 1.32, R = 6992, tau = 0
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462.
+final time 33073 s
+
+*** scenario 518 weighted
+err = 1.79949e-07, parameters:
+c_b = 1703, rho_b = 1.72, R = 6999, tau = 0
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462.
+final time 33146.3 s
