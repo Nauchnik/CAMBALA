@@ -5,12 +5,41 @@ cws :
 1500 1498 1493 1472 1462.
 final time 33780.2 s
 
+*** scenario 503.1 uniform2
+err = 0.00562743, parameters:
+c_b = 1735, rho_b = 1.28, R = 6988, tau = 0
+cws :
+1500 1498 1493 1472 1462.
+final time 187104 s
+
+
 *** scenario 504 weighted
 err = 1.8197e-07, parameters:
 c_b = 1709, rho_b = 1.64, R = 6995, tau = 0
 cws :
 1500 1498 1493 1472 1462.
 final time 33127.3 s
+
+*** scenario 504.1 weighted2
+err = 1.82416e-07, parameters:
+c_b = 1709, rho_b = 1.64, R = 6995, tau = 0
+cws :
+1500 1498 1493 1472 1462.
+final time 183545 s
+
+*** scenario 515 uniform
+err = 0.00433835, parameters:
+c_b = 1719, rho_b = 1.46, R = 6994, tau = 0
+cws :
+1500 1498 1493 1472 1462.
+final time 33776.4 s
+
+*** scenario 516 weighted
+err = 1.62752e-07, parameters:
+c_b = 1702, rho_b = 1.74, R = 6997, tau = 0
+cws :
+1500 1498 1493 1472 1462.
+final time 33783.1 s
 
 *** scenario 517 uniform
 err = 0.00577488, parameters:
