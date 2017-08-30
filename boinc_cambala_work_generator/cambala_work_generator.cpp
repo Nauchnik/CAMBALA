@@ -382,7 +382,7 @@ int generateWUs(string scenario_file_name, long long wus_for_creation, cambala_b
 		if (!isTest)
 			system(system_str.c_str());
 	}
-	c_b_config.created_wus += wus_for_creation;
+	c_b_config.created_wus = to;
 	cout << "new c_b_config.created_wus " << c_b_config.created_wus << endl;
 	
 	ofstream ofile(scenario_file_name.c_str());
