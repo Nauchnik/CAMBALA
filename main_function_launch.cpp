@@ -17,8 +17,12 @@
 #include <algorithm>
 #include <cmath>
 
+double cpu_time();
+
 int main(int argc, char **argv)
 {
+	double start_time = cpu_time();
+
 	string scenarioFileName; 
 	search_space_point point;
 	// input data
@@ -40,12 +44,19 @@ int main(int argc, char **argv)
 	CAMBALA_seq.verbosity = 2;
 	CAMBALA_seq.readScenario(scenarioFileName);
 	CAMBALA_seq.readInputDataFromFiles();
-
 	CAMBALA_seq.init(point.depths);
+	double direct_point_calc_time = cpu_time();
 	CAMBALA_seq.directPointCalc( point );
+	direct_point_calc_time = cpu_time() - direct_point_calc_time;
+	cout << "direct_point_calc_time " << direct_point_calc_time << endl;
 	CAMBALA_seq.reportFinalResult();
 
 	cout << "test done" << endl;
+	cout << "final time " << cpu_time() - start_time << endl;
 	
 	return 0;
+}
+
+double cpu_time() {
+	return (double)clock() / CLOCKS_PER_SEC;
 }
