@@ -1,3 +1,18 @@
+*** scenario 603 uniform
+err = 0.00480125, parameters:
+c_b = 1723, rho_b = 1.4, R = 6992, tau = 0
+cws :
+1500 1498 1493 1472 1462.
+final time 33136.9 s
+
+*** scenario 604 weighted
+err = 1.69631e-07, parameters:
+c_b = 1704, rho_b = 1.7, R = 6996, tau = 0
+cws :
+1500 1498 1493 1472 1462.
+final time 34376.6 s
+
+
 *** scenario 615 uniform
 err = 0.00480125, parameters:
 c_b = 1723, rho_b = 1.4, R = 6992, tau = 0
