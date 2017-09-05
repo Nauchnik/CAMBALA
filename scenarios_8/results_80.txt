@@ -1,0 +1,27 @@
+*** scenario 803 uniform
+err = 0.00958994, parameters:
+c_b = 1688, rho_b = 1.72, R = 7016, tau = -0.005
+cws :
+1500 1498 1493 1472 1462.
+final time 222091 s
+
+*** scenario 804 weighted
+err = 3.47764e-07, parameters:
+c_b = 1678, rho_b = 1.96, R = 6984, tau = -0.03
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462.
+final time 221850 s
+
+*** scenario 817 uniform
+err = 0.00964261, parameters:
+c_b = 1687, rho_b = 1.72, R = 7019, tau = -0.005
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462.
+final time 235631 s
+
+*** scenario 818 weighted
+err = 3.47764e-07, parameters:
+c_b = 1678, rho_b = 1.96, R = 6984, tau = -0.03
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462.
+final time 221850 s
