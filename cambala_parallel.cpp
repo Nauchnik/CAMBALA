@@ -361,6 +361,12 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 		point_values_vec[index++] = cur_point_values;
 	cout << "next_cartesian() finished" << endl;
 
+	if (point_values_vec.size() < corecount - 1) {
+		cerr << "point_values_vec.size() < corecount - 1" << endl;
+		cerr << point_values_vec.size() << " < " < corecount - 1 << endl;
+		MPI_Abort(MPI_COMM_WORLD, 0);
+	}
+
 	sstream_out << "point_values_vec[0].size() " << point_values_vec[0].size() << endl;
 	unsigned task_len = point_values_vec[0].size() + 1; // point data + task index
 	double *task = new double[task_len];
