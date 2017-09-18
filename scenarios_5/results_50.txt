@@ -27,6 +27,20 @@ cws :
 1500 1498 1493 1472 1462.
 final time 183545 s
 
+*** scenario 505 uniform
+err = 0.00571089, parameters:
+c_b = 1700, rho_b = 1.7, R = 7000, tau = 0
+cws :
+1496 1498 1492 1476 1464
+final time 564289 s
+
+*** scenario 506 weighted
+err = 1.78543e-07, parameters:
+c_b = 1700, rho_b = 1.7, R = 7000, tau = 0
+cws :
+1498 1498 1494 1478 1460
+final time 575409 s
+
 *** scenario 515 uniform
 err = 0.00433835, parameters:
 c_b = 1719, rho_b = 1.46, R = 6994, tau = 0
