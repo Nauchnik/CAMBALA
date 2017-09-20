@@ -1,0 +1,153 @@
+SELECT CONCAT('UPDATE user SET total_credit = total_credit + ', COUNT(*), ' * 1024 WHERE ID = ', USERID, ';') AS QUERY
+  FROM result
+ WHERE SERVER_STATE = 5 AND CLIENT_STATE = 5 AND GRANTED_CREDIT <= 1
+    AND WORKUNITID IN(SELECT ID FROM workunit WHERE CANONICAL_RESULTID != 0)
+ GROUP BY USERID;
+
+SELECT CONCAT('UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = ', ID, ';') AS QUERY
+  FROM result
+ WHERE SERVER_STATE = 5 AND CLIENT_STATE = 5 AND GRANTED_CREDIT <= 1
+   AND WORKUNITID IN(SELECT ID FROM workunit WHERE CANONICAL_RESULTID != 0);
+
+
+Output:
+
+mysql> SELECT CONCAT('UPDATE user SET total_credit = total_credit + ', COUNT(*), ' * 1024 WHERE ID = ', USERID, ';') AS QUERY
+    ->   FROM result
+    ->  WHERE SERVER_STATE = 5 AND CLIENT_STATE = 5 AND GRANTED_CREDIT <= 1
+    ->     AND WORKUNITID IN(SELECT ID FROM workunit WHERE CANONICAL_RESULTID != 0)
+    ->  GROUP BY USERID;
++------------------------------------------------------------------------+
+| QUERY                                                                  |
++------------------------------------------------------------------------+
+| UPDATE user SET total_credit = total_credit + 4 * 1024 WHERE ID = 3;   |
+| UPDATE user SET total_credit = total_credit + 1 * 1024 WHERE ID = 14;  |
+| UPDATE user SET total_credit = total_credit + 4 * 1024 WHERE ID = 22;  |
+| UPDATE user SET total_credit = total_credit + 1 * 1024 WHERE ID = 30;  |
+| UPDATE user SET total_credit = total_credit + 25 * 1024 WHERE ID = 31; |
+| UPDATE user SET total_credit = total_credit + 51 * 1024 WHERE ID = 37; |
+| UPDATE user SET total_credit = total_credit + 2 * 1024 WHERE ID = 44;  |
+| UPDATE user SET total_credit = total_credit + 1 * 1024 WHERE ID = 47;  |
+| UPDATE user SET total_credit = total_credit + 6 * 1024 WHERE ID = 49;  |
+| UPDATE user SET total_credit = total_credit + 5 * 1024 WHERE ID = 55;  |
+| UPDATE user SET total_credit = total_credit + 1 * 1024 WHERE ID = 65;  |
+| UPDATE user SET total_credit = total_credit + 1 * 1024 WHERE ID = 66;  |
++------------------------------------------------------------------------+
+12 rows in set (0.05 sec)
+
+mysql>
+
+
+mysql> SELECT CONCAT('UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = ', ID, ';') AS QUERY
+    ->   FROM result
+    ->  WHERE SERVER_STATE = 5 AND CLIENT_STATE = 5 AND GRANTED_CREDIT <= 1
+    ->    AND WORKUNITID IN(SELECT ID FROM workunit WHERE CANONICAL_RESULTID != 0);
++----------------------------------------------------------------------------+
+| QUERY                                                                      |
++----------------------------------------------------------------------------+
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 26158; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 26165; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 26422; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 26520; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 26815; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 26846; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 26847; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27176; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27177; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27258; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27259; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27282; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27283; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27492; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27493; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27516; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27517; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27530; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27531; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27536; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27537; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27542; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27543; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27642; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27643; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27782; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27783; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27972; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27995; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 27997; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28011; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28029; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28060; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28061; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28074; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28075; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28094; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28095; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28106; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28107; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28246; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28247; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28342; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28343; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28344; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28345; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28356; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28357; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28454; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28455; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28482; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28483; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28486; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28487; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28492; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28493; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28500; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28501; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28554; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28555; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28586; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28587; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28616; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28617; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28618; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28619; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28634; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28635; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28638; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28639; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28654; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28655; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28662; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28663; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28692; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28693; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28710; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28711; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28732; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28733; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28734; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28735; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28738; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28739; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28740; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28741; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28754; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28755; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28760; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28761; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28866; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 28867; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 29024; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 29025; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 29066; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 29067; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 29390; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 29391; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 29396; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 29397; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 29460; |
+| UPDATE result SET granted_credit = granted_credit + 1024 WHERE ID = 29461; |
++----------------------------------------------------------------------------+
+102 rows in set (0.05 sec)
+
+mysql>

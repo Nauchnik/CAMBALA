@@ -1,0 +1,30 @@
+% посчитать завершенные result которым которым был вручную добавлен кредит
+select count(id) from result where validate_state=1 and granted_credit=42 and workunitid in(select id from workunit where assimilate_state=2 and xml_doc not like '%<credit>%' and canonical_credit=0)
+
+% посчитать завершенные workunit в result которым был вручную добавлен кредит
+select count(id) from workunit where assimilate_state=2 and xml_doc not like '%<credit>%' and canonical_credit=0;
+
+% посчитать не завершенные workunit, у которых нет credit в шаблоне
+select count(id) from workunit where assimilate_state<2 and xml_doc not like '%<credit>%'
+
+% добавить credit в шаблон незавершенных workunit
+UPDATE workunit SET xml_doc=REPLACE(xml_doc, '</file_ref>', '</file_ref> <credit>42</credit>') WHERE assimilate_state<2 and xml_doc not like '%<credit>%';
+
+id workunit в которых нет credit
+| 591803 |
+| 591804 |
+| 591806 |
+| 591808 |
+| 591809 |
+| 591810 |
+| 591811 |
+| 591812 |
+| 591813 |
+| 591814 |
+| 591817 |
+| 591818 |
+| 591819 |
+| 591820 |
+| 591821 |
+| 591822 |
+| 591825 |
