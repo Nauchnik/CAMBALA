@@ -10,6 +10,9 @@ select count(id) from workunit where assimilate_state<2 and xml_doc not like '%<
 % добавить credit в шаблон незавершенных workunit
 UPDATE workunit SET xml_doc=REPLACE(xml_doc, '</file_ref>', '</file_ref> <credit>42</credit>') WHERE assimilate_state<2 and xml_doc not like '%<credit>%';
 
+% назнаить по 42 кредита всем host по всемы выбранным workunit
+SELECT CONCAT('UPDATE host SET total_credit = total_credit + ', COUNT(*)*42, ' WHERE ID = ', HOSTID, ';') AS QUERY FROM result where validate_state=1 and granted_credit=42 and workunitid in(select id from workunit where assimilate_state=2 and xml_doc not like '%<credit>%' and canonical_credit=0) GROUP BY HOSTID;
+
 id workunit в которых нет credit
 | 591803 |
 | 591804 |
