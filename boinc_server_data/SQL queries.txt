@@ -10,24 +10,15 @@ select count(id) from workunit where assimilate_state<2 and xml_doc not like '%<
 % добавить credit в шаблон незавершенных workunit
 UPDATE workunit SET xml_doc=REPLACE(xml_doc, '</file_ref>', '</file_ref> <credit>42</credit>') WHERE assimilate_state<2 and xml_doc not like '%<credit>%';
 
-% назнаить по 42 кредита всем host по всемы выбранным workunit
-SELECT CONCAT('UPDATE host SET total_credit = total_credit + ', COUNT(*)*42, ' WHERE ID = ', HOSTID, ';') AS QUERY FROM result where validate_state=1 and granted_credit=42 and workunitid in(select id from workunit where assimilate_state=2 and xml_doc not like '%<credit>%' and canonical_credit=0) GROUP BY HOSTID;
+% построить запросы с назначением по 42 кредита всем host по всем подходящим workunit
+SELECT CONCAT('UPDATE host SET total_credit = total_credit + ', COUNT(*)*42, ' WHERE ID = ', HOSTID, ';') 
+AS QUERY FROM result 
+where validate_state=1 and granted_credit=42 and workunitid in(select id from workunit where assimilate_state=2 and xml_doc not like '%<credit>%' and canonical_credit=0) GROUP BY HOSTID;
 
-id workunit в которых нет credit
-| 591803 |
-| 591804 |
-| 591806 |
-| 591808 |
-| 591809 |
-| 591810 |
-| 591811 |
-| 591812 |
-| 591813 |
-| 591814 |
-| 591817 |
-| 591818 |
-| 591819 |
-| 591820 |
-| 591821 |
-| 591822 |
-| 591825 |
+построеныне запросы сохранить в файл, убрать ненужные символы и выполнить в mysql командой source
+
+% построить запросы с обновлением кредитов всех user'ов как суммы кредитов хостов
+SELECT CONCAT('UPDATE user SET total_credit = ', SUM(total_credit), ' WHERE ID = ', USERID, ';') AS QUERY FROM host where total_credit>0 GROUP BY USERID;
+
+% построить запросы с обновлением кредитов всех team'ов как суммы кредитов юзеров
+SELECT CONCAT('UPDATE team SET total_credit = ', SUM(total_credit), ' WHERE ID = ', TEAMID, ';') AS QUERY FROM user where total_credit>0 GROUP BY TEAMID;
