@@ -12,6 +12,15 @@ cws :
 1500 1498 1493 1472 1462.
 final time 34376.6 s
 
+*** scenario 605 uniform
+0.00634953 
+1700 1.7 7000
+1496 1498 1492 1476 1464
+
+*** scenario 606 weighted
+1.88386e-007 
+1700 1.7 7000
+1500 1498 1494 1478 1460
 
 *** scenario 615 uniform
 err = 0.00480125, parameters:
