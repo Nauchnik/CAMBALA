@@ -303,62 +303,6 @@ void EvalPoint(
 
 	//residual = sqrt(residuals_local/n_residuals);
 }
-void EvalPoints(
-		const unsigned int tid,
-		const int batch_sz, 
-		const int cws_sz, 
-		const int dmaxsz,
-		const ftype* cws, 
-		const int* Ns_points,
-		const ftype* depths,
-		const ftype* R, 
-		const ftype* tau, 
-		const ftype* rhob, 
-		const ftype* cb, 
-		const ftype* freqs, 
-		const int freqs_sz,
-		//const ftype exp_delays[freqs_sz][dmaxsz], 
-		const ftype* exp_delays,
-		const int* exp_delays_sz,
-		ftype* residuals)
-{
-	int n_layers = cws_sz+1;
-	
-
-	ftype rhos[MAX_MAT_SIZE];
-	ftype c1s[MAX_MAT_SIZE];
-	ftype c2s[MAX_MAT_SIZE];
-	FillLocalArrays(tid, cb[tid], rhob[tid], batch_sz, cws_sz, cws,  
-			rhos, c1s, c2s);
-
-	int n_residuals = 0;
-	ftype residuals_local = 0;
-	// Compute mgvs for all frequencies
-	//assert (freqs_sz < MAX_FREQS);
-	for (int i = 0; i < freqs_sz; ++i)
-	{
-		ftype calc_mgv[MAX_WNUMS];
-		int calc_mgv_sz;
-		ComputeModalGroupVelocities(freqs[i], n_layers, Ns_points, depths, rhos, c1s, c2s, 
-			calc_mgv, calc_mgv_sz);
-
-		int min_size = calc_mgv_sz < exp_delays_sz[i] ? 
-			calc_mgv_sz : exp_delays_sz[i];
-
-		for (int j = 0; j < min_size; ++j) //iterate over modal velocities
-		{
-			ftype exp_delay = exp_delays[i*dmaxsz + j];
-			ftype calc_delay = R[tid] / calc_mgv[j];
-			if (exp_delay > 0)
-			{
-				residuals_local += pow(exp_delay + tau[tid] - calc_delay, 2);
-				++n_residuals;
-			}
-		}
-
-	}
-	residuals[tid] = sqrt(residuals_local/n_residuals);
-}
 
 void EvalPointCPU(
 		search_space_point &point,
@@ -415,8 +359,7 @@ void EvalPointCPU(
 
 	for (int tid = 0; tid<freqs_sz; ++tid)
 		EvalPoint 
-			(
-			 tid,
+			(tid,
 			 cws_sz, 
 			 dmaxsz, 
 			 cws, 
@@ -443,86 +386,4 @@ void EvalPointCPU(
 	free(cws);
 	free(residual);
 	free(n_res_global);
-}
-void EvalPointBatchCPU(
-		std::vector <search_space_point> &batch,
-		const std::vector<double> &freqs_d,
-		const std::vector<unsigned> &Ns_points_d,
-		const std::vector<double> &depths_d,
-		const std::vector<std::vector<double>> &modal_delays)
-{
-	// Transform AoS to SoA
-	size_t sz = batch.size();
-	size_t cws_sz = batch[0].cws.size();
-	ftype *R =   (ftype*) malloc(sz*sizeof(ftype));
-	ftype *tau = (ftype*) malloc(sz*sizeof(ftype));
-	ftype *rhob= (ftype*) malloc(sz*sizeof(ftype));
-	ftype *cb =  (ftype*) malloc(sz*sizeof(ftype));
-	ftype *cws = (ftype*) malloc(sz*cws_sz*sizeof(ftype));
-	for (size_t i = 0; i < sz; ++i)
-	{
-		R[i]    = batch[i].R;
-		tau[i]  = batch[i].tau;
-		rhob[i] = batch[i].rhob;
-		cb[i]   = batch[i].cb;
-
-		for (size_t j = 0; j < cws_sz; ++j)
-			cws[j*sz + i] = batch[i].cws[j];
-	}
-	//TODO: stop converting this data every time
-	assert (freqs_d.size() == modal_delays.size());
-	
-	std::cout << " copy const" << std::endl;
-	// freqs array
-	int freqs_sz = freqs_d.size();
-	std::cout << " num freqs " << freqs_sz << std::endl;
-	ftype *freqs = (ftype*) malloc(freqs_sz*sizeof(ftype));
-	for (int i = 0; i < freqs_sz; ++i)
-		freqs[i] = freqs_d[i];
-
-	// exp_delays_sz
-	int *exp_delays_sz = (int*) malloc(freqs_sz*sizeof(int));
-	for (size_t i = 0; i < freqs_sz; ++i)
-		exp_delays_sz[i] = modal_delays[i].size();
-
-	// exp_delays 2d array
-	int dmaxsz = 0;
-	for (size_t i = 0; i < freqs_sz; ++i)
-		dmaxsz = std::max(dmaxsz, exp_delays_sz[i]);
-	ftype *exp_delays = (ftype*) malloc(dmaxsz*freqs_sz*sizeof(ftype));
-	for (size_t i = 0; i < modal_delays.size(); ++i)
-		for (size_t j = 0; j < modal_delays[i].size(); ++j)
-			exp_delays[i*dmaxsz + j] = modal_delays[i][j];
-
-	
-	int n_layers = depths_d.size();
-	ftype *depths = (ftype*) malloc(n_layers*sizeof(ftype));
-	for (int i=0; i<n_layers; ++i)
-		depths[i] = depths_d[i];
-
-	int *Ns_points = (int*) malloc(n_layers*sizeof(int));
-	for (int i=0; i<n_layers; ++i)
-		Ns_points[i] = Ns_points_d[i];
-
-	ftype *residuals = (ftype*) malloc(sz*sizeof(ftype));
-
-	for (int tid = 0; tid<freqs_sz; ++tid)
-		EvalPoints
-			(tid, sz, cws_sz, dmaxsz, cws, Ns_points, depths, R, tau, rhob, cb, freqs, freqs_sz,
-				exp_delays, exp_delays_sz, residuals);
-	
-	for (size_t i = 0; i < sz; ++i)
-		batch[i].residual = residuals[i];
-
-	free(Ns_points);
-	free(depths);
-	free(exp_delays_sz);
-	free(exp_delays);
-	free(freqs);
-	free(R);
-	free(tau);
-	free(rhob);
-	free(cb);
-	free(cws);
-	free(residuals);
 }
