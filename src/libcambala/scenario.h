@@ -1,3 +1,10 @@
+#ifndef SCENARIO_H_
+#define SCENARIO_H_
+#include <vector>
+#include <string>
+#include "types.h"
+
+using namespace std;
 
 class Scenario
 {
@@ -14,6 +21,9 @@ public:
 	vector <double> freqs_; // loaded from 1st column of dtimesFileName_
 	vector <vector<double>>modal_delays_; // loaded from dtimesFilename_
 	vector <vector<double>> spmag_; // loaded from smpagFilename_
-	int Scenario::readFile(string scenarioFileName);
-	void Scenario::print();
+	int readFile(string scenarioFileName);
+	void readInputDataFromFiles();
+	void print();
 };
+
+#endif

@@ -2,13 +2,16 @@
 #define TYPES_H_
 #include <vector>
 #include "constants.h"
+
+using namespace std;
+
 struct Point
 {
 	double R = START_HUGE_VALUE;
 	double rhob = START_HUGE_VALUE;
 	double cb = START_HUGE_VALUE;
 	double tau = START_HUGE_VALUE;
-	std::vector<double> cws;
+	vector<double> cws;
 	double residual = START_HUGE_VALUE;
 
 	bool operator==(const Point& a) const
@@ -18,6 +21,31 @@ struct Point
 	
 };
 
+struct Model
+{
+	vector<double> depths;
+	vector<double> freqs;
+	vector<vector<double>> weight_coeffs;
+	//vector<unsigned> Ns_points ??
+};
+
+struct Dim
+{
+	double l = 0;
+	double s = 0;
+	double r = 0;
+};
+
+struct SearchSpaceDims
+{
+	Dim R;
+	Dim rhob;
+	Dim cb;
+	Dim tau;
+	vector <Dim> cw;
+};
+
+/*
 Point CAMBALA_sequential::fromDoubleVecToPoint(vector<double> double_vec)
 {
 	Point point;
@@ -72,21 +100,7 @@ void CAMBALA_sequential::PrintPoint(const Point& point)
 	cout << endl;
 }
 
-struct Dim
-{
-	double l = 0;
-	double s = 0;
-	double r = 0;
-};
-
-struct SearchSpaceDims
-{
-	Dim cb;
-	Dim rhob;
-	Dim R;
-	Dim tau;
-	vector <Dim> cw;
-};
+*/
 
 
 

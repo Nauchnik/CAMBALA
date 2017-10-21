@@ -1,4 +1,10 @@
+#include "scenario.h"
+#include "iostream"
+#include "fstream"
+#include "utils.h"
 
+//extern string output_filename;
+extern int verbosity;
 
 vector <double> getDimGrid(Dim d)
 {
@@ -54,29 +60,28 @@ void Scenario::print()
 	ss << dtimesFileName_ << endl;
 	ss << spmagFileName_  << endl;
 	ss << "cw_ :" << endl;
-	for (auto &x : cw_)
+	for (auto &x : ssd_.cw)
 		outDim(ss, x);
 	ss << "depths_ :" << endl;
-	for (auto &x : depths_)
+	for (auto &x : depthsDim_)
 		outDim(ss, x);
 	ss << "R_ :" << endl;
-	outDim(ss, R_);
+	outDim(ss, ssd_.R);
 	ss << "cb_ :" << endl;
-	outDim(ss, cb_);
+	outDim(ss, ssd_.cb);
 	ss << "tau_ :" << endl;
-	outDim(ss, tau_);
+	outDim(ss, ssd_.tau);
 
-	if (!rank)
-	{
-		ofstream ofile(output_filename, ios_base::out);
-		ofile << ss.str();
-		ofile.close();
-	}
+	/*
+	ofstream ofile(output_filename, ios_base::out);
+	ofile << ss.str();
+	ofile.close();
+	*/
 }
 
 int Scenario::readFile(string scenarioFileName)
 {
-	if ( (!rank) && (verbosity > 0) )
+	if (verbosity > 0)
 		cout << "scenarioFileName " << scenarioFileName << endl;
 	ifstream scenarioFile(scenarioFileName.c_str());
 
@@ -113,9 +118,10 @@ int Scenario::readFile(string scenarioFileName)
 		}
 		else if ((word.size() == 2) && (word[0] == 'd') && (isdigit(word[1])))
 		{
+			int d_index;
 			word = word.substr(1, word.size() - 1);
 			istringstream(word) >> d_index;// FIXME: we don't use the index actually!
-			depths_.push_back (getDimFromStr(sstream));
+			depthsDim_.push_back (getDimFromStr(sstream));
 		}
 		else if (word == "R")
 			ssd_.R = getDimFromStr(sstream);
@@ -147,7 +153,7 @@ int Scenario::readFile(string scenarioFileName)
 		}
 	}
 
-	if (!cw_.size())
+	if (!ssd_.cw.size())
 	{
 		cerr << "!cw1_.size()" << endl;
 		return -1;
@@ -158,22 +164,22 @@ int Scenario::readFile(string scenarioFileName)
 		return -1;
 	}
 
-	printLoadedParams();
+	print();
 
-	if (((rank == 0) || (rank == 1)) && (verbosity > 0))
+	if (verbosity > 0)
 		cout << "readScenario() finished" << endl;
 
 	return 0;
 }
 
-void Scenario::readInputDataFromFile()
+void Scenario::readInputDataFromFiles()
 {
-	auto expdelays_vv = DoubleVecVecRead(scenario_.dtimesFileName_);
+	auto expdelays_vv = DoubleVecVecRead(dtimesFileName_);
 	freqs_ = DoubleVecVecGetFirstColumn(expdelays_vv);
 	modal_delays_ = DoubleVecVecGetOtherColumns(expdelays_vv);
 	if ("weighted")
 	{
-		auto spmag_vv = DoubleVecVecRead(scenario_.spmagFileName_);
+		auto spmag_vv = DoubleVecVecRead(spmagFileName_);
 		spmag_ = DoubleVecVecGetOtherColumns(spmag_vv);
 		//TODO: add verification of freqs between modal_delays and
 		//spmag files

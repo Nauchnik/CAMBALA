@@ -1,11 +1,12 @@
-#include "cambala_sequential.h"
+#include "cambala.h"
 #include "cambala_utils.h"
 #include <iostream>
 #include <complex>
 #include <time.h>
 #include <stdexcept>
 
-CAMBALA_sequential::CAMBALA_sequential() :
+/*
+CAMBALA::CAMBALA() :
 	launch_type("bruteforce"),
 	object_function_type_("uniform"),
 	output_filename("cambala_out"),
@@ -35,9 +36,11 @@ CAMBALA_sequential::CAMBALA_sequential() :
 	start_chrono_time = chrono::high_resolution_clock::now();
 }
 
+*/
 
-void CAMBALA_sequential::reportFinalResult()
+void CAMBALA::reportFinalResult()
 {
+	/*
 	// fix final time
 	chrono::high_resolution_clock::time_point t2;
 	chrono::duration<double> time_span;
@@ -62,10 +65,12 @@ void CAMBALA_sequential::reportFinalResult()
 	ofile << "total solving time " << time_span.count() << endl;
 
 	ofile.close();
+	*/
 }
 
 
-void CAMBALA_sequential::printDelayTime(double R, vector<unsigned> mode_numbers, vector<vector<double>> modal_group_velocities)
+/*
+void CAMBALA::printDelayTime(double R, vector<unsigned> mode_numbers, vector<vector<double>> modal_group_velocities)
 {
 	string ofile_name = "delayTimeOutput_" + object_function_type_ + ".txt";
 	ofstream ofile(ofile_name);
@@ -78,14 +83,15 @@ void CAMBALA_sequential::printDelayTime(double R, vector<unsigned> mode_numbers,
 	}
 	ofile.close();
 }
+*/
 
-double CAMBALA_sequential::directPointCalc( Point point )
+double CAMBALA::directPointCalc( Point point )
 {
 	isTimeDelayPrinting = true;
 	return fillDataComputeResidual(point);
 }
 
-void CAMBALA_sequential::solve(const Scenario& c)
+void CAMBALA::Solve(const Scenario& c)
 {
 	for (auto cur_h: getDimGrid(c.h_))
 	{
