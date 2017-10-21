@@ -373,7 +373,7 @@ __global__ void EvalPoints_gpukernel(
 }
 
 void EvalPointGPU(
-		search_space_point &point,
+		Point &point,
 		const std::vector<double> &freqs_d,
 		const std::vector<unsigned> &Ns_points_d,
 		const std::vector<double> &depths_d,
@@ -489,7 +489,7 @@ void EvalPointGPU(
 	m_FreeHostAndGPU(n_res_global);
 }
 void EvalPointBatchGPU(
-		std::vector <search_space_point> &batch,
+		std::vector <Point> &batch,
 		const std::vector<double> &freqs_d,
 		const std::vector<unsigned> &Ns_points_d,
 		const std::vector<double> &depths_d,
@@ -606,7 +606,7 @@ void EvalPointBatchGPU(
 
 }
 
-search_space_point sspemdd_sequential::generateRandomPoint()
+Point sspemdd_sequential::generateRandomPoint()
 {
 	std::vector <unsigned> point_indexes;
 	for (const auto &var :search_space)
@@ -615,7 +615,7 @@ search_space_point sspemdd_sequential::generateRandomPoint()
 		point_indexes.push_back(uni(rng));
 		//std::cout << " rand var " << randnum << std::endl;
 	}
-	search_space_point point = fromPointIndexesToPoint(point_indexes);
+	Point point = fromPointIndexesToPoint(point_indexes);
 	return std::move(point);
 }
 
@@ -624,18 +624,18 @@ void sspemdd_sequential::ILSGPU(int ils_runs)
 	std::cout << "Start ILS GPU" << std::endl;
 
 	const size_t batch_size = 4*1280;
-	search_space_point global_record;
+	Point global_record;
 
 	std::cout << "Global record" << global_record.residual << std::endl;
 	for (size_t i = 0; i < ils_runs; ++i)
 	{
-		std::vector <search_space_point> batch;
+		std::vector <Point> batch;
 		for (size_t j = 0; j < batch_size; ++j)
 			batch.push_back(generateRandomPoint());
 		std::cout << " start eval " << std::endl;
 		//for (auto &point: batch) EvalPointGPU(point, freqs, Ns_points, depths, modal_delays);
 		EvalPointBatchGPU(batch, freqs, Ns_points, depths, modal_delays);
-		search_space_point best = *std::min_element(std::begin(batch), std::end(batch));
+		Point best = *std::min_element(std::begin(batch), std::end(batch));
 		std::cout << "Best of batch: " << best.residual << std::endl;
 		if (best < global_record )
 			global_record = best;

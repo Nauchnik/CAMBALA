@@ -195,7 +195,7 @@ void CAMBALA_parallel::computingProcessIls()
 	vector<double> depths;
 
 	stringstream cur_process_points_sstream;
-	search_space_point local_point_record;
+	Point local_point_record;
 	
 	for (;;) {
 		MPI_Recv( &task_index, 1,        MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
@@ -490,7 +490,7 @@ void CAMBALA_parallel::computingProcessBruteforce()
 	unsigned result_len = 2; // index of a task + calculated residual
 	double *result = new double[result_len];
 	vector<double> cur_point_values_vec;
-	search_space_point cur_point;
+	Point cur_point;
 	double task_index;
 	double *task;
 
@@ -596,7 +596,7 @@ void CAMBALA_parallel::computingProcessBruteforce()
 #endif
 }
 
-void CAMBALA_parallel::reportRecordPoint( search_space_point record_point, unsigned long long record_count )
+void CAMBALA_parallel::reportRecordPoint( Point record_point, unsigned long long record_count )
 {
 #ifdef _MPI
 	stringstream sstream_out;

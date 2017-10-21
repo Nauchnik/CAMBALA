@@ -1308,6 +1308,24 @@ double CAMBALA_sequential::compute_modal_delays_residual_uniform(vector<double> 
 	vector<unsigned> &experimental_mode_numbers
 	)
 {
+//moved from fillDataComputeResidual
+
+	for (unsigned jj = 0; jj < n_layers_w - 1; jj++)
+	{
+		c1s.at(jj) = point.cws.at(jj);
+		c2s.at(jj) = point.cws.at(jj + 1);
+		rhos.at(jj) = 1;
+	}
+	c1s.at(n_layers_w - 1) = point.cws.at(n_layers_w - 1);
+	c2s.at(n_layers_w - 1) = point.cws.at(n_layers_w - 1);
+	rhos.at(n_layers_w - 1) = 1;
+	c1s.at(n_layers_w) = point.cb;
+	c2s.at(n_layers_w) = point.cb;
+	rhos.at(n_layers_w) = point.rhob;
+
+
+
+//end moved
 	unsigned rord = 3;
 
 	double iModesSubset = -1.0;
@@ -1643,3 +1661,92 @@ void CAMBALA_sequential::compute_all_mfunctions(double &omeg, // sound frequency
 
 	}
 
+/*
+A routine for computing delay residual.
+
+Arguments:
+1) Environment: five arrays of the same length: depth, c1s, c2s, rhos, Ns_points;
+(each entry describes one layer as described in the comments to compute_wnumbers_extrap() )
+
+2) Source-receive distance: R -- distance from the source to the receiver;
+
+3) Experimental data: modal delays:
+-- experimental_mode_numbers: number of modes for each frequency in the recorded signal
+-- experimental_delays: experimental_delays[ii][jj] is the delay of jj+1-th mode for the frequency freqs[ii]
+
+The routine computes the (uniform) residual (misfit) of experimental data and the "theoretical" delays for a given environment model.
+
+It should be used as follows: for a set of environment models the residual should be computed. The minimal value of the residual indicates
+the most "adequate" model.
+*/
+
+int CAMBALA_sequential::init(vector<double> depths)
+{
+	//out:
+	//c1s
+	//c2s
+	//rhos
+	//Ns_points
+	//cw
+	if ((!rank) && (verbosity > 0))
+	{
+		cout << "init() started" << endl;
+		cout << "depths: ";
+		for (auto &x : depths)
+			cout << x << " ";
+		cout << endl;
+	}
+
+	size_t n_layers_w = depths.size() - 1;
+
+	if (0 == n_layers_w)
+	{
+		cerr << "n_layers_w == 0" << endl;
+		exit(1);
+	}
+
+	vector <Dim> cw;
+	for (size_t i=0; i<n_layers_w; ++i)
+	       cw.push_back(Dim{cw1_arr_[i], cw2_arr_[i], ncpl_arr_[i]});
+
+	// FIXME: Magic variables!
+	vector <double> c1s (n_layers_w + 1, 1500)
+	vector <double> c2s (n_layers_w + 1, 1500)
+	vector <double> rhos(n_layers_w + 1, 1)
+
+	vector <double> Ns_points(n_layers_w + 1);
+	Ns_points[0] = (unsigned)round(ppm_*depths[0]);
+	for (unsigned i=1; i < depths.size(); i++ )
+		Ns_points[i] = (unsigned)round(ppm_*(depths[i] - depths[i-1]));
+
+	{// Error checking and handling
+		unsigned long long N_total;
+		N_total = nR*nrhob*ncb*ntau;
+		for (auto &x : cw)
+			N_total *= (unsigned long long)x.n;
+
+		if (!N_total)
+		{
+			cerr << "N_total == 0" << endl;
+			cerr << "nR nrhob ncb ntau : " << endl;
+			cerr << nR << " " << nrhob << " " << ncb << " " << ntau << endl;
+			cerr << "cw.n (former ncpl_arr) : " << endl;
+			for (auto &x : cw)
+				cerr << x.n << " ";
+			cerr << endl;
+			cerr << "depths : " << endl;
+			for (auto &x : depths)
+				cerr << x << " ";
+			cerr << endl;
+			return -1;
+		}
+
+		if ( (!rank) && (verbosity > 0) )
+			cout << "N_total " << N_total << endl;
+	}
+
+	if ( (!rank) && (verbosity > 0) )
+		cout << "init() finished" << endl;
+
+	return 0;
+}

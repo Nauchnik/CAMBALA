@@ -305,7 +305,7 @@ void EvalPoint(
 }
 
 void EvalPointCPU(
-		search_space_point &point,
+		Point &point,
 		const std::vector<double> &freqs_d,
 		const std::vector<unsigned> &Ns_points_d,
 		const std::vector<double> &depths_d,

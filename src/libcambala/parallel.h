@@ -32,7 +32,7 @@ private:
 	void controlProcessFixedDepths(const vector<double> depths, const unsigned depths_index);
 	void computingProcessBruteforce();
 	
-	void reportRecordPoint( search_space_point record_point, unsigned long long record_count );
+	void reportRecordPoint( Point record_point, unsigned long long record_count );
 };
 
 #endif
