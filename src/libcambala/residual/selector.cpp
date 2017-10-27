@@ -1,5 +1,7 @@
 #include "residual/selector.h"
 
+
+
 void ResCalcSelector::ResCalcSelector()
 {
 	calcs_["default"] = nullptr;
@@ -24,4 +26,13 @@ double ResCalcSelector::computeResidual (const Model& m, const Point& p,
 			std::string calc_name = "default") 
 { 
 	return calcs_[calc_name]->CalculatePointResidual(m, p);
+}
+
+double ResCalcSelector::computeResidual (const Point& p, 
+			std::string calc_name = "default") 
+{ 
+	if (m_.depths_.size() == 0)
+		exit(1);
+
+	return calcs_[calc_name]->CalculatePointResidual(m_, p);
 }

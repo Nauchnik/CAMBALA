@@ -1,9 +1,16 @@
+//#include <iostream>
 #include "cambala.h"
-#include "cambala_utils.h"
+#include "utils.h"
+#include "types.h"
+#include "solvers/interface.h"
+#include "solvers/discrete.h"
+#include "solvers/bruteforce.h"
+/*
 #include <iostream>
 #include <complex>
 #include <time.h>
 #include <stdexcept>
+*/
 
 /*
 CAMBALA::CAMBALA() :
@@ -87,15 +94,17 @@ void CAMBALA::printDelayTime(double R, vector<unsigned> mode_numbers, vector<vec
 
 double CAMBALA::directPointCalc( Point point )
 {
-	isTimeDelayPrinting = true;
+	/*
+	//isTimeDelayPrinting = true;
 	return fillDataComputeResidual(point);
+	*/
 }
 
 void CAMBALA::Solve(const Scenario& c)
 {
-	for (auto cur_h: getDimGrid(c.h_))
+	Point record_point;
+	for (auto cur_h: getDimGrid(c.hDim_))
 	{
-
 		Solver* s;
 		/*
 		if (launch_type == "hillclimbing")
@@ -106,35 +115,38 @@ void CAMBALA::Solve(const Scenario& c)
 		*/
 			s = new BruteForce;
 
+		//TODO: rewrite model init as a separate function/method
 		Model m;
-		m.depths = makeDepths(cur_h, c.H_, c.depthsDim_, c.cwDim);
+		m.depths = makeDepths(cur_h, c.H_, c.depthsDim_, c.ssd_.cw);
 		m.freqs = c.freqs_;
 		m.weight_coeffs = c.spmag_;
+		m.Ns_points.push_back((unsigned)round(c.ppm_*m.depths[0]));
+		for (size_t i=1; i<m.depths.size(); ++i)
+			m.Ns_points.push_back((unsigned)round(c.ppm_*(m.depths[i] - m.depths[i-1]));
+
 		res_calc_sel_.LoadModel(m);
 
-		s->SetResidualCalculator(res_calc_sel_);
+		s->SetResidualCalculatorSelector(&res_calc_sel_);
 		s->LoadSearchSpaceDims(c.ssd_);
 		s->Solve();
 		Point point = s->getBestPoint();
 		delete s;
 
-		if (point.residual < record_point_.residual)
+		if (point.residual < record_point.residual)
 		{
-			record_point_ = point;
-			if (verbosity > 0)
-				PrintPoint(record_point_);
+			record_point = point;
+			//if (verbosity > 0) PrintPoint(record_point_);
 		}
-		cout << "Processed " << (cur_h-h.l)/h.s << " out of " << h.r/h.s << " h (max depths)" << endl;
+		//cout << "Processed " << (cur_h-h.l)/h.s << " out of " << h.r/h.s << " h (max depths)" << endl;
 	}
 }
-
 
 vector<double> makeDepths(double h, double H, const vector <Dim>& d, const vector<Dim>& cw)
 {
 	vector <double> depths;
 	size_t n_layers_w = cw.size();
 	double layer_thickness_w = h / n_layers_w;
-	for (unsigned jj = 1; jj <= n_layers_w; jj+)
+	for (unsigned jj = 1; jj <= n_layers_w; ++jj) 
 		depths.push_back(layer_thickness_w*jj);
 	depths.push_back(H);
 }

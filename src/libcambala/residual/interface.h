@@ -1,7 +1,6 @@
-#ifndef RESIDUE_CALCULATOR_H_
-#define RESIDUE_CALCULATOR_H_
+#ifndef RESIDUAL_CALCULATOR_H_
+#define RESIDUAL_CALCULATOR_H_
 #include "types.h"
-#include "model.h"
 
 class ResidualCalculator
 {
@@ -12,6 +11,6 @@ public:
 	//virtual ~ResidualCalculator(){};
 };
 
-using ResCals = ResidualCalculator;
+using ResCalc = ResidualCalculator;
 
 #endif

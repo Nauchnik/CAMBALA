@@ -10,7 +10,7 @@ class Scenario
 {
 public:
 	double H_;
-	double h_;
+	Dim hDim_;
 	string dtimesFileName_;
 	string spmagFileName_;
 	SearchSpaceDims ssd_;

@@ -2,14 +2,15 @@
 // CAMBALA: Coupled Acoustic Modes -- Copyright(c) 2015-2017
 // Pavel Petrov (Il'ichev Pacific Oceanological Institute of FEB RAS), 
 // Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory of SB RAS)
+// Vadim Bulavintsev (Delft University of Technology)
 *****************************************************************************************/
 
 #ifdef _MPI
 #include <mpi.h>
+#include "cambala_mpi.h"
 #endif
 
-#include "cambala_sequential.h"
-#include "cambala_parallel.h"
+#include "cambala.h"
 
 #define _USE_MATH_DEFINES
 
@@ -24,10 +25,9 @@
 
 int main(int argc, char **argv)
 {
-	unsigned ncpl = 0; // search mesh within each water layer
+	//unsigned ncpl = 0; // search mesh within each water layer
 
 	std::string scenarioFileName = "";
-	CAMBALA_sequential CAMBALA_seq;
 	int verbosity = 0;
 
 #ifdef _DEBUG
@@ -42,15 +42,19 @@ int main(int argc, char **argv)
 #endif
 
 	if (argc >= 2)
+	{
 		scenarioFileName = argv[1];
-	else {
+	}
+	else 
+	{
 		cout << "Usage : scenarioFileName [verbosity] [-test]" << endl;
 		exit(1);
 	}
 	if (argc >= 3)
 		verbosity = atoi(argv[2]);
 	bool isTestLaunch = false;
-	if (argc >= 4) {
+	if (argc >= 4)
+	{
 		string test_str= argv[3];
 		if (test_str == "-test")
 			isTestLaunch = true;
@@ -58,18 +62,25 @@ int main(int argc, char **argv)
 	
 #ifndef _MPI
 	// sequential mode%
-	cout << "verbosity " << verbosity << endl;
+	//cout << "verbosity " << verbosity << endl;
 
 	// fix start time
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-	std::chrono::high_resolution_clock::time_point t2;
-	std::chrono::duration<double> time_span;
 
-	CAMBALA_seq.verbosity = verbosity;
-	// read scenario, modal_delays, mode_numbers and freqs, then determine the search space
-	CAMBALA_seq.readScenario(scenarioFileName);
-	CAMBALA_seq.readInputDataFromFiles();
+	// read scenario, modal_delays, mode_numbers, freqs and parameters of the search space
+	Scenario scenario(scenarioFileName);
+	CAMBALA cambala;
+	
 
+	ResCalc* cpu64 = new ResCalcCPU64;
+	cambala.res_calc_sel_.addResidualCalculator("cpu64", cpu64);
+	cambala.Solve(scenario);
+	cambala.reportFinalResult();
+	delete cpu64;
+
+
+
+	/*
 	if (isTestLaunch) {
 		search_space_point point;
 		// true values
@@ -86,6 +97,7 @@ int main(int argc, char **argv)
 		cout << "true value test" << endl;
 		return 0;
 	}
+	*/
 	
 	/*ofstream depths_file("depths.txt");
 	depths_file << depths_vec.size() << " depths for the scenario " << scenarioFileName << endl;
@@ -95,11 +107,10 @@ int main(int argc, char **argv)
 		depths_file << endl;
 	}*/
 	
-	CAMBALA_seq.solve();
-	CAMBALA_seq.reportFinalResult();
 
-	t2 = std::chrono::high_resolution_clock::now();
-	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+
+	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	cout << "main() total time " << time_span.count() << " s" << endl;
 
 #else

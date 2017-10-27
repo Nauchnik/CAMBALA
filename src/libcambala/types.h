@@ -3,7 +3,7 @@
 #include <vector>
 #include "constants.h"
 
-using namespace std;
+using std::vector;
 
 struct Point
 {
@@ -23,10 +23,11 @@ struct Point
 
 struct Model
 {
-	vector<double> depths;
 	vector<double> freqs;
+	vector<double> depths;
+	vector<vector<double>> exp_delays;
 	vector<vector<double>> weight_coeffs;
-	//vector<unsigned> Ns_points ??
+	vector<unsigned> Ns_points; 
 };
 
 struct Dim

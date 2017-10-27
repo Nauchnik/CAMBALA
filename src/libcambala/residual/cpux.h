@@ -1,8 +1,7 @@
-#include "sspemdd_sequential.h"
-#include "sspemdd_utils.h"
+//#include "sspemdd_sequential.h"
+//#include "sspemdd_utils.h"
 #include "assert.h"
 #include <cmath>
-
 
 #define MAX_MAT_SIZE 2048
 #define MAX_FREQS 1000
@@ -13,14 +12,7 @@
   #define ORD_RICH 1
 #endif
 
-#ifndef FTYPE	
-  #define ftype float
-#else
-  #define ftype FTYPE
-#endif
-
-#include "bisect_cpu.h"
-
+#include "residual/bisect.h"
 
 void FillLocalArrays (
 		const int tid,
@@ -246,21 +238,23 @@ void ComputeModalGroupVelocities (
 	mgv_sz = wnums2_sz;
 }
 
-void EvalPoint(
-		const unsigned int tid,
-		const int cws_sz, 
+void EvalPoint( const unsigned int tid,
+		//model
 		const int dmaxsz,
-		const ftype* cws, 
 		const int* Ns_points,
 		const ftype* depths,
-		const ftype R, 
-		const ftype tau, 
-		const ftype rhob, 
-		const ftype cb, 
 		const ftype* freqs, 
 		const int freqs_sz,
 		const ftype* exp_delays,
 		const int* exp_delays_sz,
+		//point
+		const ftype R, 
+		const ftype tau, 
+		const ftype rhob, 
+		const ftype cb, 
+		const ftype* cws, 
+		const int cws_sz, 
+		//output
 		ftype* residual,
 		int* n_res_global)
 {
@@ -304,51 +298,75 @@ void EvalPoint(
 	//residual = sqrt(residuals_local/n_residuals);
 }
 
-void EvalPointCPU(
-		Point &point,
-		const std::vector<double> &freqs_d,
-		const std::vector<unsigned> &Ns_points_d,
-		const std::vector<double> &depths_d,
-		const std::vector<std::vector<double>> &modal_delays)
+
+void CLASSNAME::FreeImmutableData()
 {
-	// Transform AoS to SoA
-	size_t cws_sz = point.cws.size();
-	ftype *cws = (ftype*) malloc(cws_sz*sizeof(ftype));
-	for (size_t i = 0; i < cws_sz; ++i)
-		cws[i] = point.cws[i];
-	//TODO: stop converting this data every time
-	assert (freqs_d.size() == modal_delays.size());
+	//TODO: add more safety checks!
+	if (freqs_ != NULL)
+	{
+		free(freqs_);
+		free(exp_delays_sz_);
+		free(exp_delays_);
+		free(depths_);
+		free(Ns_points_);
+	}
+}
+
+void CLASSNAME::LoadImmutableData (const Model& m)
+{
+	FreeImmutableData();
+
+	assert (m.freqs.size() == m.exp_delays.size());
 	
 	//std::cout << " copy const" << std::endl;
-	// freqs array
-	int freqs_sz = freqs_d.size();
+	// model.freqs
+	freqs_sz_ = m.freqs.size();
 	//std::cout << " num freqs " << freqs_sz << std::endl;
-	ftype *freqs = (ftype*) malloc(freqs_sz*sizeof(ftype));
-	for (int i = 0; i < freqs_sz; ++i)
-		freqs[i] = freqs_d[i];
+	freqs_ = (ftype*) malloc(freqs_sz_*sizeof(ftype));
+	for (int i = 0; i < freqs_sz_; ++i)
+		freqs_[i] = m.freqs[i];
 
-	// exp_delays_sz
-	int *exp_delays_sz = (int*) malloc(freqs_sz*sizeof(int));
-	for (size_t i = 0; i < freqs_sz; ++i)
-		exp_delays_sz[i] = modal_delays[i].size();
+	// model.exp_delays subvector sizes
+	exp_delays_sz_ = (int*) malloc(freqs_sz_*sizeof(int));
+	for (size_t i = 0; i < freqs_sz_; ++i)
+		exp_delays_sz_[i] = m.exp_delays[i].size();
 
-	// exp_delays 2d array
-	int dmaxsz = 0;
-	for (size_t i = 0; i < freqs_sz; ++i)
-		dmaxsz = std::max(dmaxsz, exp_delays_sz[i]);
-	ftype *exp_delays = (ftype*) malloc(dmaxsz*freqs_sz*sizeof(ftype));
-	for (size_t i = 0; i < modal_delays.size(); ++i)
-		for (size_t j = 0; j < modal_delays[i].size(); ++j)
-			exp_delays[i*dmaxsz + j] = modal_delays[i][j];
 
-	int n_layers = depths_d.size();
-	ftype *depths = (ftype*) malloc(n_layers*sizeof(ftype));
-	for (int i=0; i<n_layers; ++i)
-		depths[i] = depths_d[i];
+	// model.exp_delays 2d array
+	dmaxsz_ = 0;
+	for (size_t i = 0; i < freqs_sz_; ++i)
+		dmaxsz_ = std::max(dmaxsz_, exp_delays_sz_[i]);
+	exp_delays_ = (ftype*) malloc(dmaxsz_*freqs_sz_*sizeof(ftype));
+	for (size_t i = 0; i < m.exp_delays.size(); ++i)
+		for (size_t j = 0; j < m.exp_delays[i].size(); ++j)
+			exp_delays_[i*dmaxsz_ + j] = m.exp_delays[i][j];
 
-	int *Ns_points = (int*) malloc(n_layers*sizeof(int));
-	for (int i=0; i<n_layers; ++i)
-		Ns_points[i] = Ns_points_d[i];
+	// model.depths
+	n_layers_ = m.depths.size();
+	ftype *depths = (ftype*) malloc(n_layers_*sizeof(ftype));
+	for (int i=0; i<n_layers_; ++i)
+		depths_[i] = m.depths[i];
+
+	// model.Ns_points
+	Ns_points_ = (int*) malloc(n_layers_*sizeof(int));
+	for (int i=0; i<n_layers_; ++i)
+		Ns_points_[i] = m.Ns_points[i];
+}
+
+double CLASSNAME::CalculatePointResidual(const Model& m, const Point& p)
+{
+	LoadImmutableData(m);
+	return CalculatePointResidual(p);
+}
+
+double CLASSNAME::CalculatePointResidual(const Point& p)
+{
+
+	// Transform AoS to SoA
+	size_t cws_sz = p.cws.size();
+	ftype *cws = (ftype*) malloc(cws_sz*sizeof(ftype));
+	for (size_t i = 0; i < cws_sz; ++i)
+		cws[i] = p.cws[i];
 
 	// output array
 	ftype *residual = (ftype*) malloc(sizeof(ftype));
@@ -357,33 +375,19 @@ void EvalPointCPU(
 	n_res_global[0] = 0;
 
 
-	for (int tid = 0; tid<freqs_sz; ++tid)
+	for (int tid = 0; tid<freqs_sz_; ++tid)
 		EvalPoint 
 			(tid,
-			 cws_sz, 
-			 dmaxsz, 
-			 cws, 
-			 Ns_points, 
-			 depths, 
-			 point.R, 
-			 point.tau, 
-			 point.rhob, 
-			 point.cb, 
-			 freqs, 
-			 freqs_sz,
-			 exp_delays,
-			 exp_delays_sz,
+			 dmaxsz_, Ns_points_, depths_, freqs_, freqs_sz_, exp_delays_, exp_delays_sz_,
+			 p.R, p.tau, p.rhob, p.cb, cws, cws_sz,
 			 residual,
 			 n_res_global);
 
-	point.residual = std::sqrt(*residual / *n_res_global);
+	double residual_total = std::sqrt(*residual / *n_res_global);
 
-	free(Ns_points);
-	free(depths);
-	free(exp_delays_sz);
-	free(exp_delays);
-	free(freqs);
-	free(cws);
 	free(residual);
+	free(cws);
 	free(n_res_global);
+	
+	return residual_total;
 }
