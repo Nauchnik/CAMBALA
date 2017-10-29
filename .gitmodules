@@ -1,0 +1,15 @@
+[submodule "ext/bbox/snowgoose"]
+	path = ext/bbox/snowgoose
+	url = https://github.com/mposypkin/snowgoose
+[submodule "ext/bbox/OPTITEST"]
+	path = ext/bbox/OPTITEST
+	url = https://github.com/mposypkin/OPTITEST.git
+[submodule "ext/bbox/LOCSEARCH"]
+	path = ext/bbox/LOCSEARCH
+	url = https://github.com/mposypkin/LOCSEARCH
+[submodule "ext/bbox/COMPI"]
+	path = ext/bbox/COMPI
+	url = https://github.com/mposypkin/COMPI
+[submodule "ext/bbox/BBSEARCH"]
+	path = ext/bbox/BBSEARCH
+	url = https://github.com/mposypkin/BBSEARCH
