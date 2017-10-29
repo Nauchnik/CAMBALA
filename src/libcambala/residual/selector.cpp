@@ -2,14 +2,14 @@
 
 
 
-void ResCalcSelector::ResCalcSelector()
+ResCalcSelector::ResCalcSelector()
 {
 	calcs_["default"] = nullptr;
 	calcs_["precise"] = nullptr;
 	calcs_["fast"] = nullptr;
 }
 
-void ResCalcSelector::addResidualCalculator(std::string name, *ResCalc rc)
+void ResCalcSelector::AddResidualCalculator(std::string name, ResCalc* rc)
 {
 	//TODO: add more semantic checks
 	calcs_[name] = rc;
@@ -22,16 +22,16 @@ void ResCalcSelector::addResidualCalculator(std::string name, *ResCalc rc)
 	}
 }
 
-double ResCalcSelector::computeResidual (const Model& m, const Point& p, 
-			std::string calc_name = "default") 
+double ResCalcSelector::ComputeResidual (const Model& m, Point& p, 
+			std::string calc_name) 
 { 
 	return calcs_[calc_name]->CalculatePointResidual(m, p);
 }
 
-double ResCalcSelector::computeResidual (const Point& p, 
-			std::string calc_name = "default") 
+double ResCalcSelector::ComputeResidual (Point& p, 
+			std::string calc_name) 
 { 
-	if (m_.depths_.size() == 0)
+	if (m_.depths.size() == 0)
 		exit(1);
 
 	return calcs_[calc_name]->CalculatePointResidual(m_, p);

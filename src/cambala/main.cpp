@@ -11,6 +11,8 @@
 #endif
 
 #include "cambala.h"
+//#include "residual/cpu32.h"
+#include "residual/cpu64.h"
 
 #define _USE_MATH_DEFINES
 
@@ -73,7 +75,7 @@ int main(int argc, char **argv)
 	
 
 	ResCalc* cpu64 = new ResCalcCPU64;
-	cambala.res_calc_sel_.addResidualCalculator("cpu64", cpu64);
+	cambala.res_calc_sel_.AddResidualCalculator("cpu64", cpu64);
 	cambala.Solve(scenario);
 	cambala.reportFinalResult();
 	delete cpu64;

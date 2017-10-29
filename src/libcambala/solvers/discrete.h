@@ -9,10 +9,13 @@ class DiscreteSearchSpace
 {
 public:
 	//Cartesian axes
-	vector<vector<double>> Axes_;// values of variables which form the search space
+	vector<vector<double>> axes_;// values of variables which form the search space
 	DiscreteSearchSpace (const SearchSpaceDims& ssd);
+	DiscreteSearchSpace ();
 	PointInds Point2Indexes(Point point);
+	Point Indexes2Point(PointInds indexes);
 	vector<Point> getSearchSpacePointsVec();
+	bool IncreaseInd(PointInds& p, size_t k);
 };
 
 inline vector <double> getDimGrid(Dim d)

@@ -122,7 +122,7 @@ void CAMBALA::Solve(const Scenario& c)
 		m.weight_coeffs = c.spmag_;
 		m.Ns_points.push_back((unsigned)round(c.ppm_*m.depths[0]));
 		for (size_t i=1; i<m.depths.size(); ++i)
-			m.Ns_points.push_back((unsigned)round(c.ppm_*(m.depths[i] - m.depths[i-1]));
+			m.Ns_points.push_back((unsigned)round(c.ppm_*(m.depths[i] - m.depths[i-1])));
 
 		res_calc_sel_.LoadModel(m);
 

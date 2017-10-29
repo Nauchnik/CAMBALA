@@ -4,16 +4,8 @@
 #include "utils.h"
 
 //extern string output_filename;
-extern int verbosity;
+//extern int verbosity;
 
-vector <double> getDimGrid(Dim d)
-{
-	vector<double> tmp_vec;
-	for (size_t i = 0; (d.l + i*d.s) <= d.r; ++i)
-		tmp_vec.push_back(d.l + i*d.s);
-	
-	return tmp_vec; // the compiler will optimize out the copy!
-}
 void getThreeValuesFromStr(string str, double &val1, double &val2, double &val3)
 {
 	val1 = val3 = -1;
@@ -38,7 +30,7 @@ Dim getDimFromStr(stringstream& sstream)
 	sstream >> word;
 	double l,s,r;
 	getThreeValuesFromStr(word, l, s, r);
-	return Dim {l,s,r};
+	return Dim (l,s,r);
 }
 
 
@@ -56,7 +48,7 @@ void Scenario::print()
 	ss << "ppm_ " << ppm_ << endl;
 	ss << "iterated_local_search_runs_ " << iterated_local_search_runs_ << endl;
 	ss << "H_ " << H_ << endl;
-	ss << "h_ " << h_ << endl;
+	ss << "h_ " << hDim_.l << endl;
 	ss << dtimesFileName_ << endl;
 	ss << spmagFileName_  << endl;
 	ss << "cw_ :" << endl;
@@ -81,8 +73,10 @@ void Scenario::print()
 
 int Scenario::readFile(string scenarioFileName)
 {
+	/*
 	if (verbosity > 0)
 		cout << "scenarioFileName " << scenarioFileName << endl;
+	*/
 	ifstream scenarioFile(scenarioFileName.c_str());
 
 	if (!scenarioFile.is_open())
@@ -108,7 +102,7 @@ int Scenario::readFile(string scenarioFileName)
 		else if (word == "H")
 			sstream >> H_;
 		else if (word == "h")
-			sstream >> h_;
+			sstream >> hDim_.l;
 		else if ((word.size() >= 2) && (word[0] == 'c') && (word[1] == 'w'))
 		{
 			word = word.substr(2, word.size() - 2);
@@ -166,8 +160,10 @@ int Scenario::readFile(string scenarioFileName)
 
 	print();
 
+	/*
 	if (verbosity > 0)
 		cout << "readScenario() finished" << endl;
+		*/
 
 	return 0;
 }
@@ -184,4 +180,10 @@ void Scenario::readInputDataFromFiles()
 		//TODO: add verification of freqs between modal_delays and
 		//spmag files
 	}
+}
+
+Scenario::Scenario(string scenarioFileName)
+{
+	readFile(scenarioFileName);
+	print();
 }

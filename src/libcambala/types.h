@@ -32,9 +32,12 @@ struct Model
 
 struct Dim
 {
-	double l = 0;
-	double s = 0;
-	double r = 0;
+public:
+	double l;
+	double s;
+	double r;
+	inline Dim (double l=0, double s=0, double r=0) : 
+		l(l), s(s), r(r) {}
 };
 
 struct SearchSpaceDims

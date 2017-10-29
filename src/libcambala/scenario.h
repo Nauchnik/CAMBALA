@@ -24,6 +24,7 @@ public:
 	int readFile(string scenarioFileName);
 	void readInputDataFromFiles();
 	void print();
+	Scenario(string scenarioFileName);
 };
 
 #endif

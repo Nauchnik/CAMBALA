@@ -1,4 +1,7 @@
-#include <solvers/discrete.h>
+#include "solvers/discrete.h"
+#include "utils.h"
+#include <algorithm>
+
 Point DiscreteSearchSpace::Indexes2Point(PointInds indexes)
 {
 	Point point;
@@ -12,7 +15,7 @@ Point DiscreteSearchSpace::Indexes2Point(PointInds indexes)
 }
 
 
-void DiscreteSearchSpace::DiscreteSearchSpace(const SearchSpaceDims& ssd)
+DiscreteSearchSpace::DiscreteSearchSpace(const SearchSpaceDims& ssd)
 {
 	axes_.push_back(getDimGrid(ssd.cb));
 	axes_.push_back(getDimGrid(ssd.rhob));
@@ -40,20 +43,35 @@ PointInds DiscreteSearchSpace::Point2Indexes(Point point)
 
 vector<Point> DiscreteSearchSpace::getSearchSpacePointsVec()
 {
-	// TODO: rewrite me for type correctness
-	vector<vector<size_t>> search_space_indexes(axes_.size());
-	for (unsigned i = 0; i < axes_.size(); i++)
-		for (unsigned j = 0; j < axes_[i].size(); j++)
-			search_space_indexes[i].push_back(j);
-
-	vector<int> index_arr;
-	vector<Point> points_vec;
-	PointInds cur_point_indexes;
-	while (CAMBALA_utils::next_cartesian(search_space_indexes, index_arr, cur_point_indexes))
-		points_vec.push_back(Indexes2Point(cur_point_indexes));
-
-	return points_vec;
+	vector <Point> all_points;
+	PointInds p;
+	while(IncreaseInd(p, 0))
+		all_points.push_back(Indexes2Point(p));
+	return all_points;
 }
+
+// former next_cartesian
+// construct all combinations of search space parameters
+// TODO: rewrite me as a template, if needed
+bool DiscreteSearchSpace::IncreaseInd(PointInds& p, size_t k)
+{
+	bool last_element = (p[k] == (axes_[k].size()-1));
+	if (!last_element)
+	{
+		p[k]++;
+		return true;
+	}
+	else
+	{
+		bool last_axis = (k == (axes_.size()-1));
+		if (last_axis)
+			return false;
+		p[k] = 0;
+		return IncreaseInd(p, k+1);
+	}
+}
+
+DiscreteSearchSpace::DiscreteSearchSpace() { }
 
 /*
 void CAMBALA_sequential::reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a)

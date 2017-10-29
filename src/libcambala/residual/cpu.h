@@ -5,8 +5,8 @@ class CLASSNAME : public ResidualCalculator
 {
 public:
 	void LoadImmutableData (const Model& m);
-	double CalculatePointResidual(const Point& p);
-	double CalculatePointResidual(const Model& m, const Point& p);
+	double CalculatePointResidual(Point& p);
+	double CalculatePointResidual(const Model& m, Point& p);
 private:
 	void FreeImmutableData();
 	inline ~CLASSNAME () {FreeImmutableData();};

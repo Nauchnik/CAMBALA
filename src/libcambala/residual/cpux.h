@@ -353,13 +353,13 @@ void CLASSNAME::LoadImmutableData (const Model& m)
 		Ns_points_[i] = m.Ns_points[i];
 }
 
-double CLASSNAME::CalculatePointResidual(const Model& m, const Point& p)
+double CLASSNAME::CalculatePointResidual(const Model& m, Point& p)
 {
 	LoadImmutableData(m);
 	return CalculatePointResidual(p);
 }
 
-double CLASSNAME::CalculatePointResidual(const Point& p)
+double CLASSNAME::CalculatePointResidual(Point& p)
 {
 
 	// Transform AoS to SoA
@@ -389,5 +389,5 @@ double CLASSNAME::CalculatePointResidual(const Point& p)
 	free(cws);
 	free(n_res_global);
 	
-	return residual_total;
+	return p.residual = residual_total;
 }
