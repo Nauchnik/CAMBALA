@@ -1,7 +1,5 @@
 
 # Ignore build results
-build/
-out/
 *.o
 *.gch
 # Ignore log files
@@ -35,7 +33,7 @@ ipch/
 [Rr]eleases/
 x64/
 x86/
-build/
+#build/
 bld/
 [Bb]in/
 [Oo]bj/
