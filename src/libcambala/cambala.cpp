@@ -5,6 +5,8 @@
 #include "solvers/interface.h"
 #include "solvers/discrete.h"
 #include "solvers/bruteforce.h"
+#include "easylogging++.h"
+
 /*
 #include <iostream>
 #include <complex>
@@ -120,6 +122,7 @@ void CAMBALA::Solve(const Scenario& c)
 		m.depths = makeDepths(cur_h, c.H_, c.depthsDim_, c.ssd_.cw);
 		m.freqs = c.freqs_;
 		m.weight_coeffs = c.spmag_;
+		LOG(DEBUG) << "c.ppm , m.depths[0] "<< c.ppm_ << " " << m.depths[0] ;
 		m.Ns_points.push_back((unsigned)round(c.ppm_*m.depths[0]));
 		for (size_t i=1; i<m.depths.size(); ++i)
 			m.Ns_points.push_back((unsigned)round(c.ppm_*(m.depths[i] - m.depths[i-1])));
@@ -143,11 +146,13 @@ void CAMBALA::Solve(const Scenario& c)
 
 vector<double> makeDepths(double h, double H, const vector <Dim>& d, const vector<Dim>& cw)
 {
+	LOG(DEBUG) << "makeDepths: "<< h << " " << H << " ";
 	vector <double> depths;
 	size_t n_layers_w = cw.size();
 	double layer_thickness_w = h / n_layers_w;
 	for (unsigned jj = 1; jj <= n_layers_w; ++jj) 
 		depths.push_back(layer_thickness_w*jj);
 	depths.push_back(H);
+	return depths;
 }
 

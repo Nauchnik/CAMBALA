@@ -24,6 +24,9 @@
 #include <iomanip>
 #include <algorithm>
 #include <cmath>
+#include "easylogging++.h"
+
+INITIALIZE_EASYLOGGINGPP
 
 int main(int argc, char **argv)
 {

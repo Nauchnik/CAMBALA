@@ -102,7 +102,7 @@ int Scenario::readFile(string scenarioFileName)
 		else if (word == "H")
 			sstream >> H_;
 		else if (word == "h")
-			sstream >> hDim_.l;
+			hDim_ = getDimFromStr(sstream);
 		else if ((word.size() >= 2) && (word[0] == 'c') && (word[1] == 'w'))
 		{
 			word = word.substr(2, word.size() - 2);

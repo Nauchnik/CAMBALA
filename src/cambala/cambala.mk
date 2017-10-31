@@ -3,9 +3,9 @@ TARGET := cambala
 SOURCES := \
 	main.cpp
 
-TGT_LDLIBS  := -lcambala
+TGT_LDLIBS  := -lcambala -leasylogging++
 TGT_LDFLAGS := -L${TARGET_DIR}
-TGT_PREREQS := libcambala.a
+TGT_PREREQS := libcambala.a libeasylogging++.a
 
 SRC_INCDIRS := ./ ../libcambala/
 

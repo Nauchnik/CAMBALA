@@ -15,9 +15,9 @@ public:
 	string spmagFileName_;
 	SearchSpaceDims ssd_;
 	vector <Dim> depthsDim_;
-	size_t iterated_local_search_runs_;
-	string object_function_type_;
-	size_t ppm_;
+	size_t iterated_local_search_runs_ = 10;
+	string object_function_type_ = "uniform";
+	size_t ppm_ = 0;
 	vector <double> freqs_; // loaded from 1st column of dtimesFileName_
 	vector <vector<double>>modal_delays_; // loaded from dtimesFilename_
 	vector <vector<double>> spmag_; // loaded from smpagFilename_

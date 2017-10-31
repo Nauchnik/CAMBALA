@@ -13,3 +13,8 @@ CXXFLAGS := -g -std=c++11 -O3
 
 SRC_INCDIRS := ./ 
 
+TGT_LDLIBS  := -leasylogging++
+TGT_LDFLAGS := -L${TARGET_DIR}
+TGT_PREREQS := libeasylogging++.a
+
+
