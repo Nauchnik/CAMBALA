@@ -79,6 +79,11 @@ int Scenario::readFile(string scenarioFileName)
 	*/
 	ifstream scenarioFile(scenarioFileName.c_str());
 
+	std::string dir = scenarioFileName;
+	// FIXME: make me Windows compatible!
+	while (dir.size()>0 && dir.back() != '/') 
+		dir.pop_back();
+
 	if (!scenarioFile.is_open())
 	{
 		cerr << "scenarioFile with the name " << scenarioFileName << " wasn't openend" << endl;
@@ -96,7 +101,11 @@ int Scenario::readFile(string scenarioFileName)
 		sstream << str;
 		sstream >> word;
 		if (word.find("dtimes_file") != string::npos)
-			sstream >> dtimesFileName_;
+		{
+			std::string filename;
+			sstream >> filename;
+			dtimesFileName_ = dir + filename;
+		}	
 		else if (word.find("spmag_file") != string::npos)
 			sstream >> spmagFileName_;
 		else if (word == "H")
