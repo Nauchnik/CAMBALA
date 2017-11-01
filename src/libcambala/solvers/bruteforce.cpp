@@ -3,20 +3,30 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#define ELPP_STL_LOGGING
+#include "easylogging++.h"
 
 
 void BruteForce::Solve()
 {
-	//cout << "findGlobalMinBruteForce()" << endl;
+	LOG(DEBUG) << "Bruteforce.Solve()";
+	//std::vector<Point> Points_vec = ss_.getSearchSpacePointsVec();
+	//LOG(DEBUG) << "Bruteforce Points_vec.size " << Points_vec.size();
 
-
-	std::vector<Point> Points_vec = ss_.getSearchSpacePointsVec();
-	//cout << "Points_vec.size() " << Points_vec.size() << endl;
-
+	/*
 	for (auto &x : Points_vec)
 		p_sel_->ComputeResidual(x);
+		*/
 
-	//recordPoint_ = *std::min_element(Points_vec.begin(), Points_vec.end());
+	PointInds p(ss_.axes_.size(),0);
+	while(ss_.IncreaseInd(p, 0))
+	{
+		Point x = ss_.Indexes2Point(p);
+		//LOG(DEBUG) << "I: " << p;
+		p_sel_->ComputeResidual(x);
+		if (x.residual < recordPoint_.residual)
+			recordPoint_ = x;
+	}
 }
 
 void BruteForce::LoadSearchSpaceDims(SearchSpaceDims ssd)

@@ -1,6 +1,8 @@
 #include "solvers/discrete.h"
 #include "utils.h"
 #include <algorithm>
+#define ELPP_STL_LOGGING
+#include "easylogging++.h"
 
 Point DiscreteSearchSpace::Indexes2Point(PointInds indexes)
 {
@@ -43,10 +45,14 @@ PointInds DiscreteSearchSpace::Point2Indexes(Point point)
 
 vector<Point> DiscreteSearchSpace::getSearchSpacePointsVec()
 {
+	//TODO: check for no duplicates
 	vector <Point> all_points;
-	PointInds p;
+	PointInds p(axes_.size(),0);
 	while(IncreaseInd(p, 0))
+	{
+		//LOG(DEBUG) << "P: " << p;
 		all_points.push_back(Indexes2Point(p));
+	}
 	return all_points;
 }
 

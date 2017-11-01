@@ -1,7 +1,7 @@
-//#include "sspemdd_sequential.h"
-//#include "sspemdd_utils.h"
 #include "assert.h"
 #include <cmath>
+#define ELPP_STL_LOGGING
+#include "easylogging++.h"
 
 #define MAX_MAT_SIZE 2048
 #define MAX_FREQS 1000
@@ -314,6 +314,7 @@ void CLASSNAME::FreeImmutableData()
 
 void CLASSNAME::LoadImmutableData (const Model& m)
 {
+	//LOG(DEBUG) << getName() << "->LoadImmutableData";
 	FreeImmutableData();
 
 	assert (m.freqs.size() == m.exp_delays.size());
@@ -343,7 +344,7 @@ void CLASSNAME::LoadImmutableData (const Model& m)
 
 	// model.depths
 	n_layers_ = m.depths.size();
-	ftype *depths = (ftype*) malloc(n_layers_*sizeof(ftype));
+	depths_ = (ftype*) malloc(n_layers_*sizeof(ftype));
 	for (int i=0; i<n_layers_; ++i)
 		depths_[i] = m.depths[i];
 
@@ -361,7 +362,9 @@ double CLASSNAME::CalculatePointResidual(const Model& m, Point& p)
 
 double CLASSNAME::CalculatePointResidual(Point& p)
 {
-
+	if (freqs_ == NULL)
+		exit(1);
+	//LOG(DEBUG) << "Point: " << p.cws;
 	// Transform AoS to SoA
 	size_t cws_sz = p.cws.size();
 	ftype *cws = (ftype*) malloc(cws_sz*sizeof(ftype));
@@ -389,5 +392,22 @@ double CLASSNAME::CalculatePointResidual(Point& p)
 	free(cws);
 	free(n_res_global);
 	
+	LOG(DEBUG) << "Residual: " << residual_total;
 	return p.residual = residual_total;
 }
+
+CLASSNAME::CLASSNAME(std::string name) : name_{name}
+{
+	LOG(DEBUG) << "Created residual calculator \""<< name_ << "\"." ;
+}
+
+std::string CLASSNAME::getName()
+{
+	return name_;
+}
+
+CLASSNAME::~CLASSNAME ()
+{
+	//LOG(DEBUG) << "Destructor for "<< name_ << "\"." ;
+	FreeImmutableData();
+};

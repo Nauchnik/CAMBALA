@@ -173,7 +173,7 @@ void Scenario::readInputDataFromFiles()
 	auto expdelays_vv = DoubleVecVecRead(dtimesFileName_);
 	freqs_ = DoubleVecVecGetFirstColumn(expdelays_vv);
 	modal_delays_ = DoubleVecVecGetOtherColumns(expdelays_vv);
-	if ("weighted")
+	if (object_function_type_=="weighted")
 	{
 		auto spmag_vv = DoubleVecVecRead(spmagFileName_);
 		spmag_ = DoubleVecVecGetOtherColumns(spmag_vv);
@@ -185,5 +185,6 @@ void Scenario::readInputDataFromFiles()
 Scenario::Scenario(string scenarioFileName)
 {
 	readFile(scenarioFileName);
+	readInputDataFromFiles();
 	print();
 }

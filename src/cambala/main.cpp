@@ -28,7 +28,8 @@
 
 INITIALIZE_EASYLOGGINGPP
 
-int main(int argc, char **argv)
+
+int main(int argc, char *argv[])
 {
 	//unsigned ncpl = 0; // search mesh within each water layer
 
@@ -77,7 +78,7 @@ int main(int argc, char **argv)
 	CAMBALA cambala;
 	
 
-	ResCalc* cpu64 = new ResCalcCPU64;
+	ResCalc* cpu64 = new ResCalcCPU64("cpu64");
 	cambala.res_calc_sel_.AddResidualCalculator("cpu64", cpu64);
 	cambala.Solve(scenario);
 	cambala.reportFinalResult();

@@ -5,47 +5,9 @@
 #include "solvers/interface.h"
 #include "solvers/discrete.h"
 #include "solvers/bruteforce.h"
+#define ELPP_STL_LOGGING
 #include "easylogging++.h"
 
-/*
-#include <iostream>
-#include <complex>
-#include <time.h>
-#include <stdexcept>
-*/
-
-/*
-CAMBALA::CAMBALA() :
-	launch_type("bruteforce"),
-	object_function_type_("uniform"),
-	output_filename("cambala_out"),
-	depths_filename("cambala_depths_out"),
-	H_(0),
-	nh_(1),
-	ncb(1),
-	nrhob(1),
-	nR(1),
-	ntau(1),
-	cb1(2000.0),
-	cb2(2000.0),
-	R1(3400.0),
-	R2(3600.0),
-	tau1(0.0),
-	tau2(0.0),
-	rhob1(2.0),
-	rhob2(2.0),
-	n_layers_w(1),
-	iterated_local_search_runs_(10),
-	verbosity(1),
-	isTimeDelayPrinting(false),
-	ppm_(0),
-	rank(0)
-{
-	srand((unsigned)time(NULL));
-	start_chrono_time = chrono::high_resolution_clock::now();
-}
-
-*/
 
 void CAMBALA::reportFinalResult()
 {
@@ -122,10 +84,20 @@ void CAMBALA::Solve(const Scenario& c)
 		m.depths = makeDepths(cur_h, c.H_, c.depthsDim_, c.ssd_.cw);
 		m.freqs = c.freqs_;
 		m.weight_coeffs = c.spmag_;
-		LOG(DEBUG) << "c.ppm , m.depths[0] "<< c.ppm_ << " " << m.depths[0] ;
 		m.Ns_points.push_back((unsigned)round(c.ppm_*m.depths[0]));
+		m.exp_delays = c.modal_delays_;
+
 		for (size_t i=1; i<m.depths.size(); ++i)
 			m.Ns_points.push_back((unsigned)round(c.ppm_*(m.depths[i] - m.depths[i-1])));
+
+		//LOG(DEBUG) << "c.ppm , m.depths[0] "<< c.ppm_ << " " << m.depths[0] ;
+		LOG(DEBUG) << "depths freqs weight_coeffs Ns_points "
+			<< m.depths.size() << " " 
+			<< m.freqs.size()<< " " 
+			<< m.weight_coeffs.size() << " "
+			<< m.depths.size() << " "
+		        << m.Ns_points.size();
+
 
 		res_calc_sel_.LoadModel(m);
 
@@ -140,6 +112,14 @@ void CAMBALA::Solve(const Scenario& c)
 			record_point = point;
 			//if (verbosity > 0) PrintPoint(record_point_);
 		}
+		// TODO: make a general output method for Point!
+		LOG(INFO) << "Record point found: " 
+			<< record_point.residual << " Coords: "
+			<< record_point.R << " "
+			<< record_point.rhob << " "
+			<< record_point.cb << " "
+			<< record_point.tau <<  " "
+			<< record_point.cws;
 		//cout << "Processed " << (cur_h-h.l)/h.s << " out of " << h.r/h.s << " h (max depths)" << endl;
 	}
 }

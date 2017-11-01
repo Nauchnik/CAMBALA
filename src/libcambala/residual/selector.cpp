@@ -1,4 +1,5 @@
 #include "residual/selector.h"
+#include "easylogging++.h"
 
 
 
@@ -11,6 +12,7 @@ ResCalcSelector::ResCalcSelector()
 
 void ResCalcSelector::AddResidualCalculator(std::string name, ResCalc* rc)
 {
+	LOG(DEBUG) << "Adding residual calculator \""<< rc->getName() << "\"" << " as \"" << name << "\".";
 	//TODO: add more semantic checks
 	calcs_[name] = rc;
 	//add default calculators
@@ -19,6 +21,7 @@ void ResCalcSelector::AddResidualCalculator(std::string name, ResCalc* rc)
 		calcs_["default"] = rc;
 		calcs_["precise"] = rc;
 		calcs_["fast"] = rc;
+		LOG(DEBUG) << " Default calc now is \"" << calcs_["default"]->getName() << "\"." ;
 	}
 }
 
