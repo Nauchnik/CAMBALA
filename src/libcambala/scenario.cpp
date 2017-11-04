@@ -3,6 +3,9 @@
 #include "fstream"
 #include "utils.h"
 
+using std::cout;
+using std::endl;
+
 //extern string output_filename;
 //extern int verbosity;
 

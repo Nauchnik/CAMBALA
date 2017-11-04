@@ -1,5 +1,5 @@
 #include "cambala.h"
-#include "residual/cpu64.h"
+#include "residual/cpu.h"
 #include "rescalc_data.cpp"
 
 #include "easylogging++.h"
@@ -8,7 +8,7 @@ INITIALIZE_EASYLOGGINGPP
 
 int main(int argc, char *argv[])
 {
-	ResCalc* cpu64 = new ResCalcCPU64("cpu64");
+	ResCalc* cpu64 = new ResCalcCPU64<double>("cpu64");
 	Model m;
 	Point p;
 	SetTestData(m,p);

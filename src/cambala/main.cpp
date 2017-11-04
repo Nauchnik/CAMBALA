@@ -11,8 +11,7 @@
 #endif
 
 #include "cambala.h"
-//#include "residual/cpu32.h"
-#include "residual/cpu64.h"
+#include "residual/cpu.h"
 
 #define _USE_MATH_DEFINES
 
@@ -28,6 +27,9 @@
 
 INITIALIZE_EASYLOGGINGPP
 
+
+using std::cout;
+using std::endl;
 
 int main(int argc, char *argv[])
 {
@@ -78,11 +80,14 @@ int main(int argc, char *argv[])
 	CAMBALA cambala;
 	
 
-	ResCalc* cpu64 = new ResCalcCPU64("cpu64");
+	ResCalc* cpu64 = new BisectResCalcCPU <double> ("cpu64");
+	ResCalc* cpu32 = new BisectResCalcCPU <float> ("cpu32");
 	cambala.res_calc_sel_.AddResidualCalculator("cpu64", cpu64);
+	cambala.res_calc_sel_.AddResidualCalculator("cpu32", cpu32);
 	cambala.Solve(scenario);
 	cambala.reportFinalResult();
 	delete cpu64;
+	delete cpu32;
 
 
 

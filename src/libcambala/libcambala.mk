@@ -5,7 +5,6 @@ SOURCES := \
 	scenario.cpp\
 	utils.cpp\
 	residual/selector.cpp\
-	residual/cpu64.cpp\
 	solvers/discrete.cpp\
 	solvers/bruteforce.cpp
 
