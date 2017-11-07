@@ -7,16 +7,13 @@
 class BruteForce : public Solver
 {
 public:
+	BruteForce(std::string name);
 	BruteForce();
-	void Solve ();
-	//inline void LoadData (std::vector<double> depths) { depths_ = depths; };
-	Point getBestPoint();
-	void SetResidualCalculatorSelector(ResCalcSelector* p_sel);
-	void LoadSearchSpaceDims(SearchSpaceDims ssd);
+	~BruteForce();
 private:
-	//std::vector<double> depths_;
-	Point recordPoint_;
 	DiscreteSearchSpace ss_;
-	ResCalcSelector* p_sel_ = NULL;
+
+	void DoSolve();
+	void DoLoadSearchSpaceDims(SearchSpaceDims ssd);
 };
 #endif

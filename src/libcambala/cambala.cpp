@@ -79,7 +79,8 @@ void CAMBALA::Solve(const Scenario& c)
 		else if (launch_type == "bruteforce")
 			s = new BruteForce;
 		*/
-			s = new HillClimbing;
+			s = new HillClimbing();
+			//s = new BruteForce;
 
 		//TODO: rewrite model init as a separate function/method
 		Model m;
@@ -101,9 +102,10 @@ void CAMBALA::Solve(const Scenario& c)
 		        << m.Ns_points.size();
 
 
-		res_calc_sel_.LoadModel(m);
+		ResCalc* rc = calcs_["fast"];
+		rc->LoadModel(m);
 
-		s->SetResidualCalculatorSelector(&res_calc_sel_);
+		s->SetResidualCalculator(rc);
 		s->LoadSearchSpaceDims(c.ssd_);
 		s->Solve();
 		Point point = s->getBestPoint();
@@ -136,5 +138,30 @@ vector<double> makeDepths(double h, double H, const vector <Dim>& d, const vecto
 		depths.push_back(layer_thickness_w*jj);
 	depths.push_back(H);
 	return depths;
+}
+
+
+void CAMBALA::AddResidualCalculator(std::string name, ResCalc* rc)
+{
+	LOG(DEBUG) << "Adding residual calculator \""<< rc->getName() << "\"" << " as \"" << name << "\".";
+	//TODO: add more semantic checks
+	calcs_[name] = rc;
+	//add default calculators
+	if( calcs_["default"]==nullptr)
+	{
+		calcs_["default"] = rc;
+		calcs_["precise"] = rc;
+		calcs_["fast"] = rc;
+		LOG(DEBUG) << " Default calc now is \"" << calcs_["default"]->getName() << "\"." ;
+	}
+}
+
+
+CAMBALA::CAMBALA()
+{
+	// residual calculators names
+	calcs_["default"] = nullptr;
+	calcs_["precise"] = nullptr;
+	calcs_["fast"] = nullptr;
 }
 

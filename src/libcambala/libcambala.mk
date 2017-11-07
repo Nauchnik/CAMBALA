@@ -5,7 +5,8 @@ SOURCES := \
 	scenario.cpp\
 	utils.cpp\
 	rng.cpp\
-	residual/selector.cpp\
+	residual/interface.cpp\
+	solvers/interface.cpp\
 	solvers/discrete.cpp\
 	solvers/hillclimbing.cpp\
 	solvers/bruteforce.cpp

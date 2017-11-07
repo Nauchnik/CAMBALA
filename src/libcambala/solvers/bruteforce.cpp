@@ -7,7 +7,7 @@
 #include "easylogging++.h"
 
 
-void BruteForce::Solve()
+void BruteForce::DoSolve()
 {
 	LOG(DEBUG) << "Bruteforce.Solve()";
 	//std::vector<Point> Points_vec = ss_.getSearchSpacePointsVec();
@@ -23,21 +23,22 @@ void BruteForce::Solve()
 	{
 		Point x = ss_.Indexes2Point(p);
 		//LOG(DEBUG) << "I: " << p;
-		p_sel_->ComputeResidual(x);
+		rc_->ComputeResidual(x);
 		if (x.residual < recordPoint_.residual)
 			recordPoint_ = x;
 	}
 }
 
-void BruteForce::LoadSearchSpaceDims(SearchSpaceDims ssd)
+void BruteForce::DoLoadSearchSpaceDims(SearchSpaceDims ssd)
 {
 	ss_ = DiscreteSearchSpace(ssd);
 }
 
-void BruteForce::SetResidualCalculatorSelector (ResCalcSelector* p_sel)
-{
-	p_sel_ = p_sel;
-}
 
-Point BruteForce::getBestPoint() { return recordPoint_; }
-BruteForce::BruteForce(){}
+BruteForce::BruteForce()
+{name_= "Bruteforce"; }
+BruteForce::BruteForce(std::string name)
+{name_ = name;}
+
+
+BruteForce::~BruteForce() {}

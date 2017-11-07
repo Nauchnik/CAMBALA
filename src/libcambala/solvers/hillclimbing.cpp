@@ -3,7 +3,7 @@
 #include "easylogging++.h"
 #include <iostream>
 
-void HillClimbing::Solve()
+void HillClimbing::DoSolve()
 //void HillClimbing::Solve(Point startingPoint = Point())
 {
 	LOG(DEBUG) <<"findLocalMinHillClimbing";
@@ -26,12 +26,6 @@ void HillClimbing::Solve()
 		}
 		LOG(DEBUG) << "new random cpi : " << startingPointInd;
 	}
-}
-
-void HillClimbing::UpdateRecord(Point p)
-{
-	recordPoint_ = p;
-	LOG(DEBUG) << "new record found: " << recordPoint_.print();
 }
 
 Point HillClimbing::FindLocalMin(PointInds startInds)
@@ -78,21 +72,29 @@ Point HillClimbing::GetOrCompute(PointInds pointInds)
 	else
 	{
 		p = ss_.Indexes2Point(pointInds);
-		p_sel_->ComputeResidual(p);
+		rc_->ComputeResidual(p);
 		ss_.AddChecked(pointInds, p);
 	}
 	return p;
 }
 
-void HillClimbing::LoadSearchSpaceDims(SearchSpaceDims ssd)
+void HillClimbing::DoLoadSearchSpaceDims(SearchSpaceDims ssd)
 {
 	ss_ = DiscreteSearchSpace(ssd);
 }
 
-void HillClimbing::SetResidualCalculatorSelector (ResCalcSelector* p_sel)
+
+HillClimbing::HillClimbing (std::string name)
 {
-	p_sel_ = p_sel;
+	name_ = name;
 }
 
-Point HillClimbing::getBestPoint() { return recordPoint_; }
-//HillClimbing::HillClimbing(){}
+HillClimbing::HillClimbing ()
+{
+	name_ = "HillClimbing";
+}
+
+
+
+
+HillClimbing::~HillClimbing(){}

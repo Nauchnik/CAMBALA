@@ -1,15 +1,24 @@
-#ifndef RESIDUAL_CALCULATOR_H_
-#define RESIDUAL_CALCULATOR_H_
+#ifndef RESIDUAL_INTERFACE_H_
+#define RESIDUAL_INTERFACE_H_
+#include <string>
 #include "types.h"
+// Using "Template Method" design pattern!
 
 class ResidualCalculator
 {
 public:
-	virtual void LoadImmutableData (const Model& m) = 0;
-	virtual double CalculatePointResidual(Point& p) = 0;
-	virtual double CalculatePointResidual(const Model& m, Point& p) = 0;
-	virtual std::string getName() = 0;
-	virtual ~ResidualCalculator() {};
+	void LoadModel (const Model& m);
+	double ComputeResidual(Point& p);
+	double ComputeResidual(const Model& m, Point& p);
+	std::string getName();
+
+	virtual ~ResidualCalculator();
+
+protected:
+	std::string name_;
+private:
+	virtual void DoLoadModel (const Model& m) = 0;
+	virtual double DoComputeResidual(Point& p) = 0;
 };
 
 using ResCalc = ResidualCalculator;

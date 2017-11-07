@@ -1,20 +1,33 @@
 #ifndef SOLVERS_INTERFACE_H_
 #define SOLVERS_INTERFACE_H_
 
+// Using "Template Method" design pattern!
+
 #include <vector>
 #include "types.h"
-#include "residual/selector.h"
+#include "residual/interface.h"
 
 class Solver
 {
 public:
-	virtual void Solve () = 0;
-	//virtual void LoadData(std::vector<double> depths) = 0;
-	virtual Point getBestPoint() = 0;
-	virtual void SetResidualCalculatorSelector(ResCalcSelector* p_sel) = 0;
-	virtual void LoadSearchSpaceDims(SearchSpaceDims ssd) = 0;
-	//virtual std::string getName() = 0;
-	virtual ~Solver(){};
+	void Solve ();
+	Point getBestPoint();
+	void SetResidualCalculator(ResCalc* rc);
+	void LoadSearchSpaceDims(SearchSpaceDims ssd);
+	std::string getName();
+	int ResCalcCount_;
+
+	virtual ~Solver();
+
+protected:
+	void UpdateRecord(Point P);
+	ResCalc* rc_ = nullptr;
+	Point recordPoint_;
+	std::string name_;
+
+private:
+	virtual void DoSolve() = 0;
+	virtual void DoLoadSearchSpaceDims(SearchSpaceDims ssd) = 0;
 };
 
 #endif

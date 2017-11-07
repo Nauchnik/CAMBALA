@@ -20,14 +20,13 @@
 template <typename ftype> 
 class BisectResCalcCPU : public ResidualCalculator
 {
+
 public:
-	BisectResCalcCPU (std::string name); 
-	BisectResCalcCPU () : name_("CLASSNAME") {}
-	void LoadImmutableData (const Model& m);
-	double CalculatePointResidual(Point& p);
-	double CalculatePointResidual(const Model& m, Point& p);
-	std::string getName();
+	BisectResCalcCPU(std::string nm);
+	BisectResCalcCPU();
 private:
+	void DoLoadModel (const Model& m);
+	double DoComputeResidual(Point& p);
 	const std::string name_;
 	void FreeImmutableData();
 	~BisectResCalcCPU  ();
@@ -354,7 +353,7 @@ void BisectResCalcCPU<ftype>::FreeImmutableData()
 }
 
 template <typename ftype> 
-void BisectResCalcCPU<ftype>::LoadImmutableData (const Model& m)
+void BisectResCalcCPU<ftype>::DoLoadModel (const Model& m)
 {
 	//LOG(DEBUG) << getName() << "->LoadImmutableData";
 	FreeImmutableData();
@@ -397,14 +396,7 @@ void BisectResCalcCPU<ftype>::LoadImmutableData (const Model& m)
 }
 
 template <typename ftype> 
-double BisectResCalcCPU<ftype>::CalculatePointResidual(const Model& m, Point& p)
-{
-	LoadImmutableData(m);
-	return CalculatePointResidual(p);
-}
-
-template <typename ftype> 
-double BisectResCalcCPU<ftype>::CalculatePointResidual(Point& p)
+double BisectResCalcCPU<ftype>::DoComputeResidual(Point& p)
 {
 	if (freqs_ == NULL)
 		exit(1);
@@ -440,21 +432,24 @@ double BisectResCalcCPU<ftype>::CalculatePointResidual(Point& p)
 	return p.residual = residual_total;
 }
 
-template <typename ftype> 
-BisectResCalcCPU<ftype>::BisectResCalcCPU(std::string name) : name_{name}
-{
-	LOG(DEBUG) << "Created residual calculator \""<< name_ << "\"." ;
-}
-
-template <typename ftype> 
-std::string BisectResCalcCPU<ftype>::getName()
-{
-	return name_;
-}
 
 template <typename ftype> 
 BisectResCalcCPU<ftype>::~BisectResCalcCPU ()
 {
 	//LOG(DEBUG) << "Destructor for "<< name_ << "\"." ;
 	FreeImmutableData();
-};
+}
+
+
+
+template <typename ftype> 
+BisectResCalcCPU<ftype>::BisectResCalcCPU(std::string nm)
+{ /*name_ = nm;*/ }
+
+template <typename ftype> 
+BisectResCalcCPU<ftype>::BisectResCalcCPU()
+{ 
+	// FIXME: Correct name assginment on constructor!!!!
+	size_t s = sizeof(ftype)*8;
+	name_ = "cpu"+std::to_string(s);
+}
