@@ -1,6 +1,7 @@
 #ifndef SOLVERS_DISCRETE_H
 #define SOLVERS_DISCRETE_H
 #include <vector>
+#include <map>
 #include "types.h"
 using namespace std;
 using PointInds = vector <size_t>;
@@ -16,6 +17,14 @@ public:
 	Point Indexes2Point(PointInds indexes);
 	vector<Point> getSearchSpacePointsVec();
 	bool IncreaseInd(PointInds& p, size_t k);
+	PointInds PermutateInds(PointInds p, float chance);
+	PointInds getCenter();
+	bool Checked(PointInds p);
+	void AddChecked(PointInds pd, Point p);
+
+	//TODO: merge PointInds with Point definition somehow?
+	std::map <PointInds, Point> checked_;
+
 };
 
 inline vector <double> getDimGrid(Dim d)

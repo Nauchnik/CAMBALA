@@ -1,8 +1,20 @@
 #include "solvers/discrete.h"
+#include "rng.h"
 #include "utils.h"
 #include <algorithm>
+#include <random>
 #define ELPP_STL_LOGGING
 #include "easylogging++.h"
+
+
+PointInds DiscreteSearchSpace::getCenter()
+{
+	PointInds center;
+	for (const auto& a: axes_)
+		center.push_back((a.size()>1) ? (a.size()/2) : 0);
+	return center;
+}
+
 
 Point DiscreteSearchSpace::Indexes2Point(PointInds indexes)
 {
@@ -77,7 +89,38 @@ bool DiscreteSearchSpace::IncreaseInd(PointInds& p, size_t k)
 	}
 }
 
+PointInds DiscreteSearchSpace::PermutateInds(PointInds p, float chance = 0.5)
+{
+	std::uniform_real_distribution<> rdis(0.0, 1.0);
+	for (unsigned i = 0; i < axes_.size(); ++i)
+	{
+		if (rdis(Gen) < chance)
+		{
+			std::uniform_int_distribution<> idis (0, axes_[i].size()-1);
+			p[i] = idis(Gen);
+		}
+	}
+	return p;
+}
+
+void DiscreteSearchSpace::AddChecked(PointInds pd, Point p)
+{
+	// Add duplicates check
+	checked_[pd] =  p;
+}
+
+bool DiscreteSearchSpace::Checked(PointInds p)
+{
+	return checked_.count(p)>0;
+}
+
+
+
+
+
+
 DiscreteSearchSpace::DiscreteSearchSpace() { }
+
 
 /*
 void CAMBALA_sequential::reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a)

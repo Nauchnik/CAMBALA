@@ -5,6 +5,7 @@
 #include "solvers/interface.h"
 #include "solvers/discrete.h"
 #include "solvers/bruteforce.h"
+#include "solvers/hillclimbing.h"
 #define ELPP_STL_LOGGING
 #include "easylogging++.h"
 
@@ -76,8 +77,9 @@ void CAMBALA::Solve(const Scenario& c)
 		else if (launch_type == "bbox")
 			s = new BBox;
 		else if (launch_type == "bruteforce")
-		*/
 			s = new BruteForce;
+		*/
+			s = new HillClimbing;
 
 		//TODO: rewrite model init as a separate function/method
 		Model m;

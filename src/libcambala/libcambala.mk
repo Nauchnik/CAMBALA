@@ -4,8 +4,10 @@ SOURCES := \
 	cambala.cpp \
 	scenario.cpp\
 	utils.cpp\
+	rng.cpp\
 	residual/selector.cpp\
 	solvers/discrete.cpp\
+	solvers/hillclimbing.cpp\
 	solvers/bruteforce.cpp
 
 CXXFLAGS := -g -std=c++11 -O3 

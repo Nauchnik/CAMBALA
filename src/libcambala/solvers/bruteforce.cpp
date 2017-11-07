@@ -32,12 +32,12 @@ void BruteForce::Solve()
 void BruteForce::LoadSearchSpaceDims(SearchSpaceDims ssd)
 {
 	ss_ = DiscreteSearchSpace(ssd);
-};
+}
 
 void BruteForce::SetResidualCalculatorSelector (ResCalcSelector* p_sel)
 {
 	p_sel_ = p_sel;
 }
 
-Point BruteForce::getBestPoint() { return recordPoint_; };
-BruteForce::BruteForce(){};
+Point BruteForce::getBestPoint() { return recordPoint_; }
+BruteForce::BruteForce(){}

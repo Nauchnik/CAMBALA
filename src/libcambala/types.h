@@ -1,6 +1,7 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 #include <vector>
+#include <string>
 #include "constants.h"
 
 using std::vector;
@@ -18,6 +19,34 @@ struct Point
 	{
 		return (R == a.R && tau == a.tau && rhob == a.rhob && cb == a.cb && cws == a.cws);
 	}
+	bool operator<(const Point& a) const
+	{
+		return (residual<a.residual);
+	}
+	bool operator>(const Point& a) const
+	{
+		return (residual>a.residual);
+	}
+	bool operator<=(const Point& a) const
+	{
+		return (residual<=a.residual);
+	}
+	std::string print()
+	{
+		std::string out;
+		/*
+		out << "[ " << (residual !=START_HUGE_VALUE ? residual : "-") << " |"
+		<< " " << R  
+		<< " " << rhob
+		<< " " << cb
+		<< " " << tau << " |"
+		*/
+		return out;
+
+	}
+
+
+
 	
 };
 
