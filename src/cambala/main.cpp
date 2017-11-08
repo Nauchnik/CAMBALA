@@ -24,6 +24,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <cmath>
+#define ELPP_FEATURE_PERFORMANCE_TRACKING
 #include "easylogging++.h"
 
 INITIALIZE_EASYLOGGINGPP
@@ -34,6 +35,7 @@ using std::endl;
 
 int main(int argc, char *argv[])
 {
+	TIMED_FUNC(timerObj);
 	//unsigned ncpl = 0; // search mesh within each water layer
 
 	std::string scenarioFileName = "";
@@ -73,8 +75,6 @@ int main(int argc, char *argv[])
 	// sequential mode%
 	//cout << "verbosity " << verbosity << endl;
 
-	// fix start time
-	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 
 	// read scenario, modal_delays, mode_numbers, freqs and parameters of the search space
 	Scenario scenario(scenarioFileName);
@@ -87,32 +87,15 @@ int main(int argc, char *argv[])
 	ResCalc* cpu32 = new BisectResCalcCPU <float> ("cpu32");
 	cambala.AddResidualCalculator("cpu32", cpu32);
 
+	cambala.calcs_["fast"] = cpu32;
+	cambala.calcs_["precise"] = cpu64;
+	//TIMED_SCOPE(timerBlkObj, "CambalaSolve");
 	cambala.Solve(scenario);
 	cambala.reportFinalResult();
 	delete cpu64;
 	delete cpu32;
 
 
-
-	/*
-	if (isTestLaunch) {
-		search_space_point point;
-		// true values
-		point.cb = 1700;
-		point.R = 7000;
-		point.rhob = 1.7;
-		point.tau = 0;
-		point.cws = { 1500, 1498, 1493, 1472, 1462 };
-		point.depths = { 10, 20, 30, 40, 50, 300 };
-		CAMBALA_seq.init(point.depths);
-		CAMBALA_seq.object_function_type = "weighted2";
-		CAMBALA_seq.directPointCalc( point );
-		CAMBALA_seq.reportFinalResult();
-		cout << "true value test" << endl;
-		return 0;
-	}
-	*/
-	
 	/*ofstream depths_file("depths.txt");
 	depths_file << depths_vec.size() << " depths for the scenario " << scenarioFileName << endl;
 	for (auto &x : depths_vec) {
@@ -123,9 +106,6 @@ int main(int argc, char *argv[])
 	
 
 
-	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-	cout << "main() total time " << time_span.count() << " s" << endl;
 
 #else
 	int rank = 0;

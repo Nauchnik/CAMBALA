@@ -11,6 +11,7 @@ class Solver
 {
 public:
 	void Solve ();
+	void Solve (Point p);
 	Point getBestPoint();
 	void SetResidualCalculator(ResCalc* rc);
 	void LoadSearchSpaceDims(SearchSpaceDims ssd);
@@ -24,6 +25,7 @@ protected:
 	ResCalc* rc_ = nullptr;
 	Point recordPoint_;
 	std::string name_;
+	Point startingPoint_;
 
 private:
 	virtual void DoSolve() = 0;

@@ -34,6 +34,7 @@ struct Point
 	std::string print()
 	{
 		std::string out;
+		out += (residual !=START_HUGE_VALUE ? std::to_string(residual) : "-");
 		/*
 		out << "[ " << (residual !=START_HUGE_VALUE ? residual : "-") << " |"
 		<< " " << R  

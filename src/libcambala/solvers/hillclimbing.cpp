@@ -7,10 +7,10 @@ void HillClimbing::DoSolve()
 //void HillClimbing::Solve(Point startingPoint = Point())
 {
 	LOG(DEBUG) <<"findLocalMinHillClimbing";
-	Point startingPoint = Point();
-	PointInds startingPointInd = (startingPoint == Point())
+	//Point startingPoint_ = Point();
+	PointInds startingPointInd = (startingPoint_ == Point())
 		? ss_.getCenter()
-		: ss_.Point2Indexes(startingPoint);
+		: ss_.Point2Indexes(startingPoint_);
 
 	// launch iterations of hill climbing
 	for (size_t i = 0; i < ils_runs_; ++i)
@@ -93,8 +93,5 @@ HillClimbing::HillClimbing ()
 {
 	name_ = "HillClimbing";
 }
-
-
-
 
 HillClimbing::~HillClimbing(){}

@@ -4,6 +4,7 @@
 #include "assert.h"
 #include <cmath>
 #define ELPP_STL_LOGGING
+#define ELPP_FEATURE_PERFORMANCE_TRACKING
 #include "easylogging++.h"
 
 #define MAX_MAT_SIZE 2048
@@ -414,6 +415,7 @@ double BisectResCalcCPU<ftype>::DoComputeResidual(Point& p)
 	n_res_global[0] = 0;
 
 
+	TIMED_FUNC(timerObj);
 	for (int tid = 0; tid<freqs_sz_; ++tid)
 		EvalPoint <ftype> // <- needed for correct conversion of p.something
 			(tid,

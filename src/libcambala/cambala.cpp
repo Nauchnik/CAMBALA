@@ -70,17 +70,6 @@ void CAMBALA::Solve(const Scenario& c)
 	Point record_point;
 	for (auto cur_h: getDimGrid(c.hDim_))
 	{
-		Solver* s;
-		/*
-		if (launch_type == "hillclimbing")
-			s = new HillClimbing;
-		else if (launch_type == "bbox")
-			s = new BBox;
-		else if (launch_type == "bruteforce")
-			s = new BruteForce;
-		*/
-			s = new HillClimbing();
-			//s = new BruteForce;
 
 		//TODO: rewrite model init as a separate function/method
 		Model m;
@@ -102,14 +91,36 @@ void CAMBALA::Solve(const Scenario& c)
 		        << m.Ns_points.size();
 
 
-		ResCalc* rc = calcs_["fast"];
-		rc->LoadModel(m);
+		ResCalc* fast = calcs_["fast"];
+		fast->LoadModel(m);
 
-		s->SetResidualCalculator(rc);
+		Solver* s;
+		/*
+		if (launch_type == "hillclimbing")
+			s = new HillClimbing;
+		else if (launch_type == "bbox")
+			s = new BBox;
+		else if (launch_type == "bruteforce")
+			s = new BruteForce;
+		*/
+			s = new HillClimbing();
+			// Use S as HillClimbing to set attributes: 
+			((HillClimbing*)s)->ils_runs_=2;
+			//s = new BruteForce;
+		s->SetResidualCalculator(fast);
 		s->LoadSearchSpaceDims(c.ssd_);
 		s->Solve();
 		Point point = s->getBestPoint();
+
+		ResCalc* precise = calcs_["precise"];
+		precise->LoadModel(m);
+
+		s->SetResidualCalculator(precise);
+		s->Solve(point);
+		point = s->getBestPoint();
+
 		delete s;
+
 
 		if (point.residual < record_point.residual)
 		{
