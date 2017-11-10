@@ -43,12 +43,7 @@ struct Point
 		<< " " << tau << " |"
 		*/
 		return out;
-
 	}
-
-
-
-	
 };
 
 struct Model
@@ -68,6 +63,15 @@ public:
 	double r;
 	inline Dim (double l=0, double s=0, double r=0) : 
 		l(l), s(s), r(r) {}
+	std::string print()
+	{
+		std::string out;
+		out 
+			+= std::string("[") +=std::to_string(l)
+			+= std::string(",") +=std::to_string(s)+= std::string(",") 
+			+=std::to_string(r) += std::string("]") ;
+		return out;
+	}
 };
 
 struct SearchSpaceDims
@@ -77,6 +81,17 @@ struct SearchSpaceDims
 	Dim cb;
 	Dim tau;
 	vector <Dim> cw;
+	std::string print()
+	{
+		std::string out;
+		out  	+= R.print() += std::string("x")
+			+= rhob.print() += std::string("x")
+			+= cb.print() += std::string("x")
+			+= tau.print() += std::string("x");
+		for (auto& c: cw)
+			out += c.print() += std::string("x");
+		return out;
+	}
 };
 
 /*

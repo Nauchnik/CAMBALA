@@ -6,6 +6,7 @@
 #include "solvers/discrete.h"
 #include "solvers/bruteforce.h"
 #include "solvers/hillclimbing.h"
+#include "solvers/bbox.h"
 #define ELPP_STL_LOGGING
 #include "easylogging++.h"
 
@@ -91,10 +92,8 @@ void CAMBALA::Solve(const Scenario& c)
 		        << m.Ns_points.size();
 
 
-		ResCalc* fast = calcs_["fast"];
-		fast->LoadModel(m);
 
-		Solver* s;
+		//Solver* s;
 		/*
 		if (launch_type == "hillclimbing")
 			s = new HillClimbing;
@@ -103,23 +102,30 @@ void CAMBALA::Solve(const Scenario& c)
 		else if (launch_type == "bruteforce")
 			s = new BruteForce;
 		*/
-			s = new HillClimbing();
+			//s = new BlackBox();
 			// Use S as HillClimbing to set attributes: 
-			((HillClimbing*)s)->ils_runs_=2;
+			//s = new HillClimbing();
+			//((HillClimbing*)s)->ils_runs_=2;
 			//s = new BruteForce;
-		s->SetResidualCalculator(fast);
-		s->LoadSearchSpaceDims(c.ssd_);
-		s->Solve();
-		Point point = s->getBestPoint();
+		Solver* s1 = new HillClimbing();
+		ResCalc* fast = calcs_["fast"];
+		fast->LoadModel(m);
+		s1->SetResidualCalculator(fast);
+		s1->LoadSearchSpaceDims(c.ssd_);
+		s1->Solve();
+		Point point = s1->getBestPoint();
+		delete s1;
 
+
+		Solver* s2 = new BlackBox();
 		ResCalc* precise = calcs_["precise"];
 		precise->LoadModel(m);
+		s2->SetResidualCalculator(precise);
+		s2->LoadSearchSpaceDims(c.ssd_);
+		s2->Solve(point);
+		point = s2->getBestPoint();
+		delete s2;
 
-		s->SetResidualCalculator(precise);
-		s->Solve(point);
-		point = s->getBestPoint();
-
-		delete s;
 
 
 		if (point.residual < record_point.residual)

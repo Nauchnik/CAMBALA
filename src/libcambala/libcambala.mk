@@ -9,6 +9,7 @@ SOURCES := \
 	solvers/interface.cpp\
 	solvers/discrete.cpp\
 	solvers/hillclimbing.cpp\
+	solvers/bbox.cpp\
 	solvers/bruteforce.cpp
 
 CXXFLAGS := -g -std=c++11 -O3 

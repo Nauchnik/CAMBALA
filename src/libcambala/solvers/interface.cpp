@@ -5,6 +5,7 @@
 
 void Solver::Solve ()
 {
+	startingPoint_ = Point(); // drop starting point to default
 	TIMED_FUNC(timerObj);
 	LOG(INFO) << "Solver " << getName() << " started";
 	DoSolve();
@@ -24,6 +25,7 @@ void Solver::Solve (Point p)
 void Solver::LoadSearchSpaceDims(SearchSpaceDims ssd)
 {
 	LOG(DEBUG) << "Solver " << getName() << " loading search space dimension data";
+	LOG(DEBUG) << "Search space dimensions: " << ssd.print();
 	DoLoadSearchSpaceDims(ssd);
 }
 

@@ -6,7 +6,6 @@
 void HillClimbing::DoSolve()
 //void HillClimbing::Solve(Point startingPoint = Point())
 {
-	LOG(DEBUG) <<"findLocalMinHillClimbing";
 	//Point startingPoint_ = Point();
 	PointInds startingPointInd = (startingPoint_ == Point())
 		? ss_.getCenter()
@@ -31,6 +30,7 @@ void HillClimbing::DoSolve()
 Point HillClimbing::FindLocalMin(PointInds startInds)
 {
 	// if changing of every variable will not lead to a record update, then a local min reached
+	LOG(DEBUG) <<"findLocalMinHillClimbing";
 	Point localRecord;
 	for (;;)
 	{
