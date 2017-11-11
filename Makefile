@@ -129,6 +129,16 @@ define COMPILE_CXX_CMDS
 	 rm -f ${@:%$(suffix $@)=%.d}
 endef
 
+define COMPILE_NVCC_CMDS
+	@mkdir -p $(dir $@)
+	$(strip ${NVCC} -o $@ -c ${NVCCFLAGS} ${SRC_NVCCFLAGS} ${INCDIRS} \
+	    ${SRC_INCDIRS} ${SRC_DEFS} ${DEFS} $<)
+	@cp ${@:%$(suffix $@)=%.d} ${@:%$(suffix $@)=%.P}; \
+	 sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	     -e '/^$$/ d' -e 's/$$/ :/' < ${@:%$(suffix $@)=%.d} \
+	     >> ${@:%$(suffix $@)=%.P}; \
+	 rm -f ${@:%$(suffix $@)=%.d}
+endef
 # INCLUDE_SUBMAKEFILE - Parameterized "function" that includes a new
 #   "submakefile" fragment into the overall Makefile. It also recursively
 #   includes all submakefiles of the specified submakefile fragment.
@@ -141,6 +151,7 @@ define INCLUDE_SUBMAKEFILE
     TARGET        :=
     TGT_CFLAGS    :=
     TGT_CXXFLAGS  :=
+    TGT_NVCCFLAGS :=
     TGT_DEFS      :=
     TGT_INCDIRS   :=
     TGT_LDFLAGS   :=
@@ -153,6 +164,7 @@ define INCLUDE_SUBMAKEFILE
     SOURCES       :=
     SRC_CFLAGS    :=
     SRC_CXXFLAGS  :=
+    SRC_NVCCFLAGS :=
     SRC_DEFS      :=
     SRC_INCDIRS   :=
 
@@ -187,6 +199,7 @@ define INCLUDE_SUBMAKEFILE
         ALL_TGTS += $${TGT}
         $${TGT}_CFLAGS    := $${TGT_CFLAGS}
         $${TGT}_CXXFLAGS  := $${TGT_CXXFLAGS}
+        $${TGT}_NVCCFLAGS := $${TGT_NVCCFLAGS}
         $${TGT}_DEFS      := $${TGT_DEFS}
         $${TGT}_DEPS      :=
         TGT_INCDIRS       := $$(call QUALIFY_PATH,$${DIR},$${TGT_INCDIRS})
@@ -206,6 +219,7 @@ define INCLUDE_SUBMAKEFILE
         TGT := $$(strip $$(call PEEK,$${TGT_STACK}))
         $${TGT}_CFLAGS    += $${TGT_CFLAGS}
         $${TGT}_CXXFLAGS  += $${TGT_CXXFLAGS}
+        $${TGT}_NVCCFLAGS += $${TGT_NVCCFLAGS}
         $${TGT}_DEFS      += $${TGT_DEFS}
         TGT_INCDIRS       := $$(call QUALIFY_PATH,$${DIR},$${TGT_INCDIRS})
         TGT_INCDIRS       := $$(call CANONICAL_PATH,$${TGT_INCDIRS})
@@ -249,6 +263,7 @@ define INCLUDE_SUBMAKEFILE
         $${TGT}_DEPS += $${OBJS:%.o=%.P}
         $${OBJS}: SRC_CFLAGS   := $${$${TGT}_CFLAGS} $${SRC_CFLAGS}
         $${OBJS}: SRC_CXXFLAGS := $${$${TGT}_CXXFLAGS} $${SRC_CXXFLAGS}
+        $${OBJS}: SRC_NVCCFLAGS := $${$${TGT}_NVCCFLAGS} $${SRC_NVCCFLAGS}
         $${OBJS}: SRC_DEFS     := $$(addprefix -D,$${$${TGT}_DEFS} $${SRC_DEFS})
         $${OBJS}: SRC_INCDIRS  := $$(addprefix -I,\
                                      $${$${TGT}_INCDIRS} $${SRC_INCDIRS})
@@ -327,7 +342,8 @@ endif
 # Define the source file extensions that we know how to handle.
 C_SRC_EXTS := %.c
 CXX_SRC_EXTS := %.C %.cc %.cp %.cpp %.CPP %.cxx %.c++
-ALL_SRC_EXTS := ${C_SRC_EXTS} ${CXX_SRC_EXTS}
+NVCC_SRC_EXTS := %.cu 
+ALL_SRC_EXTS := ${C_SRC_EXTS} ${CXX_SRC_EXTS} ${NVCC_SRC_EXTS}
 
 # Initialize global variables.
 ALL_TGTS :=
@@ -364,6 +380,12 @@ $(foreach TGT,${ALL_TGTS},\
   $(foreach EXT,${CXX_SRC_EXTS},\
     $(eval $(call ADD_OBJECT_RULE,${BUILD_DIR}/$(call CANONICAL_PATH,${TGT}),\
              ${EXT},$${COMPILE_CXX_CMDS}))))
+
+# Add pattern rule(s) for creating compiled object code from C++ source.
+$(foreach TGT,${ALL_TGTS},\
+  $(foreach EXT,${NVCC_SRC_EXTS},\
+    $(eval $(call ADD_OBJECT_RULE,${BUILD_DIR}/$(call CANONICAL_PATH,${TGT}),\
+             ${EXT},$${COMPILE_NVCC_CMDS}))))
 
 # Add "clean" rules to remove all build-generated files.
 .PHONY: clean

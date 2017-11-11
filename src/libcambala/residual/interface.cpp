@@ -1,4 +1,5 @@
 #include "residual/interface.h"
+#define ELPP_FEATURE_PERFORMANCE_TRACKING
 #include "easylogging++.h"
 
 
@@ -18,6 +19,7 @@ void ResidualCalculator::LoadModel(const Model& m)
 
 double ResidualCalculator::ComputeResidual(Point& p)
 {
+	TIMED_FUNC(timerObj);
 	LOG(DEBUG) << "ResCalc " << getName() << " starting residual calculation";
 	double result = DoComputeResidual(p);
 	LOG(DEBUG) << "Residual: " << result;

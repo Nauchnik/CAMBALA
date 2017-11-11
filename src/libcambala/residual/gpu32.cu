@@ -1,8 +1,5 @@
-#include "residual/interface.h"
-#include "assert.h"
+#include "gpu32.h"
 #include "helper_cuda.h"
-#include <cmath>
-#include "types.h"
 
 #define BLOCKSIZE 8
 
@@ -32,7 +29,10 @@
 
 #define m_FreeHostAndGPU(s)\
 	free(s);\
-	checkCudaErrors(cudaFree(g_##s));\
+	checkCudaErrors(cudaFree(g_##s));
+
+#define m_FreeGPU(s)\
+	checkCudaErrors(cudaFree(g_##s));
 
 __device__ void FillLocalArrays (
 		const int tid,
@@ -315,58 +315,27 @@ __global__ void EvalPoint_gpukernel(
 
 	//residual = sqrt(residuals_local/n_residuals);
 }
-
-void EvalPointGPU(
-		Point &point,
-		const std::vector<double> &freqs_d,
-		const std::vector<unsigned> &Ns_points_d,
-		const std::vector<double> &depths_d,
-		const std::vector<std::vector<double>> &modal_delays)
+void BisectResCalcGPU32::EvalPoint( //model
+		const int dmaxsz,
+		const int* Ns_points,
+		const float* depths,
+		const float* freqs, 
+		const int freqs_sz,
+		const float* exp_delays,
+		const int* exp_delays_sz,
+		//point
+		const float R, 
+		const float tau, 
+		const float rhob, 
+		const float cb, 
+		const float* cws, 
+		const int cws_sz, 
+		//output
+		float* residual,
+		int* n_res_global)
 {
-	// Transform AoS to SoA
-	size_t cws_sz = point.cws.size();
-	ftype *cws = (ftype*) malloc(cws_sz*sizeof(ftype));
-	for (size_t i = 0; i < cws_sz; ++i)
-		cws[i] = point.cws[i];
-	//TODO: stop converting this data every time
-	assert (freqs_d.size() == modal_delays.size());
-	
-	//std::cout << " copy const" << std::endl;
-	// freqs array
-	int freqs_sz = freqs_d.size();
-	//std::cout << " num freqs " << freqs_sz << std::endl;
-	ftype *freqs = (ftype*) malloc(freqs_sz*sizeof(ftype));
-	for (int i = 0; i < freqs_sz; ++i)
-		freqs[i] = freqs_d[i];
 
-	// exp_delays_sz
-	int *exp_delays_sz = (int*) malloc(freqs_sz*sizeof(int));
-	for (size_t i = 0; i < freqs_sz; ++i)
-		exp_delays_sz[i] = modal_delays[i].size();
-
-	// exp_delays 2d array
-	int dmaxsz = 0;
-	for (size_t i = 0; i < freqs_sz; ++i)
-		dmaxsz = std::max(dmaxsz, exp_delays_sz[i]);
-	ftype *exp_delays = (ftype*) malloc(dmaxsz*freqs_sz*sizeof(ftype));
-	for (size_t i = 0; i < modal_delays.size(); ++i)
-		for (size_t j = 0; j < modal_delays[i].size(); ++j)
-			exp_delays[i*dmaxsz + j] = modal_delays[i][j];
-
-	int n_layers = depths_d.size();
-	ftype *depths = (ftype*) malloc(n_layers*sizeof(ftype));
-	for (int i=0; i<n_layers; ++i)
-		depths[i] = depths_d[i];
-
-	int *Ns_points = (int*) malloc(n_layers*sizeof(int));
-	for (int i=0; i<n_layers; ++i)
-		Ns_points[i] = Ns_points_d[i];
-
-	// output array
-	ftype *residual = (ftype*) malloc(sizeof(ftype));
-	residual[0] = 0;
-	int *n_res_global = (int*) malloc(sizeof(int));
-	n_res_global[0] = 0;
+	int n_layers = cws_sz+1;
 
 	m_CopyToGPU2(cws, cws_sz, ftype);
 	m_CopyToGPU2(freqs, freqs_sz, ftype);
@@ -383,10 +352,10 @@ void EvalPointGPU(
 		 g_cws, 
 		 g_Ns_points, 
 		 g_depths, 
-		 point.R, 
-		 point.tau, 
-		 point.rhob, 
-		 point.cb, 
+		 R, 
+		 tau, 
+		 rhob, 
+		 cb, 
 		 g_freqs, 
 		 freqs_sz,
 		 g_exp_delays,
@@ -405,102 +374,26 @@ void EvalPointGPU(
 	checkCudaErrors(cudaMemcpy((void*) n_res_global, (void*)g_n_res_global, 
 				sizeof(int), cudaMemcpyDeviceToHost));
 	//printf("\n Res_loc: %f %i", *residual, *n_res_global);
-	point.residual = std::sqrt(*residual / *n_res_global);
 
-	m_FreeHostAndGPU(Ns_points);
-	m_FreeHostAndGPU(depths);
-	m_FreeHostAndGPU(exp_delays_sz);
-	m_FreeHostAndGPU(exp_delays);
-	m_FreeHostAndGPU(freqs);
-	m_FreeHostAndGPU(cws);
-	m_FreeHostAndGPU(residual);
-	m_FreeHostAndGPU(n_res_global);
+	m_FreeGPU(Ns_points);
+	m_FreeGPU(depths);
+	m_FreeGPU(exp_delays_sz);
+	m_FreeGPU(exp_delays);
+	m_FreeGPU(freqs);
+	m_FreeGPU(cws);
+	m_FreeGPU(residual);
+	m_FreeGPU(n_res_global);
 }
 
-void BisectResCalcCPU<ftype>::DoLoadModel (const Model& m)
-{
-	//LOG(DEBUG) << getName() << "->LoadImmutableData";
-	FreeImmutableData();
+//BisectResCalcGPU32::BisectResCalcGPU32(std::string nm) { /*name_ = nm;*/ }
 
-	assert (m.freqs.size() == m.exp_delays.size());
-
-	// model.freqs
-	freqs_sz_ = m.freqs.size();
-	//std::cout << " num freqs " << freqs_sz << std::endl;
-	freqs_ = (ftype*) malloc(freqs_sz_*sizeof(ftype));
-	for (int i = 0; i < freqs_sz_; ++i)
-		freqs_[i] = m.freqs[i];
-
-	// model.exp_delays subvector sizes
-	exp_delays_sz_ = (int*) malloc(freqs_sz_*sizeof(int));
-	for (size_t i = 0; i < freqs_sz_; ++i)
-		exp_delays_sz_[i] = m.exp_delays[i].size();
-
-
-	// model.exp_delays 2d array
-	dmaxsz_ = 0;
-	for (size_t i = 0; i < freqs_sz_; ++i)
-		dmaxsz_ = std::max(dmaxsz_, exp_delays_sz_[i]);
-	exp_delays_ = (ftype*) malloc(dmaxsz_*freqs_sz_*sizeof(ftype));
-	for (size_t i = 0; i < m.exp_delays.size(); ++i)
-		for (size_t j = 0; j < m.exp_delays[i].size(); ++j)
-			exp_delays_[i*dmaxsz_ + j] = m.exp_delays[i][j];
-
-	// model.depths
-	n_layers_ = m.depths.size();
-	depths_ = (ftype*) malloc(n_layers_*sizeof(ftype));
-	for (int i=0; i<n_layers_; ++i)
-		depths_[i] = m.depths[i];
-
-	// model.Ns_points
-	Ns_points_ = (int*) malloc(n_layers_*sizeof(int));
-	for (int i=0; i<n_layers_; ++i)
-		Ns_points_[i] = m.Ns_points[i];
-
-
+/*
+BisectResCalcGPU32::BisectResCalcGPU32()
+{ 
+	
+	// FIXME: Correct name assginment on constructor!!!!
+	//size_t s = sizeof(ftype)*8;
+	//name_ = "cpu"+std::to_string(s);
 }
 
-
-double BisectResCalcGPU::DoComputeResidual(Point& p)
-{
-	if (freqs_ == NULL)
-		exit(1);
-
-	size_t cws_sz = p.cws.size();
-	ftype *cws = (ftype*) malloc(cws_sz*sizeof(ftype));
-	for (size_t i = 0; i < cws_sz; ++i)
-		cws[i] = p.cws[i];
-	m_CopyToGPU2(cws, cws_sz, ftype);
-
-	// output array
-	ftype *residual = (ftype*) malloc(sizeof(ftype));
-	residual[0] = 0;
-	int *n_res_global = (int*) malloc(sizeof(int));
-	n_res_global[0] = 0;
-	m_CopyToGPU2(residual, 1, ftype);
-	m_CopyToGPU2(n_res_global, 1, int);
-
-	EvalPoint_gpukernel <<< freqs_sz/(1<<BLOCKSIZE), 1<<BLOCKSIZE >>> 
-		(dmaxsz, g_Ns_points, g_depths, g_freqs, freqs_sz, g_exp_delays, g_exp_delays_sz,
-		 p.R, p.tau, p.rhob, p.cb, g_cws, cws_sz,
-		 g_residual,
-		 g_n_res_global);
-
-	cudaThreadSynchronize();
-	cudaError_t err = cudaGetLastError();
-	checkCudaErrors(err);
-	//printf("\n Bla");
-
-	checkCudaErrors(cudaMemcpy((void*) residual, (void*)g_residual, 
-				sizeof(ftype), cudaMemcpyDeviceToHost));
-	checkCudaErrors(cudaMemcpy((void*) n_res_global, (void*)g_n_res_global, 
-				sizeof(int), cudaMemcpyDeviceToHost));
-	//printf("\n Res_loc: %f %i", *residual, *n_res_global);
-	p.residual = std::sqrt(*residual / *n_res_global);
-
-	m_FreeHostAndGPU(cws);
-	m_FreeHostAndGPU(residual);
-	m_FreeHostAndGPU(n_res_global);
-	return p.residual = residual_total;
-}
-
+*/

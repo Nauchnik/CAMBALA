@@ -1,4 +1,7 @@
+#ifndef RESIDUAL_CPU_H_
+#define RESIDUAL_CPU_H_
 #include "residual/interface.h"
+#include "residual/cpuh.h"
 #include "types.h"
 #include <string>
 #include "assert.h"
@@ -18,34 +21,6 @@
 
 #include "residual/bisect.h"
 
-template <typename ftype> 
-class BisectResCalcCPU : public ResidualCalculator
-{
-
-public:
-	BisectResCalcCPU(std::string nm);
-	BisectResCalcCPU();
-private:
-	void DoLoadModel (const Model& m);
-	double DoComputeResidual(Point& p);
-	const std::string name_;
-	void FreeImmutableData();
-	~BisectResCalcCPU  ();
-
-	size_t freqs_sz_;
-	ftype* freqs_ = NULL;
-
-	int* exp_delays_sz_= NULL; //int used for compatibility
-	ftype* exp_delays_= NULL; //size = freqs_sz_
-
-	size_t depths_sz_; // n_layers
-	ftype* depths_= NULL;
-
-	int* Ns_points_= NULL; //int used for compatibility
-
-	int n_layers_;
-	int dmaxsz_;
-};
 
 template <typename ftype> 
 void FillLocalArrays (
@@ -278,7 +253,7 @@ void ComputeModalGroupVelocities (
 }
 
 template <typename ftype> 
-void EvalPoint( const unsigned int tid,
+void EvalPointX( const unsigned int tid,
 		//model
 		const int dmaxsz,
 		const int* Ns_points,
@@ -338,6 +313,34 @@ void EvalPoint( const unsigned int tid,
 	//residual = sqrt(residuals_local/n_residuals);
 }
 
+template <typename ftype> 
+void BisectResCalcCPU<ftype>::EvalPoint( //model
+		const int dmaxsz,
+		const int* Ns_points,
+		const ftype* depths,
+		const ftype* freqs, 
+		const int freqs_sz,
+		const ftype* exp_delays,
+		const int* exp_delays_sz,
+		//point
+		const ftype R, 
+		const ftype tau, 
+		const ftype rhob, 
+		const ftype cb, 
+		const ftype* cws, 
+		const int cws_sz, 
+		//output
+		ftype* residual,
+		int* n_res_global)
+{
+	for (int tid = 0; tid<freqs_sz_; ++tid)
+		EvalPointX <ftype> // <- needed for correct conversion of p.something
+			(tid,
+			 dmaxsz_, Ns_points_, depths_, freqs_, freqs_sz_, exp_delays_, exp_delays_sz_,
+			 R, tau, rhob, cb, cws, cws_sz,
+			 residual,
+			 n_res_global);
+}
 
 template <typename ftype> 
 void BisectResCalcCPU<ftype>::FreeImmutableData()
@@ -396,6 +399,7 @@ void BisectResCalcCPU<ftype>::DoLoadModel (const Model& m)
 		Ns_points_[i] = m.Ns_points[i];
 }
 
+
 template <typename ftype> 
 double BisectResCalcCPU<ftype>::DoComputeResidual(Point& p)
 {
@@ -415,14 +419,11 @@ double BisectResCalcCPU<ftype>::DoComputeResidual(Point& p)
 	n_res_global[0] = 0;
 
 
-	TIMED_FUNC(timerObj);
-	for (int tid = 0; tid<freqs_sz_; ++tid)
-		EvalPoint <ftype> // <- needed for correct conversion of p.something
-			(tid,
-			 dmaxsz_, Ns_points_, depths_, freqs_, freqs_sz_, exp_delays_, exp_delays_sz_,
+	EvalPoint       (dmaxsz_, Ns_points_, depths_, freqs_, freqs_sz_, exp_delays_, exp_delays_sz_,
 			 p.R, p.tau, p.rhob, p.cb, cws, cws_sz,
 			 residual,
 			 n_res_global);
+
 
 	double residual_total = std::sqrt(*residual / *n_res_global);
 
@@ -451,7 +452,10 @@ BisectResCalcCPU<ftype>::BisectResCalcCPU(std::string nm)
 template <typename ftype> 
 BisectResCalcCPU<ftype>::BisectResCalcCPU()
 { 
+	/*
 	// FIXME: Correct name assginment on constructor!!!!
 	size_t s = sizeof(ftype)*8;
 	name_ = "cpu"+std::to_string(s);
+	*/
 }
+#endif

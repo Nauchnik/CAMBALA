@@ -5,4 +5,5 @@ TARGET_DIR := out
 #INCDIRS = ext/easyloggingpp
 INCDIRS = ext/easyloggingpp ext/bbox/COMPI/ ext/bbox/snowgoose/  ext/easyloggingpp/  ext/bbox/LOCSEARCH/ ext/bbox/BBSEARCH/
 
-SUBMAKEFILES := ext/easyloggingpp/easylogging++.mk src/libcambala/libcambala.mk src/cambala/cambala.mk #src/tests/rescalc.mk
+#SUBMAKEFILES := ext/easyloggingpp/easylogging++.mk src/libcambala/libcambala.mk src/cambala/cambala.mk #src/tests/rescalc.mk
+SUBMAKEFILES := ext/easyloggingpp/easylogging++.mk src/libcambala/libcambala.mk src/cambala/cambala.mk src/libcambala/cuda.mk #src/tests/rescalc.mk

@@ -2,7 +2,7 @@
 // CAMBALA: Coupled Acoustic Modes -- Copyright(c) 2015-2017
 // Pavel Petrov (Il'ichev Pacific Oceanological Institute of FEB RAS), 
 // Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory of SB RAS)
-// Vadim Bulavintsev (Delft University of Technology)
+// Vadim Bulavintsev (Matrosov Institute for System Dynamics and Control Theory of SB RAS)
 *****************************************************************************************/
 
 #ifdef _MPI
@@ -11,6 +11,7 @@
 #endif
 
 #include "residual/cpu.h"
+#include "residual/gpu32.h"
 #include "cambala.h"
 
 
@@ -87,7 +88,12 @@ int main(int argc, char *argv[])
 	ResCalc* cpu32 = new BisectResCalcCPU <float> ("cpu32");
 	cambala.AddResidualCalculator("cpu32", cpu32);
 
-	cambala.calcs_["fast"] = cpu32;
+	
+	//ResCalc* gpu32 = new BisectResCalcGPU32 (std::string("gpu32"));
+	ResCalc* gpu32 = new BisectResCalcGPU32 ();
+	cambala.AddResidualCalculator("gpu32", gpu32);
+
+	cambala.calcs_["fast"] = gpu32;
 	cambala.calcs_["precise"] = cpu64;
 	//TIMED_SCOPE(timerBlkObj, "CambalaSolve");
 	cambala.Solve(scenario);
