@@ -10,10 +10,13 @@
 #include "cambala_mpi.h"
 #endif
 
+
 #include "residual/cpu.h"
-#include "residual/gpu32.h"
 #include "cambala.h"
 
+#ifdef GPU_ENABLE
+#include "residual/gpu32.h"
+#endif //GPU_ENABLE
 
 #define _USE_MATH_DEFINES
 
@@ -88,13 +91,16 @@ int main(int argc, char *argv[])
 	ResCalc* cpu32 = new BisectResCalcCPU <float> ("cpu32");
 	cambala.AddResidualCalculator("cpu32", cpu32);
 
+	cambala.calcs_["fast"] = cpu32;
+	cambala.calcs_["precise"] = cpu64;
 	
 	//ResCalc* gpu32 = new BisectResCalcGPU32 (std::string("gpu32"));
+#ifdef GPU_ENABLE
 	ResCalc* gpu32 = new BisectResCalcGPU32 ();
 	cambala.AddResidualCalculator("gpu32", gpu32);
-
 	cambala.calcs_["fast"] = gpu32;
-	cambala.calcs_["precise"] = cpu64;
+#endif //GPU_ENABLE
+
 	//TIMED_SCOPE(timerBlkObj, "CambalaSolve");
 	cambala.Solve(scenario);
 	cambala.reportFinalResult();

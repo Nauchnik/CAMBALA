@@ -29,6 +29,7 @@ private:
 
 	int n_layers_;
 	int dmaxsz_;
+
 protected:
 	virtual void EvalPoint( //model
 		const int dmaxsz,
