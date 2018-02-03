@@ -2300,6 +2300,7 @@ search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> d
 					cur_point_indexes[i] = (rand_numb % search_space[i].size());
 			}
 			cur_point = fromPointIndexesToPoint(cur_point_indexes, depths);
+			// if a new point doesn't exist in the check-list, then use this point as a new start
 			if (find(checked_points.begin(), checked_points.end(), cur_point) == checked_points.end())
 				break;
 		}
