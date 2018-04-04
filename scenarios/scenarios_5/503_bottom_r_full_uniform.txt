@@ -1,0 +1,19 @@
+% SSPEMDD scenario № 33
+% inverting for bottom and R,
+% sound speed in water is considered known
+% constant parameters
+dtimes_file 50_ac_modes_R7km_dtimes.txt
+spmag_file(string|no) no
+function_type uniform
+h 50
+H 300
+% variable parameters
+cw0 1500
+cw1 1498
+cw2 1493
+cw3 1472
+cw4 1462
+R 6800:1:7200
+rhob 1.1:0.02:2
+cb 1600:1:1800
+tau 0

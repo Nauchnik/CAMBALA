@@ -1,0 +1,18 @@
+% SSPEMDD scenario № 45
+% constant parameters
+dtimes_file 260_dtimes.txt
+spmag_file(string|no) no
+h 50
+H 300
+% variable parameters
+R 6850:1:7150
+rhob 1.7
+cb 1700
+tau 0
+cw0 1500
+cw1 1450:5:1500 server
+cw2 1450:5:1500 server
+cw3 1450:5:1500 server
+cw4 1450:5:1500 server
+cw5 1450:5:1500 server
+cw6 1450:5:1500 server
