@@ -21,9 +21,6 @@
     <ClCompile Include="..\cambala\main_function_launch.cpp">
       <Filter>Файлы исходного кода</Filter>
     </ClCompile>
-    <ClCompile Include="..\cambala\cambala_sequential.cpp">
-      <Filter>Файлы исходного кода</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\alglib\alglibinternal.cpp">
       <Filter>alglib</Filter>
     </ClCompile>
@@ -63,14 +60,11 @@
     <ClCompile Include="..\..\alglib\statistics.cpp">
       <Filter>alglib</Filter>
     </ClCompile>
+    <ClCompile Include="..\cambala\sequential.cpp">
+      <Filter>Файлы исходного кода</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\cambala\cambala_sequential.h">
-      <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
-    <ClInclude Include="..\cambala\cambala_utils.h">
-      <Filter>Заголовочные файлы</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\alglib\alglibinternal.h">
       <Filter>alglib</Filter>
     </ClInclude>
@@ -109,6 +103,18 @@
     </ClInclude>
     <ClInclude Include="..\..\alglib\statistics.h">
       <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cambala\compute.h">
+      <Filter>Файлы исходного кода</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cambala\point.h">
+      <Filter>Файлы исходного кода</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cambala\sequential.h">
+      <Filter>Файлы исходного кода</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cambala\utils.h">
+      <Filter>Файлы исходного кода</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

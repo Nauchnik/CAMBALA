@@ -107,9 +107,6 @@
     <ClInclude Include="..\..\alglib\statistics.h">
       <Filter>alglib</Filter>
     </ClInclude>
-    <ClInclude Include="..\cambala\point.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\cambala\parallel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -120,6 +117,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\cambala\compute.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cambala\point.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

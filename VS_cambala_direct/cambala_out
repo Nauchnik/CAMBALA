@@ -1,0 +1,25 @@
+Parameters :
+launch_type bruteforce
+object_function_type weighted2
+ppm 1
+iterated_local_search_runs 10
+cw1_init_arr :
+1500 1498 1493 1472 1462 
+cw2_init_arr :
+1500 1498 1493 1472 1462 
+ncpl_init_arr :
+1 1 1 1 1 
+nR 401
+R1 6800
+R2 7200
+ntau 1
+tau1 0
+tau2 0
+nrhob 46
+rhob1 1.1
+rhob2 2
+ncb 201
+cb1 1600
+cb2 1800
+dtimes_file 50_ac_modes_R7km_dtimes.txt
+spmag_file 50_ac_modes_R7km_spmag.txt

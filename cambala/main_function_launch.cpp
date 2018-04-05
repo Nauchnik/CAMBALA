@@ -4,7 +4,7 @@
 // Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory of SB RAS)
 *****************************************************************************************/
 
-#include "cambala_sequential.h"
+#include "sequential.h"
 
 #define _USE_MATH_DEFINES
 

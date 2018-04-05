@@ -1,12 +1,13 @@
 #include "sequential.h"
-#include "utils.h"
-#include "compute.h"
 #include <iostream>
 #include <complex>
 #include <time.h>
 #include <stdexcept>
+#include "utils.h"
+#include "compute.h"
 
-using namespace cambala_compute;
+using namespace CAMBALA_compute;
+using namespace CAMBALA_utils;
 
 CAMBALA_sequential::CAMBALA_sequential() :
 	launch_type("bruteforce"),
@@ -156,7 +157,7 @@ int CAMBALA_sequential::createDepthsArray(const double h, vector<vector<double>>
 			vector<double> tmp_depths;
 			vector<vector<double>> ::iterator it;
 			double cur_treshold;
-			while (CAMBALA_utils::next_cartesian(search_space_depths, index_arr, tmp_depths)) {
+			while (next_cartesian(search_space_depths, index_arr, tmp_depths)) {
 				vector<double> depths;
 				cur_treshold = tmp_depths[0] + 3;
 				depths.push_back(tmp_depths[0]); // at least 1 water layer must exist
@@ -188,6 +189,32 @@ int CAMBALA_sequential::createDepthsArray(const double h, vector<vector<double>>
 	cout << "depths_vec.size() " << depths_vec.size() << endl;
 
 	return 0;
+}
+
+vector<vector<double>> CAMBALA_sequential::getAllDepths(vector<double> h_vec)
+{
+	vector<vector<double>> total_depths_vec;
+	for (auto &h : h_vec) {
+		vector<vector<double>> depths_vec;
+		createDepthsArray(h, depths_vec);
+		for (auto &depths : depths_vec)
+			total_depths_vec.push_back(depths);
+		if (total_depths_vec.size() >= MAX_DEPTHS_VECTORS) {
+			cout << "WARNING. total_depths_vec.size() >= MAX_DEPTHS_VECTORS" << endl;
+			cout << "total_depths_vec.size() changed to " << MAX_DEPTHS_VECTORS << endl;
+			total_depths_vec.resize(MAX_DEPTHS_VECTORS);
+			break;
+		}
+	}
+	return total_depths_vec;
+}
+
+vector<double> CAMBALA_sequential::getHeightValues()
+{
+	vector<double> h_vec;
+	for (unsigned i = 0; i < nh; i++)
+		h_vec.push_back(h1 + (nh == 1 ? 0 : i * (h2 - h1) / (nh - 1)));
+	return h_vec;
 }
 
 void CAMBALA_sequential::reportFinalResult()
@@ -244,7 +271,7 @@ vector<search_space_point> CAMBALA_sequential::getSearchSpacePointsVec(vector<do
 			search_space_indexes[i].push_back(j);
 
 	vector<search_space_point> points_vec;
-	while (CAMBALA_utils::next_cartesian(search_space_indexes, index_arr, cur_point_indexes))
+	while (next_cartesian(search_space_indexes, index_arr, cur_point_indexes))
 		points_vec.push_back(fromPointIndexesToPoint(cur_point_indexes, depths));
 
 	return points_vec;
@@ -631,61 +658,9 @@ vector<unsigned> CAMBALA_sequential::fromPointToPointIndexes( search_space_point
 	return cur_point_indexes;
 }
 
-search_space_point CAMBALA_sequential::fromDoubleVecToPoint(vector<double> double_vec)
-{
-	search_space_point point;
-	point.cb   = double_vec[0];
-	point.rhob = double_vec[1];
-	point.R    = double_vec[2];
-	point.tau  = double_vec[3];
-	for (unsigned i = 4; i < double_vec.size(); i++)
-		point.cws.push_back(double_vec[i]);
-	point.residual = START_HUGE_VALUE;
-	return point;
-}
-
-// function for BOINC client application
-search_space_point CAMBALA_sequential::fromStrToPoint(string str)
-{
-	search_space_point point;
-	stringstream sstream;
-	sstream << str;
-	sstream >> point.residual >> point.cb >> point.rhob >> point.R >> point.tau;
-	double val;
-	while (sstream >> val)
-		point.cws.push_back(val);
-	return point;
-}
-
-void CAMBALA_sequential::fromPointToFile(const search_space_point &point, ofstream &ofile)
-{
-	ofile << point.residual << " " << point.cb << " " << point.rhob << " "
-		<< point.R << " " << point.tau << " ";
-	for (unsigned i = 0; i < point.cws.size(); i++)
-		ofile << point.cws[i] << " ";
-}
-
 double CAMBALA_sequential::getRecordResidual()
 {
 	return record_point.residual;
-}
-
-void CAMBALA_sequential::getThreeValuesFromStr(string str, double &val1, double &val2, double &val3)
-{
-	val1 = val3 = -1;
-	val2 = 1;
-	string word1, word2, word3;
-	for (auto &x : str)
-		if (x == ':')
-			x = ' ';
-	stringstream sstream;
-	sstream << str;
-	sstream >> word1 >> word2 >> word3;
-	istringstream(word1) >> val1;
-	istringstream(word2) >> val2;
-	istringstream(word3) >> val3;
-	if (val3 == -1)
-		val3 = val1;
 }
 
 int CAMBALA_sequential::readScenario(string scenarioFileName)
@@ -711,13 +686,13 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 		sstream >> word;
 		if (word.find("dtimes_file") != string::npos)
 			sstream >> dtimesFileName;
-		else if (word.find("gg_file") != string::npos)
+		else if (word.find("spmag_file") != string::npos)
 			sstream >> spmagFileName;
 		else if (word == "H")
 			sstream >> H;
 		else if (word == "h") {
 			sstream >> word;
-			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			h1 = cur_val1;
 			h2 = cur_val2;
 			if (h1 == h2)
@@ -735,7 +710,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 			if (ncpl_init_arr.size() < cw_index + 1)
 				ncpl_init_arr.resize(cw_index + 1);
 			sstream >> word;
-			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			cw1_init_arr[cw_index] = cur_val1;
 			cw2_init_arr[cw_index] = cur_val2;
 			if (cur_val1 == cur_val2)
@@ -753,14 +728,14 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 				d_step.resize(d_index + 1);
 			}
 			sstream >> word;
-			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			d1_arr[d_index] = cur_val1;
 			d2_arr[d_index] = cur_val2;
 			d_step[d_index] = cur_val_step;
 		}
 		else if (word == "R") {
 			sstream >> word;
-			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			R1 = cur_val1;
 			R2 = cur_val2;
 			if (R1 == R2)
@@ -770,7 +745,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 		}
 		else if (word == "rhob") {
 			sstream >> word;
-			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			rhob1 = cur_val1;
 			rhob2 = cur_val2;
 			if (rhob1 == rhob2)
@@ -780,7 +755,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 		}
 		else if (word == "cb") {
 			sstream >> word;
-			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			cb1 = cur_val1;
 			cb2 = cur_val2;
 			if (cb1 == cb2)
@@ -790,7 +765,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 		}
 		else if (word == "tau") {
 			sstream >> word;
-			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			tau1 = cur_val1;
 			tau2 = cur_val2;
 			if (tau1 == tau2)
@@ -905,7 +880,7 @@ int CAMBALA_sequential::readInputDataFromFiles()
 
 	if (object_function_type.find("weighted") != string::npos) {
 		weight_coeffs.clear();
-		ifstream spmagFile(spmagFileName.c_str());
+		ifstream spmagFile(spmagFileName);
 		if (spmagFile.is_open()) {
 			buffvect.clear();
 			while (getline(spmagFile, myLine)) {
@@ -973,20 +948,6 @@ search_space_point CAMBALA_sequential::getNonRandomStartPoint( vector<double> de
 	point.depths = depths;
 
 	return point;
-}
-
-void CAMBALA_sequential::printDelayTime(double R, vector<unsigned> mode_numbers, vector<vector<double>> modal_group_velocities)
-{
-	string ofile_name = "delayTimeOutput_" + object_function_type + ".txt";
-	ofstream ofile(ofile_name);
-	for (unsigned ii = 0; ii < freqs.size(); ii++) {
-		unsigned mnumb = mode_numbers.at(ii);
-		ofile << freqs.at(ii) << "\t";
-		for (unsigned jj = 0; jj < mnumb; jj++)
-			ofile << R / modal_group_velocities[ii][jj] << "\t";
-		ofile << endl;
-	}
-	ofile.close();
 }
 
 double CAMBALA_sequential::directPointCalc( search_space_point point )

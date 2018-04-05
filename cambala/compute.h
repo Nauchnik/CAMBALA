@@ -2,15 +2,126 @@
 #define COMPUTE_H
 
 #include <iostream>
+#include <fstream>
 #include <complex>
 #include "linalg.h"
 
-namespace cambala_compute{
-	
 const double LOCAL_M_PI = 3.14159265358979323846;
-const complex<double> Iu(0.0,1.0);
+const complex<double> Iu(0.0, 1.0);
+
+namespace CAMBALA_compute {
 
 // functions by Pavel
+
+double RK4(double omeg2, double kh2, double deltah, double c1, double c2, unsigned Np, 
+	vector<double> &phi0, vector<double> &dphi0);
+
+double Layer_an_exp(double omeg2, double kh2, double deltah, double c, unsigned Np,
+	vector<double> &phi0, vector<double> &dphi0);
+
+void load_layers_data(string LayersFName,
+	vector<double> &depths, vector<double> &c1s, vector<double> &c2s, vector<double> &rhos,
+	vector<unsigned> &Ns_points);
+
+void load_profile_deep_water(string ProfileFName, vector<double> &depths, vector<double> &c1s,
+	vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, const unsigned ppm);
+
+double compute_modal_delays_residual_uniform(vector<double> &freqs, vector<double> &depths,
+	vector<double> &c1s, vector<double> &c2s, vector<double> &rhos,
+	vector<unsigned> &Ns_points, double R, double tau,
+	vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
+
+double compute_modal_delays_residual_uniform2(vector<double> &freqs, vector<double> &depths,
+	vector<double> &c1s, vector<double> &c2s, vector<double> &rhos,
+	vector<unsigned> &Ns_points, double R, double tau,
+	vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
+
+double compute_modal_delays_residual_weighted(vector<double> &freqs,
+	vector<double> &depths, vector<double> &c1s, vector<double> &c2s,
+	vector<double> &rhos, vector<unsigned> &Ns_points, double R,
+	double tau, vector<vector<double>> &experimental_delays,
+	vector<vector<double>> &weight_coeffs, vector<unsigned> &experimental_mode_numbers
+);
+
+double compute_modal_delays_residual_weighted2(vector<double> &freqs,
+	vector<double> &depths, vector<double> &c1s, vector<double> &c2s,
+	vector<double> &rhos, vector<unsigned> &Ns_points, double R,
+	double tau, vector<vector<double>> &experimental_delays,
+	vector<vector<double>> &weight_coeffs, vector<unsigned> &experimental_mode_numbers
+);
+
+
+vector<double> compute_wnumbers(double &omeg, vector<double> &c, vector<double> &rho,
+	vector<unsigned> &interface_idcs, vector<double> &meshsizes,
+	double iModesSubset);
+
+vector<double> compute_wnumbers_extrap(double &omeg, vector<double> &depths, vector<double> &c1s,
+	vector<double> &c2s, vector<double> &rhos,
+	vector<unsigned> &Ns_points, double iModesSubset, unsigned &ordRich);
+
+vector<double> compute_wnumbers_extrap2(double &omeg, vector<double> &depths, vector<double> &c1s,
+	vector<double> &c2s, vector<double> &rhos,
+	vector<unsigned> &Ns_points, double iModesSubset, unsigned &ordRich);
+
+vector<double> compute_wnumbers_extrap_lin_dz(double &omeg, vector<double> &depths, vector<double> &c1s,
+	vector<double> &c2s, vector<double> &rhos,
+	vector<unsigned> &Ns_points, double iModesSubset, unsigned &ordRich);
+
+void compute_wmode(double &omeg, vector<double> &depths, vector<double> &c1s,
+	vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, double kh, vector<double> &phi,
+	vector<double> &dphi);
+
+void compute_wmode1(double &omeg, vector<double> &depths, vector<double> &c1s,
+	vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, double kh, vector<double> &phi,
+	vector<double> &dphi);
+
+vector<complex<double>> compute_cpl_pressure(double f, vector<double> &depths, vector<double> &c1s,
+	vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, vector<double> &Rr,
+	vector<double> &zr, double iModesSubset, unsigned ordRich);
+
+void compute_all_mfunctions(double &omeg, vector<double> &depths, vector<double> &c1s,
+	vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, vector<double> &khs);
+
+void compute_mfunctions_zr(double &omeg, vector<double> &depths, vector<double> &c1s, vector<double> &c2s,
+	vector<double> &rhos, vector<unsigned> &Ns_points, vector<double> &khs, vector<double> &zr, vector<vector<double>> &mfunctions_zr);
+
+double compute_wmode_vg(double &omeg, vector<double> &depths, vector<double> &c1s, vector<double> &c2s,
+	vector<double> &rhos, vector<unsigned> &Ns_points, double kh, vector<double> &phi);
+
+int compute_modal_grop_velocities(vector<double> &freqs, double deltaf, vector<double> &depths, vector<double> &c1s,
+	vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points,
+	double iModesSubset, unsigned &ordRich, vector<vector<double>> &modal_group_velocities,
+	vector<unsigned> &mode_numbers);
+
+int compute_modal_grop_velocities2(vector<double> &freqs, double deltaf, vector<double> &depths, vector<double> &c1s,
+	vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points,
+	double iModesSubset, unsigned &ordRich, vector<vector<double>> &modal_group_velocities,
+	vector<unsigned> &mode_numbers);
+
+int compute_wnumbers_bb(vector<double> &freqs, double deltaf, vector<double> &depths, vector<double> &c1s,
+	vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points,
+	unsigned flOnlyTrapped, unsigned &ordRich, vector<vector<double>> &modal_group_velocities,
+	vector<unsigned> &mode_numbers);
+
+void printDelayTime(const double R, const vector<double> freqs, const vector<unsigned> mode_numbers, 
+	const vector<vector<double>> modal_group_velocities);
+
+void printDelayTime(const double R, 
+				    const vector<double> freqs, 
+	                const vector<unsigned> mode_numbers, 
+	                const vector<vector<double>> modal_group_velocities)
+{
+	string ofile_name = "delayTimeOutput.txt";
+	ofstream ofile(ofile_name);
+	for (unsigned ii = 0; ii < freqs.size(); ii++) {
+		unsigned mnumb = mode_numbers.at(ii);
+		ofile << freqs.at(ii) << "\t";
+		for (unsigned jj = 0; jj < mnumb; jj++)
+			ofile << R / modal_group_velocities[ii][jj] << "\t";
+		ofile << endl;
+	}
+	ofile.close();
+}
 
 double RK4(double omeg2, // sound frequency
     double kh2,
@@ -60,7 +171,6 @@ double RK4(double omeg2, // sound frequency
 
     return layer_int;
 }
-
 
 double Layer_an_exp(double omeg2, // sound frequency
     double kh2,
@@ -217,7 +327,8 @@ void load_profile_deep_water(
 	vector<double> &c1s,
 	vector<double> &c2s,
 	vector<double> &rhos,
-	vector<unsigned> &Ns_points)
+	vector<unsigned> &Ns_points, 
+	const unsigned ppm)
 {
     ifstream Myfile(ProfileFName);
     double cp, cc, dc, dp;
@@ -300,8 +411,8 @@ double compute_modal_delays_residual_uniform(vector<double> &freqs,
     //2016.04.27:Pavel: RMS
 	residual = sqrt(residual/nRes);
 
-	if (isTimeDelayPrinting)
-		printDelayTime(R, mode_numbers, modal_group_velocities);
+	//if (isTimeDelayPrinting)
+	//	printDelayTime(R, freqs, mode_numbers, modal_group_velocities);
 
 	return residual;
 }
@@ -364,8 +475,8 @@ double compute_modal_delays_residual_uniform2(vector<double> &freqs,
     //2016.04.27:Pavel: RMS
 	residual = sqrt(residual/nRes);
 
-	if (isTimeDelayPrinting)
-		printDelayTime(R, mode_numbers, modal_group_velocities);
+	//if (isTimeDelayPrinting)
+	//	printDelayTime(R, freqs, mode_numbers, modal_group_velocities);
 
 	return residual;
 }
@@ -427,8 +538,8 @@ double compute_modal_delays_residual_weighted(vector<double> &freqs,
 	double d = (double)(residual / (double)nRes);
 	residual = sqrt(d);
 
-	if (isTimeDelayPrinting)
-		printDelayTime(R, mode_numbers, modal_group_velocities);
+	//if (isTimeDelayPrinting)
+	//	printDelayTime(R, freqs, mode_numbers, modal_group_velocities);
 
 	return residual;
 }
@@ -451,8 +562,6 @@ double compute_modal_delays_residual_weighted2(vector<double> &freqs,
 	)
 {
     //residual = residual + weight_coeffs[ii][jj]*pow(experimental_delays[ii][jj] + tau - mdelay, 2);
-	if (verbosity > 1)
-		cout << "compute_modal_delays_residual_weighted2()" << endl;
 
     unsigned rord = 3;
 	double iModesSubset = 1/sqrt(2);
@@ -487,18 +596,14 @@ double compute_modal_delays_residual_weighted2(vector<double> &freqs,
 			}
 		}
 	}
-	if (verbosity > 1)
-		cout << "freqs loop done" << endl;
     //2016.04.27:Pavel: RMS
 	residual = sqrt(residual/nRes);
 
-	if (isTimeDelayPrinting)
-		printDelayTime(R, mode_numbers, modal_group_velocities);
+	//if (isTimeDelayPrinting)
+	//	printDelayTime(R, freqs, mode_numbers, modal_group_velocities);
 
 	return residual;
 }
-
-
 
 int compute_wnumbers_bb(vector<double> &freqs,
 	double deltaf,
@@ -612,9 +717,6 @@ int compute_modal_grop_velocities2(vector<double> &freqs,
 	vector<unsigned> &mode_numbers
 )
 {
-	if (verbosity > 1)
-		cout << "compute_modal_grop_velocities2" << endl;
-
 	mode_numbers.clear();
 	modal_group_velocities.clear();
 

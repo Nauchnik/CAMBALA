@@ -1,5 +1,5 @@
-#ifndef UTILS
-#define UTILS
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <iostream>
 #include <vector>
@@ -8,6 +8,24 @@
 #include <algorithm>
 
 namespace CAMBALA_utils{
+	inline void getThreeValuesFromStr(string str, double &val1, double &val2, double &val3)
+	{
+		val1 = val3 = -1;
+		val2 = 1;
+		string word1, word2, word3;
+		for (auto &x : str)
+			if (x == ':')
+				x = ' ';
+		stringstream sstream;
+		sstream << str;
+		sstream >> word1 >> word2 >> word3;
+		istringstream(word1) >> val1;
+		istringstream(word2) >> val2;
+		istringstream(word3) >> val3;
+		if (val3 == -1)
+			val3 = val1;
+	}
+	
 	// construct all combinations of some parameters
 	template< typename T >
 	bool next_cartesian(vector<T> &vii, vector<int> &index_arr, T &cur_vi)
@@ -49,24 +67,6 @@ namespace CAMBALA_utils{
 		}
 
 		return true;
-	}
-	
-	void getThreeValuesFromStr(string str, double &val1, double &val2, double &val3)
-	{
-		val1 = val3 = -1;
-		val2 = 1;
-		string word1, word2, word3;
-		for (auto &x : str)
-			if (x == ':')
-				x = ' ';
-		stringstream sstream;
-		sstream << str;
-		sstream >> word1 >> word2 >> word3;
-		istringstream(word1) >> val1;
-		istringstream(word2) >> val2;
-		istringstream(word3) >> val3;
-		if (val3 == -1)
-			val3 = val1;
 	}
 };
 

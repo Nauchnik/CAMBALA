@@ -1,7 +1,3 @@
-#include "parallel.h"
-#include "sequential.h"
-#include "utils.h"
-
 #include <iostream>
 #include <vector>
 #include <sstream>
@@ -10,6 +6,10 @@
 #include <iomanip>
 #include <algorithm>
 #include <cmath>
+#include "parallel.h"
+#include "utils.h"
+
+using namespace CAMBALA_utils;
 
 CAMBALA_parallel::CAMBALA_parallel() :
 	corecount ( 0 )
@@ -36,7 +36,6 @@ void CAMBALA_parallel::MPI_main()
 
 void CAMBALA_parallel::controlProcessIls()
 {
-/*
 #ifdef _MPI
 	MPI_Status status, cur_status;
 	stringstream sstream_out;
@@ -44,8 +43,8 @@ void CAMBALA_parallel::controlProcessIls()
 
 	cout << endl << "control_process() started" << endl;
 
-	vector<vector<double>> depths_vec;
-	createDepthsArray(depths_vec);
+	vector<double> h_vec = getHeightValues();
+	vector<vector<double>> depths_vec = getAllDepths(h_vec);
 	cout << "depths_vec.size() " << depths_vec.size() << endl;
 	
 	double *task = new double[ILS_TASK_LEN];
@@ -59,7 +58,7 @@ void CAMBALA_parallel::controlProcessIls()
 		send_task_count++;
 	}
 	sstream_out << "send_task_count " << send_task_count << endl;
-	sstream_out << "tasks number " << depths_vec.size() << endl;
+	sstream_out << "tasks count " << depths_vec.size() << endl;
 	
 	ofstream ofile(output_filename, ios_base::app);
 	ofile << sstream_out.rdbuf();
@@ -168,10 +167,9 @@ void CAMBALA_parallel::controlProcessIls()
 	cout << "finilizing process " << rank << endl;
 	MPI_Finalize();
 #endif
-*/
 }
 
-void CAMBALA_parallel::sendTaskIls(double *task, int task_index, unsigned process_index, vector<double> depths)
+void CAMBALA_parallel::sendTaskIls(double *task, int task_index, const unsigned process_index, const vector<double> depths)
 {
 	unsigned cur_depths_size = depths.size();
 	for (unsigned j = 0; j < cur_depths_size; j++)
@@ -179,14 +177,13 @@ void CAMBALA_parallel::sendTaskIls(double *task, int task_index, unsigned proces
 	for (unsigned j = cur_depths_size; j < ILS_TASK_LEN; j++)
 		task[j] = -1;
 #ifdef _MPI
-	MPI_Send( &task_index, 1,        MPI_INT, process_index, 0, MPI_COMM_WORLD);
-	MPI_Send( task, ILS_TASK_LEN, MPI_DOUBLE,   process_index, 0, MPI_COMM_WORLD);
+	MPI_Send( &task_index, 1,            MPI_INT,      process_index, 0, MPI_COMM_WORLD);
+	MPI_Send( task,        ILS_TASK_LEN, MPI_DOUBLE,   process_index, 0, MPI_COMM_WORLD);
 #endif
 }
 
 void CAMBALA_parallel::computingProcessIls()
 {
-/*
 #ifdef _MPI
 	MPI_Status status;
 	double *task = new double[ILS_TASK_LEN];
@@ -206,7 +203,7 @@ void CAMBALA_parallel::computingProcessIls()
 		}
 		MPI_Recv( task, ILS_TASK_LEN, MPI_DOUBLE,   0, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
 
-		if (rank == 1) {
+		if ( (rank == 1) && (verbosity > 0) ) {
 			cout << "computing process, rank " << rank << endl;
 			cout << "received task " << endl;
 			for ( unsigned j = 0; j < ILS_TASK_LEN; j++)
@@ -220,7 +217,7 @@ void CAMBALA_parallel::computingProcessIls()
 			depths.push_back( task[j] );
 		}
 		
-		if (rank == 1) {
+		if ( (rank == 1) && (verbosity > 0) ) {
 			cout << "received depths " << endl;
 			for (auto &x : depths)
 				cout << x << " " << endl;
@@ -230,28 +227,33 @@ void CAMBALA_parallel::computingProcessIls()
 
 		init(depths);
 		double processing_time = MPI_Wtime();
+		iterated_local_search_runs = depths.size() * 10;
+		if ((rank == 1) && (verbosity > 0)) {
+			cout << "depths size " << depths.size() << endl;
+			cout << "iterated_local_search_runs " << iterated_local_search_runs << endl;
+		}
 		local_point_record = findLocalMinHillClimbing(depths);
 		processing_time = MPI_Wtime() - processing_time;
 		if ( (rank == 1) && (verbosity > 0) )
 			cout << "task " << task_index << " completed" << endl;
 		
+		for (unsigned j = 0; j < ILS_RESULT_LEN; j++)
+			result[j] = -1;
+
 		result[0] = local_point_record.residual;
 		result[1] = local_point_record.cb;
 		result[2] = local_point_record.rhob;
 		result[3] = local_point_record.R;
 		result[4] = local_point_record.tau;
-		unsigned cur_cws_size = local_point_record.cws.size();
-		for (unsigned j = 0; j < cur_cws_size; j++)
-			result[5 + j] = local_point_record.cws[j];
-		unsigned cur_depths_size = depths.size();
-		for (unsigned j = 0; j < cur_depths_size; j++)
-			result[5 + cur_cws_size + j] = local_point_record.depths[j];
-		for (unsigned j = 5 + cur_cws_size + cur_depths_size; j < ILS_RESULT_LEN; j++)
-			result[j] = -1;
+		unsigned cur_ind = 5;
+		for (auto &x : local_point_record.cws)
+			result[cur_ind++] = x;
+		for (auto &x : depths)
+			result[cur_ind++] = x;
 		
-		MPI_Send( &task_index,      1,          MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD );
-		MPI_Send( &processing_time, 1,          MPI_DOUBLE,   0, 0, MPI_COMM_WORLD );
-		MPI_Send( result,          ILS_RESULT_LEN, MPI_DOUBLE,   0, 0, MPI_COMM_WORLD );
+		MPI_Send( &task_index,      1,              MPI_UNSIGNED, 0, 0, MPI_COMM_WORLD );
+		MPI_Send( &processing_time, 1,              MPI_DOUBLE,   0, 0, MPI_COMM_WORLD );
+		MPI_Send( result,           ILS_RESULT_LEN, MPI_DOUBLE,   0, 0, MPI_COMM_WORLD );
 	}
 	delete[] task;
 	delete[] result;
@@ -259,39 +261,23 @@ void CAMBALA_parallel::computingProcessIls()
 	MPI_Finalize();
 
 #endif
-	*/
 }
 
 void CAMBALA_parallel::controlProcessBruteforce()
 {
 	cout << "Start of controlProcessBruteforce()" << endl;
 	cout << "corecount " << corecount << endl;
-	
-	stringstream main_sstream_out;
-	
-	vector<double> h_vec;
-	for (unsigned i = 0; i < nh; i++)
-		h_vec.push_back(h1 + (nh == 1 ? 0 : i*(h2 - h1) / (nh - 1)));
 
+	vector<double> h_vec = getHeightValues();
+
+	stringstream main_sstream_out;
 	main_sstream_out << "h_vec.size() " << h_vec.size() << endl;
 	for (auto &x : h_vec)
 		main_sstream_out << x << " ";
 	main_sstream_out << endl;
 
-	vector<vector<double>> total_depths_vec;
-	
-	for (auto &h : h_vec) {
-		vector<vector<double>> depths_vec;
-		createDepthsArray(h, depths_vec);
-		for (auto &depths : depths_vec)
-			total_depths_vec.push_back(depths);
-		if (total_depths_vec.size() >= MAX_DEPTHS_VECTORS) {
-			main_sstream_out << "WARNING. total_depths_vec.size() >= MAX_DEPTHS_VECTORS" << endl;
-			main_sstream_out << "total_depths_vec.size() changed to " << MAX_DEPTHS_VECTORS << endl;
-			total_depths_vec.resize(MAX_DEPTHS_VECTORS);
-			break;
-		}
-	}
+	vector<vector<double>> total_depths_vec = getAllDepths(h_vec);
+
 	main_sstream_out << "total_depths_vec.size() " << total_depths_vec.size() << endl;
 	string main_output_filename = "cambala_main_out";
 	ofstream ofile;
@@ -357,13 +343,13 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 	unsigned long long index = 0;
 	vector<double> cur_point_values;
 	vector<int> index_arr;
-	while (CAMBALA_utils::next_cartesian(search_space, index_arr, cur_point_values))
+	while (next_cartesian(search_space, index_arr, cur_point_values))
 		point_values_vec[index++] = cur_point_values;
 	cout << "next_cartesian() finished" << endl;
 
 	if (point_values_vec.size() < corecount - 1) {
 		cerr << "point_values_vec.size() < corecount - 1" << endl;
-		cerr << point_values_vec.size() << " < " < corecount - 1 << endl;
+		cerr << point_values_vec.size() << " < " << corecount - 1 << endl;
 		MPI_Abort(MPI_COMM_WORLD, 0);
 	}
 

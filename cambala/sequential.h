@@ -8,38 +8,13 @@
 #include <chrono>
 #include <math.h>
 #include "linalg.h"
+#include "point.h"
 
 using namespace std;
+using namespace CAMBALA_point;
 
-const double LOCAL_M_PI = 3.14159265358979323846;
-const complex<double> Iu(0.0,1.0);
-const double START_HUGE_VALUE = 1e100;
 const double START_CW_VALUE = 1481;
-
-struct search_space_point
-{
-	double R;
-	double rhob;
-	double cb;
-	double tau;
-	vector<double> cws;
-	double residual;
-	vector<double> depths;
-
-	bool operator==(const search_space_point& a) const
-	{
-		return (R == a.R && tau == a.tau && rhob == a.rhob && cb == a.cb && cws == a.cws && depths == a.depths);
-	}
-};
-
-struct reduced_search_space_attribute
-{
-	bool R;
-	bool rhob;
-	bool cb;
-	bool tau;
-	vector<bool> cws;
-};
+const unsigned MAX_DEPTHS_VECTORS = 1000000;
 
 class CAMBALA_sequential
 {
@@ -101,22 +76,19 @@ public:
 	int createDepthsArray(const double h, vector<vector<double>> &depths_vec);
 	void loadValuesToSearchSpaceVariables();
 	double getRecordResidual();
-	search_space_point getNonRandomStartPoint( vector<double> depths );
 	double fillDataComputeResidual( search_space_point &point );
+	search_space_point getNonRandomStartPoint(vector<double> depths);
 	vector<search_space_point> getSearchSpacePointsVec(vector<double> depths);
 	search_space_point findLocalMinHillClimbing(vector<double> depths);
-	void findGlobalMinBruteForce(vector<double> depths);
-	void reportFinalResult();
-	void getThreeValuesFromStr(string str, double &val1, double &val2, double &val3);
-	void reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a);
-	double directPointCalc( search_space_point point );
-	void printDelayTime(double R, vector<unsigned> mode_numbers, vector<vector<double>> modal_group_velocities);
-
 	search_space_point fromPointIndexesToPoint(vector<unsigned> cur_point_indexes, vector<double> depths);
 	vector<unsigned> fromPointToPointIndexes(search_space_point point);
-	search_space_point fromDoubleVecToPoint(vector<double> double_vec);
-	search_space_point fromStrToPoint(string str); // BOINC client application
-	void fromPointToFile(const search_space_point &point, ofstream &ofile); // BOINC client application
+	void findGlobalMinBruteForce(vector<double> depths);
+	void reportFinalResult();
+	void reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a);
+	double directPointCalc( search_space_point point );
+	vector<vector<double>> getAllDepths(vector<double> h_vec);
+	vector<double> getHeightValues();
+
 protected:
 	unsigned long long N_total;
 	search_space_point record_point;
