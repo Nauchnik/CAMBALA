@@ -8,8 +8,8 @@
 #include <mpi.h>
 #endif
 
-#include "cambala_sequential.h"
-#include "cambala_parallel.h"
+#include "sequential.h"
+#include "parallel.h"
 
 #define _USE_MATH_DEFINES
 

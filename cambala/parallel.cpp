@@ -1,6 +1,6 @@
-#include "cambala_parallel.h"
-#include "cambala_sequential.h"
-#include "cambala_utils.h"
+#include "parallel.h"
+#include "sequential.h"
+#include "utils.h"
 
 #include <iostream>
 #include <vector>

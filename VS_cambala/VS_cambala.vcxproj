@@ -85,6 +85,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../../alglib; ../cambala/</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -110,6 +111,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>../../alglib; ../cambala/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -130,9 +132,9 @@
     <ClCompile Include="..\..\alglib\solvers.cpp" />
     <ClCompile Include="..\..\alglib\specialfunctions.cpp" />
     <ClCompile Include="..\..\alglib\statistics.cpp" />
-    <ClCompile Include="..\cambala\cambala_parallel.cpp" />
-    <ClCompile Include="..\cambala\cambala_sequential.cpp" />
     <ClCompile Include="..\cambala\main.cpp" />
+    <ClCompile Include="..\cambala\parallel.cpp" />
+    <ClCompile Include="..\cambala\sequential.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\alglib\alglibinternal.h" />
@@ -148,9 +150,14 @@
     <ClInclude Include="..\..\alglib\solvers.h" />
     <ClInclude Include="..\..\alglib\specialfunctions.h" />
     <ClInclude Include="..\..\alglib\statistics.h" />
-    <ClInclude Include="..\cambala\cambala_parallel.h" />
-    <ClInclude Include="..\cambala\cambala_sequential.h" />
-    <ClInclude Include="..\cambala\cambala_utils.h" />
+    <ClInclude Include="..\cambala\compute.h" />
+    <ClInclude Include="..\cambala\parallel.h" />
+    <ClInclude Include="..\cambala\point.h" />
+    <ClInclude Include="..\cambala\sequential.h" />
+    <ClInclude Include="..\cambala\utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\cambala\Makefile" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

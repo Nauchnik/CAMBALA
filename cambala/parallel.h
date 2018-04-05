@@ -1,5 +1,5 @@
-#ifndef CAMBALA_PARALLEL_H
-#define CAMBALA_PARALLEL_H
+#ifndef PARALLEL_H
+#define PARALLEL_H
 
 #ifdef _MPI
 #include <mpi.h>
@@ -8,7 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include "cambala_sequential.h"
+#include "sequential.h"
 
 const double STOP_MESSAGE = -1;
 const unsigned ILS_TASK_LEN = 10;
