@@ -47,6 +47,7 @@ public:
 	double rhob1;
 	double rhob2;
 	unsigned long long n_layers_w;
+	unsigned long long init_iterated_local_search_runs;
 	unsigned long long iterated_local_search_runs;
 	vector<unsigned> mode_numbers;
 	vector<vector<double>> modal_delays;

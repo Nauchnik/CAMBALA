@@ -223,10 +223,10 @@ void CAMBALA_parallel::computingProcessIls()
 			cout << endl;
 			cout << "received task_index " << task_index << endl;
 		}
-
+		
 		init(depths);
 		double processing_time = MPI_Wtime();
-		iterated_local_search_runs = depths.size() * 10;
+		iterated_local_search_runs = init_iterated_local_search_runs * depths.size();
 		if ((rank == 1) && (verbosity > 0)) {
 			cout << "depths size " << depths.size() << endl;
 			cout << "iterated_local_search_runs " << iterated_local_search_runs << endl;
