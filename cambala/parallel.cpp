@@ -77,11 +77,10 @@ void CAMBALA_parallel::controlProcessIls()
 		MPI_Recv( &task_processing_time, 1, MPI_DOUBLE, cur_status.MPI_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
 		MPI_Recv( result, ILS_RESULT_LEN, MPI_DOUBLE, cur_status.MPI_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
 		processed_task_count++;
-		if (processed_task_count % 1000 == 0) {
-			sstream_out << endl << "processed_task_count " << processed_task_count;
-			sstream_out << " , time from start " << MPI_Wtime() - mpi_start_time << " s" << endl;
-		}
 		
+		sstream_out << "processed_task_count " << processed_task_count;
+		sstream_out << " , time from start " << MPI_Wtime() - mpi_start_time << " s" << endl;
+
 		received_residual = result[0];
 		
 		if (received_residual < record_point.residual) {
