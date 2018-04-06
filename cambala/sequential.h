@@ -39,8 +39,7 @@ public:
 	vector<unsigned long long> ncpl_arr;
 	string object_function_type;
 	unsigned ppm;
-	double h1;
-	double h2;
+	double h;
 	double R1;
 	double R2;
 	double tau1;    // tau to the class declaration
@@ -73,7 +72,7 @@ public:
 	int readInputDataFromFiles();
 	int init(vector<double> depths);
 	void solve();
-	int createDepthsArray(const double h, vector<vector<double>> &depths_vec);
+	vector<vector<double>> createDepthsArray();
 	void loadValuesToSearchSpaceVariables();
 	double getRecordResidual();
 	double fillDataComputeResidual( search_space_point &point );
@@ -86,8 +85,6 @@ public:
 	void reportFinalResult();
 	void reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a);
 	double directPointCalc( search_space_point point );
-	vector<vector<double>> getAllDepths(vector<double> h_vec);
-	vector<double> getHeightValues();
 
 protected:
 	unsigned long long N_total;

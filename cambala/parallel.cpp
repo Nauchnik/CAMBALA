@@ -43,8 +43,7 @@ void CAMBALA_parallel::controlProcessIls()
 
 	cout << endl << "control_process() started" << endl;
 
-	vector<double> h_vec = getHeightValues();
-	vector<vector<double>> depths_vec = getAllDepths(h_vec);
+	vector<vector<double>> depths_vec = createDepthsArray();
 	cout << "depths_vec.size() " << depths_vec.size() << endl;
 	
 	double *task = new double[ILS_TASK_LEN];
@@ -268,17 +267,15 @@ void CAMBALA_parallel::controlProcessBruteforce()
 	cout << "Start of controlProcessBruteforce()" << endl;
 	cout << "corecount " << corecount << endl;
 
-	vector<double> h_vec = getHeightValues();
+	vector<vector<double>> depths_vec = createDepthsArray();
+	if (depths_vec.size() >= MAX_DEPTHS_VECTORS) {
+		cout << "WARNING. depths_vec.size() >= MAX_DEPTHS_VECTORS" << endl;
+		cout << "depths_vec.size() changed to " << MAX_DEPTHS_VECTORS << endl;
+		depths_vec.resize(MAX_DEPTHS_VECTORS);
+	}
 
 	stringstream main_sstream_out;
-	main_sstream_out << "h_vec.size() " << h_vec.size() << endl;
-	for (auto &x : h_vec)
-		main_sstream_out << x << " ";
-	main_sstream_out << endl;
-
-	vector<vector<double>> total_depths_vec = getAllDepths(h_vec);
-
-	main_sstream_out << "total_depths_vec.size() " << total_depths_vec.size() << endl;
+	main_sstream_out << "depths_vec.size() " << depths_vec.size() << endl;
 	string main_output_filename = "cambala_main_out";
 	ofstream ofile;
 	ofile.open(main_output_filename, ios_base::app);;
@@ -286,11 +283,11 @@ void CAMBALA_parallel::controlProcessBruteforce()
 	main_sstream_out.clear(); main_sstream_out.str("");
 	ofile.close(); ofile.clear();
 	
-	for (unsigned i = 0; i < total_depths_vec.size(); i++) {
-		controlProcessFixedDepths(total_depths_vec[i], i);
+	for (unsigned i = 0; i < depths_vec.size(); i++) {
+		controlProcessFixedDepths(depths_vec[i], i);
 		ofstream ofile(main_output_filename, ios_base::app);;
 		ofile << endl << "***" << endl << 
-			"depths # " << i << " out of " << total_depths_vec.size() << " processed" << endl;
+			"depths # " << i << " out of " << depths_vec.size() << " processed" << endl;
 		ofile.close(); ofile.clear();
 	}
 #ifdef _MPI

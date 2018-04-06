@@ -120,62 +120,53 @@ int CAMBALA_sequential::init(vector<double> depths)
 	return 0;
 }
 
-int CAMBALA_sequential::createDepthsArray(const double h, vector<vector<double>> &depths_vec)
+vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 {
-	if (launch_type == "bruteforce") {
-		n_layers_w = cw1_init_arr.size();
+	vector<vector<double>> depths_vec;
+	if (d1_arr.size() == 0) { // static depths mode
+		n_layers_w = cw1_arr.size();
 		double layer_thickness_w = h / n_layers_w;
 		vector<double> depths;
 		for (unsigned jj = 1; jj <= n_layers_w; jj++)
 			depths.push_back(layer_thickness_w*jj);
 		depths.push_back(H);
 		depths_vec.push_back(depths);
-	} else if (launch_type == "ils") {
-		if (d1_arr.size() == 0) {
-			n_layers_w = cw1_arr.size();
-			double layer_thickness_w = h / n_layers_w;
-			vector<double> depths;
-			for (unsigned jj = 1; jj <= n_layers_w; jj++)
-				depths.push_back(layer_thickness_w*jj);
-			depths.push_back(H);
-			depths_vec.push_back(depths);
+	}
+	else { // dynamic depths mode
+		vector<vector<double>> search_space_depths;
+		search_space_depths.resize(d1_arr.size());
+		for (unsigned i = 0; i < d2_arr.size(); i++) {
+			double cur_val = d2_arr[i];
+			for (;;) {
+				search_space_depths[i].push_back(cur_val);
+				cur_val -= d_step[i];
+				if (cur_val < d1_arr[i])
+					break;
+			}
 		}
-		else {
-			vector<vector<double>> search_space_depths;
-			search_space_depths.resize(d1_arr.size());
-			for (unsigned i = 0; i < d2_arr.size(); i++) {
-				double cur_val = d2_arr[i];
-				for (;;) {
-					search_space_depths[i].push_back(cur_val);
-					cur_val -= d_step[i];
-					if (cur_val < d1_arr[i])
-						break;
+
+		vector<int> index_arr;
+		vector<double> tmp_depths;
+		vector<vector<double>> ::iterator it;
+		double cur_treshold;
+		while (next_cartesian(search_space_depths, index_arr, tmp_depths)) {
+			vector<double> depths;
+			cur_treshold = tmp_depths[0] + 3;
+			depths.push_back(tmp_depths[0]); // at least 1 water layer must exist
+			for (unsigned i = 1; i < tmp_depths.size(); i++) {
+				if (tmp_depths[i] >= cur_treshold) {
+					depths.push_back(tmp_depths[i]);
+					cur_treshold = tmp_depths[i] + 2;
 				}
 			}
+			it = find(depths_vec.begin(), depths_vec.end(), depths);
+			if (it == depths_vec.end())
+				depths_vec.push_back(depths);
+		}
 
-			vector<int> index_arr;
-			vector<double> tmp_depths;
-			vector<vector<double>> ::iterator it;
-			double cur_treshold;
-			while (next_cartesian(search_space_depths, index_arr, tmp_depths)) {
-				vector<double> depths;
-				cur_treshold = tmp_depths[0] + 3;
-				depths.push_back(tmp_depths[0]); // at least 1 water layer must exist
-				for (unsigned i = 1; i < tmp_depths.size(); i++) {
-					if (tmp_depths[i] >= cur_treshold) {
-						depths.push_back(tmp_depths[i]);
-						cur_treshold = tmp_depths[i] + 2;
-					}
-				}
-				it = find(depths_vec.begin(), depths_vec.end(), depths);
-				if (it == depths_vec.end())
-					depths_vec.push_back(depths);
-			}
-
-			for (auto &x : depths_vec) {
-				x.push_back(h);
-				x.push_back(H);
-			}
+		for (auto &x : depths_vec) {
+			x.push_back(h);
+			x.push_back(H);
 		}
 	}
 
@@ -188,33 +179,7 @@ int CAMBALA_sequential::createDepthsArray(const double h, vector<vector<double>>
 	ofile.close();
 	cout << "depths_vec.size() " << depths_vec.size() << endl;
 
-	return 0;
-}
-
-vector<vector<double>> CAMBALA_sequential::getAllDepths(vector<double> h_vec)
-{
-	vector<vector<double>> total_depths_vec;
-	for (auto &h : h_vec) {
-		vector<vector<double>> depths_vec;
-		createDepthsArray(h, depths_vec);
-		for (auto &depths : depths_vec)
-			total_depths_vec.push_back(depths);
-		if (total_depths_vec.size() >= MAX_DEPTHS_VECTORS) {
-			cout << "WARNING. total_depths_vec.size() >= MAX_DEPTHS_VECTORS" << endl;
-			cout << "total_depths_vec.size() changed to " << MAX_DEPTHS_VECTORS << endl;
-			total_depths_vec.resize(MAX_DEPTHS_VECTORS);
-			break;
-		}
-	}
-	return total_depths_vec;
-}
-
-vector<double> CAMBALA_sequential::getHeightValues()
-{
-	vector<double> h_vec;
-	for (unsigned i = 0; i < nh; i++)
-		h_vec.push_back(h1 + (nh == 1 ? 0 : i * (h2 - h1) / (nh - 1)));
-	return h_vec;
+	return depths_vec;
 }
 
 void CAMBALA_sequential::reportFinalResult()
@@ -688,17 +653,15 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 			sstream >> dtimesFileName;
 		else if (word.find("spmag_file") != string::npos)
 			sstream >> spmagFileName;
+		else if (word == "function_type")
+			sstream >> object_function_type;
+		else if (word.find("launch_type") != string::npos)
+			sstream >> launch_type;
 		else if (word == "H")
 			sstream >> H;
 		else if (word == "h") {
-			sstream >> word;
-			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
-			h1 = cur_val1;
-			h2 = cur_val2;
-			if (h1 == h2)
-				nh = 1;
-			else
-				nh = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+			sstream >> h;
+			nh = 1;
 		}
 		else if ((word.size() >= 2) && (word[0] == 'c') && (word[1] == 'w')) {
 			word = word.substr(2, word.size() - 2);
@@ -710,7 +673,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 			if (ncpl_init_arr.size() < cw_index + 1)
 				ncpl_init_arr.resize(cw_index + 1);
 			sstream >> word;
-			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			cw1_init_arr[cw_index] = cur_val1;
 			cw2_init_arr[cw_index] = cur_val2;
 			if (cur_val1 == cur_val2)
@@ -719,7 +682,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 				ncpl_init_arr[cw_index] = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
 		}
 		else if ((word.size() == 2) && (word[0] == 'd') && (isdigit(word[1]))) {
-			word = word.substr(1, word.size() - 1);
+			word = word.substr(1, word.size() - 1); // read depths
 			istringstream(word) >> d_index;
 			d_index--;
 			if (d1_arr.size() < d_index + 1) {
@@ -728,14 +691,14 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 				d_step.resize(d_index + 1);
 			}
 			sstream >> word;
-			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			d1_arr[d_index] = cur_val1;
 			d2_arr[d_index] = cur_val2;
 			d_step[d_index] = cur_val_step;
 		}
 		else if (word == "R") {
 			sstream >> word;
-			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			R1 = cur_val1;
 			R2 = cur_val2;
 			if (R1 == R2)
@@ -745,7 +708,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 		}
 		else if (word == "rhob") {
 			sstream >> word;
-			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			rhob1 = cur_val1;
 			rhob2 = cur_val2;
 			if (rhob1 == rhob2)
@@ -755,7 +718,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 		}
 		else if (word == "cb") {
 			sstream >> word;
-			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			cb1 = cur_val1;
 			cb2 = cur_val2;
 			if (cb1 == cb2)
@@ -765,7 +728,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 		}
 		else if (word == "tau") {
 			sstream >> word;
-			CAMBALA_utils::getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
+			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
 			tau1 = cur_val1;
 			tau2 = cur_val2;
 			if (tau1 == tau2)
@@ -773,12 +736,10 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 			else
 				ntau = (unsigned long long)abs(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
 		}
-		else if (word == "ils_iterations")
-			sstream >> iterated_local_search_runs;
-		else if (word == "function_type")
-			sstream >> object_function_type;
 		else if (word == "ppm")
 			sstream >> ppm;
+		else if (word == "ils_iterations")
+			sstream >> iterated_local_search_runs;
 		sstream.str(""); sstream.clear();
 	}
 	
@@ -835,6 +796,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 	input_params_sstream << "cb2 " << cb2 << endl;
 	input_params_sstream << "dtimes_file " << dtimesFileName << endl;
 	input_params_sstream << "spmag_file " << spmagFileName << endl;
+	input_params_sstream << "launch_type " << launch_type << endl;
 
 	if (!rank) {
 		ofstream ofile(output_filename, ios_base::out);
@@ -960,22 +922,17 @@ double CAMBALA_sequential::directPointCalc( search_space_point point )
 
 void CAMBALA_sequential::solve()
 {
-	for (unsigned i = 0; i < nh; i++) {
-		double cur_h = h1 + (nh == 1 ? 0 : i*(h2 - h1) / (nh - 1));
-		vector<vector<double>> depths_vec;
-		createDepthsArray(cur_h, depths_vec);
-		if (launch_type == "ils") {
-			for (unsigned j = 0; j < depths_vec.size(); j++) {
-				init(depths_vec[j]);
-				//CAMBALA_seq.findGlobalMinBruteForce(depths_vec[i]);
-				findLocalMinHillClimbing(depths_vec[j]);
-				cout << "Processed " << j + 1 << " out of " << depths_vec.size() << " depths" << endl;
-			}
+	vector<vector<double>> depths_vec = createDepthsArray();
+	if (launch_type == "ils") {
+		for (unsigned j = 0; j < depths_vec.size(); j++) {
+			init(depths_vec[j]);
+			//CAMBALA_seq.findGlobalMinBruteForce(depths_vec[i]);
+			findLocalMinHillClimbing(depths_vec[j]);
+			cout << "Processed " << j + 1 << " out of " << depths_vec.size() << " depths" << endl;
 		}
-		else {
-			init(depths_vec[0]);
-			findGlobalMinBruteForce(depths_vec[0]);
-		}
-		cout << "Processed " << i + 1 << " out of " << nh << " h (max depths)" << endl;
+	}
+	else {
+		init(depths_vec[0]);
+		findGlobalMinBruteForce(depths_vec[0]);
 	}
 }
