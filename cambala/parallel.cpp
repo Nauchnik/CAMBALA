@@ -59,10 +59,7 @@ void CAMBALA_parallel::controlProcessIls()
 	sstream_out << "send_task_count " << send_task_count << endl;
 	sstream_out << "tasks count " << depths_vec.size() << endl;
 	
-	ofstream ofile(output_filename, ios_base::app);
-	ofile << sstream_out.rdbuf();
-	sstream_out.clear(); sstream_out.str("");
-	ofile.close(); ofile.clear();
+	writeOutputData(sstream_out);
 	
 	unsigned processed_task_count = 0;
 	int received_task_index;
@@ -109,19 +106,7 @@ void CAMBALA_parallel::controlProcessIls()
 			sstream_out << endl << "Control process, new residual minimum:" << endl;
 			sstream_out << "task processing time " << task_processing_time << " s" << endl;
 			sstream_out << "task index " << received_task_index << endl;
-			sstream_out << "err = " << record_point.residual << ", parameters:" << endl;
-			sstream_out << "c_b = " << record_point.cb << 
-				           ", rho_b= " << record_point.rhob << 
-						   ", tau = " << record_point.tau <<
-				           ", R = " << record_point.R << endl;
-			sstream_out << "cws :" << endl;
-			for (auto &x : record_point.cws)
-				sstream_out << x << " ";
-			sstream_out << endl;
-			sstream_out << "depths :" << endl;
-			for (auto &x : record_point.depths)
-				sstream_out << x << " ";
-			sstream_out << endl;
+			sstream_out << strPointData(record_point);
 			sstream_out << "time from start " << MPI_Wtime() - mpi_start_time << " s" << endl;
 		}
 		// if free tasks for sending
@@ -132,32 +117,14 @@ void CAMBALA_parallel::controlProcessIls()
 		else
 			MPI_Send( &stop_message, 1, MPI_INT, status.MPI_SOURCE, 0, MPI_COMM_WORLD);
 		
-		ofile.open(output_filename, ios_base::app);
-		ofile << sstream_out.rdbuf();
-		sstream_out.clear(); sstream_out.str("");
-		ofile.close(); ofile.clear();
+		writeOutputData(sstream_out);
 	}
 	
 	sstream_out << endl << "SEARCH ENDED!" << endl;
-	sstream_out << "err = " << record_point.residual << ", parameters:" << endl;
-	sstream_out << "c_b = " << record_point.cb <<
-		", rho_b = " << record_point.rhob <<
-		", R = " << record_point.R <<
-		", tau = " << record_point.tau << endl;
-	sstream_out << "cws :" << endl;
-	for (auto &x : record_point.cws)
-		sstream_out << x << " ";
-	sstream_out << endl;
-	sstream_out << "depths :" << endl;
-	for (auto &x : record_point.depths)
-		sstream_out << x << " ";
-	sstream_out << endl;
+	sstream_out << strPointData(record_point);
 	sstream_out << "final time " << MPI_Wtime() - mpi_start_time << " s" << endl;
 	
-	ofile.open(output_filename, ios_base::app);
-	ofile << sstream_out.rdbuf();
-	sstream_out.clear(); sstream_out.str("");
-	ofile.close(); ofile.clear();
+	writeOutputData(sstream_out);
 	
 	delete[] task;
 	delete[] result;
@@ -275,27 +242,29 @@ void CAMBALA_parallel::controlProcessBruteforce()
 
 	stringstream main_sstream_out;
 	main_sstream_out << "depths_vec.size() " << depths_vec.size() << endl;
-	string main_output_filename = "cambala_main_out";
-	ofstream ofile;
-	ofile.open(main_output_filename, ios_base::app);;
-	ofile << main_sstream_out.rdbuf();
-	main_sstream_out.clear(); main_sstream_out.str("");
-	ofile.close(); ofile.clear();
+	writeOutputData(main_sstream_out);
 	
+	search_space_point global_record;
+	global_record.residual = HUGE_VAL;
 	for (unsigned i = 0; i < depths_vec.size(); i++) {
 		controlProcessFixedDepths(depths_vec[i], i);
-		ofstream ofile(main_output_filename, ios_base::app);;
-		ofile << endl << "***" << endl << 
-			"depths # " << i << " out of " << depths_vec.size() << " processed" << endl;
-		ofile.close(); ofile.clear();
+		main_sstream_out << i+1 << " depths out of " << depths_vec.size() 
+			             << " has been processed" << endl;
+		writeOutputData(main_sstream_out);
+		if (record_point < global_record) {
+			global_record = record_point;
+			main_sstream_out << endl <<  "New record : " << endl;
+			main_sstream_out << strPointData(global_record);
+			writeOutputData(main_sstream_out);
+		}
 	}
 #ifdef _MPI
 	// send stop-messages to all computing processes
 	int stop_message = -1;
 	for (unsigned i=1; i< corecount; i++)
 		MPI_Send(&stop_message, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-	ofile.open(main_output_filename, ios_base::app);;
-	ofile << "stop-messages were sent" << endl;
+	main_sstream_out << "stop-messages were sent" << endl;
+	writeOutputData(main_sstream_out);
 	MPI_Finalize();
 #endif
 }
@@ -307,60 +276,69 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 	stringstream sstream_out;
 	mpi_start_time = MPI_Wtime();
 
-	cout << "control_process() started of depths # " << depths_index << endl;
+	if (verbosity > 1)
+		cout << "control_process() started on depths # " << depths_index << endl;
 	
 	init(depths);
 
-	sstream_out << endl;
-	sstream_out << "MPI control process" << endl;
-	sstream_out << "Start residual is: " << record_point.residual << endl;
-	sstream_out << "Search space:" << endl;
-	sstream_out << cb1 << " < c_b < " << cb2 << endl;
-	sstream_out << R1 << " < Range < " << R2 << endl;
-	sstream_out << rhob1 << " < rho_b < " << rhob2 << endl;
-	sstream_out << tau1 << " < tau < " << tau2 << endl;
-	sstream_out << "cw1_arr :" << endl;
-	for (auto &x : cw1_arr)
-		sstream_out << x << " ";
-	sstream_out << endl;
-	sstream_out << "cw2_arr :" << endl;
-	for (auto &x : cw2_arr)
-		sstream_out << x << " ";
-	sstream_out << endl;
-	sstream_out << "ncpl_arr :" << endl;
-	for (auto &x : ncpl_arr)
-		sstream_out << x << " ";
-	sstream_out << endl;
+	if (verbosity > 1) {
+		sstream_out << endl;
+		sstream_out << "MPI control process" << endl;
+		sstream_out << "Start residual is: " << record_point.residual << endl;
+		sstream_out << "Search space:" << endl;
+		sstream_out << cb1 << " < c_b < " << cb2 << endl;
+		sstream_out << R1 << " < Range < " << R2 << endl;
+		sstream_out << rhob1 << " < rho_b < " << rhob2 << endl;
+		sstream_out << tau1 << " < tau < " << tau2 << endl;
+		sstream_out << "cw1_arr :" << endl;
+		for (auto &x : cw1_arr)
+			sstream_out << x << " ";
+		sstream_out << endl;
+		sstream_out << "cw2_arr :" << endl;
+		for (auto &x : cw2_arr)
+			sstream_out << x << " ";
+		sstream_out << endl;
+		sstream_out << "ncpl_arr :" << endl;
+		for (auto &x : ncpl_arr)
+			sstream_out << x << " ";
+		sstream_out << endl;
+	}
 
 	vector<vector<double>> point_values_vec;
 	point_values_vec.resize(N_total);
-	sstream_out << "point_values_vec as vector of tasks" << endl;
-	sstream_out << "point_values_vec.size() " << point_values_vec.size() << endl;
+	sstream_out << endl;
+	//sstream_out << "point_values_vec as vector of tasks" << endl;
+	if (verbosity > 0)
+		sstream_out << "point_values_vec.size() " << point_values_vec.size() << endl;
 	unsigned long long index = 0;
 	vector<double> cur_point_values;
 	vector<int> index_arr;
 	while (next_cartesian(search_space, index_arr, cur_point_values))
 		point_values_vec[index++] = cur_point_values;
-	cout << "next_cartesian() finished" << endl;
+	if (verbosity > 1)
+		cout << "next_cartesian() finished" << endl;
 
 	if (point_values_vec.size() < corecount - 1) {
 		cerr << "point_values_vec.size() < corecount - 1" << endl;
 		cerr << point_values_vec.size() << " < " << corecount - 1 << endl;
 		MPI_Abort(MPI_COMM_WORLD, 0);
 	}
-
-	sstream_out << "point_values_vec[0].size() " << point_values_vec[0].size() << endl;
+	
+	if (verbosity > 1)
+		sstream_out << "point_values_vec[0].size() " << point_values_vec[0].size() << endl;
 	unsigned task_len = point_values_vec[0].size() + 1; // point data + task index
 	double *task = new double[task_len];
 	unsigned result_len = 2; // calculated residual + index of a task
 	double *result = new double[result_len];
-	sstream_out << "task_len " << task_len << endl;
-	sstream_out << "result_len " << result_len << endl;
+	if (verbosity > 1) {
+		sstream_out << "task_len " << task_len << endl;
+		sstream_out << "result_len " << result_len << endl;
+	}
 
 	unsigned send_task_count = 0;
 	int depths_p_len = depths.size();
 	double *depths_p = new double[depths_p_len];
-	cout << "depths_p" << endl;
+	//cout << "depths_p" << endl;
 	for (unsigned i = 0; i < depths_p_len; i++)
 		depths_p[i] = depths[i];
 	
@@ -389,13 +367,12 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 		send_task_count++;
 	}
 	delete[] depths_p;
-	sstream_out << "send_task_count " << send_task_count << endl;
-	cout << "first send_task_count " << send_task_count << endl;
+	if (verbosity > 1) {
+		sstream_out << "send_task_count " << send_task_count << endl;
+		cout << "first send_task_count " << send_task_count << endl;
+	}
 
-	ofstream ofile(output_filename, ios_base::app);;
-	ofile << sstream_out.rdbuf();
-	sstream_out.clear(); sstream_out.str("");
-	ofile.close(); ofile.clear();
+	writeOutputData(sstream_out);
 
 	unsigned processed_task_count = 0;
 	unsigned received_task_index;
@@ -408,11 +385,10 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 	while (processed_task_count < point_values_vec.size()) {
 		MPI_Recv(result, result_len, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		processed_task_count++;
-		if (processed_task_count % 100000 == 0) {
-			ofstream ofile(output_filename, ios_base::app);
-			ofile << endl << "processed_task_count " << processed_task_count << " out of " << point_values_vec.size() << endl;
-			ofile << "time from start " << MPI_Wtime() - mpi_start_time << endl;
-			ofile.close(); ofile.clear();
+		if ( (!is_mpi) && (processed_task_count % 100000 == 0) ) {
+			sstream_out << endl << "processed_task_count " << processed_task_count << " out of " << point_values_vec.size() << endl;
+			sstream_out << "time from start " << MPI_Wtime() - mpi_start_time << endl;
+			writeOutputData(sstream_out);
 		}
 
 		received_residual = result[0];
@@ -442,23 +418,14 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 			send_task_count++;
 		}
 	}
+	
+	if ((!is_mpi) || (verbosity > 0)) {
+		sstream_out << endl << "SEARCH ENDED" << endl;
+		sstream_out << strPointData(record_point);
+		sstream_out << "final time " << MPI_Wtime() - mpi_start_time << " s" << endl;
+	}
 
-	sstream_out << endl << "SEARCH ENDED!" << endl;
-	sstream_out << "err = " << record_point.residual << ", parameters:" << endl;
-	sstream_out << "c_b = " << record_point.cb <<
-		", rho_b = " << record_point.rhob <<
-		", R = " << record_point.R <<
-		", tau = " << record_point.tau << endl;
-	sstream_out << "cws :" << endl;
-	for (auto &x : record_point.cws)
-		sstream_out << x << " ";
-	sstream_out << endl;
-	sstream_out << "final time " << MPI_Wtime() - mpi_start_time << " s" << endl;
-
-	ofile.open(output_filename, ios_base::app);
-	ofile << sstream_out.rdbuf();
-	sstream_out.clear(); sstream_out.str("");
-	ofile.close(); ofile.clear();
+	writeOutputData(sstream_out);
 
 	delete[] task;
 	delete[] result;
@@ -547,16 +514,7 @@ void CAMBALA_parallel::computingProcessBruteforce()
 
 		fillDataComputeResidual(cur_point); // calculated residual is written to cur_point
 
-		cur_process_points_sstream << cur_point.cb << " "
-			<< cur_point.rhob << " "
-			<< cur_point.R << " "
-			<< cur_point.tau << " ";
-		for (unsigned i = 0; i < cur_point.cws.size(); i++)
-			cur_process_points_sstream << cur_point.cws[i] << " ";
-		for (unsigned i = 0; i < cur_point.depths.size(); i++)
-			cur_process_points_sstream << cur_point.depths[i] << " ";
-		cur_process_points_sstream << cur_point.residual;
-		cur_process_points_sstream << endl;
+		cur_process_points_sstream << strPointData(cur_point);
 
 		result[0] = cur_point.residual;
 		result[1] = task_index;
@@ -584,24 +542,9 @@ void CAMBALA_parallel::reportRecordPoint( search_space_point record_point, unsig
 	stringstream sstream_out;
 	sstream_out << endl << "record_count " << record_count << endl;
 	sstream_out << "control process, new residual minimum" << endl;
-	sstream_out << "err = " << record_point.residual << ", parameters:" << endl;
-	sstream_out << "c_b = " << record_point.cb <<
-		", rho_b= " << record_point.rhob <<
-		", tau = " << record_point.tau <<
-		", R = " << record_point.R << endl;
-	sstream_out << "cws :" << endl;
-	for (auto &x : record_point.cws)
-		sstream_out << x << " ";
-	sstream_out << endl;
-	sstream_out << "depths :" << endl;
-	for (auto &x : record_point.depths)
-		sstream_out << x << " ";
-	sstream_out << endl;
+	sstream_out << strPointData(record_point);
 	sstream_out << "time from start " << MPI_Wtime() - mpi_start_time << " s" << endl;
 
-	ofstream ofile(output_filename, ios_base::app);
-	ofile << sstream_out.rdbuf();
-	sstream_out.clear(); sstream_out.str("");
-	ofile.close(); ofile.clear();
+	writeOutputData(sstream_out);
 #endif
 }

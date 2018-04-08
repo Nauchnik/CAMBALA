@@ -35,6 +35,7 @@ CAMBALA_sequential::CAMBALA_sequential() :
 	N_total(1),
 	isTimeDelayPrinting(false),
 	ppm(0),
+	is_mpi(false),
 	rank(0)
 {
 	record_point.cb       = START_HUGE_VALUE;
@@ -44,6 +45,9 @@ CAMBALA_sequential::CAMBALA_sequential() :
 	record_point.residual = START_HUGE_VALUE;
 	srand((unsigned)time(NULL));
 	start_chrono_time = chrono::high_resolution_clock::now();
+#ifdef _MPI
+	is_mpi = true;
+#endif
 }
 
 //tau_comment: search and output,
@@ -121,6 +125,14 @@ int CAMBALA_sequential::init(vector<double> depths)
 	return 0;
 }
 
+void CAMBALA_sequential::writeOutputData(stringstream &sstream)
+{
+	ofstream ofile(output_filename, ios_base::app);
+	ofile << sstream.rdbuf();
+	sstream.clear(); sstream.str("");
+	ofile.close(); ofile.clear();
+}
+
 vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 {
 	vector<vector<double>> depths_vec;
@@ -191,28 +203,16 @@ void CAMBALA_sequential::reportFinalResult()
 	t2 = chrono::high_resolution_clock::now();
 	time_span = chrono::duration_cast<chrono::duration<double>>(t2 - start_chrono_time);
 
-	ofstream ofile(output_filename, ios_base::app);
+	stringstream sstream;
 
-	ofile << endl;
-	ofile << "total solving time (chrono) " << time_span.count() << endl;
-	ofile << "SEARCH ENDED!" << endl;
-	ofile << "RESULTING VALUE:" << endl;
-	ofile << "err = " << record_point.residual << ", parameters:" << endl;
-	ofile << "c_b = " << record_point.cb << endl
-			  << "tau = " << record_point.tau << endl
-			  << "rho_b = " << record_point.rhob << endl
-			  << "R = " << record_point.R << endl;
-	ofile << "cws :" << endl;
-	for (auto &x : record_point.cws)
-		ofile << x << " ";
-	ofile << endl;
-	ofile << "depths " << endl;
-	for (auto &x : record_point.depths)
-		ofile << x << " ";
-	ofile << endl;
-	ofile << "total solving time " << time_span.count() << endl;
+	sstream << endl;
+	sstream << "total solving time (chrono) " << time_span.count() << endl;
+	sstream << "SEARCH ENDED!" << endl;
+	sstream << "RESULTING VALUE:" << endl;
+	sstream << strPointData(record_point);
+	sstream << "total solving time " << time_span.count() << endl;
 
-	ofile.close();
+	writeOutputData(sstream);
 }
 
 void CAMBALA_sequential::findGlobalMinBruteForce(vector<double> depths)
@@ -339,29 +339,12 @@ double CAMBALA_sequential::fillDataComputeResidual( search_space_point &point )
 	if ( verbosity > 1 )
 		cout << "point.residual " << point.residual << endl;
 
-	if (point.residual < record_point.residual) {
+	if (point < record_point) {
 		record_point = point;
 		if (verbosity > 0) {
 			cout << endl;
 			cout << endl << "New residual minimum:" << endl;
-			cout << "err = " << record_point.residual << ", parameters:" << endl;
-			cout << "c_b = " << record_point.cb
-				<< ", rho_b = " << record_point.rhob
-				<< ", tau = " << record_point.tau
-				<< ", R = " << record_point.R << endl;
-			cout << "cws_min :" << endl;
-			for (auto &x : record_point.cws)
-				cout << x << " ";
-			cout << endl;
-			cout << "depths " << endl;
-			for (auto &x : record_point.depths)
-				cout << x << " ";
-			cout << endl;
-			cout << "Ns_points " << endl;
-			for (auto &x : Ns_points)
-				cout << x << " ";
-			cout << endl;
-			cout << endl;
+			cout << strPointData(record_point);
 		}
 	}
 
@@ -801,11 +784,8 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 	input_params_sstream << "spmag_file " << spmagFileName << endl;
 	input_params_sstream << "launch_type " << launch_type << endl;
 
-	if (!rank) {
-		ofstream ofile(output_filename, ios_base::out);
-		ofile << input_params_sstream.str();
-		ofile.close();
-	}
+	if (!rank)
+		writeOutputData(input_params_sstream);
 
 	if (((rank == 0) || (rank == 1)) && (verbosity > 0))
 		cout << "readScenario() finished" << endl;

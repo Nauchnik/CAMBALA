@@ -66,11 +66,13 @@ public:
 	stringstream input_params_sstream;
 	string output_filename;
 	string depths_filename;
+	bool is_mpi;
 	
 	// Oleg's functions
 	vector<vector<double>> search_space; // values of variables which form a search space
 	int readScenario(string scenarioFileName);
 	int readInputDataFromFiles();
+	void writeOutputData(stringstream &sstream);
 	int init(vector<double> depths);
 	void solve();
 	vector<vector<double>> createDepthsArray();

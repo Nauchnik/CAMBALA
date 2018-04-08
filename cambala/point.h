@@ -27,6 +27,10 @@ namespace CAMBALA_point {
 		{
 			return (R == a.R && tau == a.tau && rhob == a.rhob && cb == a.cb && cws == a.cws && depths == a.depths);
 		}
+		friend bool operator<(const search_space_point& a, const search_space_point& b)
+		{
+			return (a.residual < b.residual);
+		}
 	};
 
 	struct reduced_search_space_attribute
@@ -70,6 +74,25 @@ namespace CAMBALA_point {
 			<< point.R << " " << point.tau << " ";
 		for (unsigned i = 0; i < point.cws.size(); i++)
 			ofile << point.cws[i] << " ";
+	}
+
+	inline string strPointData(const search_space_point point)
+	{
+		stringstream sstream;
+		sstream << "err = " << point.residual << ", parameters:" << endl;
+		sstream << "c_b = " << point.cb << endl
+			<< "tau = " << point.tau << endl
+			<< "rho_b = " << point.rhob << endl
+			<< "R = " << point.R << endl;
+		sstream << "cws :" << endl;
+		for (auto &x : point.cws)
+			sstream << x << " ";
+		sstream << endl;
+		sstream << "depths " << endl;
+		for (auto &x : point.depths)
+			sstream << x << " ";
+		sstream << endl;
+		return sstream.str();
 	}
 }
 
