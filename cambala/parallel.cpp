@@ -248,8 +248,8 @@ void CAMBALA_parallel::controlProcessBruteforce()
 	global_record.residual = HUGE_VAL;
 	for (unsigned i = 0; i < depths_vec.size(); i++) {
 		controlProcessFixedDepths(depths_vec[i], i);
-		main_sstream_out << i+1 << " depths out of " << depths_vec.size() 
-			             << " has been processed" << endl;
+		main_sstream_out << i + 1 << " depths out of " << depths_vec.size()
+			<< " has been processed" << endl << endl;
 		writeOutputData(main_sstream_out);
 		if (record_point < global_record) {
 			global_record = record_point;
@@ -306,10 +306,8 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 
 	vector<vector<double>> point_values_vec;
 	point_values_vec.resize(N_total);
-	sstream_out << endl;
 	//sstream_out << "point_values_vec as vector of tasks" << endl;
-	if (verbosity > 0)
-		sstream_out << "point_values_vec.size() " << point_values_vec.size() << endl;
+	sstream_out << "point_values_vec.size() " << point_values_vec.size() << endl;
 	unsigned long long index = 0;
 	vector<double> cur_point_values;
 	vector<int> index_arr;
