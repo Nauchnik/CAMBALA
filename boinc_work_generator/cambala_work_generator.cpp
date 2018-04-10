@@ -3,9 +3,11 @@ Work generator for Acoustics@home. 2017 (c).
 Format of WUs: scenarios of Acoustics@home.
 Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory of SB RAS)
 *****************************************************************************************/
+#ifndef _WIN32
 #include <mysql.h>
+#endif
 
-#include "cambala_sequential.h"
+#include "sequential.h"
 
 #include <iostream>
 #include <string>
@@ -28,8 +30,10 @@ struct cambala_boinc_config
 
 bool isTest = false;
 
+#ifndef _WIN32
 long long getCountOfUnsentWUs(string pass_file_name);
 int processQuery( MYSQL *conn, string str, vector< vector<stringstream *> > &result_vec );
+#endif
 int readConfig( const string config_file_name, cambala_boinc_config &c_b_config );
 int generateWUs(string scenario_file_name, long long wus_for_creation, cambala_boinc_config &c_b_config);
 
@@ -61,7 +65,9 @@ int main( int argc, char **argv )
 	}
 	
 	long long unsent_wus_count =  -1;
+#ifndef _WIN32
 	unsent_wus_count = getCountOfUnsentWUs(pass_file_name);
+#endif
 	if (unsent_wus_count < 0) {
 		cerr << "unsent_wus_count " << unsent_wus_count << endl;
 		exit(-1);
@@ -85,6 +91,7 @@ int main( int argc, char **argv )
 	return 0;
 }
 
+#ifndef _WIN32
 long long getCountOfUnsentWUs(string pass_file_name)
 {
 	long long unsent_count;
@@ -179,13 +186,14 @@ int processQuery( MYSQL *conn, string str, vector< vector<stringstream *> > &res
 
 	return 0;
 }
+#endif
 
 int readConfig( const string config_file_name, cambala_boinc_config &c_b_config )
 {
 	cout << "readConfig()" << endl;
 	ifstream config_file(config_file_name.c_str());
 	if (!config_file.is_open()) {
-		cerr << "config_file " << config_file << " wasn't opened" << endl;
+		cerr << "config_file " << config_file_name << " wasn't opened" << endl;
 		return -1;
 	}
 	c_b_config.unsent_wus_required = -1;
@@ -248,7 +256,7 @@ int generateWUs(string scenario_file_name, long long wus_for_creation, cambala_b
 	}
 	
 	vector<vector<double>> depths_vec;
-	cambala_seq.createDepthsArray(cambala_seq.h1, depths_vec);
+	depths_vec = cambala_seq.createDepthsArray();
 	cout << "depths_vec[0]" << endl;
 	for (unsigned i=0; i < depths_vec[0].size(); i++)
 		cout << depths_vec[0][i] << " ";

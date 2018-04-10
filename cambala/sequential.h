@@ -20,7 +20,6 @@ class CAMBALA_sequential
 {
 public:
 	CAMBALA_sequential();
-	double H;
 	unsigned long long nh;
 	unsigned long long ncb;
 	unsigned long long nrhob;
@@ -40,6 +39,7 @@ public:
 	string object_function_type;
 	unsigned ppm;
 	double h;
+	double H;
 	double R1;
 	double R2;
 	double tau1;    // tau to the class declaration

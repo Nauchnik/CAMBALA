@@ -20,7 +20,7 @@ CPPFLAGS = -O3 \
     -L /usr/X11R6/lib \
     -L.
 
-release: cambala_boinc
+release: cambala_boinc_app
 
 libstdc++.a:
 	ln -s `g++ -print-file-name=libstdc++.a`
@@ -31,11 +31,11 @@ ttfont.cpp:
 clean: distclean
 
 distclean:
-	/bin/rm -f $(PROGS) *.o libstdc++.a cambala_boinc
+	/bin/rm -f $(PROGS) *.o libstdc++.a cambala_boinc_app
 
-cambala_boinc: cambala_boinc.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o cambala_sequential.o \
+cambala_boinc_app: cambala_boinc_app.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o cambala_sequential.o \
 	libstdc++.a $(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a
-	$(CPP) $(CPPFLAGS) cambala_boinc.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o cambala_sequential.o -o cambala_boinc \
+	$(CPP) $(CPPFLAGS) cambala_boinc_app.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o cambala_sequential.o -o cambala_boinc_app \
 	libstdc++.a -pthread $(BOINC_API_DIR)/libboinc_api.a \
 	$(BOINC_LIB_DIR)/libboinc.a
 	
@@ -57,5 +57,5 @@ alglibinternal.o: $(ALGLIB)/alglibinternal.cpp
 cambala_sequential.o: $(CAMBALA)/cambala_sequential.cpp
 	${CPP} ${CPPFLAGS} $(CAMBALA)/cambala_sequential.cpp -c
 
-cambala_boinc.o: cambala_boinc.cpp
-	${CPP} ${CPPFLAGS} cambala_boinc.cpp -c
+cambala_boinc_app.o: cambala_boinc_app.cpp
+	${CPP} ${CPPFLAGS} cambala_boinc_app.cpp -c

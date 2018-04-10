@@ -1,4 +1,4 @@
-CAMBALA = ..
+CAMBALA = ../cambala/
 ALGLIB = ../../alglib
 MYSQL = /usr/include/mysql
 UUID = /usr/include/uuid
@@ -17,8 +17,8 @@ release: cambala_work_generator
 debug: CPPFLAGS = $(CPP_DEBUG_FLAGS)
 debug: cambala_work_generator
 
-cambala_work_generator: cambala_work_generator.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o cambala_sequential.o
-	$(CPP) $(CPPFLAGS) cambala_work_generator.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o cambala_sequential.o -o cambala_work_generator $(MYSQL_LIBS)
+cambala_work_generator: cambala_work_generator.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sequential.o
+	$(CPP) $(CPPFLAGS) cambala_work_generator.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sequential.o -o cambala_work_generator $(MYSQL_LIBS)
 	
 specialfunctions.o: $(ALGLIB)/specialfunctions.cpp 
 	${CPP} ${CPPFLAGS} $(ALGLIB)/specialfunctions.cpp -c
@@ -35,8 +35,8 @@ alglibmisc.o: $(ALGLIB)/alglibmisc.cpp
 alglibinternal.o: $(ALGLIB)/alglibinternal.cpp 
 	${CPP} ${CPPFLAGS} $(ALGLIB)/alglibinternal.cpp -c
 
-cambala_sequential.o: $(CAMBALA)/cambala_sequential.cpp
-	${CPP} ${CPPFLAGS} $(CAMBALA)/cambala_sequential.cpp -c
+sequential.o: $(CAMBALA)/sequential.cpp
+	${CPP} ${CPPFLAGS} $(CAMBALA)/sequential.cpp -c
 
 cambala_work_generator.o: cambala_work_generator.cpp
 	${CPP} ${CPPFLAGS} cambala_work_generator.cpp -c
