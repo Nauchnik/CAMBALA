@@ -35,36 +35,46 @@ long long getCountOfUnsentWUs(string pass_file_name);
 int processQuery( MYSQL *conn, string str, vector< vector<stringstream *> > &result_vec );
 #endif
 int readConfig( const string config_file_name, cambala_boinc_config &c_b_config );
-int generateWUs(string scenario_file_name, long long wus_for_creation, cambala_boinc_config &c_b_config);
+int generateWUs(cambala_boinc_config &c_b_config);
+int generateWUsFixedDepths(cambala_boinc_config &c_b_config, CAMBALA_sequential &cambala_seq, const vector<double> depths);
+
+string scenario_file_name = "";
+string pass_file_name = "";
+long long unsent_wus_count = -1;
+long long wus_for_creation = 0;
 
 int main( int argc, char **argv )
 {
+#ifdef _DEBUG
+	argc = 3;
+	scenario_file_name = "..\\boinc_work_generator\\906_uniform_dynamic_d_2-3n_boinc";
+	isTest = true;
+	unsent_wus_count = 2400;
+#else
 	if ( argc < 3 ) {
-		cerr << "Usage : program scenario_file_name pass_file_name[-test]" << endl;
+		cerr << "Usage : program scenario_file_name pass_file_name [-test]" << endl;
 		return -1;
 	}
-	
-	
-	string scenario_file_name = argv[1];
-	cout << "scenario_file_name " << scenario_file_name << endl;
-	// read password for database
-	string pass_file_name = argv[2];
-	cout << "pass_file_name " << pass_file_name << endl;
+	scenario_file_name = argv[1];
+	string pass_file_name = argv[2]; // read password for database
 	if (argc >3) {
 		string tmp_str = argv[3];
 		if ( (tmp_str == "-test") || (tmp_str == "--test") )
 			isTest = true;
 	}
+#endif
+
+	cout << "scenario_file_name " << scenario_file_name << endl;
+	cout << "pass_file_name " << pass_file_name << endl;
 	cout << "isTest " << isTest << endl;
 	
 	cambala_boinc_config c_b_config;
 	int retval = readConfig( scenario_file_name, c_b_config );
 	if (retval) {
-		cerr << "readConfig() falied " << endl;
+		cerr << "readConfig() falied \n";
 		exit(retval);
 	}
 	
-	long long unsent_wus_count =  -1;
 #ifndef _WIN32
 	unsent_wus_count = getCountOfUnsentWUs(pass_file_name);
 #endif
@@ -74,20 +84,76 @@ int main( int argc, char **argv )
 	}
 	cout << "unsent_wus_count " << unsent_wus_count << endl;
 	
-	long long wus_for_creation = MAX_WUS_FOR_CREATION - unsent_wus_count;
+	wus_for_creation = MAX_WUS_FOR_CREATION - unsent_wus_count;
 	
 	cout << "wus_for_creation " << wus_for_creation << endl;
 	
-	if ( (!isTest) && 
-	     (wus_for_creation >= MIN_WUS_FOR_CREATION) && 
-	     (wus_for_creation <= MAX_WUS_FOR_CREATION) && 
-         (c_b_config.created_wus < c_b_config.total_wus) )
-		generateWUs(scenario_file_name, wus_for_creation, c_b_config);
+	if (isTest) 
+		cout << "test launch \n";
+	else if ( (wus_for_creation >= MIN_WUS_FOR_CREATION) && 
+	          (wus_for_creation <= MAX_WUS_FOR_CREATION) && 
+              (c_b_config.created_wus < c_b_config.total_wus) )
+		generateWUs(c_b_config);
 	else {
-		cout << "generation is not required recently" << endl;
+		cout << "generation is not required recently \n";
 		cout << "MIN_WUS_FOR_CREATION " << MIN_WUS_FOR_CREATION << endl;
 	}
 	
+	return 0;
+}
+
+int readConfig(const string config_file_name, cambala_boinc_config &c_b_config)
+{
+	cout << "readConfig()" << endl;
+	ifstream config_file(config_file_name.c_str());
+	if (!config_file.is_open()) {
+		cerr << "config_file " << config_file_name << " wasn't opened" << endl;
+		return -1;
+	}
+	c_b_config.unsent_wus_required = -1;
+	c_b_config.seconds_between_launches = -1;
+	c_b_config.total_wus = -1;
+	c_b_config.created_wus = -1;
+
+	string str;
+	while (getline(config_file, str)) {
+		stringstream sstream;
+		string word1 = "", word2 = "";
+		sstream << str;
+		sstream >> word1 >> word2;
+		if (word1 == "unsent_wus_required")
+			istringstream(word2) >> c_b_config.unsent_wus_required;
+		if (word1 == "seconds_between_launches")
+			istringstream(word2) >> c_b_config.seconds_between_launches;
+		if (word1 == "total_wus")
+			istringstream(word2) >> c_b_config.total_wus;
+		if (word1 == "created_wus")
+			istringstream(word2) >> c_b_config.created_wus;
+	}
+	config_file.close();
+
+	if (c_b_config.unsent_wus_required < MIN_WUS_FOR_CREATION) {
+		cerr << "c_b_config.unsent_wus_required " << c_b_config.unsent_wus_required << endl;
+		return -1;
+	}
+	if (c_b_config.seconds_between_launches <= 0) {
+		cerr << "c_b_config.seconds_between_launches " << c_b_config.seconds_between_launches << endl;
+		return -1;
+	}
+	if (c_b_config.total_wus < MIN_WUS_FOR_CREATION) {
+		cerr << "c_b_config.total_wus " << c_b_config.total_wus << endl;
+		return -1;
+	}
+	if (c_b_config.created_wus < 0) {
+		cerr << "c_b_config.created_wus " << c_b_config.created_wus << endl;
+		return -1;
+	}
+
+	cout << "c_b_config.unsent_wus_required " << c_b_config.unsent_wus_required << endl;
+	cout << "c_b_config.seconds_between_launches " << c_b_config.seconds_between_launches << endl;
+	cout << "c_b_config.total_wus " << c_b_config.total_wus << endl;
+	cout << "c_b_config.created_wus " << c_b_config.created_wus << endl;
+
 	return 0;
 }
 
@@ -188,62 +254,7 @@ int processQuery( MYSQL *conn, string str, vector< vector<stringstream *> > &res
 }
 #endif
 
-int readConfig( const string config_file_name, cambala_boinc_config &c_b_config )
-{
-	cout << "readConfig()" << endl;
-	ifstream config_file(config_file_name.c_str());
-	if (!config_file.is_open()) {
-		cerr << "config_file " << config_file_name << " wasn't opened" << endl;
-		return -1;
-	}
-	c_b_config.unsent_wus_required = -1;
-	c_b_config.seconds_between_launches = -1;
-	c_b_config.total_wus = -1;
-	c_b_config.created_wus = -1;
-	
-	string str;
-	while (getline(config_file,str)) {
-		stringstream sstream;
-		string word1 = "", word2 = "";
-		sstream << str;
-		sstream >> word1 >> word2;
-		if (word1 == "unsent_wus_required")
-			istringstream(word2) >> c_b_config.unsent_wus_required;
-		if (word1 == "seconds_between_launches")
-			istringstream(word2) >> c_b_config.seconds_between_launches;
-		if (word1 == "total_wus")
-			istringstream(word2) >> c_b_config.total_wus;
-		if (word1 == "created_wus")
-			istringstream(word2) >> c_b_config.created_wus;
-	}
-	config_file.close();
-	
-	if (c_b_config.unsent_wus_required < MIN_WUS_FOR_CREATION) {
-		cerr << "c_b_config.unsent_wus_required " << c_b_config.unsent_wus_required << endl;
-		return -1;
-	}
-	if (c_b_config.seconds_between_launches <= 0) {
-		cerr << "c_b_config.seconds_between_launches " << c_b_config.seconds_between_launches << endl;
-		return -1;
-	}
-	if (c_b_config.total_wus < MIN_WUS_FOR_CREATION) {
-		cerr << "c_b_config.total_wus " << c_b_config.total_wus << endl;
-		return -1;
-	}
-	if (c_b_config.created_wus < 0) {
-		cerr << "c_b_config.created_wus " << c_b_config.created_wus << endl;
-		return -1;
-	}
-	
-	cout << "c_b_config.unsent_wus_required " << c_b_config.unsent_wus_required << endl;
-	cout << "c_b_config.seconds_between_launches " << c_b_config.seconds_between_launches << endl;
-	cout << "c_b_config.total_wus " << c_b_config.total_wus << endl;
-	cout << "c_b_config.created_wus " << c_b_config.created_wus << endl;
-	
-	return 0;
-}
-
-int generateWUs(string scenario_file_name, long long wus_for_creation, cambala_boinc_config &c_b_config)
+int generateWUs(cambala_boinc_config &c_b_config)
 {
 	cout << "generateWUs()" << endl;
 	
@@ -257,26 +268,33 @@ int generateWUs(string scenario_file_name, long long wus_for_creation, cambala_b
 	
 	vector<vector<double>> depths_vec;
 	depths_vec = cambala_seq.createDepthsArray();
-	cout << "depths_vec[0]" << endl;
-	for (unsigned i=0; i < depths_vec[0].size(); i++)
-		cout << depths_vec[0][i] << " ";
-	cout << endl;
+	cout << "depths_vec size " << depths_vec.size() << endl;
 	
-	retval = cambala_seq.init(depths_vec[0]);
+	for (unsigned i=0; i<depths_vec.size(); i++) {
+		generateWUsFixedDepths(c_b_config, cambala_seq, depths_vec[i]);
+		cout << "WUs generated for " << i + 1 << " depths out of " << depths_vec.size() << " \n";
+	}
+	
+	return 0;
+}
+
+int generateWUsFixedDepths(cambala_boinc_config &c_b_config, CAMBALA_sequential &cambala_seq, const vector<double> depths)
+{
+	int retval = cambala_seq.init(depths);
 	if (retval) {
 		cerr << "cambala_seq.init() falied " << endl;
 		exit(retval);
 	}
-	
+
 	stringstream sstream_static_strings, sstream;
 	ifstream ifile(scenario_file_name.c_str());
 	string str, word, word1, word2, word3;
 	reduced_search_space_attribute reduced_s_s_a;
 	reduced_s_s_a.cb = reduced_s_s_a.R = reduced_s_s_a.tau = reduced_s_s_a.rhob = false;
 	reduced_s_s_a.cws.resize(cambala_seq.cw1_arr.size());
-	for (unsigned i=0; i<reduced_s_s_a.cws.size(); i++)
+	for (unsigned i = 0; i<reduced_s_s_a.cws.size(); i++)
 		reduced_s_s_a.cws[i] = false;
-	
+
 	unsigned cw_index;
 	stringstream sstream_scenario_wout_created_wus;
 	while (getline(ifile, str)) {
@@ -286,7 +304,7 @@ int generateWUs(string scenario_file_name, long long wus_for_creation, cambala_b
 		word1 = word2 = word3 = "";
 		sstream >> word1 >> word2 >> word3;
 		if (word3 == "server") {
-			if ( word1 == "R" )
+			if (word1 == "R")
 				reduced_s_s_a.R = true;
 			else if (word1 == "cb")
 				reduced_s_s_a.cb = true;
@@ -311,19 +329,19 @@ int generateWUs(string scenario_file_name, long long wus_for_creation, cambala_b
 	cout << "reduced_s_s_a.cb " << reduced_s_s_a.cb << endl;
 	cout << "reduced_s_s_a.rhob " << reduced_s_s_a.rhob << endl;
 	cout << "reduced_s_s_a.tau " << reduced_s_s_a.tau << endl;
-	for (unsigned i=0; i < reduced_s_s_a.cws.size(); i++)
+	for (unsigned i = 0; i < reduced_s_s_a.cws.size(); i++)
 		cout << "reduced_s_s_a.cws index " << i << " " << reduced_s_s_a.cws[i] << endl;
 	cout << endl;
-	
+
 	cambala_seq.reduceSearchSpace(reduced_s_s_a);
-	vector<search_space_point> reduced_points_vec = cambala_seq.getSearchSpacePointsVec(depths_vec[0]);
+	vector<search_space_point> reduced_points_vec = cambala_seq.getSearchSpacePointsVec(depths);
 	cout << "reduced_points_vec.size() " << reduced_points_vec.size() << endl;
 	if (reduced_points_vec.size() < c_b_config.total_wus) {
 		cerr << "reduced_points_vec.size() < c_b_config.total_wus" << endl;
 		cerr << reduced_points_vec.size() << " < " << c_b_config.total_wus << endl;
 		return -1;
 	}
-	
+
 	string str_to_remove = "./";
 	unsigned pos = scenario_file_name.find(str_to_remove);
 	if (pos != string::npos)
@@ -344,13 +362,13 @@ int generateWUs(string scenario_file_name, long long wus_for_creation, cambala_b
 		cerr << "to " << to << " > " << MAX_WUS_FOR_CREATION << endl;
 		return -1;
 	}
-	
+
 	cout << "from " << from << endl;
 	cout << "to " << to << endl;
-	
+
 	for (long long i = from; i < to; i++)
 	{
-		sstream << scenario_file_name << "-wu" << i+1;
+		sstream << scenario_file_name << "-wu" << i + 1;
 		string wu_name = sstream.str();
 		sstream.str(""); sstream.clear();
 		string cur_wu_input_file_name = "input_" + wu_name;
@@ -371,13 +389,13 @@ int generateWUs(string scenario_file_name, long long wus_for_creation, cambala_b
 			temp_wu_file << "R " << reduced_points_vec[i].R << endl;
 		if (reduced_s_s_a.tau == true)
 			temp_wu_file << "tau " << reduced_points_vec[i].tau << endl;
-		for (unsigned j=0; j<reduced_s_s_a.cws.size(); j++) {
+		for (unsigned j = 0; j<reduced_s_s_a.cws.size(); j++) {
 			if (reduced_s_s_a.cws[j] == true)
 				temp_wu_file << "cw" << j << " " << reduced_points_vec[i].cws[j] << endl;
 		}
 		temp_wu_file.close();
 		temp_wu_file.clear();
-		
+
 		string system_str = "cp tmp_wu_file `./bin/dir_hier_path " + cur_wu_input_file_name + "`";
 		//cout << "before system command : " << system_str << endl; 
 		if (!isTest)
@@ -392,11 +410,11 @@ int generateWUs(string scenario_file_name, long long wus_for_creation, cambala_b
 	}
 	c_b_config.created_wus = to;
 	cout << "new c_b_config.created_wus " << c_b_config.created_wus << endl;
-	
+
 	ofstream ofile(scenario_file_name.c_str());
-	ofile << sstream_scenario_wout_created_wus.rdbuf(); 
+	ofile << sstream_scenario_wout_created_wus.rdbuf();
 	ofile << "created_wus " << c_b_config.created_wus;
 	ofile.close();
-	
+
 	return 0;
 }
