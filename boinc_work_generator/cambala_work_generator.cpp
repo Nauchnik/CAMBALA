@@ -36,7 +36,8 @@ int processQuery( MYSQL *conn, string str, vector< vector<stringstream *> > &res
 #endif
 int readConfig( const string config_file_name, cambala_boinc_config &c_b_config );
 int generateWUs(cambala_boinc_config &c_b_config);
-int generateWUsFixedDepths(cambala_boinc_config &c_b_config, CAMBALA_sequential &cambala_seq, const vector<double> depths);
+int generateWUsFixedDepths(cambala_boinc_config &c_b_config, CAMBALA_sequential &cambala_seq, 
+	const vector<double> depths, const bool isOnlyCount);
 
 string scenario_file_name = "";
 string pass_file_name = "";
@@ -267,16 +268,30 @@ int generateWUs(cambala_boinc_config &c_b_config)
 	vector<vector<double>> depths_vec;
 	depths_vec = cambala_seq.createDepthsArray();
 	cout << "depths_vec size " << depths_vec.size() << endl;
+
+	bool isOnlyCount = true;
+	long long wus_sum = 0;
+	for (unsigned i = 0; i<depths_vec.size(); i++)
+		wus_sum += generateWUsFixedDepths(c_b_config, cambala_seq, depths_vec[i], isOnlyCount);
+	cout << "calculated wus_sum " << wus_sum << endl;
+	if ((c_b_config.total_wus <= 0) || (c_b_config.total_wus > wus_sum)) {
+		c_b_config.total_wus = wus_sum;
+		cout << "total_wus was changed to " << c_b_config.total_wus << endl;
+	}
 	
+	isOnlyCount = false;
 	for (unsigned i=0; i<depths_vec.size(); i++) {
-		generateWUsFixedDepths(c_b_config, cambala_seq, depths_vec[i]);
+		generateWUsFixedDepths(c_b_config, cambala_seq, depths_vec[i], isOnlyCount);
 		cout << "WUs generated for " << i + 1 << " depths out of " << depths_vec.size() << " \n";
 	}
 	
 	return 0;
 }
 
-int generateWUsFixedDepths(cambala_boinc_config &c_b_config, CAMBALA_sequential &cambala_seq, const vector<double> depths)
+int generateWUsFixedDepths( cambala_boinc_config &c_b_config, 
+							CAMBALA_sequential &cambala_seq, 
+							const vector<double> depths, 
+							const bool isOnlyCount)
 {
 	int retval = cambala_seq.init(depths);
 	if (retval) {
@@ -323,17 +338,21 @@ int generateWUsFixedDepths(cambala_boinc_config &c_b_config, CAMBALA_sequential 
 	}
 	ifile.close();
 
-	cout << "reduced_s_s_a.R " << reduced_s_s_a.R << endl;
+	/*cout << "reduced_s_s_a.R " << reduced_s_s_a.R << endl;
 	cout << "reduced_s_s_a.cb " << reduced_s_s_a.cb << endl;
 	cout << "reduced_s_s_a.rhob " << reduced_s_s_a.rhob << endl;
 	cout << "reduced_s_s_a.tau " << reduced_s_s_a.tau << endl;
 	for (unsigned i = 0; i < reduced_s_s_a.cws.size(); i++)
 		cout << "reduced_s_s_a.cws index " << i << " " << reduced_s_s_a.cws[i] << endl;
-	cout << endl;
+	cout << endl;*/
 
 	cambala_seq.reduceSearchSpace(reduced_s_s_a);
 	vector<search_space_point> reduced_points_vec = cambala_seq.getSearchSpacePointsVec(depths);
 	cout << "reduced_points_vec.size() " << reduced_points_vec.size() << endl;
+
+	if (isOnlyCount)
+		return reduced_points_vec.size();
+
 	if (reduced_points_vec.size() < c_b_config.total_wus) {
 		cerr << "reduced_points_vec.size() < c_b_config.total_wus" << endl;
 		cerr << reduced_points_vec.size() << " < " << c_b_config.total_wus << endl;
@@ -390,6 +409,14 @@ int generateWUsFixedDepths(cambala_boinc_config &c_b_config, CAMBALA_sequential 
 		for (unsigned j = 0; j<reduced_s_s_a.cws.size(); j++) {
 			if (reduced_s_s_a.cws[j] == true)
 				temp_wu_file << "cw" << j << " " << reduced_points_vec[i].cws[j] << endl;
+		}
+		for (unsigned j = 1; j < reduced_s_s_a.cws.size(); j++) {
+			unsigned depths_index = j - 1;
+			if (depths_index >= depths.size()) {
+				cerr << "depths_index >= depths.size() \n";
+				cerr << depths_index << " >= " << depths.size() << "\n";
+			}
+			temp_wu_file << "d" << j << " " << depths[depths_index] << endl;
 		}
 		temp_wu_file.close();
 		temp_wu_file.clear();
