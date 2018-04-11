@@ -71,7 +71,7 @@
     <None Include="..\boinc_work_generator\505_ssp_full_uniform_boinc">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\boinc_work_generator\906_uniform_dynamic_d_2-3n_boinc">
+    <None Include="..\boinc_work_generator\906_uniform_dynamic_d_2n_boinc">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

@@ -47,7 +47,7 @@ int main( int argc, char **argv )
 {
 #ifdef _DEBUG
 	argc = 3;
-	scenario_file_name = "..\\boinc_work_generator\\906_uniform_dynamic_d_2-3n_boinc";
+	scenario_file_name = "..\\boinc_work_generator\\906_uniform_dynamic_d_2n_boinc";
 	isTest = true;
 	unsent_wus_count = 2400;
 #else
@@ -88,9 +88,7 @@ int main( int argc, char **argv )
 	
 	cout << "wus_for_creation " << wus_for_creation << endl;
 	
-	if (isTest) 
-		cout << "test launch \n";
-	else if ( (wus_for_creation >= MIN_WUS_FOR_CREATION) && 
+	if ( (wus_for_creation >= MIN_WUS_FOR_CREATION) && 
 	          (wus_for_creation <= MAX_WUS_FOR_CREATION) && 
               (c_b_config.created_wus < c_b_config.total_wus) )
 		generateWUs(c_b_config);

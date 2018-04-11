@@ -172,6 +172,8 @@ vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 					cur_treshold = tmp_depths[i] + 2;
 				}
 			}
+			if (depths.size() < d1_arr.size()) // skip short depths
+				continue; 
 			it = find(depths_vec.begin(), depths_vec.end(), depths);
 			if (it == depths_vec.end())
 				depths_vec.push_back(depths);

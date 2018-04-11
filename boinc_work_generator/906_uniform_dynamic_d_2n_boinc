@@ -12,13 +12,11 @@ H 300
 % variable parameters
 cw0 1450:2:1510
 cw1 1450:2:1510
-cw2 1450:2:1510 server
 R 7000
 rhob 1.7
 cb 1700
 tau 0
-d1 2:1:40
-d2 2:1:40
+d1 2:1:40 server
 % boinc config
 unsent_wus_required 2500
 seconds_between_launches 600
