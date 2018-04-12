@@ -395,8 +395,8 @@ void CAMBALA_sequential::loadValuesToSearchSpaceVariables()
 		search_space.push_back(tmp_vec);
 	}
 
-	if (!rank)
-		cout << "loadValuesToSearchSpaceVariables() finished" << endl;
+	//if (!rank)
+	//	cout << "loadValuesToSearchSpaceVariables() finished" << endl;
 }
 
 search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> depths)

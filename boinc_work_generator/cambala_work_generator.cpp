@@ -36,8 +36,9 @@ int processQuery( MYSQL *conn, string str, vector< vector<stringstream *> > &res
 #endif
 int readConfig( const string config_file_name, cambala_boinc_config &c_b_config );
 int generateWUs(cambala_boinc_config &c_b_config);
-int generateWUsFixedDepths(cambala_boinc_config &c_b_config, CAMBALA_sequential &cambala_seq, 
-	const vector<double> depths, const bool isOnlyCount);
+vector<search_space_point> generateWUsFixedDepths(cambala_boinc_config &c_b_config, 
+	CAMBALA_sequential &cambala_seq, const vector<double> depths);
+void runSystemWUsGeneration(const vector<search_space_point> points_to_generate);
 
 string scenario_file_name = "";
 string pass_file_name = "";
@@ -269,29 +270,52 @@ int generateWUs(cambala_boinc_config &c_b_config)
 	depths_vec = cambala_seq.createDepthsArray();
 	cout << "depths_vec size " << depths_vec.size() << endl;
 
-	bool isOnlyCount = true;
 	long long wus_sum = 0;
-	for (unsigned i = 0; i<depths_vec.size(); i++)
-		wus_sum += generateWUsFixedDepths(c_b_config, cambala_seq, depths_vec[i], isOnlyCount);
+	long long skipped_wus = 0;
+	long long depths_from = 0, depths_to = 0;
+	vector<search_space_point> points;
+	for (unsigned i = 0; i < depths_vec.size(); i++) {
+		points = generateWUsFixedDepths(c_b_config, cambala_seq, depths_vec[i]);
+		wus_sum += points.size();
+		if (wus_sum < c_b_config.created_wus) {
+			depths_from = i + 1;
+			skipped_wus += points.size();
+		}
+		else if ( (!depths_to) && (wus_sum > c_b_config.created_wus + wus_for_creation) )
+			depths_to = i;
+	}
+	
+	cout << "depths_from " << depths_from << endl;
+	cout << "depths_to " << depths_to << endl;
 	cout << "calculated wus_sum " << wus_sum << endl;
 	if ((c_b_config.total_wus <= 0) || (c_b_config.total_wus > wus_sum)) {
 		c_b_config.total_wus = wus_sum;
 		cout << "total_wus was changed to " << c_b_config.total_wus << endl;
 	}
+
+	//long long from = c_b_config.created_wus;
+	//long long to = c_b_config.created_wus + wus_for_creation
 	
-	isOnlyCount = false;
-	for (unsigned i=0; i<depths_vec.size(); i++) {
-		generateWUsFixedDepths(c_b_config, cambala_seq, depths_vec[i], isOnlyCount);
-		cout << "WUs generated for " << i + 1 << " depths out of " << depths_vec.size() << " \n";
+	vector<search_space_point> tmp_total_points, total_points;
+	for (unsigned i=depths_from; i<=depths_to; i++) {
+		points = generateWUsFixedDepths(c_b_config, cambala_seq, depths_vec[i]);
+		for (auto &x : points)
+			tmp_total_points.push_back(x);
 	}
+
+	long long wu_from = c_b_config.created_wus - skipped_wus;
+	long long wu_to = c_b_config.created_wus - skipped_wus + wus_for_creation;
+	for (unsigned i = wu_from; i < wu_to; i++)
+		total_points.push_back(tmp_total_points[i]);
+
+	runSystemWUsGeneration(total_points);
 	
 	return 0;
 }
 
-int generateWUsFixedDepths( cambala_boinc_config &c_b_config, 
-							CAMBALA_sequential &cambala_seq, 
-							const vector<double> depths, 
-							const bool isOnlyCount)
+vector<search_space_point> generateWUsFixedDepths( cambala_boinc_config &c_b_config,
+						CAMBALA_sequential &cambala_seq, 
+						const vector<double> depths)
 {
 	int retval = cambala_seq.init(depths);
 	if (retval) {
@@ -348,36 +372,30 @@ int generateWUsFixedDepths( cambala_boinc_config &c_b_config,
 
 	cambala_seq.reduceSearchSpace(reduced_s_s_a);
 	vector<search_space_point> reduced_points_vec = cambala_seq.getSearchSpacePointsVec(depths);
-	cout << "reduced_points_vec.size() " << reduced_points_vec.size() << endl;
+	//cout << "reduced_points_vec.size() " << reduced_points_vec.size() << endl;
 
-	if (isOnlyCount)
-		return reduced_points_vec.size();
+	return reduced_points_vec;
+}
 
-	if (reduced_points_vec.size() < c_b_config.total_wus) {
-		cerr << "reduced_points_vec.size() < c_b_config.total_wus" << endl;
-		cerr << reduced_points_vec.size() << " < " << c_b_config.total_wus << endl;
-		return -1;
-	}
-
+void runSystemWUsGeneration(const vector<search_space_point> points_to_generate)
+{
 	string str_to_remove = "./";
 	unsigned pos = scenario_file_name.find(str_to_remove);
 	if (pos != string::npos)
-		scenario_file_name.erase(pos, str_to_remove.length());
+	scenario_file_name.erase(pos, str_to_remove.length());
 	fstream temp_wu_file;
-	long long from = c_b_config.created_wus;
-	long long to = c_b_config.created_wus + wus_for_creation;
-	if (from > c_b_config.total_wus) {
-		cerr << "from > c_b_config.total_wus" << endl;
-		cerr << from << " > " << c_b_config.total_wus << endl;
+	/*if (from > c_b_config.total_wus) {
+	cerr << "from > c_b_config.total_wus" << endl;
+	cerr << from << " > " << c_b_config.total_wus << endl;
 	}
 	if (to > c_b_config.total_wus) {
-		to = c_b_config.total_wus;
-		cout << "last generation" << endl;
+	to = c_b_config.total_wus;
+	cout << "last generation" << endl;
 	}
 	if (to - from > MAX_WUS_FOR_CREATION) {
-		cerr << "to - from > MAX_WUS_FOR_CREATION" << endl;
-		cerr << "to " << to << " > " << MAX_WUS_FOR_CREATION << endl;
-		return -1;
+	cerr << "to - from > MAX_WUS_FOR_CREATION" << endl;
+	cerr << "to " << to << " > " << MAX_WUS_FOR_CREATION << endl;
+	return -1;
 	}
 
 	cout << "from " << from << endl;
@@ -385,53 +403,53 @@ int generateWUsFixedDepths( cambala_boinc_config &c_b_config,
 
 	for (long long i = from; i < to; i++)
 	{
-		sstream << scenario_file_name << "-wu" << i + 1;
-		string wu_name = sstream.str();
-		sstream.str(""); sstream.clear();
-		string cur_wu_input_file_name = "input_" + wu_name;
+	sstream << scenario_file_name << "-wu" << i + 1;
+	string wu_name = sstream.str();
+	sstream.str(""); sstream.clear();
+	string cur_wu_input_file_name = "input_" + wu_name;
 
-		temp_wu_file.open("tmp_wu_file", ios_base::out);
-		if (!temp_wu_file.is_open()) {
-			cerr << "Failed to create tmp_wu_file" << endl;
-			exit(1);
-		}
+	temp_wu_file.open("tmp_wu_file", ios_base::out);
+	if (!temp_wu_file.is_open()) {
+	cerr << "Failed to create tmp_wu_file" << endl;
+	exit(1);
+	}
 
-		// write input data to WU file
-		temp_wu_file << sstream_static_strings.str();
-		if (reduced_s_s_a.cb == true)
-			temp_wu_file << "cb " << reduced_points_vec[i].cb << endl;
-		if (reduced_s_s_a.rhob == true)
-			temp_wu_file << "rhob " << reduced_points_vec[i].rhob << endl;
-		if (reduced_s_s_a.R == true)
-			temp_wu_file << "R " << reduced_points_vec[i].R << endl;
-		if (reduced_s_s_a.tau == true)
-			temp_wu_file << "tau " << reduced_points_vec[i].tau << endl;
-		for (unsigned j = 0; j<reduced_s_s_a.cws.size(); j++) {
-			if (reduced_s_s_a.cws[j] == true)
-				temp_wu_file << "cw" << j << " " << reduced_points_vec[i].cws[j] << endl;
-		}
-		for (unsigned j = 1; j < reduced_s_s_a.cws.size(); j++) {
-			unsigned depths_index = j - 1;
-			if (depths_index >= depths.size()) {
-				cerr << "depths_index >= depths.size() \n";
-				cerr << depths_index << " >= " << depths.size() << "\n";
-			}
-			temp_wu_file << "d" << j << " " << depths[depths_index] << endl;
-		}
-		temp_wu_file.close();
-		temp_wu_file.clear();
+	// write input data to WU file
+	temp_wu_file << sstream_static_strings.str();
+	if (reduced_s_s_a.cb == true)
+	temp_wu_file << "cb " << reduced_points_vec[i].cb << endl;
+	if (reduced_s_s_a.rhob == true)
+	temp_wu_file << "rhob " << reduced_points_vec[i].rhob << endl;
+	if (reduced_s_s_a.R == true)
+	temp_wu_file << "R " << reduced_points_vec[i].R << endl;
+	if (reduced_s_s_a.tau == true)
+	temp_wu_file << "tau " << reduced_points_vec[i].tau << endl;
+	for (unsigned j = 0; j<reduced_s_s_a.cws.size(); j++) {
+	if (reduced_s_s_a.cws[j] == true)
+		temp_wu_file << "cw" << j << " " << reduced_points_vec[i].cws[j] << endl;
+	}
+	for (unsigned j = 1; j < reduced_s_s_a.cws.size(); j++) {
+	unsigned depths_index = j - 1;
+	if (depths_index >= depths.size()) {
+		cerr << "depths_index >= depths.size() \n";
+		cerr << depths_index << " >= " << depths.size() << "\n";
+	}
+	temp_wu_file << "d" << j << " " << depths[depths_index] << endl;
+	}
+	temp_wu_file.close();
+	temp_wu_file.clear();
 
-		string system_str = "cp tmp_wu_file `./bin/dir_hier_path " + cur_wu_input_file_name + "`";
-		//cout << "before system command : " << system_str << endl; 
-		if (!isTest)
-			system(system_str.c_str());
-		//cout << "done" << endl;
-		system_str = "./bin/create_work -appname sspemdd -wu_name " + wu_name +
-			" -wu_template ./templates/workunit_cambala.xml" +
-			" -result_template ./templates/result_cambala.xml " + cur_wu_input_file_name;
-		cout << system_str << endl;
-		if (!isTest)
-			system(system_str.c_str());
+	string system_str = "cp tmp_wu_file `./bin/dir_hier_path " + cur_wu_input_file_name + "`";
+	//cout << "before system command : " << system_str << endl; 
+	if (!isTest)
+	system(system_str.c_str());
+	//cout << "done" << endl;
+	system_str = "./bin/create_work -appname sspemdd -wu_name " + wu_name +
+	" -wu_template ./templates/workunit_cambala.xml" +
+	" -result_template ./templates/result_cambala.xml " + cur_wu_input_file_name;
+	cout << system_str << endl;
+	if (!isTest)
+	system(system_str.c_str());
 	}
 	c_b_config.created_wus = to;
 	cout << "new c_b_config.created_wus " << c_b_config.created_wus << endl;
@@ -439,7 +457,5 @@ int generateWUsFixedDepths( cambala_boinc_config &c_b_config,
 	ofstream ofile(scenario_file_name.c_str());
 	ofile << sstream_scenario_wout_created_wus.rdbuf();
 	ofile << "created_wus " << c_b_config.created_wus;
-	ofile.close();
-
-	return 0;
+	ofile.close();*/
 }
