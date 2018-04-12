@@ -1,4 +1,4 @@
-CAMBALA = ..
+CAMBALA = ../cambala
 ALGLIB = ../../alglib
 BOINC_DIR = ../../boinc
 BOINC_API_DIR = $(BOINC_DIR)/api
@@ -33,9 +33,9 @@ clean: distclean
 distclean:
 	/bin/rm -f $(PROGS) *.o libstdc++.a cambala_boinc_app
 
-cambala_boinc_app: cambala_boinc_app.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o cambala_sequential.o \
+cambala_boinc_app: cambala_boinc_app.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sequential.o \
 	libstdc++.a $(BOINC_API_DIR)/libboinc_api.a $(BOINC_LIB_DIR)/libboinc.a
-	$(CPP) $(CPPFLAGS) cambala_boinc_app.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o cambala_sequential.o -o cambala_boinc_app \
+	$(CPP) $(CPPFLAGS) cambala_boinc_app.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sequential.o -o cambala_boinc_app \
 	libstdc++.a -pthread $(BOINC_API_DIR)/libboinc_api.a \
 	$(BOINC_LIB_DIR)/libboinc.a
 	
@@ -54,8 +54,8 @@ alglibmisc.o: $(ALGLIB)/alglibmisc.cpp
 alglibinternal.o: $(ALGLIB)/alglibinternal.cpp 
 	${CPP} ${CPPFLAGS} $(ALGLIB)/alglibinternal.cpp -c
 
-cambala_sequential.o: $(CAMBALA)/cambala_sequential.cpp
-	${CPP} ${CPPFLAGS} $(CAMBALA)/cambala_sequential.cpp -c
+sequential.o: $(CAMBALA)/sequential.cpp
+	${CPP} ${CPPFLAGS} $(CAMBALA)/sequential.cpp -c
 
 cambala_boinc_app.o: cambala_boinc_app.cpp
 	${CPP} ${CPPFLAGS} cambala_boinc_app.cpp -c

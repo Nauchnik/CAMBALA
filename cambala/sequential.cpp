@@ -133,9 +133,8 @@ void CAMBALA_sequential::writeOutputData(stringstream &sstream)
 	ofile.close(); ofile.clear();
 }
 
-vector<vector<double>> CAMBALA_sequential::createDepthsArray()
+void CAMBALA_sequential::createDepthsArray()
 {
-	vector<vector<double>> depths_vec;
 	if (d1_arr.size() == 0) { // static depths mode
 		n_layers_w = cw1_arr.size();
 		double layer_thickness_w = h / n_layers_w;
@@ -193,8 +192,6 @@ vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 	}
 	ofile.close();
 	cout << "depths_vec.size() " << depths_vec.size() << endl;
-
-	return depths_vec;
 }
 
 void CAMBALA_sequential::reportFinalResult()
@@ -907,7 +904,7 @@ double CAMBALA_sequential::directPointCalc( search_space_point point )
 
 void CAMBALA_sequential::solve()
 {
-	vector<vector<double>> depths_vec = createDepthsArray();
+	createDepthsArray();
 	if (launch_type == "ils") {
 		for (unsigned j = 0; j < depths_vec.size(); j++) {
 			init(depths_vec[j]);

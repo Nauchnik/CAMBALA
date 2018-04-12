@@ -1,19 +1,26 @@
-% SSPEMDD scenario № 33
+% SSPEMDD scenario
 % inverting for bottom and R,
 % sound speed in water is considered known
 % constant parameters
-dtimes_file 50_ac_modes_R7km_dtimes.txt
-spmag_file(string|no) 50_ac_modes_R7km_spmag.txt
-function_type weighted2
+dtimes_file ac_modes_R7km_dtimes1.txt
+spmag_file(string|no) no
+launch_type(bruteforce|ils) bruteforce
+function_type uniform
+verbosity 0
 h 50
 H 300
 % variable parameters
-cw0 1500
-cw1 1500
-cw2 1500
-cw3 1440:2:1510
-cw4 1440:2:1510
+cw1 1440:2:1510 
+cw2 1440:2:1510 
 R 7000
 rhob 1.7
 cb 1700
 tau 0
+% boinc config
+unsent_wus_required 2500
+seconds_between_launches 600
+total_wus 23976
+created_wus 2600
+cw0 1510
+d1 26
+d2 32

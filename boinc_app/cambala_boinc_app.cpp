@@ -28,8 +28,9 @@
 #include <string>
 #include <fstream>
 
-#include "cambala_sequential.h"
-#include "cambala_utils.h"
+#include "sequential.h"
+#include "utils.h"
+#include "point.h"
 
 #define CHECKPOINT_FILE "chpt"
 #define INPUT_FILENAME "in"
@@ -74,7 +75,7 @@ int main(int argc, char **argv)
 		getline(chpt_file, str);
 		istringstream(str) >> processed_points;
 		getline(chpt_file, str);
-		cur_record_point = cambala_seq.fromStrToPoint(str);
+		cur_record_point = fromStrToPoint(str);
 		chpt_file.close();
 		cout << "point from chpt file" << endl;
 	}
@@ -96,7 +97,7 @@ int main(int argc, char **argv)
 		exit(-1);
     }
 	
-	cambala_seq.fromPointToFile(cur_record_point, output_file);
+	fromPointToFile(cur_record_point, output_file);
 	
 	output_file.close();
 	
@@ -118,14 +119,13 @@ bool do_work( const string &input_file_name,
 		fprintf(stderr, "APP: readInputDataFromFiles() failed %d\n", retval);
 		exit(retval);
 	}
-	vector<vector<double>> depths_vec;
-	cambala_seq.createDepthsArray(cambala_seq.h1, depths_vec);
-	retval = cambala_seq.init(depths_vec[0]);
+	cambala_seq.createDepthsArray();
+	retval = cambala_seq.init(cambala_seq.depths_vec[0]);
 	if (retval) {
 		fprintf(stderr, "APP: init() failed %d\n", retval);
 		exit(retval);
 	}
-	vector<search_space_point> points_vec = cambala_seq.getSearchSpacePointsVec(depths_vec[0]);
+	vector<search_space_point> points_vec = cambala_seq.getSearchSpacePointsVec(cambala_seq.depths_vec[0]);
 	
 	unsigned long long total_points = points_vec.size();
 	
@@ -178,7 +178,7 @@ int do_checkpoint( const unsigned long long &total_points,
 	if ( !temp_ofile.is_open() ) return 1;
 
 	temp_ofile << processed_points << endl;
-	cambala_seq.fromPointToFile(current_record_point, temp_ofile);
+	fromPointToFile(current_record_point, temp_ofile);
     temp_ofile.close();
 	
     boinc_resolve_filename_s(CHECKPOINT_FILE, resolved_name);

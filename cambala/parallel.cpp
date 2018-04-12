@@ -233,7 +233,7 @@ void CAMBALA_parallel::controlProcessBruteforce()
 	cout << "Start of controlProcessBruteforce()" << endl;
 	cout << "corecount " << corecount << endl;
 
-	vector<vector<double>> depths_vec = createDepthsArray();
+	createDepthsArray();
 	if (depths_vec.size() >= MAX_DEPTHS_VECTORS) {
 		cout << "WARNING. depths_vec.size() >= MAX_DEPTHS_VECTORS" << endl;
 		cout << "depths_vec.size() changed to " << MAX_DEPTHS_VECTORS << endl;
