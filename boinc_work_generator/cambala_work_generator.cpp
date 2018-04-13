@@ -268,8 +268,8 @@ int generateWUs()
 		exit(retval);
 	}
 	
-	cambala_seq.createDepthsArray();
-	cout << "depths_vec size " << cambala_seq.depths_vec.size() << endl;
+	vector<vector<double>> depths_vec = cambala_seq.createDepthsArray();
+	cout << "depths_vec size " << depths_vec.size() << endl;
 
 	getReducedSpaceAttrib();
 
@@ -277,8 +277,8 @@ int generateWUs()
 	long long skipped_wus = 0;
 	long long depths_from = 0, depths_to = 0;
 	vector<search_space_point> points;
-	for (unsigned i = 0; i < cambala_seq.depths_vec.size(); i++) {
-		points = generateWUsFixedDepths(cambala_seq.depths_vec[i]);
+	for (unsigned i = 0; i < depths_vec.size(); i++) {
+		points = generateWUsFixedDepths(depths_vec[i]);
 		wus_sum += points.size();
 		if (wus_sum <= c_b_config.created_wus) {
 			depths_from = i + 1;
@@ -303,7 +303,7 @@ int generateWUs()
 
 	vector<search_space_point> tmp_wus, wus_to_generate;
 	for (unsigned i=depths_from; i<=depths_to; i++) {
-		points = generateWUsFixedDepths(cambala_seq.depths_vec[i]);
+		points = generateWUsFixedDepths(depths_vec[i]);
 		for (auto &x : points)
 			tmp_wus.push_back(x);
 	}

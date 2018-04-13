@@ -37,14 +37,11 @@
 #define OUTPUT_FILENAME "out"
 
 using namespace std;
-CAMBALA_sequential cambala_seq;
 
-bool do_work( const string &input_file_name, 
-	          const unsigned long long &processed_points, 
-	          search_space_point &current_record_point );
+bool do_work(search_space_point &cur_record_point);
 int do_checkpoint( const unsigned long long &total_points, 
 	               const unsigned long long &processed_points, 
-	               const search_space_point &current_record_point );
+	               const search_space_point &cur_record_point );
 
 int main(int argc, char **argv)
 {
@@ -57,39 +54,19 @@ int main(int argc, char **argv)
         exit( retval );
     }
 	
-	string input_file_name, output_file_name, chpt_file_name;
-	string str;
-	ofstream output_file;
-	fstream chpt_file;
-	unsigned long long processed_points = 0;
-	
-	// open the input file (resolve logical name first)
-	boinc_resolve_filename_s( INPUT_FILENAME, input_file_name);
-	
-	// read data from the checkpoint file if such exists
 	search_space_point cur_record_point;
 	cur_record_point.residual = START_HUGE_VALUE;
-    boinc_resolve_filename_s( CHECKPOINT_FILE, chpt_file_name);
-	chpt_file.open( chpt_file_name.c_str(), ios_base::in );
-	if ( chpt_file.is_open() ) {
-		getline(chpt_file, str);
-		istringstream(str) >> processed_points;
-		getline(chpt_file, str);
-		cur_record_point = fromStrToPoint(str);
-		chpt_file.close();
-		cout << "point from chpt file" << endl;
-	}
-	
-	cambala_seq.verbosity = 0;
-	if ( !do_work( input_file_name, processed_points, cur_record_point ) ) {
+
+	if ( !do_work( cur_record_point ) ) {
 		fprintf( stderr, "APP: do_work() failed:\n" );
 		perror("do_work");
         exit(1);
 	}
 
 	// resolve, open and write answer to output file
+	string output_file_name;
     boinc_resolve_filename_s( OUTPUT_FILENAME, output_file_name);
-	output_file.open( output_file_name.c_str() );
+	ofstream output_file(output_file_name.c_str());
     if ( !output_file.is_open() ) {
         fprintf(stderr, "%s APP: app output open failed:\n",
             boinc_msg_prefix(buf, sizeof(buf))
@@ -104,10 +81,15 @@ int main(int argc, char **argv)
     boinc_finish(0);
 }
 
-bool do_work( const string &input_file_name, 
-	          const unsigned long long &processed_points,
-	          search_space_point &current_record_point)
+bool do_work (search_space_point &cur_record_point)
 {
+	string input_file_name;
+	string str;
+
+	// open the input file (resolve logical name first)
+	boinc_resolve_filename_s(INPUT_FILENAME, input_file_name);
+
+	CAMBALA_sequential cambala_seq;
 	int retval;
 	retval = cambala_seq.readScenario(input_file_name);
 	if (retval) {
@@ -119,15 +101,41 @@ bool do_work( const string &input_file_name,
 		fprintf(stderr, "APP: readInputDataFromFiles() failed %d\n", retval);
 		exit(retval);
 	}
-	cambala_seq.createDepthsArray();
-	retval = cambala_seq.init(cambala_seq.depths_vec[0]);
+	vector<vector<double>> depths_vec = cambala_seq.createDepthsArray();
+	if (depths_vec.size() > 1) {
+		fprintf(stderr, "APP: depths_vec.size() %d\n", depths_vec.size());
+		exit(1);
+	}
+	vector<double> depths = depths_vec[0];
+	depths_vec.clear();
+	cout << "depths :";
+	for (unsigned i = 0; i < depths.size(); i++)
+		cout << " " << depths[i];
+	cout << endl;
+	retval = cambala_seq.init(depths);
 	if (retval) {
 		fprintf(stderr, "APP: init() failed %d\n", retval);
 		exit(retval);
 	}
-	vector<search_space_point> points_vec = cambala_seq.getSearchSpacePointsVec(cambala_seq.depths_vec[0]);
+	vector<search_space_point> points_vec = cambala_seq.getSearchSpacePointsVec(depths);
 	
 	unsigned long long total_points = points_vec.size();
+
+	// read data from the checkpoint file if such exists
+	string chpt_file_name;
+	fstream chpt_file;
+	unsigned long long processed_points = 0;
+	boinc_resolve_filename_s(CHECKPOINT_FILE, chpt_file_name);
+	chpt_file.open(chpt_file_name.c_str(), ios_base::in);
+	if (chpt_file.is_open()) {
+		getline(chpt_file, str);
+		istringstream(str) >> processed_points;
+		getline(chpt_file, str);
+		unsigned cws_count = cambala_seq.cw1_arr.size();
+		cur_record_point = fromStrToPoint(str, cws_count);
+		chpt_file.close();
+		cout << "point from chpt file" << endl;
+	}
 	
 	if (processed_points == total_points) // exit if all points already processed
 		return true;
@@ -147,13 +155,13 @@ bool do_work( const string &input_file_name,
 	
 	for ( unsigned long long i = processed_points; i < total_points; i++) {
 		dval = cambala_seq.fillDataComputeResidual(points_vec[i]);
-		if (dval < current_record_point.residual)
-			current_record_point = points_vec[i];
+		if (dval < cur_record_point.residual)
+			cur_record_point = points_vec[i];
 		
 		// checkpoint current results
 		//if ( ( boinc_is_standalone() ) || ( boinc_time_to_checkpoint() ) ) {
 		if ((i+1) % checkpoint_every_point == 0) {
-			retval = do_checkpoint(total_points, i + 1, current_record_point);
+			retval = do_checkpoint(total_points, i + 1, cur_record_point);
 			if (retval) {
 				fprintf(stderr, "APP: checkpoint failed %d\n", retval);
 				exit(retval);
@@ -169,7 +177,7 @@ bool do_work( const string &input_file_name,
 
 int do_checkpoint( const unsigned long long &total_points, 
 	               const unsigned long long &processed_points, 
-	               const search_space_point &current_record_point )
+	               const search_space_point &cur_record_point )
 {
 	int retval = 0;
     string resolved_name;
@@ -178,7 +186,7 @@ int do_checkpoint( const unsigned long long &total_points,
 	if ( !temp_ofile.is_open() ) return 1;
 
 	temp_ofile << processed_points << endl;
-	fromPointToFile(current_record_point, temp_ofile);
+	fromPointToFile(cur_record_point, temp_ofile);
     temp_ofile.close();
 	
     boinc_resolve_filename_s(CHECKPOINT_FILE, resolved_name);

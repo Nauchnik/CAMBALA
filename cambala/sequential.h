@@ -67,7 +67,6 @@ public:
 	string output_filename;
 	string depths_filename;
 	bool is_mpi;
-	vector<vector<double>> depths_vec;
 	
 	// Oleg's functions
 	vector<vector<double>> search_space; // values of variables which form a search space
@@ -76,7 +75,7 @@ public:
 	void writeOutputData(stringstream &sstream);
 	int init(vector<double> depths);
 	void solve();
-	void createDepthsArray();
+	vector<vector<double>> createDepthsArray();
 	void loadValuesToSearchSpaceVariables();
 	double getRecordResidual();
 	double fillDataComputeResidual( search_space_point &point );

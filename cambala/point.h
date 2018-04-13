@@ -56,15 +56,20 @@ namespace CAMBALA_point {
 	}
 
 	// function for BOINC client application
-	inline search_space_point fromStrToPoint(const string str)
+	inline search_space_point fromStrToPoint(const string str, const unsigned cws_count )
 	{
 		search_space_point point;
 		stringstream sstream;
 		sstream << str;
 		sstream >> point.residual >> point.cb >> point.rhob >> point.R >> point.tau;
 		double val;
-		while (sstream >> val)
+		for (unsigned i = 0; i < cws_count; i++) {
+			sstream >> val;
 			point.cws.push_back(val);
+		}
+		while (sstream >> val)
+			point.depths.push_back(val);
+		
 		return point;
 	}
 
@@ -74,6 +79,8 @@ namespace CAMBALA_point {
 			<< point.R << " " << point.tau << " ";
 		for (unsigned i = 0; i < point.cws.size(); i++)
 			ofile << point.cws[i] << " ";
+		for (unsigned i = 0; i < point.depths.size(); i++)
+			ofile << point.depths[i] << " ";
 	}
 
 	inline string strPointData(const search_space_point point)

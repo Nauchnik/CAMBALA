@@ -32,16 +32,14 @@ int main(int argc, char **argv)
 
 #ifdef _DEBUG
 	argc = 3;
-	//argv[1] = "./scenarios_5/504_1_bottom_r_full_weighted2.txt";
+	scenarioFileName = "..//scenarios//test_fixed_depths.txt";
 	//argv[1] = "./boinc_CAMBALA_app/in";
 	//argv[1] = "39_hydro_r_uniform260.txt";
 	//argv[1] = "true_scenario_2.txt";
 	//argv[2] = "1";
-	//argv[3] = "-test";
 	verbosity = 2;
-#endif
-
-	if (argc >= 2)
+#else
+	if (argc > 1)
 		scenarioFileName = argv[1];
 	else {
 		cout << "Usage : scenarioFileName [verbosity] [-test]" << endl;
@@ -49,12 +47,7 @@ int main(int argc, char **argv)
 	}
 	if (argc >= 3)
 		verbosity = atoi(argv[2]);
-	bool isTestLaunch = false;
-	if (argc >= 4) {
-		string test_str= argv[3];
-		if (test_str == "-test")
-			isTestLaunch = true;
-	}
+#endif
 	
 #ifndef _MPI
 	// sequential mode%
@@ -69,31 +62,6 @@ int main(int argc, char **argv)
 	// read scenario, modal_delays, mode_numbers and freqs, then determine the search space
 	CAMBALA_seq.readScenario(scenarioFileName);
 	CAMBALA_seq.readInputDataFromFiles();
-
-	if (isTestLaunch) {
-		search_space_point point;
-		// true values
-		point.cb = 1700;
-		point.R = 7000;
-		point.rhob = 1.7;
-		point.tau = 0;
-		point.cws = { 1500, 1498, 1493, 1472, 1462 };
-		point.depths = { 10, 20, 30, 40, 50, 300 };
-		CAMBALA_seq.init(point.depths);
-		CAMBALA_seq.object_function_type = "weighted2";
-		CAMBALA_seq.directPointCalc( point );
-		CAMBALA_seq.reportFinalResult();
-		cout << "true value test" << endl;
-		return 0;
-	}
-	
-	/*ofstream depths_file("depths.txt");
-	depths_file << depths_vec.size() << " depths for the scenario " << scenarioFileName << endl;
-	for (auto &x : depths_vec) {
-		for (auto &y : x)
-			depths_file << y << " ";
-		depths_file << endl;
-	}*/
 	
 	CAMBALA_seq.solve();
 	CAMBALA_seq.reportFinalResult();
