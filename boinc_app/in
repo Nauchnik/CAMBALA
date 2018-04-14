@@ -10,8 +10,8 @@ verbosity 0
 h 50
 H 300
 % variable parameters
-cw1 1440:2:1510 
-cw2 1440:2:1510 
+cw1 1490 
+cw2 1460:2:1480
 R 7000
 rhob 1.7
 cb 1700
@@ -21,6 +21,6 @@ unsent_wus_required 2500
 seconds_between_launches 600
 total_wus 23976
 created_wus 2600
-cw0 1510
-d1 26
-d2 32
+cw0 1506
+d1 23
+d2 33

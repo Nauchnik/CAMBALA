@@ -103,7 +103,7 @@ bool do_work (search_space_point &cur_record_point)
 	}
 	vector<vector<double>> depths_vec = cambala_seq.createDepthsArray();
 	if (depths_vec.size() > 1) {
-		fprintf(stderr, "APP: depths_vec.size() %d\n", depths_vec.size());
+		fprintf(stderr, "APP: depths_vec.size() %zd\n", depths_vec.size());
 		exit(1);
 	}
 	vector<double> depths = depths_vec[0];
@@ -142,7 +142,7 @@ bool do_work (search_space_point &cur_record_point)
 
 	if (!total_points) {
 		retval = -1;
-		fprintf(stderr, "APP: total_points == 0", retval);
+		fprintf(stderr, "APP: total_points == 0");
 		exit(retval);
 	}
 	
@@ -168,7 +168,7 @@ bool do_work (search_space_point &cur_record_point)
 			}
 			boinc_checkpoint_completed();
 		}
-		cout << "processed " << i+1 << " out from " << total_points << endl;
+		cout << "processed " << i+1 << " out of " << total_points << endl;
         //}
 	}
 	
