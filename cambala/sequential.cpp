@@ -617,13 +617,16 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 {
 // read constant and variable values from a scenario file
 	if ( (!rank) && (verbosity > 0) )
-		cout << "scenarioFileName " << scenarioFileName << endl;
+		cout << "scenario file " << scenarioFileName << endl;
 	ifstream scenarioFile(scenarioFileName.c_str());
 
 	if (!scenarioFile.is_open()) {
 		cerr << "scenarioFile with the name " << scenarioFileName << " wasn't openend" << endl;
 		return -1;
 	}
+
+	if ((!rank) && (verbosity > 0))
+		cout << "scenario file was opened" << endl;
 
 	string str, word, tmp_word;
 	stringstream sstream;

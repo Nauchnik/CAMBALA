@@ -394,7 +394,7 @@ void runSystemWUsGeneration( vector<search_space_point> &wus_to_generate )
 	stringstream sstream;
 	
 	for (unsigned i = 0; i < wus_to_generate.size(); i++) {
-		sstream << scenario_file_name << "-wu" << i + 1;
+		sstream << scenario_file_name << "-wu" << c_b_config.created_wus + i + 1;
 		string wu_name = sstream.str();
 		sstream.str(""); sstream.clear();
 		string cur_wu_input_file_name = "input_" + wu_name;
