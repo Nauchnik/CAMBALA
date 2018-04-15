@@ -56,7 +56,7 @@ int main( int argc, char **argv )
 	argc = 3;
 	scenario_file_name = "..\\boinc_work_generator\\906_uniform_dynamic_d_2n_boinc";
 	//isTest = true;
-	unsent_wus_count = 2400;
+	unsent_wus_count = 0;
 #else
 	if ( argc < 3 ) {
 		cerr << "Usage : program scenario_file_name pass_file_name [-test]" << endl;
@@ -161,103 +161,6 @@ int readConfig(const string config_file_name)
 	return 0;
 }
 
-#ifndef _WIN32
-long long getCountOfUnsentWUs(string pass_file_name)
-{
-	long long unsent_count;
-	char *host = "localhost";
-    char *db;
-	char *user;
-    char *pass;
-	MYSQL *conn;
-	
-	ifstream pass_file;
-	pass_file.open( pass_file_name.c_str() );
-	if ( !pass_file.is_open() ) {
-		cerr << "pass_file " << pass_file_name << " wasn't opened" << endl;
-		exit(1);
-	}
-	string str;
-	getline( pass_file, str );
-	db = new char[str.length() + 1];
-	strcpy( db, str.c_str() );
-	db[str.length()] = NULL;
-	getline( pass_file, str );
-	user = new char[str.length() + 1];
-	strcpy( user, str.c_str() );
-	user[str.length()] = NULL;
-	getline( pass_file, str );
-	pass = new char[str.length() + 1];
-	strcpy( pass, str.c_str() );
-	pass[str.length()] = NULL;
-	cout << "db "   << db   << endl;
-	cout << "user " << user << endl;
-	cout << "pass " << pass << endl;
-	
-	conn = mysql_init(NULL);
-	if(conn == NULL)
-		cerr << "Error: can't create MySQL-descriptor\n" << endl;
-	
-	if(!mysql_real_connect(conn, host, user, pass, db, 0, NULL, 0)) {
-		cerr << "Error: can't connect to MySQL server" << endl;
-		exit(1);
-	}
-	delete[] db;
-	delete[] user;
-	delete[] pass;
-
-	vector< vector<stringstream *> > result_vec;
-	str = "SELECT COUNT(*) FROM workunit WHERE id IN(SELECT workunitid FROM result WHERE server_state = 2)";
-	cout << str << endl;
-
-	processQuery( conn, str, result_vec );
-	*result_vec[0][0] >> unsent_count;
-	result_vec.clear();
-	mysql_close(conn);
-	
-	return unsent_count;
-}
-
-int processQuery( MYSQL *conn, string str, vector< vector<stringstream *> > &result_vec )
-{
-	MYSQL_RES *res;
-	MYSQL_ROW row;
-	int num_fields;
-	
-	if ( mysql_query(conn, str.c_str()) != 0 ) {
-		cerr << "Error: can't execute SQL-query\n";
-		return -1;
-	}
-	
-	res = mysql_store_result( conn );
-
-	if( res == NULL ) {
-		cerr << "Error: can't get the result description\n";
-		return -1;
-	}
-
-	num_fields = mysql_num_fields(res);
-	stringstream *sstream_p;
-	vector<stringstream *> result_data;
-
-	if ( mysql_num_rows( res ) > 0 ) {
-		while((row = mysql_fetch_row(res)) != NULL) {
-			for( int i = 0; i < num_fields; ++i ) {
-				sstream_p = new stringstream();
-				*sstream_p << row[i]; // get value
-				result_data.push_back( sstream_p );
-			}
-			result_vec.push_back( result_data );
-			result_data.clear();
-		}
-	}
-
-	mysql_free_result(res);
-
-	return 0;
-}
-#endif
-
 int generateWUs()
 {
 	cout << "generateWUs()" << endl;
@@ -275,18 +178,22 @@ int generateWUs()
 
 	long long wus_sum = 0;
 	long long skipped_wus = 0;
-	long long depths_from = 0, depths_to = 0;
+	long long depths_from = 0, depths_to = -1;
 	vector<search_space_point> points;
 	for (unsigned i = 0; i < depths_vec.size(); i++) {
 		points = generateWUsFixedDepths(depths_vec[i]);
 		wus_sum += points.size();
 		if (wus_sum <= c_b_config.created_wus) {
-			depths_from = i + 1;
+			if (i != depths_vec.size() - 1)
+				depths_from = i + 1;
 			skipped_wus += points.size();
 		}
-		else if ( (!depths_to) && (wus_sum > c_b_config.created_wus + wus_for_creation) )
+		else if ( (depths_to == -1) && (wus_sum > c_b_config.created_wus + wus_for_creation) )
 			depths_to = i;
 	}
+	
+	if ( (depths_to == -1) && (depths_from > -1) )
+		depths_to = depths_vec.size() - 1;
 	
 	cout << "depths_from " << depths_from << endl;
 	cout << "depths_to " << depths_to << endl;
@@ -309,12 +216,14 @@ int generateWUs()
 	}
 
 	long long wu_from = c_b_config.created_wus - skipped_wus;
-	long long wu_to = c_b_config.created_wus - skipped_wus + wus_for_creation;
+	long long wu_to = c_b_config.created_wus - skipped_wus + wus_for_creation - 1;
+	if (wu_to >= tmp_wus.size())
+		wu_to = tmp_wus.size() - 1;
 	if ( (wu_from < 0) || (wu_to >= tmp_wus.size()) ) {
 		cerr << "incorrect wu_from or wu_to " << wu_from << " " << wu_to << endl;
-		exit;
+		exit(-1);
 	}
-	for (unsigned i = wu_from; i < wu_to; i++)
+	for (unsigned i = wu_from; i <= wu_to; i++)
 		wus_to_generate.push_back(tmp_wus[i]);
 	
 	runSystemWUsGeneration(wus_to_generate);
@@ -450,3 +359,101 @@ void runSystemWUsGeneration( vector<search_space_point> &wus_to_generate )
 	ofile << "created_wus " << c_b_config.created_wus;
 	ofile.close();
 }
+
+
+#ifndef _WIN32
+long long getCountOfUnsentWUs(string pass_file_name)
+{
+	long long unsent_count;
+	char *host = "localhost";
+	char *db;
+	char *user;
+	char *pass;
+	MYSQL *conn;
+
+	ifstream pass_file;
+	pass_file.open(pass_file_name.c_str());
+	if (!pass_file.is_open()) {
+		cerr << "pass_file " << pass_file_name << " wasn't opened" << endl;
+		exit(1);
+	}
+	string str;
+	getline(pass_file, str);
+	db = new char[str.length() + 1];
+	strcpy(db, str.c_str());
+	db[str.length()] = NULL;
+	getline(pass_file, str);
+	user = new char[str.length() + 1];
+	strcpy(user, str.c_str());
+	user[str.length()] = NULL;
+	getline(pass_file, str);
+	pass = new char[str.length() + 1];
+	strcpy(pass, str.c_str());
+	pass[str.length()] = NULL;
+	cout << "db " << db << endl;
+	cout << "user " << user << endl;
+	cout << "pass " << pass << endl;
+
+	conn = mysql_init(NULL);
+	if (conn == NULL)
+		cerr << "Error: can't create MySQL-descriptor\n" << endl;
+
+	if (!mysql_real_connect(conn, host, user, pass, db, 0, NULL, 0)) {
+		cerr << "Error: can't connect to MySQL server" << endl;
+		exit(1);
+	}
+	delete[] db;
+	delete[] user;
+	delete[] pass;
+
+	vector< vector<stringstream *> > result_vec;
+	str = "SELECT COUNT(*) FROM workunit WHERE id IN(SELECT workunitid FROM result WHERE server_state = 2)";
+	cout << str << endl;
+
+	processQuery(conn, str, result_vec);
+	*result_vec[0][0] >> unsent_count;
+	result_vec.clear();
+	mysql_close(conn);
+
+	return unsent_count;
+}
+
+int processQuery(MYSQL *conn, string str, vector< vector<stringstream *> > &result_vec)
+{
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	int num_fields;
+
+	if (mysql_query(conn, str.c_str()) != 0) {
+		cerr << "Error: can't execute SQL-query\n";
+		return -1;
+	}
+
+	res = mysql_store_result(conn);
+
+	if (res == NULL) {
+		cerr << "Error: can't get the result description\n";
+		return -1;
+	}
+
+	num_fields = mysql_num_fields(res);
+	stringstream *sstream_p;
+	vector<stringstream *> result_data;
+
+	if (mysql_num_rows(res) > 0) {
+		while ((row = mysql_fetch_row(res)) != NULL) {
+			for (int i = 0; i < num_fields; ++i) {
+				sstream_p = new stringstream();
+				*sstream_p << row[i]; // get value
+				result_data.push_back(sstream_p);
+			}
+			result_vec.push_back(result_data);
+			result_data.clear();
+		}
+	}
+
+	mysql_free_result(res);
+
+	return 0;
+}
+#endif
