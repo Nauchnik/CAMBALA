@@ -142,3 +142,55 @@ cws :
 depths 
 23 33 50 300 
 total solving time 51.1116
+Input parameters :
+launch_type bruteforce
+object_function_type uniform
+ppm 2
+init_iterated_local_search_runs 10
+cw1_init_arr :
+1506 1490 1462 
+cw2_init_arr :
+1506 1490 1462 
+ncpl_init_arr :
+1 1 1 
+nR 1
+R1 7000
+R2 7000
+ntau 1
+tau1 0
+tau2 0
+nrhob 1
+rhob1 1.7
+rhob2 1.7
+ncb 1
+cb1 1700
+cb2 1700
+dtimes_file ac_modes_R7km_dtimes1.txt
+spmag_file no
+launch_type bruteforce
+Input parameters :
+launch_type bruteforce
+object_function_type uniform
+ppm 2
+init_iterated_local_search_runs 10
+cw1_init_arr :
+1506 1490 1462 1462 
+cw2_init_arr :
+1506 1490 1462 1462 
+ncpl_init_arr :
+1 1 1 1 
+nR 1
+R1 7000
+R2 7000
+ntau 1
+tau1 0
+tau2 0
+nrhob 1
+rhob1 1.7
+rhob2 1.7
+ncb 1
+cb1 1700
+cb2 1700
+dtimes_file ac_modes_R7km_dtimes1.txt
+spmag_file no
+launch_type bruteforce
