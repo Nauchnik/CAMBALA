@@ -38,7 +38,7 @@
 
 using namespace std;
 
-bool do_work(search_space_point &cur_record_point);
+int do_work(search_space_point &cur_record_point);
 int do_checkpoint( const unsigned long long &total_points, 
 	               const unsigned long long &processed_points, 
 	               const search_space_point &cur_record_point );
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     char buf[256];
 	int retval = boinc_init();
     if ( retval ) {
-        fprintf(stderr, "%s boinc_init returned %d\n",
+        fprintf(stderr, "%s APP: boinc_init() returned %d\n",
             boinc_msg_prefix(buf, sizeof(buf)), retval
         );
         exit( retval );
@@ -57,10 +57,10 @@ int main(int argc, char **argv)
 	search_space_point cur_record_point;
 	cur_record_point.residual = START_HUGE_VALUE;
 
-	if ( !do_work( cur_record_point ) ) {
-		fprintf( stderr, "APP: do_work() failed:\n" );
-		perror("do_work");
-        exit(1);
+	retval = do_work(cur_record_point);
+	if ( retval ) {
+		fprintf( stderr, "%s APP: do_work() returned \n" );
+		exit(retval);
 	}
 
 	// resolve, open and write answer to output file
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "%s APP: app output open failed:\n",
             boinc_msg_prefix(buf, sizeof(buf))
         );
-		exit(-1);
+		exit(retval);
     }
 	
 	fromPointToFile(cur_record_point, output_file);
@@ -81,13 +81,16 @@ int main(int argc, char **argv)
     boinc_finish(0);
 }
 
-bool do_work (search_space_point &cur_record_point)
+int do_work (search_space_point &cur_record_point)
 {
-	string input_file_name;
-	string str;
+	string input_file_name = "";
+	string str = "';
 
 	// open the input file (resolve logical name first)
 	boinc_resolve_filename_s(INPUT_FILENAME, input_file_name);
+
+	if (input_file_name == "")
+		return false;
 
 	CAMBALA_sequential cambala_seq;
 	int retval;
@@ -172,29 +175,51 @@ bool do_work (search_space_point &cur_record_point)
         //}
 	}
 	
-	return true;
+	return 0;
 }
 
 int do_checkpoint( const unsigned long long &total_points, 
 	               const unsigned long long &processed_points, 
 	               const search_space_point &cur_record_point )
 {
-	int retval = 0;
-    string resolved_name;
+    string resolved_name = "";
 	
 	ofstream temp_ofile( "temp" );
-	if ( !temp_ofile.is_open() ) return 1;
-
+	if (!temp_ofile.is_open()) {
+		fprintf(stderr, "APP: do_checkpoint() temp ofile wasn't opened");
+		return -1;
+	}
+	
 	temp_ofile << processed_points << endl;
 	fromPointToFile(cur_record_point, temp_ofile);
     temp_ofile.close();
 	
     boinc_resolve_filename_s(CHECKPOINT_FILE, resolved_name);
+	if (resolved_name == "") {
+		fprintf(stderr, "APP: resolved_name is empty");
+		return -1;
+	}
+	
+	int retval = 0;
     retval = boinc_rename( "temp", resolved_name.c_str() );
+	if ( retval ) {
+		fprintf(stderr, "APP: do_checkpoint() boinc_rename() returned %d", retval);
+		return -1;
+	}
+
+	if (!processed_points) {
+		fprintf(stderr, "APP: do_checkpoint() processed_points == 0");
+		return -1;
+	}
+
+	if (!total_points) {
+		fprintf(stderr, "APP: do_checkpoint() total_points == 0");
+		return -1;
+	}
 
 	boinc_fraction_done( (double)processed_points / (double)total_points );
 
-    return retval;
+    return 0;
 }
 
 #ifdef _WIN32
