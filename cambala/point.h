@@ -56,14 +56,14 @@ namespace CAMBALA_point {
 	}
 
 	// function for BOINC client application
-	inline search_space_point fromStrToPoint(const string str, const unsigned cws_count )
+	inline search_space_point fromStrToPoint(const string str, const unsigned long long cws_count )
 	{
 		search_space_point point;
 		stringstream sstream;
 		sstream << str;
 		sstream >> point.residual >> point.cb >> point.rhob >> point.R >> point.tau;
-		double val;
-		for (unsigned i = 0; i < cws_count; i++) {
+		double val = 0;
+		for (unsigned long long i = 0; i < cws_count; i++) {
 			sstream >> val;
 			point.cws.push_back(val);
 		}
@@ -81,6 +81,30 @@ namespace CAMBALA_point {
 			ofile << point.cws[i] << " ";
 		for (unsigned i = 0; i < point.depths.size(); i++)
 			ofile << point.depths[i] << " ";
+	}
+
+	inline bool isNan(const double x) { // check if a given valune is not a number (NaN)
+		return x != x;
+	}
+	
+	inline bool isCorrectCalculatedPoint(const search_space_point point) 
+	{
+		if ((point.residual <= 0) || (point.cb <= 0) || (point.R <= 0) || (point.rhob <= 0))
+			return false;
+		if (isNan(point.residual) || isNan(point.cb) || isNan(point.R) || isNan(point.rhob))
+			return false;
+		
+		for (auto &x : point.cws)
+			if (x <= 0) return false;
+		for (auto &x : point.cws)
+			if (isNan(x)) return false;
+		
+		for (auto &x : point.depths)
+			if (x < 0) return false;
+		for (auto &x : point.depths)
+			if (isNan(x)) return false;
+		
+		return true;
 	}
 
 	inline string strPointData(const search_space_point point)

@@ -14,6 +14,8 @@ CAMBALA_sequential::CAMBALA_sequential() :
 	object_function_type("uniform"),
 	output_filename("cambala_out"),
 	depths_filename("cambala_depths_out"),
+	dtimesFileName(""),
+	spmagFileName(""),
 	H(0),
 	nh(1),
 	ncb(1),
@@ -350,6 +352,12 @@ double CAMBALA_sequential::fillDataComputeResidual( search_space_point &point )
 	}
 
 	return point.residual;
+}
+
+void CAMBALA_sequential::updateRecordPoint(const search_space_point point)
+{
+	if ( (isCorrectCalculatedPoint(point)) && (point < record_point) )
+		record_point = point;
 }
 
 void CAMBALA_sequential::loadValuesToSearchSpaceVariables()
@@ -743,15 +751,20 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 			exit(1);
 		}
 	}
-
+	
+	if (dtimesFileName == "") {
+		cerr << "dtimesFileName == "" \n";
+		return -1;
+	}
 	if (!cw1_init_arr.size()) {
-		cerr << "!cw1_init_arr.size()" << endl;
+		cerr << "cw1_init_arr is empty \n";
 		return -1;
 	}
-	if (!H) {
-		cerr << "!H" << endl;
+	if (H <= 0) {
+		cerr << "incorrect H " << H << endl;
 		return -1;
 	}
+
 	cw1_arr = cw1_init_arr;
 	cw2_arr = cw2_init_arr;
 
@@ -801,7 +814,7 @@ int CAMBALA_sequential::readInputDataFromFiles()
 {
 	ifstream dtimesFile(dtimesFileName.c_str());
 	if (!dtimesFile.is_open()) {
-		cerr << "dtimesFile " << dtimesFileName << " wasn't opened" << endl;
+		cerr << "dtimesFile " << dtimesFileName << " wasn't opened \n";
 		exit(-1);
 	}
 	stringstream myLineStream;

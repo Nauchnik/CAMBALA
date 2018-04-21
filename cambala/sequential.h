@@ -79,6 +79,7 @@ public:
 	void loadValuesToSearchSpaceVariables();
 	double getRecordResidual();
 	double fillDataComputeResidual( search_space_point &point );
+	void updateRecordPoint(const search_space_point point);
 	search_space_point getNonRandomStartPoint(vector<double> depths);
 	vector<search_space_point> getSearchSpacePointsVec(vector<double> depths);
 	search_space_point findLocalMinHillClimbing(vector<double> depths);
