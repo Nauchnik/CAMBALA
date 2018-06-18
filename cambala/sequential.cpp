@@ -207,7 +207,7 @@ void CAMBALA_sequential::reportFinalResult()
 	time_span = chrono::duration_cast<chrono::duration<double>>(t2 - start_chrono_time);
 
 	stringstream sstream;
-
+	
 	sstream << endl;
 	sstream << "total solving time (chrono) " << time_span.count() << endl;
 	sstream << "SEARCH ENDED!" << endl;
