@@ -30,6 +30,7 @@ Linux (only MPI version):
 HOW TO LAUNCH
 
 > VS_cambala.exe <scenario-file> <verbosity>
+
 In a scenario file constant and variable parameters should be specified
 Possible verbosity values: 0, 1, 2.
   
