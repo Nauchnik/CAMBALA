@@ -62,7 +62,7 @@ rhob 1.6:0.1:1.8
 
 Comment. Here the file 50_ac_modes_R7km_dtimes.txt is specified, so it should be in the same folder.
 Two paremeters are variable: R and rhob, left and right bounds as well as the step are specified for them
-in the format <left_bound>:<step>:<right_bound>. Values of all other parameters are constanst.
+in the format left_bound:step:right_bound. Values of all other parameters are constanst.
 Both R and rhob have 3 possible values, that gives us the search space of 9 points.
 
 
