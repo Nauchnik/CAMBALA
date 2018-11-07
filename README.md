@@ -42,22 +42,39 @@ EXAMPLES
 > VS_cambala.exe test_scenario.txt 1
 
 test_scenario.txt is located in the \scenarios folder
+
 It contains the following strings:
+
 % constant parameters
+
 dtimes_file 50_ac_modes_R7km_dtimes.txt
+
 spmag_file(string|no) no
+
 function_type uniform
+
 h 50
+
 H 300
+
 cw0 1500
+
 cw1 1500
+
 cw2 1498
+
 cw3 1496
+
 cw4 1493
+
 cb 1700
+
 tau 0
+
 % variable parameters
+
 R 6995:5:7005
+
 rhob 1.6:0.1:1.8
 
 Comment. Here the file 50_ac_modes_R7km_dtimes.txt is specified, so it should be in the same folder.
