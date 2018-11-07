@@ -135,7 +135,6 @@
     <ClCompile Include="..\cambala\main.cpp" />
     <ClCompile Include="..\cambala\parallel.cpp" />
     <ClCompile Include="..\cambala\sequential.cpp" />
-    <ClCompile Include="..\smac\cambala_smac.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\alglib\alglibinternal.h" />
@@ -159,7 +158,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\cambala\Makefile" />
-    <None Include="..\smac\Makefile" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

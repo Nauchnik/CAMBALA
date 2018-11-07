@@ -1,5 +1,5 @@
 /*****************************************************************************************
-// CAMBALA: Coupled Acoustic Modes -- Copyright(c) 2015-2017
+// CAMBALA: Coupled Acoustic Modes -- Copyright(c) 2015-2018
 // Pavel Petrov (Il'ichev Pacific Oceanological Institute of FEB RAS), 
 // Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory of SB RAS)
 *****************************************************************************************/
