@@ -34,6 +34,12 @@ Linux (only MPI version):
 - > make
 
 ================================================================================
+HOW TO CREATE INVERTION SCENARIOS
+
+A manual on creating inversion scenarios is located in
+\doc\Creating_an_inversion_scenario_file.docx
+
+================================================================================
 HOW TO LAUNCH
 
 > VS_cambala.exe scenario_file_name verbosity
@@ -56,11 +62,3 @@ Example 2. Invert bottom parameters and the sound speed profile.
 > Copy VS_cambala.exe to the folder \scenarios\Example_2_cb_rhob_ssp\
 
 > VS_cambala.exe scenario2 1
-
-================================================================================
-HOW TO CREATE INVERTION SCENARIOS
-
-A manual on creating inversion scenarios is located in
-\doc\Creating_an_inversion_scenario_file.docx
-
-
