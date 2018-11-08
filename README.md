@@ -17,13 +17,15 @@ HOW TO BUILD
 
 Windows (only sequential version):
 
-- > Download the zip-archive https://github.com/Nauchnik/Acoustics-at-home/archive/master.zip
+> Download the zip-archive https://github.com/Nauchnik/Acoustics-at-home/archive/master.zip
 
-- > Unzip the archive
+> Unzip the archive
 
-- > Launch a Visual Studio 2017 solution VS_cambala\VS_cambala.sln
+> Launch a Visual Studio 2017 solution \src\VS_cambala\VS_cambala.sln
 
-- > Compile and build exe-file in Visual Studio (in the Release mode)
+> Compile and build an .exe file in Visual Studio (in the Release mode)
+
+> VS_cambala.exe will appear either in \src\VS_cambala\x64\Release\ or in \src\VS_cambala\Release\
 
 Linux (only MPI version):
 
