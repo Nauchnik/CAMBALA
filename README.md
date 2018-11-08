@@ -17,9 +17,17 @@ HOW TO BUILD
 
 Windows (only sequential version):
 
-> Download the zip-archive https://github.com/Nauchnik/Acoustics-at-home/archive/master.zip
+> Download CAMBALA zip-archive https://github.com/Nauchnik/Acoustics-at-home/archive/master.zip
 
-> Unzip the archive
+> Unzip the archive to the folder /Acoustics-at-home
+
+> Download a zip-archive with ALGLIB C++ sources from http://www.alglib.net/download.php
+
+> Unzip the archive to a default folder, e.g. \alglib-3.14.0.cpp.gpl. 
+
+> make a new folder \alglib, copy to it all files from the subfolder \alglib-3.14.0.cpp.gpl\cpp\src\
+
+> NB! Folders /Acoustics-at-home and /alglib should be on the same level
 
 > Launch a Visual Studio 2017 solution \src\VS_cambala\VS_cambala.sln
 
@@ -31,7 +39,7 @@ Linux (only MPI version):
 
 - > git clone https://github.com/Nauchnik/Acoustics-at-home.git
 
-- > cd /cambala
+- > cd /src/cambala
 
 - > make
 
