@@ -76,7 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../alglib; ../cambala/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../alglib; ../cambala/</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -85,7 +85,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../alglib; ../cambala/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../alglib; ../cambala/</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -96,7 +96,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../alglib; ../cambala/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../alglib;../cambala/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -111,7 +111,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../alglib; ../cambala/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../../alglib; ../cambala/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -119,45 +119,42 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\alglib\alglibinternal.cpp" />
-    <ClCompile Include="..\..\alglib\alglibmisc.cpp" />
-    <ClCompile Include="..\..\alglib\ap.cpp" />
-    <ClCompile Include="..\..\alglib\dataanalysis.cpp" />
-    <ClCompile Include="..\..\alglib\diffequations.cpp" />
-    <ClCompile Include="..\..\alglib\fasttransforms.cpp" />
-    <ClCompile Include="..\..\alglib\integration.cpp" />
-    <ClCompile Include="..\..\alglib\interpolation.cpp" />
-    <ClCompile Include="..\..\alglib\linalg.cpp" />
-    <ClCompile Include="..\..\alglib\optimization.cpp" />
-    <ClCompile Include="..\..\alglib\solvers.cpp" />
-    <ClCompile Include="..\..\alglib\specialfunctions.cpp" />
-    <ClCompile Include="..\..\alglib\statistics.cpp" />
+    <ClCompile Include="..\..\..\alglib\alglibinternal.cpp" />
+    <ClCompile Include="..\..\..\alglib\alglibmisc.cpp" />
+    <ClCompile Include="..\..\..\alglib\ap.cpp" />
+    <ClCompile Include="..\..\..\alglib\dataanalysis.cpp" />
+    <ClCompile Include="..\..\..\alglib\diffequations.cpp" />
+    <ClCompile Include="..\..\..\alglib\fasttransforms.cpp" />
+    <ClCompile Include="..\..\..\alglib\integration.cpp" />
+    <ClCompile Include="..\..\..\alglib\interpolation.cpp" />
+    <ClCompile Include="..\..\..\alglib\linalg.cpp" />
+    <ClCompile Include="..\..\..\alglib\optimization.cpp" />
+    <ClCompile Include="..\..\..\alglib\solvers.cpp" />
+    <ClCompile Include="..\..\..\alglib\specialfunctions.cpp" />
+    <ClCompile Include="..\..\..\alglib\statistics.cpp" />
     <ClCompile Include="..\cambala\main.cpp" />
     <ClCompile Include="..\cambala\parallel.cpp" />
     <ClCompile Include="..\cambala\sequential.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\alglib\alglibinternal.h" />
-    <ClInclude Include="..\..\alglib\alglibmisc.h" />
-    <ClInclude Include="..\..\alglib\ap.h" />
-    <ClInclude Include="..\..\alglib\dataanalysis.h" />
-    <ClInclude Include="..\..\alglib\diffequations.h" />
-    <ClInclude Include="..\..\alglib\fasttransforms.h" />
-    <ClInclude Include="..\..\alglib\integration.h" />
-    <ClInclude Include="..\..\alglib\interpolation.h" />
-    <ClInclude Include="..\..\alglib\linalg.h" />
-    <ClInclude Include="..\..\alglib\optimization.h" />
-    <ClInclude Include="..\..\alglib\solvers.h" />
-    <ClInclude Include="..\..\alglib\specialfunctions.h" />
-    <ClInclude Include="..\..\alglib\statistics.h" />
+    <ClInclude Include="..\..\..\alglib\alglibinternal.h" />
+    <ClInclude Include="..\..\..\alglib\alglibmisc.h" />
+    <ClInclude Include="..\..\..\alglib\ap.h" />
+    <ClInclude Include="..\..\..\alglib\dataanalysis.h" />
+    <ClInclude Include="..\..\..\alglib\diffequations.h" />
+    <ClInclude Include="..\..\..\alglib\fasttransforms.h" />
+    <ClInclude Include="..\..\..\alglib\integration.h" />
+    <ClInclude Include="..\..\..\alglib\interpolation.h" />
+    <ClInclude Include="..\..\..\alglib\linalg.h" />
+    <ClInclude Include="..\..\..\alglib\optimization.h" />
+    <ClInclude Include="..\..\..\alglib\solvers.h" />
+    <ClInclude Include="..\..\..\alglib\specialfunctions.h" />
+    <ClInclude Include="..\..\..\alglib\statistics.h" />
     <ClInclude Include="..\cambala\compute.h" />
     <ClInclude Include="..\cambala\parallel.h" />
     <ClInclude Include="..\cambala\point.h" />
     <ClInclude Include="..\cambala\sequential.h" />
     <ClInclude Include="..\cambala\utils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\cambala\Makefile" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

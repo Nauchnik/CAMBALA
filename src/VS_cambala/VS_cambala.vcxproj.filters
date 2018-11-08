@@ -21,92 +21,53 @@
     <ClCompile Include="..\cambala\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\alglib\alglibinternal.cpp">
-      <Filter>alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\alglib\alglibmisc.cpp">
-      <Filter>alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\alglib\ap.cpp">
-      <Filter>alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\alglib\dataanalysis.cpp">
-      <Filter>alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\alglib\diffequations.cpp">
-      <Filter>alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\alglib\fasttransforms.cpp">
-      <Filter>alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\alglib\integration.cpp">
-      <Filter>alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\alglib\interpolation.cpp">
-      <Filter>alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\alglib\linalg.cpp">
-      <Filter>alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\alglib\optimization.cpp">
-      <Filter>alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\alglib\solvers.cpp">
-      <Filter>alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\alglib\specialfunctions.cpp">
-      <Filter>alglib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\alglib\statistics.cpp">
-      <Filter>alglib</Filter>
-    </ClCompile>
     <ClCompile Include="..\cambala\parallel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\cambala\sequential.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\alglib\alglibinternal.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\alglib\alglibmisc.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\alglib\ap.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\alglib\dataanalysis.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\alglib\diffequations.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\alglib\fasttransforms.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\alglib\integration.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\alglib\interpolation.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\alglib\linalg.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\alglib\optimization.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\alglib\solvers.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\alglib\specialfunctions.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\alglib\statistics.cpp">
+      <Filter>alglib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\alglib\alglibinternal.h">
-      <Filter>alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\alglib\alglibmisc.h">
-      <Filter>alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\alglib\ap.h">
-      <Filter>alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\alglib\dataanalysis.h">
-      <Filter>alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\alglib\diffequations.h">
-      <Filter>alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\alglib\fasttransforms.h">
-      <Filter>alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\alglib\integration.h">
-      <Filter>alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\alglib\interpolation.h">
-      <Filter>alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\alglib\linalg.h">
-      <Filter>alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\alglib\optimization.h">
-      <Filter>alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\alglib\solvers.h">
-      <Filter>alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\alglib\specialfunctions.h">
-      <Filter>alglib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\alglib\statistics.h">
-      <Filter>alglib</Filter>
-    </ClInclude>
     <ClInclude Include="..\cambala\parallel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -122,10 +83,44 @@
     <ClInclude Include="..\cambala\point.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\cambala\Makefile">
-      <Filter>Source Files</Filter>
-    </None>
+    <ClInclude Include="..\..\..\alglib\alglibinternal.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\alglib\alglibmisc.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\alglib\ap.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\alglib\dataanalysis.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\alglib\diffequations.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\alglib\fasttransforms.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\alglib\integration.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\alglib\interpolation.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\alglib\linalg.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\alglib\optimization.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\alglib\solvers.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\alglib\specialfunctions.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\alglib\statistics.h">
+      <Filter>alglib</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
