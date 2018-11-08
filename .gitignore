@@ -240,7 +240,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-*.exe
+sspemdd*.exe
 Release x64/SSPEMDD.iobj
 Release x64/260_dtimes.txt
 *.ipdb
