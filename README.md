@@ -16,15 +16,22 @@ inversion scheme.
 HOW TO BUILD
 
 Windows (only sequential version):
-> Download the zip-archive https://github.com/Nauchnik/Acoustics-at-home/archive/master.zip
-> Unzip the archive
-> Launch VS_cambala\VS_cambala.sln - it is a Visual Studio 2017 solution
-> Compile and build in Visual Studio
+
+- > Download the zip-archive https://github.com/Nauchnik/Acoustics-at-home/archive/master.zip
+
+- > Unzip the archive
+
+- > Launch a Visual Studio 2017 solution VS_cambala\VS_cambala.sln
+
+- > Compile and build exe-file in Visual Studio (in the Release mode)
 
 Linux (only MPI version):
-> git clone https://github.com/Nauchnik/Acoustics-at-home.git
-> cd /cambala
-> make
+
+- > git clone https://github.com/Nauchnik/Acoustics-at-home.git
+
+- > cd /cambala
+
+- > make
 
 ================================================================================
 HOW TO LAUNCH
@@ -41,11 +48,13 @@ EXAMPLES
 Example 1. Invert bottom parameters and the range correction.
 
 > Copy VS_cambala.exe to the folder \scenarios\Example_1_range_cb_rhob\
+
 > VS_cambala.exe scenario1 1
 
 Example 2. Invert bottom parameters and the sound speed profile.
 
 > Copy VS_cambala.exe to the folder \scenarios\Example_2_cb_rhob_ssp\
+
 > VS_cambala.exe scenario2 1
 
 ================================================================================
