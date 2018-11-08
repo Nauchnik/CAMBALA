@@ -31,55 +31,27 @@ HOW TO LAUNCH
 
 > VS_cambala.exe scenario_file_name verbosity
 
-In a scenario file constant and variable parameters should be specified
 Possible verbosity values: 0, 1, 2.
-  
-NB! all additional files specified in a scenario file must be in the same folder. 
+
+NB! All additional files specified in a scenario file must be in the folder where a program is launched. 
 
 ================================================================================
 EXAMPLES
 
-> VS_cambala.exe test_scenario.txt 1
+Example 1. Invert bottom parameters and the range correction.
 
-test_scenario.txt is located in the \scenarios folder
+> Copy VS_cambala.exe to the folder \scenarios\Example_1_range_cb_rhob\
+> VS_cambala.exe scenario1 1
 
-It contains the following strings:
+Example 2. Invert bottom parameters and the sound speed profile.
 
-% constant parameters
+> Copy VS_cambala.exe to the folder \scenarios\Example_2_cb_rhob_ssp\
+> VS_cambala.exe scenario2 1
 
-dtimes_file 50_ac_modes_R7km_dtimes.txt
+================================================================================
+HOW TO CREATE INVERTION SCENARIOS
 
-spmag_file(string|no) no
-
-function_type uniform
-
-h 50
-
-H 300
-
-cw0 1500
-
-cw1 1500
-
-cw2 1498
-
-cw3 1496
-
-cw4 1493
-
-cb 1700
-
-tau 0
-
-% variable parameters
-
-R 6995:5:7005
-
-rhob 1.6:0.1:1.8
-
-Comment. Here the file 50_ac_modes_R7km_dtimes.txt is specified, so it should be in the same folder.
-Two paremeters are variable: R and rhob, left and right bounds as well as the step are specified for them
-in the format left_bound:step:right_bound. Values of all other parameters are constanst.
-Both R and rhob have 3 possible values, that gives us the search space of 9 points.
+A manual on creating inversion scenarios is located in
+\doc\Creating_an_inversion_scenario_file.docx
 
 
