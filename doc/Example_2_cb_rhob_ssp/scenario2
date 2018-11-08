@@ -1,0 +1,19 @@
+% Florida data
+% we invert bottom parameters and the sound speed profile
+% ssp is assumed to have only 3 nodes including z=0
+% the depths of two remaining nodes are spefified by d1,d2
+% the respective ssp values are c0,c1,c2
+dtimes_file dtimes.txt
+spmag_file(string|no) spmag.txt
+h 100
+H 500
+% variable parameters
+R 4879
+rhob 1.2:0.1:2.2
+cb 1600:50:1900
+tau 0
+d1 2:2:90
+d2 2:2:98
+cw0 1500:5:1540
+cw1 1500:5:1540
+cw2 1500:5:1540
