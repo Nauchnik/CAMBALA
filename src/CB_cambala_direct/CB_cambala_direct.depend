@@ -1,0 +1,206 @@
+# depslib dependency file v1.0
+1529144598 source:d:\programming\alglib\alglibinternal.cpp
+	"stdafx.h"
+	"alglibinternal.h"
+
+1529144598 d:\programming\alglib\stdafx.h
+
+1529144598 d:\programming\alglib\alglibinternal.h
+	"ap.h"
+
+1529144598 d:\programming\alglib\ap.h
+	<stdio.h>
+	<stdlib.h>
+	<stddef.h>
+	<string>
+	<cstring>
+	<iostream>
+	<math.h>
+	<list>
+	<vector>
+	<list.h>
+	<vector.h>
+	<list>
+	<vector>
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	<setjmp.h>
+	<math.h>
+	<stddef.h>
+	<stdint.h>
+	<emmintrin.h>
+	<xmmintrin.h>
+	<xmmintrin.h>
+	<emmintrin.h>
+	<iostream>
+
+1529144598 source:d:\programming\alglib\alglibmisc.cpp
+	"stdafx.h"
+	"alglibmisc.h"
+
+1529144598 d:\programming\alglib\alglibmisc.h
+	"ap.h"
+	"alglibinternal.h"
+
+1529144598 source:d:\programming\alglib\ap.cpp
+	"stdafx.h"
+	"ap.h"
+	<limits>
+	<locale.h>
+	<ctype.h>
+	<intrin.h>
+	<windows.h>
+	<process.h>
+	<time.h>
+	<unistd.h>
+	<pthread.h>
+	<sched.h>
+	<windows.h>
+	<stdio.h>
+	<sys/time.h>
+
+1529144598 source:d:\programming\alglib\dataanalysis.cpp
+	"stdafx.h"
+	"dataanalysis.h"
+
+1529144598 d:\programming\alglib\dataanalysis.h
+	"ap.h"
+	"alglibinternal.h"
+	"alglibmisc.h"
+	"linalg.h"
+	"statistics.h"
+	"specialfunctions.h"
+	"solvers.h"
+	"optimization.h"
+
+1529144598 d:\programming\alglib\linalg.h
+	"ap.h"
+	"alglibinternal.h"
+	"alglibmisc.h"
+
+1529144598 d:\programming\alglib\statistics.h
+	"ap.h"
+	"alglibinternal.h"
+	"linalg.h"
+	"specialfunctions.h"
+	"alglibmisc.h"
+
+1529144598 d:\programming\alglib\specialfunctions.h
+	"ap.h"
+	"alglibinternal.h"
+
+1529144598 d:\programming\alglib\solvers.h
+	"ap.h"
+	"alglibinternal.h"
+	"alglibmisc.h"
+	"linalg.h"
+
+1529144598 d:\programming\alglib\optimization.h
+	"ap.h"
+	"alglibinternal.h"
+	"linalg.h"
+	"alglibmisc.h"
+	"solvers.h"
+
+1529144598 source:d:\programming\alglib\diffequations.cpp
+	"stdafx.h"
+	"diffequations.h"
+
+1529144598 d:\programming\alglib\diffequations.h
+	"ap.h"
+	"alglibinternal.h"
+
+1529144598 source:d:\programming\alglib\fasttransforms.cpp
+	"stdafx.h"
+	"fasttransforms.h"
+
+1529144598 d:\programming\alglib\fasttransforms.h
+	"ap.h"
+	"alglibinternal.h"
+
+1529144598 source:d:\programming\alglib\integration.cpp
+	"stdafx.h"
+	"integration.h"
+
+1529144598 d:\programming\alglib\integration.h
+	"ap.h"
+	"alglibinternal.h"
+	"alglibmisc.h"
+	"linalg.h"
+	"specialfunctions.h"
+
+1529144598 source:d:\programming\alglib\interpolation.cpp
+	"stdafx.h"
+	"interpolation.h"
+
+1529144598 d:\programming\alglib\interpolation.h
+	"ap.h"
+	"alglibinternal.h"
+	"alglibmisc.h"
+	"linalg.h"
+	"solvers.h"
+	"optimization.h"
+	"specialfunctions.h"
+	"integration.h"
+
+1529144598 source:d:\programming\alglib\linalg.cpp
+	"stdafx.h"
+	"linalg.h"
+
+1529144598 source:d:\programming\alglib\optimization.cpp
+	"stdafx.h"
+	"optimization.h"
+
+1529144598 source:d:\programming\alglib\solvers.cpp
+	"stdafx.h"
+	"solvers.h"
+
+1529144598 source:d:\programming\alglib\specialfunctions.cpp
+	"stdafx.h"
+	"specialfunctions.h"
+
+1529144598 source:d:\programming\alglib\statistics.cpp
+	"stdafx.h"
+	"statistics.h"
+
+1529336848 source:d:\programming\acoustics-at-home\src\cambala\sequential.cpp
+	"sequential.h"
+	<iostream>
+	<complex>
+	<time.h>
+	<stdexcept>
+	"utils.h"
+	"compute.h"
+
+1524164337 d:\programming\acoustics-at-home\src\cambala\sequential.h
+	<vector>
+	<complex>
+	<fstream>
+	<algorithm>
+	<chrono>
+	<math.h>
+	"linalg.h"
+	"point.h"
+
+1524166045 d:\programming\acoustics-at-home\src\cambala\point.h
+	<iostream>
+	<vector>
+	<string>
+	<sstream>
+	<fstream>
+	<algorithm>
+
+1522947688 d:\programming\acoustics-at-home\src\cambala\utils.h
+	<iostream>
+	<vector>
+	<string>
+	<sstream>
+	<algorithm>
+
+1522947685 d:\programming\acoustics-at-home\src\cambala\compute.h
+	<iostream>
+	<fstream>
+	<complex>
+	"linalg.h"
+

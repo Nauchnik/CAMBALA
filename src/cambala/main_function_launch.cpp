@@ -1,6 +1,6 @@
 /*****************************************************************************************
 // CAMBALA: Coupled Acoustic Modes -- Copyright(c) 2015-2017
-// Pavel Petrov (Il'ichev Pacific Oceanological Institute of FEB RAS), 
+// Pavel Petrov (Il'ichev Pacific Oceanological Institute of FEB RAS),
 // Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory of SB RAS)
 *****************************************************************************************/
 
@@ -23,23 +23,23 @@ int main(int argc, char **argv)
 {
 	double start_time = cpu_time();
 
-	string scenarioFileName; 
+	string scenarioFileName;
 	search_space_point point;
 	// input data
-	point.cb = 1715;
-	point.R = 6993;
-	point.rhob = 1.56;
+	point.cb = 1750;
+	point.R = 4875;
+	point.rhob = 1.7;
 	point.tau = 0;
-	point.cws = { 1500, 1498, 1493, 1472, 1462 };
-	point.depths = { 10, 20, 30, 40, 50, 300 };
+	point.cws = { 1539, 1539, 1535 };
+	point.depths = { 60, 95, 100, 500 };
 
-	if (argc > 1)
-		scenarioFileName = argv[1];
-	else {
-		//scenarioFileName = "./504_bottom_r_full_weighted.txt";
-		scenarioFileName = "./504_1_bottom_r_full_weighted2.txt";
+	if (argc == 1) {
+        cerr << "Usage: program scenario_file \n";
+        exit(1);
 	}
-	
+
+    scenarioFileName = argv[1];
+
 	CAMBALA_sequential CAMBALA_seq;
 	CAMBALA_seq.verbosity = 2;
 	CAMBALA_seq.readScenario(scenarioFileName);
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 
 	cout << "test done" << endl;
 	cout << "final time " << cpu_time() - start_time << endl;
-	
+
 	return 0;
 }
 
