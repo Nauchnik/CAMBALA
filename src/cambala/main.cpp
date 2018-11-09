@@ -6,10 +6,10 @@
 
 #ifdef _MPI
 #include <mpi.h>
+#include "parallel.h"
 #endif
 
 #include "sequential.h"
-#include "parallel.h"
 
 #define _USE_MATH_DEFINES
 
