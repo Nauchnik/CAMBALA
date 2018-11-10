@@ -265,6 +265,7 @@ void CAMBALA_parallel::controlProcessBruteforce()
 		MPI_Send(&stop_message, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
 	main_sstream_out << "stop-messages were sent" << endl;
 	writeOutputData(main_sstream_out);
+	reportFinalResult();
 	MPI_Finalize();
 #endif
 }

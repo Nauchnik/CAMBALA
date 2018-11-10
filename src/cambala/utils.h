@@ -25,6 +25,16 @@ namespace CAMBALA_utils{
 		if (val3 == -1)
 			val3 = val1;
 	}
+
+	inline void setParameterWithCount(const string word, double &val1, double &val2, unsigned long long &val_count)
+	{
+		double val_step = 0;
+		getThreeValuesFromStr(word, val1, val_step, val2);
+		if (val1 == val2)
+			val_count = 1;
+		else
+			val_count = (unsigned long long)(ceil((val2 - val1) / val_step)) + 1;
+	}
 	
 	// construct all combinations of some parameters
 	template< typename T >

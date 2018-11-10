@@ -123,4 +123,7 @@
       <Filter>alglib</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\cambala\Makefile" />
+  </ItemGroup>
 </Project>

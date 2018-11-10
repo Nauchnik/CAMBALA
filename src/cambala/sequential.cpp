@@ -209,11 +209,10 @@ void CAMBALA_sequential::reportFinalResult()
 	stringstream sstream;
 	
 	sstream << endl;
-	sstream << "total solving time (chrono) " << time_span.count() << endl;
+	sstream << "total solving time " << time_span.count() << endl;
 	sstream << "SEARCH ENDED!" << endl;
 	sstream << "RESULTING VALUE:" << endl;
 	sstream << strPointData(record_point);
-	sstream << "total solving time " << time_span.count() << endl;
 
 	writeOutputData(sstream);
 }
@@ -639,7 +638,6 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 	string str, word, tmp_word;
 	stringstream sstream;
 	unsigned cw_index = 0, d_index = 0;
-	double cur_val_step = 0, cur_val1 = 0, cur_val2 = 0;
 	while (getline(scenarioFile, str)) {
 		if ((str == "") || (str[0] == '%'))
 			continue;
@@ -669,13 +667,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 			if (ncpl_init_arr.size() < cw_index + 1)
 				ncpl_init_arr.resize(cw_index + 1);
 			sstream >> word;
-			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
-			cw1_init_arr[cw_index] = cur_val1;
-			cw2_init_arr[cw_index] = cur_val2;
-			if (cur_val1 == cur_val2)
-				ncpl_init_arr[cw_index] = 1;
-			else
-				ncpl_init_arr[cw_index] = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+			setParameterWithCount(word, cw1_init_arr[cw_index], cw2_init_arr[cw_index], ncpl_init_arr[cw_index]);
 		}
 		else if ((word.size() == 2) && (word[0] == 'd') && (isdigit(word[1]))) {
 			word = word.substr(1, word.size() - 1); // read depths
@@ -687,50 +679,24 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 				d_step.resize(d_index + 1);
 			}
 			sstream >> word;
-			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
-			d1_arr[d_index] = cur_val1;
-			d2_arr[d_index] = cur_val2;
-			d_step[d_index] = cur_val_step;
+			// here we need step, not count, so setParameterWithCount() is not required
+			getThreeValuesFromStr(word, d1_arr[d_index], d_step[d_index], d2_arr[d_index]);
 		}
 		else if (word == "R") {
 			sstream >> word;
-			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
-			R1 = cur_val1;
-			R2 = cur_val2;
-			if (R1 == R2)
-				nR = 1;
-			else
-				nR = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+			setParameterWithCount(word, R1, R2, nR);
 		}
 		else if (word == "rhob") {
 			sstream >> word;
-			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
-			rhob1 = cur_val1;
-			rhob2 = cur_val2;
-			if (rhob1 == rhob2)
-				nrhob = 1;
-			else
-				nrhob = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+			setParameterWithCount(word, rhob1, rhob2, nrhob);
 		}
 		else if (word == "cb") {
 			sstream >> word;
-			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
-			cb1 = cur_val1;
-			cb2 = cur_val2;
-			if (cb1 == cb2)
-				ncb = 1;
-			else
-				ncb = (unsigned)(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+			setParameterWithCount(word, cb1, cb2, ncb);
 		}
 		else if (word == "tau") {
 			sstream >> word;
-			getThreeValuesFromStr(word, cur_val1, cur_val_step, cur_val2);
-			tau1 = cur_val1;
-			tau2 = cur_val2;
-			if (tau1 == tau2)
-				ntau = 1;
-			else
-				ntau = (unsigned long long)abs(ceil((cur_val2 - cur_val1) / cur_val_step)) + 1;
+			setParameterWithCount(word, tau1, tau2, ntau);
 		}
 		else if (word == "ppm")
 			sstream >> ppm;
@@ -788,6 +754,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 	input_params_sstream << "nR " << nR << endl;
 	input_params_sstream << "R1 " << R1 << endl;
 	input_params_sstream << "R2 " << R2 << endl;
+	input_params_sstream << "nh " << nh << endl;
 	input_params_sstream << "ntau " << ntau << endl;
 	input_params_sstream << "tau1 " << tau1 << endl;
 	input_params_sstream << "tau2 " << tau2 << endl;

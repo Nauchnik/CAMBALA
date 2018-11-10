@@ -38,11 +38,11 @@ public:
 	vector<unsigned long long> ncpl_arr;
 	string object_function_type;
 	unsigned ppm;
-	double h;
 	double H;
+	double h;
 	double R1;
 	double R2;
-	double tau1;    // tau to the class declaration
+	double tau1;
 	double tau2;  
 	double rhob1;
 	double rhob2;
