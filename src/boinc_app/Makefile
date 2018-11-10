@@ -1,6 +1,6 @@
 CAMBALA = ../cambala
-ALGLIB = ../../alglib
-BOINC_DIR = ../../boinc
+ALGLIB = ../../../alglib
+BOINC_DIR = ../../../boinc
 BOINC_API_DIR = $(BOINC_DIR)/api
 BOINC_LIB_DIR = $(BOINC_DIR)/lib
 BOINC_ZIP_DIR = $(BOINC_DIR)/zip
