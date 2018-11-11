@@ -13,7 +13,7 @@ namespace CAMBALA_compute {
 
 // functions by Pavel
 
-double RK4(double omeg2, double kh2, double deltah, double c1, double c2, unsigned Np, 
+double RK4(double omeg2, double kh2, double deltah, double c1, double c2, unsigned Np,
 	vector<double> &phi0, vector<double> &dphi0);
 
 double Layer_an_exp(double omeg2, double kh2, double deltah, double c, unsigned Np,
@@ -27,6 +27,11 @@ void load_profile_deep_water(string ProfileFName, vector<double> &depths, vector
 	vector<double> &c2s, vector<double> &rhos, vector<unsigned> &Ns_points, const unsigned ppm);
 
 double compute_modal_delays_residual_uniform(vector<double> &freqs, vector<double> &depths,
+	vector<double> &c1s, vector<double> &c2s, vector<double> &rhos,
+	vector<unsigned> &Ns_points, double R, double tau,
+	vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
+
+double compute_modal_delays_residual_LWan(vector<double> &freqs, vector<double> &depths,
 	vector<double> &c1s, vector<double> &c2s, vector<double> &rhos,
 	vector<unsigned> &Ns_points, double R, double tau,
 	vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
@@ -103,12 +108,12 @@ int compute_wnumbers_bb(vector<double> &freqs, double deltaf, vector<double> &de
 	unsigned flOnlyTrapped, unsigned &ordRich, vector<vector<double>> &modal_group_velocities,
 	vector<unsigned> &mode_numbers);
 
-void printDelayTime(const double R, const vector<double> freqs, const vector<unsigned> mode_numbers, 
+void printDelayTime(const double R, const vector<double> freqs, const vector<unsigned> mode_numbers,
 	const vector<vector<double>> modal_group_velocities);
 
-void printDelayTime(const double R, 
-				    const vector<double> freqs, 
-	                const vector<unsigned> mode_numbers, 
+void printDelayTime(const double R,
+				    const vector<double> freqs,
+	                const vector<unsigned> mode_numbers,
 	                const vector<vector<double>> modal_group_velocities)
 {
 	string ofile_name = "delayTimeOutput.txt";
@@ -327,7 +332,7 @@ void load_profile_deep_water(
 	vector<double> &c1s,
 	vector<double> &c2s,
 	vector<double> &rhos,
-	vector<unsigned> &Ns_points, 
+	vector<unsigned> &Ns_points,
 	const unsigned ppm)
 {
     ifstream Myfile(ProfileFName);
@@ -416,6 +421,116 @@ double compute_modal_delays_residual_uniform(vector<double> &freqs,
 
 	return residual;
 }
+
+//Pavel: 2018.11.12, new fitness function from L.Wan et al, JASA 140(4), 2358-2373, 2016
+
+double compute_modal_delays_residual_LWan(vector<double> &freqs,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
+	double R,
+	double tau,
+	vector<vector<double>> &experimental_delays,
+	vector<unsigned> &experimental_mode_numbers
+	)
+{
+	unsigned rord = 3;
+    unsigned SomeBigNumber = 100000;
+
+	double iModesSubset = -1.0;
+	double deltaf = 0.05;
+
+	double residual = 0;
+	unsigned mnumb;
+	double mdelay;
+	//2016.04.27:Pavel: now we use RMS as the residual
+    unsigned nRes = 0;
+
+
+	vector<vector<double>> modal_group_velocities;
+	vector<unsigned> mode_numbers;
+
+	//Pavel: 2018.11.12
+	// cut off frequencies and their respective delays in the data
+	vector<unsigned> mode_cut_off_exp_idx;
+    unsigned cmode_cut_off_idx;
+
+    mode_cut_off_exp_idx.clear();
+
+	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
+
+	for (unsigned ii = 0; ii<freqs.size(); ii++) {
+		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
+		mnumb = experimental_mode_numbers.at(ii);
+
+
+        while (mnumb > mode_cut_off_exp_idx.size() ) {
+            mode_cut_off_exp_idx.push_back(SomeBigNumber);
+        }
+
+
+        for (unsigned jj=0; jj<mnumb; jj++) {
+            if ((mode_cut_off_exp_idx.at(jj) >=SomeBigNumber) && (experimental_delays[ii][jj]>0)) {
+                mode_cut_off_exp_idx.at(jj) = ii;
+            }
+        }
+
+        // INTRAMODAL component of Wan's formula (5)
+
+		for (unsigned jj = 0; jj<mnumb; jj++) {
+            cmode_cut_off_idx = mode_cut_off_exp_idx.at(jj);
+
+			if ((experimental_delays[ii][jj]>0) && ( cmode_cut_off_idx < ii )) {
+                nRes = nRes + 1;
+
+                if ( jj<mode_numbers.at(cmode_cut_off_idx) ) {
+                    mdelay = (R / modal_group_velocities[ii][jj])  -  (R / modal_group_velocities[cmode_cut_off_idx][jj]);
+                }
+                else {
+                    mdelay = 0;
+                }
+
+				residual = residual + pow(experimental_delays[ii][jj] - experimental_delays[cmode_cut_off_idx][jj] - mdelay, 2);
+			}
+		}
+
+
+
+        // INTERMODAL component of Wan's formula (5)
+        cmode_cut_off_idx = SomeBigNumber;
+
+		for (unsigned jj = 0; jj<mnumb; jj++) {
+            if ((experimental_delays[ii][jj]>0) && (cmode_cut_off_idx >= SomeBigNumber)){
+                cmode_cut_off_idx = jj;
+            }
+
+
+			if ((experimental_delays[ii][jj]>0) && ( cmode_cut_off_idx < jj )) {
+                nRes = nRes + 1;
+
+                if ( jj < mode_numbers.at(ii) ) {
+                    mdelay = (R / modal_group_velocities[ii][jj])  -  (R / modal_group_velocities[ii][cmode_cut_off_idx]);
+                }
+                else {
+                    mdelay = 0;
+                }
+
+				residual = residual + pow(experimental_delays[ii][jj] - experimental_delays[ii][cmode_cut_off_idx] - mdelay, 2);
+			}
+		}
+
+	}
+    //2016.04.27:Pavel: RMS
+	residual = sqrt(residual/nRes);
+
+	//if (isTimeDelayPrinting)
+	//	printDelayTime(R, freqs, mode_numbers, modal_group_velocities);
+
+	return residual;
+}
+
 
 // New version from 17.05.2017, group velocities computed using perturbative approach
 double compute_modal_delays_residual_uniform2(vector<double> &freqs,
@@ -1859,7 +1974,7 @@ vector<double> compute_wnumbers(double &omeg, // sound frequency
 
 	return wnumbers2;
 }
-		
+
 }
 
 #endif
