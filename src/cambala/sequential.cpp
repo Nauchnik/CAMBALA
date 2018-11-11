@@ -129,7 +129,7 @@ int CAMBALA_sequential::init(vector<double> depths)
 
 void CAMBALA_sequential::writeOutputData(stringstream &sstream)
 {
-	ofstream ofile(output_filename, ios_base::app);
+	ofstream ofile(output_filename);
 	ofile << sstream.rdbuf();
 	sstream.clear(); sstream.str("");
 	ofile.close(); ofile.clear();
@@ -209,10 +209,12 @@ void CAMBALA_sequential::reportFinalResult()
 	stringstream sstream;
 	
 	sstream << endl;
-	sstream << "total solving time " << time_span.count() << endl;
 	sstream << "SEARCH ENDED!" << endl;
+	sstream << "SOLVING TIME " << time_span.count() << endl;
 	sstream << "RESULTING VALUE:" << endl;
 	sstream << strPointData(record_point);
+	
+	cout << sstream.str();
 
 	writeOutputData(sstream);
 }
@@ -323,6 +325,10 @@ double CAMBALA_sequential::fillDataComputeResidual( search_space_point &point )
 	}
 	else if (object_function_type == "uniform2") {
 		point.residual = compute_modal_delays_residual_uniform2(freqs, depths, c1s, c2s, rhos, Ns_points,
+			point.R, point.tau, modal_delays, mode_numbers);
+	}
+	else if (object_function_type == "Wan_uniform") {
+		point.residual = compute_modal_delays_residual_LWan(freqs, depths, c1s, c2s, rhos, Ns_points,
 			point.R, point.tau, modal_delays, mode_numbers);
 	}
 	else if (object_function_type == "weighted") {
@@ -708,7 +714,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 	}
 	
 	if (ppm == 0) { // if ppm wasn't set directly
-		if ((object_function_type == "uniform") || (object_function_type == "weighted"))
+		if ((object_function_type == "uniform") || (object_function_type == "Wan_uniform") || (object_function_type == "weighted"))
 			ppm = 2;
 		else if ((object_function_type == "uniform2") || (object_function_type == "weighted2"))
 			ppm = 1;

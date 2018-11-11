@@ -66,10 +66,6 @@ int main(int argc, char **argv)
 	CAMBALA_seq.solve();
 	CAMBALA_seq.reportFinalResult();
 
-	t2 = std::chrono::high_resolution_clock::now();
-	time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-	cout << "main() total time " << time_span.count() << " s" << endl;
-
 #else
 	int rank = 0;
 	int corecount = 1;
