@@ -1,0 +1,5 @@
+case 1: 817-818 -- invert for dtau
+case 2: 717-718 -- average dtau, 719 -- wan uniform
+case 3: 517-518 -- dtau = dtau(f)
+case 4: 617-618 -- dtau = dtau(f), noise added
+
