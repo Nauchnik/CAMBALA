@@ -18,18 +18,6 @@ CAMBALA_sequential::CAMBALA_sequential() :
 	spmagFileName(""),
 	H(0),
 	nh(1),
-	ncb(1),
-	nrhob(1),
-	nR(1),
-	ntau(1),
-	cb1(2000.0),
-	cb2(2000.0),
-	R1(3400.0),
-	R2(3600.0),
-	tau1(0.0),
-	tau2(0.0),
-	rhob1(2.0),
-	rhob2(2.0),
 	n_layers_w(1),
 	iterated_local_search_runs(10),
 	init_iterated_local_search_runs(10),
@@ -52,16 +40,13 @@ CAMBALA_sequential::CAMBALA_sequential() :
 #endif
 }
 
-//tau_comment: search and output,
-//check for tau!
+// tau_comment: search and output,
+// check for tau!
 int CAMBALA_sequential::init(vector<double> depths)
 {
 	if ((!rank) && (verbosity > 0)) {
 		cout << "init() started" << endl;
-		cout << "depths: ";
-		for (auto &x : depths)
-			cout << x << " ";
-		cout << endl;
+		cout << "depths: \n" << doubleVecToStr(depths) << endl;
 	}
 
 	n_layers_w = depths.size() - 1;
@@ -71,12 +56,8 @@ int CAMBALA_sequential::init(vector<double> depths)
 		return -1;
 	}
 
-	ncpl_arr = ncpl_init_arr;
-	ncpl_arr.resize(n_layers_w);
-	cw1_arr = cw1_init_arr;
-	cw1_arr.resize(n_layers_w);
-	cw2_arr = cw2_init_arr;
-	cw2_arr.resize(n_layers_w);
+	cw_vec_vec = cw_init_vec_vec;
+	cw_vec_vec.resize(n_layers_w);
 
 	c1s.resize(n_layers_w + 1);
 	for (auto &x : c1s)
@@ -91,31 +72,22 @@ int CAMBALA_sequential::init(vector<double> depths)
 	Ns_points[0] = (unsigned)round(ppm*depths[0]);
 	for (unsigned i=1; i < depths.size(); i++ )
 		Ns_points[i] = (unsigned)round(ppm*(depths[i] - depths[i-1]));
-
-	N_total = nR*nrhob*ncb*ntau;
-	for (auto &x : ncpl_arr)
-		N_total *= (unsigned long long)x;
+	
+	N_total = R_vec.size()*rhob_vec.size()*cb_vec.size()*tau_vec.size();
+	for (auto &cw_vec : cw_vec_vec)
+		N_total *= (unsigned long long)cw_vec.size();
 
 	if (!N_total) {
 		cerr << "N_total == 0" << endl;
-		cerr << "nR nrhob ncb ntau : " << endl;
-		cerr << nR << " " << nrhob << " " << ncb << " " << ntau << endl;
-		cerr << "ncpl_arr : " << endl;
-		for (auto &x : ncpl_arr)
-			cerr << x << " ";
-		cerr << endl;
-		cerr << "depths : " << endl;
-		for (auto &x : depths)
-			cerr << x << " ";
-		cerr << endl;
+		cerr << "depths : " << doubleVecToStr(depths) << endl;
 		return -1;
 	}
 
 	if ( (!rank) && (verbosity > 0) )
 		cout << "N_total " << N_total << endl;
 
-	if (cw1_arr.size() != (depths.size() - 1)) {
-		cerr << "cw1_arr.size() != (depths.size() - 1)";
+	if (cw_vec_vec.size() != (depths.size() - 1)) {
+		cerr << "cw_vec_vec.size() != (depths.size() - 1)";
 		cerr << endl;
 		exit(1);
 	}
@@ -129,7 +101,7 @@ int CAMBALA_sequential::init(vector<double> depths)
 
 void CAMBALA_sequential::writeOutputData(stringstream &sstream)
 {
-	ofstream ofile(output_filename);
+	ofstream ofile(output_filename, ios_base::app);
 	ofile << sstream.rdbuf();
 	sstream.clear(); sstream.str("");
 	ofile.close(); ofile.clear();
@@ -138,8 +110,8 @@ void CAMBALA_sequential::writeOutputData(stringstream &sstream)
 vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 {
 	vector<vector<double>> depths_vec;
-	if (d1_arr.size() == 0) { // static depths mode
-		n_layers_w = cw1_arr.size();
+	if (d1_vec.size() == 0) { // static depths mode
+		n_layers_w = cw_init_vec_vec.size();
 		double layer_thickness_w = h / n_layers_w;
 		vector<double> depths;
 		for (unsigned jj = 1; jj <= n_layers_w; jj++)
@@ -149,13 +121,13 @@ vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 	}
 	else { // dynamic depths mode
 		vector<vector<double>> search_space_depths;
-		search_space_depths.resize(d1_arr.size());
-		for (unsigned i = 0; i < d2_arr.size(); i++) {
-			double cur_val = d2_arr[i];
+		search_space_depths.resize(d1_vec.size());
+		for (unsigned i = 0; i < d2_vec.size(); i++) {
+			double cur_val = d2_vec[i];
 			for (;;) {
 				search_space_depths[i].push_back(cur_val);
-				cur_val -= d_step[i];
-				if (cur_val < d1_arr[i])
+				cur_val -= d_step_vec[i];
+				if (cur_val < d1_vec[i])
 					break;
 			}
 		}
@@ -174,7 +146,7 @@ vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 					cur_treshold = tmp_depths[i] + 2;
 				}
 			}
-			if (depths.size() < d1_arr.size()) // skip short depths
+			if (depths.size() < d1_vec.size()) // skip short depths
 				continue; 
 			it = find(depths_vec.begin(), depths_vec.end(), depths);
 			if (it == depths_vec.end())
@@ -221,13 +193,19 @@ void CAMBALA_sequential::reportFinalResult()
 
 void CAMBALA_sequential::findGlobalMinBruteForce(vector<double> depths)
 {
-	cout << "findGlobalMinBruteForce()" << endl;
+	cout << "Brute force mode" << endl;
 
 	vector<search_space_point> search_space_points_vec = getSearchSpacePointsVec(depths);
-	cout << "search_space_points_vec.size() " << search_space_points_vec.size() << endl;
+	cout << search_space_points_vec.size() << " points in the search space" << endl;
 
-	for (auto &x : search_space_points_vec)
+	int processed_points = 0;
+	for (auto &x : search_space_points_vec) {
 		fillDataComputeResidual(x); // calculated residual is written to cur_point
+		processed_points++;
+		if ((verbosity>0) && (processed_points % 10 == 0) ) {
+			cout << processed_points << " out of " << search_space_points_vec.size() << " points have been processed \n";
+		}
+	}
 }
 
 vector<search_space_point> CAMBALA_sequential::getSearchSpacePointsVec(vector<double> depths)
@@ -256,24 +234,24 @@ void CAMBALA_sequential::reduceSearchSpace(reduced_search_space_attribute &reduc
 	// search_space_variables[4, ...] - cws
 	if (reduced_s_s_a.cb == false) {
 		search_space[0].resize(1);
-		search_space[0][0] = cb1;
+		search_space[0][0] = cb_vec[0];
 	}
 	if (reduced_s_s_a.rhob == false) {
 		search_space[1].resize(1);
-		search_space[1][0] = rhob1;
+		search_space[1][0] = rhob_vec[0];
 	}
 	if (reduced_s_s_a.R == false) {
 		search_space[2].resize(1);
-		search_space[2][0] = R1;
+		search_space[2][0] = R_vec[0];
 	}
 	if (reduced_s_s_a.tau == false) {
 		search_space[3].resize(1);
-		search_space[3][0] = tau1;
+		search_space[3][0] = tau_vec[0];
 	}
 	for (unsigned i=0; i < reduced_s_s_a.cws.size(); i++) {
 		if (reduced_s_s_a.cws[i] == false) {
 			search_space[4 + i].resize(1);
-			search_space[4 + i][0] = cw1_arr[i];
+			search_space[4 + i][0] = cw_vec_vec[i][0];
 		}
 	}
 }
@@ -349,7 +327,7 @@ double CAMBALA_sequential::fillDataComputeResidual( search_space_point &point )
 
 	if (point < record_point) {
 		record_point = point;
-		if (verbosity > 0) {
+		if ((!is_mpi) && (verbosity > 0)) {
 			cout << endl;
 			cout << endl << "New residual minimum:" << endl;
 			cout << strPointData(record_point);
@@ -372,43 +350,19 @@ void CAMBALA_sequential::loadValuesToSearchSpaceVariables()
 	// search_space_variables[2] - R
 	// search_space_variables[3] - tau
 	// search_space_variables[4...] - cws
-	vector<double> tmp_vec;
 	search_space.clear();
 
 	// fill search_space_variables[0] with cb
-	tmp_vec.resize(ncb);
-	for (unsigned long long i = 0; i < ncb; i++)
-		tmp_vec[i] = cb1 + (ncb == 1 ? 0 : i*(cb2 - cb1) / (ncb - 1));
-	search_space.push_back(tmp_vec);
-
+	search_space.push_back(cb_vec);
 	// fill search_space_variables[1] with rhob
-	tmp_vec.resize(nrhob);
-	for (unsigned long long i = 0; i < nrhob; i++)
-		tmp_vec[i] = rhob1 + (nrhob == 1 ? 0 : i*(rhob2 - rhob1) / (nrhob - 1));
-	search_space.push_back(tmp_vec);
-
+	search_space.push_back(rhob_vec);
 	// fill search_space_variables[2] with R
-	tmp_vec.resize(nR);
-	for (unsigned long long i = 0; i < nR; i++)
-		tmp_vec[i] = R1 + (nR == 1 ? 0 : i*(R2 - R1) / (nR - 1));
-	search_space.push_back(tmp_vec);
-
+	search_space.push_back(R_vec);
 	// fill search_space_variables[3] with tau
-	tmp_vec.resize(ntau);
-	for (unsigned long long i = 0; i < ntau; i++)
-		tmp_vec[i] = tau1 + (ntau == 1 ? 0 : i*(tau2 - tau1) / (ntau - 1));
-	search_space.push_back(tmp_vec);
-
+	search_space.push_back(tau_vec);
 	// fill search_space_variables[4...] with cws
-	for (unsigned long long i = 0; i < cw1_arr.size(); i++) {
-		tmp_vec.resize(ncpl_arr[i]);
-		for (unsigned long long j = 0; j < ncpl_arr[i]; j++)
-			tmp_vec[j] = cw1_arr[i] + (ncpl_arr[i] == 1 ? 0 : j*(cw2_arr[i] - cw1_arr[i]) / (ncpl_arr[i] - 1));
-		search_space.push_back(tmp_vec);
-	}
-
-	//if (!rank)
-	//	cout << "loadValuesToSearchSpaceVariables() finished" << endl;
+	for (auto cw_vec : cw_vec_vec)
+		search_space.push_back(cw_vec);
 }
 
 search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> depths)
@@ -663,46 +617,43 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 			sstream >> h;
 			nh = 1;
 		}
-		else if ((word.size() >= 2) && (word[0] == 'c') && (word[1] == 'w')) {
+		else if ((word.size() >= 3) && (word[0] == 'c') && (word[1] == 'w') && (isdigit(word[2]))) {
 			word = word.substr(2, word.size() - 2);
 			istringstream(word) >> cw_index;
-			if (cw1_init_arr.size() < cw_index + 1)
-				cw1_init_arr.resize(cw_index + 1);
-			if (cw2_init_arr.size() < cw_index + 1)
-				cw2_init_arr.resize(cw_index + 1);
-			if (ncpl_init_arr.size() < cw_index + 1)
-				ncpl_init_arr.resize(cw_index + 1);
+			if (cw_vec_vec.size() < cw_index + 1)
+				cw_init_vec_vec.resize(cw_index + 1);
 			sstream >> word;
-			setParameterWithCount(word, cw1_init_arr[cw_index], cw2_init_arr[cw_index], ncpl_init_arr[cw_index]);
+			fillArrayStep(word, cw_init_vec_vec[cw_index]);
 		}
 		else if ((word.size() == 2) && (word[0] == 'd') && (isdigit(word[1]))) {
 			word = word.substr(1, word.size() - 1); // read depths
 			istringstream(word) >> d_index;
 			d_index--;
-			if (d1_arr.size() < d_index + 1) {
-				d1_arr.resize(d_index + 1);
-				d2_arr.resize(d_index + 1);
-				d_step.resize(d_index + 1);
+
+			if (d1_vec.size() < d_index + 1) {
+				d1_vec.resize(d_index + 1);
+				d2_vec.resize(d_index + 1);
+				d_step_vec.resize(d_index + 1);	
 			}
-			sstream >> word;
-			// here we need step, not count, so setParameterWithCount() is not required
-			getThreeValuesFromStr(word, d1_arr[d_index], d_step[d_index], d2_arr[d_index]);
+				sstream >> word;
+			// here we need step, not count, so setParameterWithCount() is not required^M
+			getThreeValuesFromStr(word, d1_vec[d_index], d_step_vec[d_index], d2_vec[d_index]);
 		}
 		else if (word == "R") {
 			sstream >> word;
-			setParameterWithCount(word, R1, R2, nR);
+			fillArrayStep(word, R_vec);
 		}
 		else if (word == "rhob") {
 			sstream >> word;
-			setParameterWithCount(word, rhob1, rhob2, nrhob);
+			fillArrayStep(word, rhob_vec);
 		}
 		else if (word == "cb") {
 			sstream >> word;
-			setParameterWithCount(word, cb1, cb2, ncb);
+			fillArrayStep(word, cb_vec);
 		}
 		else if (word == "tau") {
 			sstream >> word;
-			setParameterWithCount(word, tau1, tau2, ntau);
+			fillArrayStep(word, tau_vec);
 		}
 		else if (word == "ppm")
 			sstream >> ppm;
@@ -726,60 +677,70 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 	
 	if (dtimesFileName == "") {
 		cerr << "dtimesFileName == "" \n";
-		return -1;
+		exit(-1);
 	}
-	if (!cw1_init_arr.size()) {
-		cerr << "cw1_init_arr is empty \n";
-		return -1;
+	if (!cw_init_vec_vec.size()) {
+		cerr << "cw_init_vec_vec is empty \n";
+		exit(-1);
 	}
 	if (H <= 0) {
 		cerr << "incorrect H " << H << endl;
-		return -1;
+		exit(-1);
 	}
-
-	cw1_arr = cw1_init_arr;
-	cw2_arr = cw2_init_arr;
 
 	input_params_sstream << "Input parameters :" << endl;
 	input_params_sstream << "launch_type " << launch_type << endl;
 	input_params_sstream << "object_function_type " << object_function_type << endl;
 	input_params_sstream << "ppm " << ppm << endl;
 	input_params_sstream << "init_iterated_local_search_runs " << init_iterated_local_search_runs << endl;
-	input_params_sstream << "cw1_init_arr :" << endl;
-	for (auto &x : cw1_init_arr)
-		input_params_sstream << x << " ";
-	input_params_sstream << endl;
-	input_params_sstream << "cw2_init_arr :" << endl;
-	for (auto &x : cw2_init_arr)
-		input_params_sstream << x << " ";
-	input_params_sstream << endl;
-	input_params_sstream << "ncpl_init_arr :" << endl;
-	for (auto &x : ncpl_init_arr)
-		input_params_sstream << x << " ";
-	input_params_sstream << endl;
-	input_params_sstream << "nR " << nR << endl;
-	input_params_sstream << "R1 " << R1 << endl;
-	input_params_sstream << "R2 " << R2 << endl;
-	input_params_sstream << "nh " << nh << endl;
-	input_params_sstream << "ntau " << ntau << endl;
-	input_params_sstream << "tau1 " << tau1 << endl;
-	input_params_sstream << "tau2 " << tau2 << endl;
-	input_params_sstream << "nrhob " << nrhob << endl;
-	input_params_sstream << "rhob1 " << rhob1 << endl;
-	input_params_sstream << "rhob2 " << rhob2 << endl;
-	input_params_sstream << "ncb " << ncb << endl;
-	input_params_sstream << "cb1 " << cb1 << endl;
-	input_params_sstream << "cb2 " << cb2 << endl;
+	input_params_sstream << "cw_init_vec_vec :" << endl;
+	for (auto &x : cw_init_vec_vec)
+		input_params_sstream << doubleVecToStr(x) << endl;
+	input_params_sstream << "d1_vec :" << endl;
+	input_params_sstream << doubleVecToStr(d1_vec) << endl;
+	input_params_sstream << "d2_vec :" << endl;
+	input_params_sstream << doubleVecToStr(d2_vec) << endl;
+	input_params_sstream << "d_step_vec :" << endl;
+	input_params_sstream << doubleVecToStr(d_step_vec) << endl;
+	input_params_sstream << "R_vec :" << endl;
+	input_params_sstream << doubleVecToStr(R_vec) << endl;
+	input_params_sstream << "cb_vec :" << endl;
+	input_params_sstream << doubleVecToStr(cb_vec) << endl;
+	input_params_sstream << "rhob_vec :" << endl;
+	input_params_sstream << doubleVecToStr(rhob_vec) << endl;
+	input_params_sstream << "tau_vec :" << endl;
+	input_params_sstream << doubleVecToStr(tau_vec) << endl;
 	input_params_sstream << "dtimes_file " << dtimesFileName << endl;
 	input_params_sstream << "spmag_file " << spmagFileName << endl;
 	input_params_sstream << "launch_type " << launch_type << endl;
 
-	if (!rank)
+	if (!rank) {
+		cout << input_params_sstream.str() << endl;
 		writeOutputData(input_params_sstream);
+	}
 
 	if (((rank == 0) || (rank == 1)) && (verbosity > 0))
 		cout << "readScenario() finished" << endl;
 
+	return 0;
+}
+
+int CAMBALA_sequential::fillArrayStep(const string word, vector<double> &vec)
+{
+	double left_bound_val = 0, step = 0, right_bound_val = 0;
+	getThreeValuesFromStr(word, left_bound_val, step, right_bound_val);
+	vec.push_back(left_bound_val);
+	if (left_bound_val == right_bound_val)
+		return 0;
+	double val = left_bound_val;
+	for (;;) {
+		val += step;
+		if (val > right_bound_val)
+			break;
+		vec.push_back(val);
+	}
+	if (find(vec.begin(),vec.end(),right_bound_val) == vec.end())
+		vec.push_back(right_bound_val);
 	return 0;
 }
 
@@ -857,29 +818,14 @@ int CAMBALA_sequential::readInputDataFromFiles()
 
 search_space_point CAMBALA_sequential::getNonRandomStartPoint( vector<double> depths )
 {
-	// search_space_variables[0] - cb
-	// search_space_variables[1] - rhob
-	// search_space_variables[2] - R
-	// search_space_variables[3] - tau
-	// search_space_variables[4...] - cws
-
 	search_space_point point;
-
-	point.cb = (cb1 == cb2) ? cb1 : (cb2 - cb1) / 2;
-	point.rhob = (rhob1 == rhob2) ? rhob1 : (rhob2 - rhob1) / 2;
-	point.R = (R1 == R2) ? R1 : (R2 - R1) / 2;
-	point.tau = (tau1 == tau2) ? tau1 : (tau2 - tau1) / 2;
-
-	point.cws.resize(cw1_arr.size());
-	for ( unsigned i = 0; i < point.cws.size(); i++ ) {
-		if (cw1_arr[i] == cw2_arr[i])
-			point.cws[i] = cw1_arr[i];
-		else if ((START_CW_VALUE >= cw1_arr[i]) && (START_CW_VALUE <= cw2_arr[i])) // if cws should be modified
-			point.cws[i] = START_CW_VALUE;
-		else
-			point.cws[i] = (cw2_arr[i] - cw1_arr[i]) / 2;
-	}
-
+	point.cb = getMidVecValue(cb_vec);
+	point.rhob = getMidVecValue(rhob_vec);
+	point.R = getMidVecValue(R_vec);
+	point.tau = getMidVecValue(tau_vec);
+	point.cws.resize(cw_vec_vec.size());
+	for (unsigned i=0; i<cw_vec_vec.size(); i++)
+		point.cws[i] = getMidVecValue(cw_vec_vec[i]);
 	point.depths = depths;
 
 	return point;
@@ -895,6 +841,10 @@ double CAMBALA_sequential::directPointCalc( search_space_point point )
 
 void CAMBALA_sequential::solve()
 {
+	// clear out file
+	ofstream ofile(output_filename, ios_base::out);
+	ofile.close();
+
 	vector<vector<double>> depths_vec = createDepthsArray();
 	if (launch_type == "ils") {
 		for (unsigned j = 0; j < depths_vec.size(); j++) {

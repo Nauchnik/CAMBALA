@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 
 #ifdef _DEBUG
 	argc = 3;
-	scenarioFileName = "..//scenarios//test_fixed_depths.txt";
+	scenarioFileName = "..//..//scenarios//scenarios_7//719_bottom_r_short_uniform_wan_10nodes.txt";
 	//argv[1] = "./boinc_CAMBALA_app/in";
 	//argv[1] = "39_hydro_r_uniform260.txt";
 	//argv[1] = "true_scenario_2.txt";
@@ -52,11 +52,6 @@ int main(int argc, char **argv)
 #ifndef _MPI
 	// sequential mode%
 	cout << "verbosity " << verbosity << endl;
-
-	// fix start time
-	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-	std::chrono::high_resolution_clock::time_point t2;
-	std::chrono::duration<double> time_span;
 
 	CAMBALA_seq.verbosity = verbosity;
 	// read scenario, modal_delays, mode_numbers and freqs, then determine the search space

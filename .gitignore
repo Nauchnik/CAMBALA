@@ -247,3 +247,6 @@ Release x64/260_dtimes.txt
 Release x64/SSPEMDD.tlog/CL.command.1.tlog
 *.tlog
 Release x64/out
+scenarios/scenarios_7/VS_cambala.exe
+scenarios/scenarios_7/cambala_depths_out
+scenarios/scenarios_7/cambala_out

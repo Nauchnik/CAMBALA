@@ -1,300 +1,33 @@
-Parameters :
+Input parameters :
 launch_type bruteforce
-object_function_type uniform
+object_function_type Wan_uniform
 ppm 2
 init_iterated_local_search_runs 10
-cw1_init_arr :
-1500 1498 1493 
-cw2_init_arr :
-1500 1498 1493 
-ncpl_init_arr :
-1 1 1 
-nR 1
-R1 7000
-R2 7000
-ntau 1
-tau1 0
-tau2 0
-nrhob 1
-rhob1 1.7
-rhob2 1.7
-ncb 1
-cb1 1700
-cb2 1700
-dtimes_file 260_dtimes.txt
-spmag_file 260_spmag.txt
-launch_type bruteforce
-Parameters :
-launch_type bruteforce
-object_function_type uniform
-ppm 2
-init_iterated_local_search_runs 10
-cw1_init_arr :
-1500 1498 1493 
-cw2_init_arr :
-1500 1498 1493 
-ncpl_init_arr :
-1 1 1 
-nR 1
-R1 7000
-R2 7000
-ntau 1
-tau1 0
-tau2 0
-nrhob 1
-rhob1 1.7
-rhob2 1.7
-ncb 1
-cb1 1700
-cb2 1700
-dtimes_file 260_dtimes.txt
-spmag_file 260_spmag.txt
-launch_type bruteforce
-Parameters :
-launch_type bruteforce
-object_function_type uniform
-ppm 2
-init_iterated_local_search_runs 10
-cw1_init_arr :
-1500 1498 1493 
-cw2_init_arr :
-1500 1498 1493 
-ncpl_init_arr :
-1 1 1 
-nR 1
-R1 7000
-R2 7000
-ntau 1
-tau1 0
-tau2 0
-nrhob 1
-rhob1 1.7
-rhob2 1.7
-ncb 1
-cb1 1700
-cb2 1700
-dtimes_file 260_dtimes.txt
-spmag_file 260_spmag.txt
-launch_type bruteforce
-Parameters :
-launch_type bruteforce
-object_function_type uniform
-ppm 2
-init_iterated_local_search_runs 10
-cw1_init_arr :
-1506 1490 1462 
-cw2_init_arr :
-1506 1490 1462 
-ncpl_init_arr :
-1 1 1 
-nR 1
-R1 7000
-R2 7000
-ntau 1
-tau1 0
-tau2 0
-nrhob 1
-rhob1 1.7
-rhob2 1.7
-ncb 1
-cb1 1700
-cb2 1700
-dtimes_file ac_modes_R7km_dtimes1.txt
-spmag_file no
-launch_type bruteforce
-Parameters :
-launch_type bruteforce
-object_function_type uniform
-ppm 2
-init_iterated_local_search_runs 10
-cw1_init_arr :
-1506 1490 1462 
-cw2_init_arr :
-1506 1490 1462 
-ncpl_init_arr :
-1 1 1 
-nR 1
-R1 7000
-R2 7000
-ntau 1
-tau1 0
-tau2 0
-nrhob 1
-rhob1 1.7
-rhob2 1.7
-ncb 1
-cb1 1700
-cb2 1700
-dtimes_file ac_modes_R7km_dtimes1.txt
-spmag_file no
-launch_type bruteforce
+cw_init_vec_vec :
+1500 
+1500 
+1498 
+1496 
+1493 
+1487 
+1472 
+1466 
+1462 
+1462 
+d1_vec :
 
-total solving time (chrono) 51.1116
-SEARCH ENDED!
-RESULTING VALUE:
-err = 0.003945, parameters:
-c_b = 1700
-tau = 0
-rho_b = 1.7
-R = 7000
-cws :
-1506 1490 1462 
-depths 
-23 33 50 300 
-total solving time 51.1116
-Input parameters :
-launch_type bruteforce
-object_function_type uniform
-ppm 2
-init_iterated_local_search_runs 10
-cw1_init_arr :
-1506 1490 1462 
-cw2_init_arr :
-1506 1490 1462 
-ncpl_init_arr :
-1 1 1 
-nR 1
-R1 7000
-R2 7000
-ntau 1
-tau1 0
-tau2 0
-nrhob 1
-rhob1 1.7
-rhob2 1.7
-ncb 1
-cb1 1700
-cb2 1700
-dtimes_file ac_modes_R7km_dtimes1.txt
-spmag_file no
-launch_type bruteforce
-Input parameters :
-launch_type bruteforce
-object_function_type uniform
-ppm 2
-init_iterated_local_search_runs 10
-cw1_init_arr :
-1506 1490 1462 1462 
-cw2_init_arr :
-1506 1490 1462 1462 
-ncpl_init_arr :
-1 1 1 1 
-nR 1
-R1 7000
-R2 7000
-ntau 1
-tau1 0
-tau2 0
-nrhob 1
-rhob1 1.7
-rhob2 1.7
-ncb 1
-cb1 1700
-cb2 1700
-dtimes_file ac_modes_R7km_dtimes1.txt
-spmag_file no
-launch_type bruteforce
-Input parameters :
-launch_type bruteforce
-object_function_type uniform
-ppm 2
-init_iterated_local_search_runs 10
-cw1_init_arr :
-1506 1490 1462 1462 
-cw2_init_arr :
-1506 1490 1462 1462 
-ncpl_init_arr :
-1 1 1 1 
-nR 1
-R1 7000
-R2 7000
-ntau 1
-tau1 0
-tau2 0
-nrhob 1
-rhob1 1.7
-rhob2 1.7
-ncb 1
-cb1 1700
-cb2 1700
-dtimes_file ac_modes_R7km_dtimes1.txt
-spmag_file no
-launch_type bruteforce
-Input parameters :
-launch_type bruteforce
-object_function_type uniform
-ppm 2
-init_iterated_local_search_runs 10
-cw1_init_arr :
-1506 1490 1462 1462 
-cw2_init_arr :
-1506 1490 1462 1462 
-ncpl_init_arr :
-1 1 1 1 
-nR 1
-R1 7000
-R2 7000
-ntau 1
-tau1 0
-tau2 0
-nrhob 1
-rhob1 1.7
-rhob2 1.7
-ncb 1
-cb1 1700
-cb2 1700
-dtimes_file ac_modes_R7km_dtimes1.txt
-spmag_file no
-launch_type bruteforce
-Input parameters :
-launch_type bruteforce
-object_function_type uniform
-ppm 2
-init_iterated_local_search_runs 10
-cw1_init_arr :
-1506 1490 1462 
-cw2_init_arr :
-1506 1490 1462 
-ncpl_init_arr :
-1 1 1 
-nR 1
-R1 7000
-R2 7000
-ntau 1
-tau1 0
-tau2 0
-nrhob 1
-rhob1 1.7
-rhob2 1.7
-ncb 1
-cb1 1700
-cb2 1700
-dtimes_file ac_modes_R7km_dtimes1.txt
-spmag_file no
-launch_type bruteforce
-Input parameters :
-launch_type bruteforce
-object_function_type uniform
-ppm 2
-init_iterated_local_search_runs 10
-cw1_init_arr :
-1506 1490 1462 
-cw2_init_arr :
-1506 1490 1462 
-ncpl_init_arr :
-1 1 1 
-nR 1
-R1 7000
-R2 7000
-ntau 1
-tau1 0
-tau2 0
-nrhob 1
-rhob1 1.7
-rhob2 1.7
-ncb 1
-cb1 1700
-cb2 1700
-dtimes_file ac_modes_R7km_dtimes1.txt
+d2_vec :
+
+d_step_vec :
+
+R_vec :
+6840 6860 6880 6900 6920 6940 6960 6980 7000 7020 7040 7060 7080 7100 7120 7140 7160 7160 
+cb_vec :
+1600 1620 1640 1660 1680 1700 1720 1740 1760 1780 1800 1800 
+rhob_vec :
+1.1 1.3 1.5 1.7 1.9 2 
+tau_vec :
+0 
+dtimes_file ac_modes_zr50m_R7km_dtimes_avdtau.txt
 spmag_file no
 launch_type bruteforce

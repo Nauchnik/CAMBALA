@@ -26,14 +26,22 @@ namespace CAMBALA_utils{
 			val3 = val1;
 	}
 
-	inline void setParameterWithCount(const string word, double &val1, double &val2, unsigned long long &val_count)
+	inline string doubleToStr(const double d) { 
+		stringstream sstream; 
+		sstream << d;
+		return sstream.str();
+	}
+
+	inline string doubleVecToStr(vector<double> vec) {
+		string str;
+		for (auto x : vec)
+			str += doubleToStr(x) + " ";
+		return str;
+	}
+
+	inline double getMidVecValue(vector<double> vec) 
 	{
-		double val_step = 0;
-		getThreeValuesFromStr(word, val1, val_step, val2);
-		if (val1 == val2)
-			val_count = 1;
-		else
-			val_count = (unsigned long long)(ceil((val2 - val1) / val_step)) + 1;
+		return (vec.size() == 1) ? vec[0] : (vec[vec.size() / 2]);
 	}
 	
 	// construct all combinations of some parameters

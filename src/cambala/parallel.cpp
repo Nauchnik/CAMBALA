@@ -168,7 +168,7 @@ void CAMBALA_parallel::computingProcessIls()
 		}
 		MPI_Recv( task, ILS_TASK_LEN, MPI_DOUBLE,   0, MPI_ANY_TAG, MPI_COMM_WORLD, &status );
 
-		if ( (rank == 1) && (verbosity > 0) ) {
+		if ( (rank == 1) && (verbosity > 2) ) {
 			cout << "computing process, rank " << rank << endl;
 			cout << "received task " << endl;
 			for ( unsigned j = 0; j < ILS_TASK_LEN; j++)
@@ -230,6 +230,10 @@ void CAMBALA_parallel::computingProcessIls()
 
 void CAMBALA_parallel::controlProcessBruteforce()
 {
+	// clear out file
+	ofstream ofile(output_filename, ios_base::out); 
+	ofile.close();
+
 	cout << "Start of controlProcessBruteforce()" << endl;
 	cout << "corecount " << corecount << endl;
 
@@ -277,38 +281,22 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 	stringstream sstream_out;
 	mpi_start_time = MPI_Wtime();
 
-	if (verbosity > 1)
-		cout << "control_process() started on depths # " << depths_index << endl;
-	
 	init(depths);
 
-	if (verbosity > 1) {
+	if (verbosity > 0) {
+		cout << "control_process() started on depths # " << depths_index << endl;
+		sstream_out << "control_process() started on depths # " << depths_index << endl;
 		sstream_out << endl;
 		sstream_out << "MPI control process" << endl;
 		sstream_out << "Start residual is: " << record_point.residual << endl;
-		sstream_out << "Search space:" << endl;
-		sstream_out << cb1 << " < c_b < " << cb2 << endl;
-		sstream_out << R1 << " < Range < " << R2 << endl;
-		sstream_out << rhob1 << " < rho_b < " << rhob2 << endl;
-		sstream_out << tau1 << " < tau < " << tau2 << endl;
-		sstream_out << "cw1_arr :" << endl;
-		for (auto &x : cw1_arr)
-			sstream_out << x << " ";
-		sstream_out << endl;
-		sstream_out << "cw2_arr :" << endl;
-		for (auto &x : cw2_arr)
-			sstream_out << x << " ";
-		sstream_out << endl;
-		sstream_out << "ncpl_arr :" << endl;
-		for (auto &x : ncpl_arr)
-			sstream_out << x << " ";
-		sstream_out << endl;
 	}
 
 	vector<vector<double>> point_values_vec;
 	point_values_vec.resize(N_total);
 	//sstream_out << "point_values_vec as vector of tasks" << endl;
 	sstream_out << "point_values_vec.size() " << point_values_vec.size() << endl;
+	writeOutputData(sstream_out);
+
 	unsigned long long index = 0;
 	vector<double> cur_point_values;
 	vector<int> index_arr;
@@ -346,7 +334,7 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 		for (unsigned j = 0; j < task_len - 1; j++)
 			task[j] = point_values_vec[send_task_count][j];
 		task[task_len - 1] = (double)send_task_count;
-		if (verbosity > 0) {
+		if (verbosity > 1) {
 			cout << "Sending from control process" << endl;
 			cout << "depths_p_len " << depths_p_len << endl;
 			cout << "depths_p" << endl;
@@ -384,7 +372,7 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 	while (processed_task_count < point_values_vec.size()) {
 		MPI_Recv(result, result_len, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		processed_task_count++;
-		if ( (!is_mpi) && (processed_task_count % 100000 == 0) ) {
+		if (processed_task_count % 10000 == 0) {
 			sstream_out << endl << "processed_task_count " << processed_task_count << " out of " << point_values_vec.size() << endl;
 			sstream_out << "time from start " << MPI_Wtime() - mpi_start_time << endl;
 			writeOutputData(sstream_out);
@@ -400,9 +388,9 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 			record_point = fromDoubleVecToPoint(point_values_vec[received_task_index]);
 			record_point.depths = depths;
 			record_point.residual = received_residual;
-
+			
 			double current_time = MPI_Wtime();
-			if (current_time - previous_record_time >= 1000) {
+			if (current_time - previous_record_time >= 100) {
 				reportRecordPoint(record_point, record_count);
 				previous_record_time = MPI_Wtime();
 			}
@@ -447,7 +435,7 @@ void CAMBALA_parallel::computingProcessBruteforce()
 		cout << "result_len " << result_len << endl;
 	}
 
-	stringstream cur_process_points_sstream;
+	//stringstream cur_process_points_sstream;
 
 	int message;
 	double d_message;
@@ -487,10 +475,10 @@ void CAMBALA_parallel::computingProcessBruteforce()
 
 			init(depths);
 
-			cur_process_points_sstream << "cb rhob R tau ";
+			/*cur_process_points_sstream << "cb rhob R tau ";
 			for (unsigned i = 0; i < cw1_arr.size(); i++)
 				cur_process_points_sstream << "cw" << i << " ";
-			cur_process_points_sstream << "residual";
+			cur_process_points_sstream << "residual";*/
 		}
 		MPI_Recv(task, task_len, MPI_DOUBLE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
@@ -508,12 +496,12 @@ void CAMBALA_parallel::computingProcessBruteforce()
 		cur_point = fromDoubleVecToPoint(cur_point_values_vec);
 		cur_point.depths = depths;
 		
-		if ( (rank == 1) && ( verbosity > 0 ) )
+		if ( (rank == 1) && ( verbosity > 1 ) )
 			cout << "received task_index " << task_index << endl;
 
 		fillDataComputeResidual(cur_point); // calculated residual is written to cur_point
 
-		cur_process_points_sstream << strPointData(cur_point);
+		//cur_process_points_sstream << strPointData(cur_point);
 
 		result[0] = cur_point.residual;
 		result[1] = task_index;
@@ -523,13 +511,13 @@ void CAMBALA_parallel::computingProcessBruteforce()
 		delete[] task;
 	delete[] result;
 	
-	stringstream cur_process_file_name_sstream;
+	/*stringstream cur_process_file_name_sstream;
 	cur_process_file_name_sstream << "points_process" << rank;
 	ofstream cur_process_file;
 	cur_process_file.open(cur_process_file_name_sstream.str().c_str(),ios_base::app);
 	cur_process_file << cur_process_points_sstream.rdbuf();
 	cur_process_file.close();
-	cur_process_points_sstream.clear(); cur_process_points_sstream.str("");
+	cur_process_points_sstream.clear(); cur_process_points_sstream.str("");*/
 
 	MPI_Finalize();
 #endif

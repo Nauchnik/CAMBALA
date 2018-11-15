@@ -13,39 +13,26 @@
 using namespace std;
 using namespace CAMBALA_point;
 
-const double START_CW_VALUE = 1481;
 const unsigned MAX_DEPTHS_VECTORS = 1000000;
 
 class CAMBALA_sequential
 {
 public:
 	CAMBALA_sequential();
+	double H;
 	unsigned long long nh;
-	unsigned long long ncb;
-	unsigned long long nrhob;
-	unsigned long long nR;
-	unsigned long long ntau;  //tau_comment: added tau to the class declaration
-	double cb1;
-	double cb2;
-	vector<double> cw1_arr;
-	vector<double> cw2_arr;
-	vector<double> cw1_init_arr;
-	vector<double> cw2_init_arr;
-	vector<double> d1_arr;
-	vector<double> d2_arr;
-	vector<double> d_step;
-	vector<unsigned long long> ncpl_init_arr;
-	vector<unsigned long long> ncpl_arr;
+	double h;
+	vector<double> cb_vec;
+	vector<double> R_vec;
+	vector<double> tau_vec;
+	vector<double> rhob_vec;
+	vector<vector<double>> cw_vec_vec;
+	vector<vector<double>> cw_init_vec_vec;
+	vector<double> d1_vec;
+	vector<double> d2_vec;
+	vector<double> d_step_vec;
 	string object_function_type;
 	unsigned ppm;
-	double H;
-	double h;
-	double R1;
-	double R2;
-	double tau1;
-	double tau2;  
-	double rhob1;
-	double rhob2;
 	unsigned long long n_layers_w;
 	unsigned long long init_iterated_local_search_runs;
 	unsigned long long iterated_local_search_runs;
@@ -71,6 +58,7 @@ public:
 	// Oleg's functions
 	vector<vector<double>> search_space; // values of variables which form a search space
 	int readScenario(string scenarioFileName);
+	int fillArrayStep(const string word, vector<double> &vec);
 	int readInputDataFromFiles();
 	void writeOutputData(stringstream &sstream);
 	int init(vector<double> depths);
