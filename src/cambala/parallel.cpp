@@ -372,7 +372,7 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 	while (processed_task_count < point_values_vec.size()) {
 		MPI_Recv(result, result_len, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		processed_task_count++;
-		if (processed_task_count % 10000 == 0) {
+		if (processed_task_count % 100000 == 0) {
 			sstream_out << endl << "processed_task_count " << processed_task_count << " out of " << point_values_vec.size() << endl;
 			sstream_out << "time from start " << MPI_Wtime() - mpi_start_time << endl;
 			writeOutputData(sstream_out);
