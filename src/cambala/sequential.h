@@ -20,8 +20,7 @@ class CAMBALA_sequential
 public:
 	CAMBALA_sequential();
 	double H;
-	unsigned long long nh;
-	double h;
+	vector<double> h_vec;
 	vector<double> cb_vec;
 	vector<double> R_vec;
 	vector<double> tau_vec;

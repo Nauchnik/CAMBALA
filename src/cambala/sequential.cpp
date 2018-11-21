@@ -17,7 +17,6 @@ CAMBALA_sequential::CAMBALA_sequential() :
 	dtimesFileName(""),
 	spmagFileName(""),
 	H(0),
-	nh(1),
 	n_layers_w(1),
 	iterated_local_search_runs(10),
 	init_iterated_local_search_runs(10),
@@ -109,65 +108,83 @@ void CAMBALA_sequential::writeOutputData(stringstream &sstream)
 
 vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 {
-	vector<vector<double>> depths_vec;
-	if (d1_vec.size() == 0) { // static depths mode
-		n_layers_w = cw_init_vec_vec.size();
-		double layer_thickness_w = h / n_layers_w;
-		vector<double> depths;
-		for (unsigned jj = 1; jj <= n_layers_w; jj++)
-			depths.push_back(layer_thickness_w*jj);
-		depths.push_back(H);
-		depths_vec.push_back(depths);
-	}
-	else { // dynamic depths mode
-		vector<vector<double>> search_space_depths;
-		search_space_depths.resize(d1_vec.size());
-		for (unsigned i = 0; i < d2_vec.size(); i++) {
-			double cur_val = d2_vec[i];
-			for (;;) {
-				search_space_depths[i].push_back(cur_val);
-				cur_val -= d_step_vec[i];
-				if (cur_val < d1_vec[i])
-					break;
-			}
-		}
-
-		vector<int> index_arr;
-		vector<double> tmp_depths;
-		vector<vector<double>> ::iterator it;
-		double cur_treshold;
-		while (next_cartesian(search_space_depths, index_arr, tmp_depths)) {
+	vector<vector<double>> total_depths_vec;
+	long long int skipped_depths_count = 0;
+	
+	for (auto h : h_vec) {
+		vector<vector<double>> depths_vec;
+		if (d1_vec.size() == 0) { // static depths mode
+			n_layers_w = cw_init_vec_vec.size();
+			double layer_thickness_w = h / n_layers_w;
 			vector<double> depths;
-			cur_treshold = tmp_depths[0] + 3;
-			depths.push_back(tmp_depths[0]); // at least 1 water layer must exist
-			for (unsigned i = 1; i < tmp_depths.size(); i++) {
-				if (tmp_depths[i] >= cur_treshold) {
-					depths.push_back(tmp_depths[i]);
-					cur_treshold = tmp_depths[i] + 2;
+			for (unsigned jj = 1; jj <= n_layers_w; jj++)
+				depths.push_back(layer_thickness_w*jj);
+			depths.push_back(H);
+			depths_vec.push_back(depths);
+		}
+		else { // dynamic depths mode
+			vector<vector<double>> search_space_depths;
+			search_space_depths.resize(d1_vec.size());
+			for (unsigned i = 0; i < d2_vec.size(); i++) {
+				double cur_val = d2_vec[i];
+				for (;;) {
+					search_space_depths[i].push_back(cur_val);
+					cur_val -= d_step_vec[i];
+					if (cur_val < d1_vec[i])
+						break;
 				}
 			}
-			if (depths.size() < d1_vec.size()) // skip short depths
-				continue; 
-			it = find(depths_vec.begin(), depths_vec.end(), depths);
-			if (it == depths_vec.end())
-				depths_vec.push_back(depths);
-		}
 
-		for (auto &x : depths_vec) {
-			x.push_back(h);
-			x.push_back(H);
+			vector<int> index_arr;
+			vector<double> tmp_depths;
+			vector<vector<double>> ::iterator it;
+			double cur_treshold;
+			while (next_cartesian(search_space_depths, index_arr, tmp_depths)) {
+				vector<double> depths;
+				cur_treshold = tmp_depths[0] + 3;
+				depths.push_back(tmp_depths[0]); // at least 1 water layer must exist
+				for (unsigned i = 1; i < tmp_depths.size(); i++) {
+					if (tmp_depths[i] >= cur_treshold) {
+						depths.push_back(tmp_depths[i]);
+						cur_treshold = tmp_depths[i] + 2;
+					}
+				}
+				if (depths.size() < d1_vec.size()) // skip short depths
+					continue;
+				// skip depths combination with a value >= h, because h should be a threshold
+				bool is_all_depths_less_h = true;
+				for (auto x : depths)
+					if (x >= h) {
+						is_all_depths_less_h = false;
+						break;
+					}
+				if (!is_all_depths_less_h) {
+					skipped_depths_count++;
+					continue;
+				}
+				it = find(depths_vec.begin(), depths_vec.end(), depths);
+				if (it == depths_vec.end())
+					depths_vec.push_back(depths);
+			}
+			for (auto &x : depths_vec) {
+				x.push_back(h);
+				x.push_back(H);
+			}
+
+			for (auto depth : depths_vec)
+				total_depths_vec.push_back(depth);
 		}
 	}
-
+	cout << skipped_depths_count << " depths combinations were skipped \n";
+	
 	ofstream ofile(depths_filename);
-	for (auto &x : depths_vec) {
+	for (auto &x : total_depths_vec) {
 		for (auto &y : x)
 			ofile << y << " ";
 		ofile << endl;
 	}
 	ofile.close();
-	cout << "depths_vec.size() " << depths_vec.size() << endl;
-	return depths_vec;
+	return total_depths_vec;
 }
 
 void CAMBALA_sequential::reportFinalResult()
@@ -409,7 +426,7 @@ search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> d
 		do { // do while local min not reached
 			isLocalMin = true; // if changing of every variable will not lead to a record updata, then a local min reached
 			for (unsigned i = 0; i < search_space.size(); i++) { // i stands for variable_index
-				if (search_space[i].size() == 1) {
+				if (search_space[i].size() <= 1) {
 					//cout << "one value of a variable, skip it" << endl;
 					continue;
 				}
@@ -429,7 +446,7 @@ search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> d
 							isTriggerIncToDec = false;
 						}
 						if (cur_point_indexes[i] == 0)
-							cur_point_indexes[i] = search_space[i].size() - 1;
+							cur_point_indexes[i] = (unsigned)(search_space[i].size() - 1);
 						else
 							cur_point_indexes[i]--;
 					}
@@ -613,10 +630,6 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 			sstream >> launch_type;
 		else if (word == "H")
 			sstream >> H;
-		else if (word == "h") {
-			sstream >> h;
-			nh = 1;
-		}
 		else if ((word.size() >= 3) && (word[0] == 'c') && (word[1] == 'w') && (isdigit(word[2]))) {
 			word = word.substr(2, word.size() - 2);
 			istringstream(word) >> cw_index;
@@ -642,6 +655,10 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 		else if (word == "R") {
 			sstream >> word;
 			fillArrayStep(word, R_vec);
+		}
+		else if (word == "h") {
+			sstream >> word;
+			fillArrayStep(word, h_vec);
 		}
 		else if (word == "rhob") {
 			sstream >> word;
@@ -693,6 +710,8 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 	input_params_sstream << "object_function_type " << object_function_type << endl;
 	input_params_sstream << "ppm " << ppm << endl;
 	input_params_sstream << "init_iterated_local_search_runs " << init_iterated_local_search_runs << endl;
+	input_params_sstream << "h_vec :" << endl;
+	input_params_sstream << doubleVecToStr(h_vec) << endl;
 	input_params_sstream << "cw_init_vec_vec :" << endl;
 	for (auto &x : cw_init_vec_vec)
 		input_params_sstream << doubleVecToStr(x) << endl;
@@ -846,6 +865,7 @@ void CAMBALA_sequential::solve()
 	ofile.close();
 
 	vector<vector<double>> depths_vec = createDepthsArray();
+	cout << depths_vec.size() << " depths combinations" << endl;
 	if (launch_type == "ils") {
 		for (unsigned j = 0; j < depths_vec.size(); j++) {
 			init(depths_vec[j]);
@@ -855,8 +875,12 @@ void CAMBALA_sequential::solve()
 			cout << "Processed " << j + 1 << " out of " << depths_vec.size() << " depths" << endl;
 		}
 	}
-	else {
-		init(depths_vec[0]);
-		findGlobalMinBruteForce(depths_vec[0]);
+	else { // brute force
+		for (unsigned i = 0; i < depths_vec.size(); i++) {
+			cout << "Processing depths combination # " << i << " : " << endl;
+			cout << doubleVecToStr(depths_vec[i]) << endl;
+			init(depths_vec[i]);
+			findGlobalMinBruteForce(depths_vec[i]);
+		}
 	}
 }
