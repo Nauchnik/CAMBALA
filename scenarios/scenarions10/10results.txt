@@ -1,0 +1,60 @@
+1017
+
+dh=0, uniform
+err = 0.00496511, parameters:
+c_b = 1740
+tau = 0
+rho_b = 1.48
+R = 6991
+
+1019
+dh=1, uniform
+
+err = 0.00543264, parameters:
+c_b = 1746
+tau = 0
+rho_b = 1.44
+R = 6988
+
+
+1021
+
+
+dh=2, uniform
+err = 0.0104388, parameters:
+c_b = 1749
+tau = 0
+rho_b = 1.16
+R = 6975
+
+
+
+1018
+dh=0, weighted
+
+err = 7.52285e-08, parameters:
+c_b = 1728
+tau = 0
+rho_b = 1.62
+R = 6992
+
+1020
+dh=1, weighted
+
+err = 1.04793e-07, parameters:
+c_b = 1717
+tau = 0
+rho_b = 1.66
+R = 6995
+
+
+
+1022
+
+dh=2, weighted
+err = 1.64726e-07, parameters:
+c_b = 1731
+tau = 0
+rho_b = 1.48
+R = 6989
+
