@@ -26,12 +26,12 @@ int main(int argc, char **argv)
 	string scenarioFileName;
 	search_space_point point;
 	// input data
-	point.cb = 1750;
-	point.R = 4875;
-	point.rhob = 1.7;
+	point.cb = 2050;
+	point.R = 4925;
+	point.rhob = 1;
 	point.tau = 0;
-	point.cws = { 1539, 1539, 1535 };
-	point.depths = { 60, 95, 100, 500 };
+	point.cws = { 1538.5, 1538.5, 1538.5, 1538.5, 1536.5, 1534.5 };
+	point.depths = { 20, 40, 60, 80, 98, 108, 500 };
 
 	if (argc == 1) {
         cerr << "Usage: program scenario_file \n";

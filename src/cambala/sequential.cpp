@@ -170,10 +170,10 @@ vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 				x.push_back(h);
 				x.push_back(H);
 			}
-
-			for (auto depth : depths_vec)
-				total_depths_vec.push_back(depth);
 		}
+
+		for (auto depth : depths_vec)
+			total_depths_vec.push_back(depth);
 	}
 	cout << skipped_depths_count << " depths combinations were skipped \n";
 	
