@@ -4,6 +4,15 @@ function_type weighted
 h 40:1:60
 H 300
 % variable parameters
+d1 5
+d2 10
+d3 15
+d4 20
+d5 25
+d6 30
+d7 35
+d8 40
+d9 45
 cw0 1500
 cw1 1500
 cw2 1498
