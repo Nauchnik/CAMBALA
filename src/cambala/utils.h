@@ -34,8 +34,9 @@ namespace CAMBALA_utils{
 
 	inline string doubleVecToStr(vector<double> vec) {
 		string str;
-		for (auto x : vec)
-			str += doubleToStr(x) + " ";
+		for (unsigned i=0; i<vec.size()-1; i++)
+			str += doubleToStr(vec[i]) + " ";
+		str += doubleToStr(vec[vec.size()-1]);
 		return str;
 	}
 

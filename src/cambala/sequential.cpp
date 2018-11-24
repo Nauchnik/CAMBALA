@@ -115,10 +115,11 @@ vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 		vector<vector<double>> depths_vec;
 		if (d1_vec.size() == 0) { // static depths mode
 			n_layers_w = cw_init_vec_vec.size();
-			double layer_thickness_w = h / n_layers_w;
+			double layer_thickness_w = h_vec[0] / n_layers_w; // exactly h_vec[0] is required here
 			vector<double> depths;
-			for (unsigned jj = 1; jj <= n_layers_w; jj++)
+			for (unsigned jj = 1; jj < n_layers_w; jj++)
 				depths.push_back(layer_thickness_w*jj);
+			depths.push_back(h);
 			depths.push_back(H);
 			depths_vec.push_back(depths);
 		}
