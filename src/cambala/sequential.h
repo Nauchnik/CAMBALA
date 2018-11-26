@@ -15,6 +15,15 @@ using namespace CAMBALA_point;
 
 const unsigned MAX_DEPTHS_VECTORS = 1000000;
 
+struct depth
+{
+	double left_bound;
+	double right_bound;
+	double step;
+	bool left_h_glue;
+	bool right_h_glue;
+};
+
 class CAMBALA_sequential
 {
 public:
@@ -27,9 +36,7 @@ public:
 	vector<double> rhob_vec;
 	vector<vector<double>> cw_vec_vec;
 	vector<vector<double>> cw_init_vec_vec;
-	vector<double> d1_vec;
-	vector<double> d2_vec;
-	vector<double> d_step_vec;
+	vector<depth> d_vec;
 	string object_function_type;
 	unsigned ppm;
 	unsigned long long n_layers_w;
@@ -53,9 +60,8 @@ public:
 	string output_filename;
 	string depths_filename;
 	bool is_mpi;
-	
-	// Oleg's functions
 	vector<vector<double>> search_space; // values of variables which form a search space
+
 	int readScenario(string scenarioFileName);
 	int fillArrayStep(const string word, vector<double> &vec);
 	int readInputDataFromFiles();

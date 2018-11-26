@@ -39,6 +39,12 @@ CAMBALA_sequential::CAMBALA_sequential() :
 #endif
 }
 
+ostream& operator<<(std::ostream& os, const depth& d)
+{
+	return os << "left bound: " << d.left_bound << ", step: " << d.step << ", right bound: " << d.right_bound
+		<< ", left_h_glue: " << d.left_h_glue << ", right_h_glue: " << d.right_h_glue;
+}
+
 // tau_comment: search and output,
 // check for tau!
 int CAMBALA_sequential::init(vector<double> depths)
@@ -113,7 +119,7 @@ vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 	
 	for (auto h : h_vec) {
 		vector<vector<double>> depths_vec;
-		if (d1_vec.size() == 0) { // static depths mode
+		if (d_vec.size() == 0) { // static depths mode
 			n_layers_w = cw_init_vec_vec.size();
 			double layer_thickness_w = h_vec[0] / n_layers_w; // exactly h_vec[0] is required here
 			vector<double> depths;
@@ -125,14 +131,24 @@ vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 		}
 		else { // dynamic depths mode
 			vector<vector<double>> search_space_depths;
-			search_space_depths.resize(d1_vec.size());
-			for (unsigned i = 0; i < d2_vec.size(); i++) {
-				double cur_val = d2_vec[i];
-				for (;;) {
-					search_space_depths[i].push_back(cur_val);
-					cur_val -= d_step_vec[i];
-					if (cur_val < d1_vec[i])
-						break;
+			search_space_depths.resize(d_vec.size());
+			for (unsigned i = 0; i < d_vec.size(); i++) {
+				double r_b = d_vec[i].right_bound;
+				if (d_vec[i].right_h_glue) // h-glue mode
+					r_b = h - d_vec[i].right_bound;
+				double l_b = d_vec[i].left_bound;
+				if (d_vec[i].left_h_glue) // h-glue mode
+					l_b = h - d_vec[i].left_bound;
+				if ( (r_b < 0) || (r_b <= l_b) )
+					search_space_depths[i].push_back(l_b);
+				else {
+					double cur_val = r_b;
+					for (;;) {
+						search_space_depths[i].push_back(cur_val);
+						cur_val -= d_vec[i].step;
+						if (cur_val < l_b)
+							break;
+					}
 				}
 			}
 
@@ -150,7 +166,7 @@ vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 						cur_treshold = tmp_depths[i] + 2;
 					}
 				}
-				if (depths.size() < d1_vec.size()) // skip short depths
+				if (depths.size() < d_vec.size()) // skip short depths
 					continue;
 				// skip depths combination with a value >= h, because h should be a threshold
 				bool is_all_depths_less_h = true;
@@ -643,15 +659,47 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 			word = word.substr(1, word.size() - 1); // read depths
 			istringstream(word) >> d_index;
 			d_index--;
-
-			if (d1_vec.size() < d_index + 1) {
-				d1_vec.resize(d_index + 1);
-				d2_vec.resize(d_index + 1);
-				d_step_vec.resize(d_index + 1);	
+			if (d_vec.size() < d_index + 1)
+				d_vec.resize(d_index + 1);
+			sstream >> word;
+			for (auto &x : word)
+				if (x == ':')
+					x = ' ';
+			stringstream tmp_sstream;
+			tmp_sstream << word;
+			string word1, word2, word3;
+			tmp_sstream >> word1 >> word2 >> word3;
+			if (word1.empty()) {
+				cerr << "Error. depth left bound is empty";
+				exit(-1);
 			}
-				sstream >> word;
-			// here we need step, not count, so setParameterWithCount() is not required^M
-			getThreeValuesFromStr(word, d1_vec[d_index], d_step_vec[d_index], d2_vec[d_index]);
+			depth d;
+			d.left_bound = -1;
+			d.left_h_glue = false;
+			d.right_bound = -1;
+			d.right_h_glue = false;
+			d.step = 1;
+			if (is_pos_number(word1))
+				istringstream(word1) >> d.left_bound;
+			else if ( ( word1.size() > 1) && (word1[0] == 'h') && (word[1] == '-') ) {
+				d.left_h_glue = true;
+				word1 = word1.substr(2, word1.size() - 1);
+				istringstream(word1) >> d.left_bound;
+			}
+			else {
+				cerr << "Error. Unknown depth left bound format";
+				exit(-1);
+			}
+			if (!word2.empty() && is_pos_number(word2))
+				istringstream(word2) >> d.step;
+			if (is_pos_number(word3))
+				istringstream(word3) >> d.right_bound;
+			else if ((word3.size() > 1) && (word3[0] == 'h') && (word3[1] == '-')) {
+				d.right_h_glue = true;
+				word3 = word3.substr(2, word3.size() - 1);
+				istringstream(word3) >> d.right_bound;
+			}
+			d_vec[d_index] = d;
 		}
 		else if (word == "R") {
 			sstream >> word;
@@ -716,12 +764,9 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 	input_params_sstream << "cw_init_vec_vec :" << endl;
 	for (auto &x : cw_init_vec_vec)
 		input_params_sstream << doubleVecToStr(x) << endl;
-	input_params_sstream << "d1_vec :" << endl;
-	input_params_sstream << doubleVecToStr(d1_vec) << endl;
-	input_params_sstream << "d2_vec :" << endl;
-	input_params_sstream << doubleVecToStr(d2_vec) << endl;
-	input_params_sstream << "d_step_vec :" << endl;
-	input_params_sstream << doubleVecToStr(d_step_vec) << endl;
+	input_params_sstream << "d_vec :" << endl;
+	for (auto d : d_vec)
+		cout << d << endl;
 	input_params_sstream << "R_vec :" << endl;
 	input_params_sstream << doubleVecToStr(R_vec) << endl;
 	input_params_sstream << "cb_vec :" << endl;

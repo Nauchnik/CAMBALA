@@ -8,6 +8,16 @@
 #include <algorithm>
 
 namespace CAMBALA_utils{
+	inline bool is_pos_number(const string& s)
+	{
+		if (s.empty())
+			return false;
+		for (auto x : s)
+			if (!isdigit(x))
+				return false;
+		return true;
+	}
+
 	inline void getThreeValuesFromStr(string str, double &val1, double &val2, double &val3)
 	{
 		val1 = val3 = -1;
