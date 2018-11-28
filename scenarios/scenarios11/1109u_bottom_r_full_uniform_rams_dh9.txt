@@ -1,6 +1,6 @@
-dtimes_file rams_zr50m_R7km_dtimes.txt
-spmag_file(string|no) rams_zr50m_R7km_spmag.txt
-function_type weighted
+dtimes_file rams_zr50m_R7km_dtimes_dh9.txt
+spmag_file(string|no) no
+function_type uniform
 h 50
 H 300
 % variable parameters
@@ -14,7 +14,7 @@ cw6 1472
 cw7 1466
 cw8 1462
 cw9 1462
-R 7040
-rhob 1.1:0.02:3.5
+R 6900:1:7100
+rhob 1.1:0.02:3
 cb 1650:1:1800
 tau 0
