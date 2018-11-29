@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 
 #ifdef _DEBUG
 	argc = 3;
-	scenarioFileName = "test_scenario";
+	scenarioFileName = "719_bottom_r_short_uniform_wan_10nodes.txt";
 	//argv[1] = "./boinc_CAMBALA_app/in";
 	//argv[1] = "39_hydro_r_uniform260.txt";
 	//argv[1] = "true_scenario_2.txt";
