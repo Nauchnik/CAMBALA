@@ -1,0 +1,49 @@
+1)
+series 110x: range-dependent case, bottom relief described by
+
+hr = h0 + dh*sin( 2*pi*(r-rc)/P );
+
+where h0=50m, P=7000,
+
+dh = x (varies from 1m to 10m), e.g. for dh=10m depth varies between 40m and 60m along the track
+
+Inverted parameters: R, cb, rhob
+
+2)
+series 112x: range-dependent case, bottom relief described by
+
+hr = h0 + dh*sin( 2*pi*(r-rc)/P );
+
+where h0=50m, P=7000,
+
+dh = x (varies from 1m to 10m), e.g. for dh=10m depth varies between 40m and 60m along the track
+
+Inverted parameters: R, cb, rhob, h
+
+(main difference from (1): h is also inverted)
+
+3)
+series 113x: range-independent case
+
+Inverted parameters cb, rhob
+
+The algorithm is supplied with incorrect (biased) value of R to estimate the resulting inaccuracy in cb, rhob reconstruction
+
+4)
+series 114x: range-independent case
+
+Inverted parameters cb, rhob, R
+
+The algorithm is supplied with incorrect (biased) value of h to estimate the resulting inaccuracy in R, cb, rhob reconstruction
+
+5) : range-dependent case, bottom relief described by
+
+hr = h0 + dh*sin( 2*pi*(r-rc)/P );
+
+where h0=50m, P=7000, 7000/2, 7000/4, 7000/8
+
+dh = 8m.
+
+Inverted parameters: R, cb, rhob
+
+We consider influence of bottom inhomogeneities variation "speed" with range
