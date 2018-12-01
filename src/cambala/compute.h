@@ -31,10 +31,20 @@ double compute_modal_delays_residual_uniform(vector<double> &freqs, vector<doubl
 	vector<unsigned> &Ns_points, double R, double tau,
 	vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
 
+double compute_modal_delays_residual_LWan1(vector<double> &freqs, vector<double> &depths,
+	vector<double> &c1s, vector<double> &c2s, vector<double> &rhos,
+	vector<unsigned> &Ns_points, double R, double tau,
+	vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
+
 double compute_modal_delays_residual_LWan(vector<double> &freqs, vector<double> &depths,
 	vector<double> &c1s, vector<double> &c2s, vector<double> &rhos,
 	vector<unsigned> &Ns_points, double R, double tau,
 	vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
+
+double compute_modal_delays_residual_LWan_weighted(vector<double> &freqs, vector<double> &depths,
+	vector<double> &c1s, vector<double> &c2s, vector<double> &rhos,
+	vector<unsigned> &Ns_points, double R, double tau,
+	vector<vector<double>> &experimental_delays,vector<vector<double>> &weight_coeffs, vector<unsigned> &experimental_mode_numbers);
 
 double compute_modal_delays_residual_uniform2(vector<double> &freqs, vector<double> &depths,
 	vector<double> &c1s, vector<double> &c2s, vector<double> &rhos,
@@ -424,6 +434,146 @@ double compute_modal_delays_residual_uniform(vector<double> &freqs,
 
 //Pavel: 2018.11.12, new fitness function from L.Wan et al, JASA 140(4), 2358-2373, 2016
 
+double compute_modal_delays_residual_LWan1(vector<double> &freqs,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
+	double R,
+	double tau,
+	vector<vector<double>> &experimental_delays,
+	vector<unsigned> &experimental_mode_numbers
+	)
+{
+	unsigned rord = 3;
+    unsigned SomeBigNumber = 100000;
+
+	double iModesSubset = -1.0;
+	double deltaf = 0.05;
+
+	double residual = 0;
+	unsigned mnumb;
+	double mdelay;
+	//2016.04.27:Pavel: now we use RMS as the residual
+    unsigned nRes = 0;
+
+
+	vector<vector<double>> modal_group_velocities;
+	vector<unsigned> mode_numbers;
+
+	//Pavel: 2018.11.12
+	// cut off frequencies and their respective delays in the data
+	vector<unsigned> mode_cut_off_exp_idx;
+    unsigned cmode_cut_off_idx;
+
+    mode_cut_off_exp_idx.clear();
+
+	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
+
+	for (unsigned ii = 0; ii<freqs.size(); ii++) {
+
+		mnumb = experimental_mode_numbers.at(ii);
+
+
+        // here we initialize an array of cut off (f_L) index
+        // with big numbers
+        // cut-off frequency for a mode is lowest frequency for this mode where we have the arrival data
+
+        while (mnumb > mode_cut_off_exp_idx.size() ) {
+            mode_cut_off_exp_idx.push_back(SomeBigNumber);
+        }
+
+
+        // find smallest indices in experimental_delays where
+        // we have inversion data ii = smallest "frequency index" such that
+        // for mode jj we have nonzero experimental_delays[ii][jj]
+
+        for (unsigned jj=0; jj<mnumb; jj++) {
+            if ((mode_cut_off_exp_idx.at(jj) >=SomeBigNumber) && (experimental_delays[ii][jj]>0)) {
+                mode_cut_off_exp_idx.at(jj) = ii;
+            }
+        }
+
+        // INTRAMODAL component of Wan's formula (5)
+
+        // loop over all modes for the given frequency
+		for (unsigned jj = 0; jj<mnumb; jj++) {
+
+            // cut-off frequency index for current mode (index corresponding to f_L in Wan's formula)
+            // initially these indices are set to SomeBigNumber, but if we are above cut-off frequency,
+            // then it was already set to some nonzero value
+            cmode_cut_off_idx = mode_cut_off_exp_idx.at(jj);
+
+            // the data contributes to the residual if the frequency is above cut-off
+            // and if experimental_delays[ii][jj] is nonzero
+
+			if ((experimental_delays[ii][jj]>0) && ( cmode_cut_off_idx < ii )) {
+                nRes = nRes + 1;
+
+                // if for this mode number jj we have theoretical data (i.e. jj<mode_numbers.at(cmode_cut_off_idx))
+                // then compute mdelay -- theoretical intramodal delay
+
+                // else set mdelay to zero, and experimental delay will work as the penalty
+
+                if ( jj<mode_numbers.at(cmode_cut_off_idx) ) {
+                    mdelay = (R / modal_group_velocities[ii][jj])  -  (R / modal_group_velocities[cmode_cut_off_idx][jj]);
+                }
+                else {
+                    mdelay = 0;
+                }
+
+                // experimental delay: experimental_delays[ii][jj] - experimental_delays[cmode_cut_off_idx][jj]
+
+				residual = residual + pow(experimental_delays[ii][jj] - experimental_delays[cmode_cut_off_idx][jj] - mdelay, 2);
+			}
+		}
+
+
+
+        // INTERMODAL component of Wan's formula (5)
+        cmode_cut_off_idx = SomeBigNumber;
+
+        // loop over modes
+		for (unsigned jj = 0; jj<mnumb; jj++) {
+
+            // find the first mode jj for thus freq where we have data
+            // if all values experimental_delays[ii][jj]<0 then
+            // cmode_cut_off_idx stays equal to SomeBigNumber, and residual is not updated
+
+            if ((experimental_delays[ii][jj]>0) && (cmode_cut_off_idx >= SomeBigNumber)){
+                cmode_cut_off_idx = jj;
+            }
+
+            // if cmode_cut_off_idx is already set to some mode number, and we have some higher mode
+            // with nonzero experimental_delays[ii][jj], then we compute an intermodal delay
+            // and compare it with theoretical one to update the residual
+			if ((experimental_delays[ii][jj]>0) && ( cmode_cut_off_idx < jj )) {
+                nRes = nRes + 1;
+
+                if ( jj < mode_numbers.at(ii) ) {
+                    mdelay = (R / modal_group_velocities[ii][jj])  -  (R / modal_group_velocities[ii][cmode_cut_off_idx]);
+                }
+                else {
+                    mdelay = 0;
+                }
+
+				residual = residual + pow(experimental_delays[ii][jj] - experimental_delays[ii][cmode_cut_off_idx] - mdelay, 2);
+			}
+		}
+
+	}
+    //2016.04.27:Pavel: RMS
+	residual = sqrt(residual/nRes);
+
+	//if (isTimeDelayPrinting)
+	//	printDelayTime(R, freqs, mode_numbers, modal_group_velocities);
+
+	return residual;
+}
+
+
+
 double compute_modal_delays_residual_LWan(vector<double> &freqs,
 	vector<double> &depths,
 	vector<double> &c1s,
@@ -462,14 +612,22 @@ double compute_modal_delays_residual_LWan(vector<double> &freqs,
 	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
 
 	for (unsigned ii = 0; ii<freqs.size(); ii++) {
-		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
+
 		mnumb = experimental_mode_numbers.at(ii);
 
+
+        // here we initialize an array of cut off (f_L) index
+        // with big numbers
+        // cut-off frequency for a mode is lowest frequency for this mode where we have the arrival data
 
         while (mnumb > mode_cut_off_exp_idx.size() ) {
             mode_cut_off_exp_idx.push_back(SomeBigNumber);
         }
 
+
+        // find smallest indices in experimental_delays where
+        // we have inversion data ii = smallest "frequency index" such that
+        // for mode jj we have nonzero experimental_delays[ii][jj]
 
         for (unsigned jj=0; jj<mnumb; jj++) {
             if ((mode_cut_off_exp_idx.at(jj) >=SomeBigNumber) && (experimental_delays[ii][jj]>0)) {
@@ -479,11 +637,24 @@ double compute_modal_delays_residual_LWan(vector<double> &freqs,
 
         // INTRAMODAL component of Wan's formula (5)
 
+        // loop over all modes for the given frequency
 		for (unsigned jj = 0; jj<mnumb; jj++) {
+
+            // cut-off frequency index for current mode (index corresponding to f_L in Wan's formula)
+            // initially these indices are set to SomeBigNumber, but if we are above cut-off frequency,
+            // then it was already set to some nonzero value
             cmode_cut_off_idx = mode_cut_off_exp_idx.at(jj);
+
+            // the data contributes to the residual if the frequency is above cut-off
+            // and if experimental_delays[ii][jj] is nonzero
 
 			if ((experimental_delays[ii][jj]>0) && ( cmode_cut_off_idx < ii )) {
                 nRes = nRes + 1;
+
+                // if for this mode number jj we have theoretical data (i.e. jj<mode_numbers.at(cmode_cut_off_idx))
+                // then compute mdelay -- theoretical intramodal delay
+
+                // else set mdelay to zero, and experimental delay will work as the penalty
 
                 if ( jj<mode_numbers.at(cmode_cut_off_idx) ) {
                     mdelay = (R / modal_group_velocities[ii][jj])  -  (R / modal_group_velocities[cmode_cut_off_idx][jj]);
@@ -491,6 +662,8 @@ double compute_modal_delays_residual_LWan(vector<double> &freqs,
                 else {
                     mdelay = 0;
                 }
+
+                // experimental delay: experimental_delays[ii][jj] - experimental_delays[cmode_cut_off_idx][jj]
 
 				residual = residual + pow(experimental_delays[ii][jj] - experimental_delays[cmode_cut_off_idx][jj] - mdelay, 2);
 			}
@@ -501,12 +674,20 @@ double compute_modal_delays_residual_LWan(vector<double> &freqs,
         // INTERMODAL component of Wan's formula (5)
         cmode_cut_off_idx = SomeBigNumber;
 
+        // loop over modes
 		for (unsigned jj = 0; jj<mnumb; jj++) {
+
+            // find the first mode jj for thus freq where we have data
+            // if all values experimental_delays[ii][jj]<0 then
+            // cmode_cut_off_idx stays equal to SomeBigNumber, and residual is not updated
+
             if ((experimental_delays[ii][jj]>0) && (cmode_cut_off_idx >= SomeBigNumber)){
                 cmode_cut_off_idx = jj;
             }
 
-
+            // if cmode_cut_off_idx is already set to some mode number, and we have some higher mode
+            // with nonzero experimental_delays[ii][jj], then we compute an intermodal delay
+            // and compare it with theoretical one to update the residual
 			if ((experimental_delays[ii][jj]>0) && ( cmode_cut_off_idx < jj )) {
                 nRes = nRes + 1;
 
@@ -518,6 +699,10 @@ double compute_modal_delays_residual_LWan(vector<double> &freqs,
                 }
 
 				residual = residual + pow(experimental_delays[ii][jj] - experimental_delays[ii][cmode_cut_off_idx] - mdelay, 2);
+
+                //Wan fitness function: only neighboring curves are compared in the intermodal part
+                //in Wan1 fitness function all modes are compared against the first one
+				cmode_cut_off_idx = jj;
 			}
 		}
 
@@ -530,6 +715,150 @@ double compute_modal_delays_residual_LWan(vector<double> &freqs,
 
 	return residual;
 }
+
+double compute_modal_delays_residual_LWan_weighted(vector<double> &freqs,
+	vector<double> &depths,
+	vector<double> &c1s,
+	vector<double> &c2s,
+	vector<double> &rhos,
+	vector<unsigned> &Ns_points,
+	double R,
+	double tau,
+	vector<vector<double>> &experimental_delays,
+	vector<vector<double>> &weight_coeffs,
+	vector<unsigned> &experimental_mode_numbers
+	)
+{
+	unsigned rord = 3;
+    unsigned SomeBigNumber = 100000;
+
+	double iModesSubset = -1.0;
+	double deltaf = 0.05;
+
+	double residual = 0;
+	unsigned mnumb;
+	double mdelay;
+	//2016.04.27:Pavel: now we use RMS as the residual
+    unsigned nRes = 0;
+
+
+	vector<vector<double>> modal_group_velocities;
+	vector<unsigned> mode_numbers;
+
+	//Pavel: 2018.11.12
+	// cut off frequencies and their respective delays in the data
+	vector<unsigned> mode_cut_off_exp_idx;
+    unsigned cmode_cut_off_idx;
+
+    mode_cut_off_exp_idx.clear();
+
+	compute_modal_grop_velocities(freqs, deltaf, depths, c1s, c2s, rhos, Ns_points, iModesSubset, rord, modal_group_velocities, mode_numbers);
+
+	for (unsigned ii = 0; ii<freqs.size(); ii++) {
+
+		mnumb = experimental_mode_numbers.at(ii);
+
+
+        // here we initialize an array of cut off (f_L) index
+        // with big numbers
+        // cut-off frequency for a mode is lowest frequency for this mode where we have the arrival data
+
+        while (mnumb > mode_cut_off_exp_idx.size() ) {
+            mode_cut_off_exp_idx.push_back(SomeBigNumber);
+        }
+
+
+        // find smallest indices in experimental_delays where
+        // we have inversion data ii = smallest "frequency index" such that
+        // for mode jj we have nonzero experimental_delays[ii][jj]
+
+        for (unsigned jj=0; jj<mnumb; jj++) {
+            if ((mode_cut_off_exp_idx.at(jj) >=SomeBigNumber) && (experimental_delays[ii][jj]>0)) {
+                mode_cut_off_exp_idx.at(jj) = ii;
+            }
+        }
+
+        // INTRAMODAL component of Wan's formula (5)
+
+        // loop over all modes for the given frequency
+		for (unsigned jj = 0; jj<mnumb; jj++) {
+
+            // cut-off frequency index for current mode (index corresponding to f_L in Wan's formula)
+            // initially these indices are set to SomeBigNumber, but if we are above cut-off frequency,
+            // then it was already set to some nonzero value
+            cmode_cut_off_idx = mode_cut_off_exp_idx.at(jj);
+
+            // the data contributes to the residual if the frequency is above cut-off
+            // and if experimental_delays[ii][jj] is nonzero
+
+			if ((experimental_delays[ii][jj]>0) && ( cmode_cut_off_idx < ii )) {
+                nRes = nRes + 1;
+
+                // if for this mode number jj we have theoretical data (i.e. jj<mode_numbers.at(cmode_cut_off_idx))
+                // then compute mdelay -- theoretical intramodal delay
+
+                // else set mdelay to zero, and experimental delay will work as the penalty
+
+                if ( jj<mode_numbers.at(cmode_cut_off_idx) ) {
+                    mdelay = (R / modal_group_velocities[ii][jj])  -  (R / modal_group_velocities[cmode_cut_off_idx][jj]);
+                }
+                else {
+                    mdelay = 0;
+                }
+
+                // experimental delay: experimental_delays[ii][jj] - experimental_delays[cmode_cut_off_idx][jj]
+
+				residual = residual + weight_coeffs[ii][jj]*weight_coeffs[cmode_cut_off_idx][jj]*pow(experimental_delays[ii][jj] - experimental_delays[cmode_cut_off_idx][jj] - mdelay, 2);
+			}
+		}
+
+
+
+        // INTERMODAL component of Wan's formula (5)
+        cmode_cut_off_idx = SomeBigNumber;
+
+        // loop over modes
+		for (unsigned jj = 0; jj<mnumb; jj++) {
+
+            // find the first mode jj for thus freq where we have data
+            // if all values experimental_delays[ii][jj]<0 then
+            // cmode_cut_off_idx stays equal to SomeBigNumber, and residual is not updated
+
+            if ((experimental_delays[ii][jj]>0) && (cmode_cut_off_idx >= SomeBigNumber)){
+                cmode_cut_off_idx = jj;
+            }
+
+            // if cmode_cut_off_idx is already set to some mode number, and we have some higher mode
+            // with nonzero experimental_delays[ii][jj], then we compute an intermodal delay
+            // and compare it with theoretical one to update the residual
+			if ((experimental_delays[ii][jj]>0) && ( cmode_cut_off_idx < jj )) {
+                nRes = nRes + 1;
+
+                if ( jj < mode_numbers.at(ii) ) {
+                    mdelay = (R / modal_group_velocities[ii][jj])  -  (R / modal_group_velocities[ii][cmode_cut_off_idx]);
+                }
+                else {
+                    mdelay = 0;
+                }
+
+				residual = residual + weight_coeffs[ii][jj]*weight_coeffs[ii][cmode_cut_off_idx]*pow(experimental_delays[ii][jj] - experimental_delays[ii][cmode_cut_off_idx] - mdelay, 2);
+
+                //Wan_n fitness function: only neighboring curves are compared in the intermodal part
+                //in Wan fitness function all modes are compared against the first one
+				cmode_cut_off_idx = jj;
+			}
+		}
+
+	}
+    //2016.04.27:Pavel: RMS
+	residual = sqrt(residual/nRes);
+
+	//if (isTimeDelayPrinting)
+	//	printDelayTime(R, freqs, mode_numbers, modal_group_velocities);
+
+	return residual;
+}
+
 
 
 // New version from 17.05.2017, group velocities computed using perturbative approach
@@ -789,7 +1118,7 @@ int compute_modal_grop_velocities(vector<double> &freqs,
 		out_wnum2.clear();
 		mgv_ii.clear();
 		omeg1 = 2 * LOCAL_M_PI*(freqs.at(ii) + deltaf);
-		out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s, c2s, rhos, Ns_points, -1.0, ordRich);
+		out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1, depths, c1s, c2s, rhos, Ns_points, iModesSubset, ordRich);
 		nwnum = (unsigned)out_wnum1.size();
 
 		/*
@@ -802,7 +1131,7 @@ int compute_modal_grop_velocities(vector<double> &freqs,
 		*/
 
 		omeg2 = 2 * LOCAL_M_PI*(freqs.at(ii));
-		out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2, depths, c1s, c2s, rhos, Ns_points, -1.0, ordRich);
+		out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2, depths, c1s, c2s, rhos, Ns_points, iModesSubset, ordRich);
 		//nwnum = min(nwnum, (unsigned)out_wnum2.size());
         nwnum = (unsigned)out_wnum2.size();
 
