@@ -739,14 +739,10 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 	}
 	
 	if (ppm == 0) { // if ppm wasn't set directly
-		if ((object_function_type == "uniform") || (object_function_type == "Wan_uniform") || (object_function_type == "weighted"))
-			ppm = 2;
-		else if ((object_function_type == "uniform2") || (object_function_type == "weighted2"))
+		if ((object_function_type == "uniform2") || (object_function_type == "weighted2"))
 			ppm = 1;
-		else {
-			cerr << "unknown object_function_type " << object_function_type << endl;
-			exit(1);
-		}
+		else
+			ppm = 2;
 	}
 	
 	if (dtimesFileName == "") {

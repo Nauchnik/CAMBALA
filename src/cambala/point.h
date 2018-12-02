@@ -110,18 +110,19 @@ namespace CAMBALA_point {
 	inline string strPointData(const search_space_point point)
 	{
 		stringstream sstream;
-		sstream << "err = " << point.residual << ", parameters:" << endl;
+		sstream << "err = " << point.residual << ", parameters :\n";
 		sstream << "c_b = " << point.cb << endl
 			<< "tau = " << point.tau << endl
 			<< "rho_b = " << point.rhob << endl
 			<< "R = " << point.R << endl;
-		sstream << "cws :" << endl;
-		for (auto &x : point.cws)
-			sstream << x << " ";
-		sstream << endl;
-		sstream << "depths " << endl;
-		for (auto &x : point.depths)
-			sstream << x << " ";
+		sstream << "cws :\n";
+		for (unsigned j=0; j < point.cws.size()-1; j++)
+			sstream << point.cws[j] << " ";
+		sstream << point.cws[point.cws.size() - 1] << endl;
+		sstream << "depths :\n";
+		for (unsigned j = 0; j < point.depths.size() - 1; j++)
+			sstream << point.depths[j] << " ";
+		sstream << point.depths[point.depths.size() - 1] << endl;
 		sstream << endl;
 		return sstream.str();
 	}
