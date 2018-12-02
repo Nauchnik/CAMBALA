@@ -343,6 +343,14 @@ double CAMBALA_sequential::fillDataComputeResidual( search_space_point &point )
 		point.residual = compute_modal_delays_residual_LWan(freqs, depths, c1s, c2s, rhos, Ns_points,
 			point.R, point.tau, modal_delays, mode_numbers);
 	}
+	else if (object_function_type == "Wan1_uniform") {
+		point.residual = compute_modal_delays_residual_LWan1(freqs, depths, c1s, c2s, rhos, Ns_points,
+			point.R, point.tau, modal_delays, mode_numbers);
+	}
+	else if (object_function_type == "Wan_weighted") {
+		point.residual = compute_modal_delays_residual_LWan_weighted(freqs, depths, c1s, c2s, rhos, Ns_points,
+			point.R, point.tau, modal_delays, weight_coeffs, mode_numbers);
+	}
 	else if (object_function_type == "weighted") {
 		point.residual = compute_modal_delays_residual_weighted(freqs, depths, c1s, c2s, rhos, Ns_points,
 			point.R, point.tau, modal_delays, weight_coeffs, mode_numbers);
