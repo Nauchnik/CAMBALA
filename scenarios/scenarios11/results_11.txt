@@ -295,7 +295,7 @@ cws :
 depths :
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1131
+*** scenario 1131_bottom_r_full_weighted_rams_dh0.txt
 err = 2.62251e-07, parameters:
 c_b = 1666
 tau = 0
@@ -306,7 +306,7 @@ cws :
 depths
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1131u
+*** scenario 1131u_bottom_r_full_uniform_rams_dh0.txt
 err = 0.00528372, parameters:
 c_b = 1664
 tau = 0
@@ -317,7 +317,7 @@ cws :
 depths
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1131w
+*** scenario 1131w_bottom_r_full_weighted_rams_dh0.txt
 err = 1.14381e-11, parameters :
 c_b = 1717
 tau = 0
@@ -328,7 +328,7 @@ cws :
 depths :
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1131wu
+*** scenario 1131wu_bottom_r_full_uniform_rams_dh0.txt
 err = 0.00492206, parameters :
 c_b = 1713
 tau = 0
@@ -339,7 +339,7 @@ cws :
 depths :
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1132
+*** scenario 1132_bottom_r_full_weighted_rams_dh0.txt
 err = 5.34413e-07, parameters:
 c_b = 1659
 tau = 0
@@ -350,7 +350,7 @@ cws :
 depths
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1132u
+*** scenario 1132u_bottom_r_full_uniform_rams_dh0.txt
 err = 0.0104064, parameters:
 c_b = 1657
 tau = 0
@@ -361,7 +361,7 @@ cws :
 depths
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1132w
+*** scenario 1132w_bottom_r_full_weighted_rams_dh0.txt
 err = 1.15635e-11, parameters :
 c_b = 1718
 tau = 0
@@ -372,7 +372,7 @@ cws :
 depths :
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1132wu
+*** scenario 1132wu_bottom_r_full_uniform_rams_dh0.txt
 err = 0.00494142, parameters :
 c_b = 1712
 tau = 0
@@ -383,7 +383,7 @@ cws :
 depths :
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1133
+*** scenario 1133_bottom_r_full_weighted_rams_dh0.txt
 err = 8.42831e-07, parameters:
 c_b = 1656
 tau = 0
@@ -394,7 +394,7 @@ cws :
 depths
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1133u
+*** scenario 1133u_bottom_r_full_uniform_rams_dh0.txt
 err = 0.0165363, parameters:
 c_b = 1654
 tau = 0
@@ -405,7 +405,7 @@ cws :
 depths
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1133w
+*** scenario 1133w_bottom_r_full_weighted_rams_dh0.txt
 err = 1.17102e-11, parameters :
 c_b = 1716
 tau = 0
@@ -416,7 +416,7 @@ cws :
 depths :
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1133wu
+*** scenario 1133wu_bottom_r_full_uniform_rams_dh0.txt
 err = 0.00496369, parameters :
 c_b = 1713
 tau = 0
@@ -427,7 +427,7 @@ cws :
 depths :
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1134
+*** scenario 1134_bottom_r_full_weighted_rams_dh0.txt
 err = 1.1619e-06, parameters:
 c_b = 1654
 tau = 0
@@ -438,7 +438,7 @@ cws :
 depths
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1134u
+*** scenario 1134u_bottom_r_full_uniform_rams_dh0.txt
 err = 0.0229338, parameters:
 c_b = 1653
 tau = 0
@@ -449,7 +449,7 @@ cws :
 depths
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1134w
+*** scenario 1134w_bottom_r_full_weighted_rams_dh0.txt
 err = 1.18562e-11, parameters :
 c_b = 1717
 tau = 0
@@ -460,7 +460,7 @@ cws :
 depths :
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1134wu
+*** scenario 1134wu_bottom_r_full_uniform_rams_dh0.txt
 err = 0.00498629, parameters :
 c_b = 1711
 tau = 0
@@ -471,7 +471,7 @@ cws :
 depths :
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1135
+*** scenario 1135_bottom_r_full_weighted_rams_dh0.txt
 err = 1.48606e-06, parameters:
 c_b = 1653
 tau = 0
@@ -482,7 +482,7 @@ cws :
 depths
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1135u
+*** scenario 1135u_bottom_r_full_uniform_rams_dh0.txt
 err = 0.0294443, parameters:
 c_b = 1652
 tau = 0
@@ -493,7 +493,7 @@ cws :
 depths
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1135w
+*** scenario 1135w_bottom_r_full_weighted_rams_dh0.txt
 err = 1.20239e-11, parameters :
 c_b = 1715
 tau = 0
@@ -504,12 +504,234 @@ cws :
 depths :
 5 10 15 20 25 30 35 40 45 50 300
 
-*** scenario 1135wu
+*** scenario 1135wu_bottom_r_full_uniform_rams_dh0.txt
 err = 0.00501268, parameters :
 c_b = 1709
 tau = 0
 rho_b = 1.82
 R = 7050
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+|||| 113* scenarios with dh0m
+
+*** scenario 1131_bottom_r_full_weighted_rams_dh0m.txt
+err = 1.7731e-07, parameters :
+c_b = 1734
+tau = 0
+rho_b = 1.48
+R = 6990
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1131u_bottom_r_full_uniform_rams_dh0m.txt
+err = 0.00380539, parameters :
+c_b = 1740
+tau = 0
+rho_b = 1.38
+R = 6990
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1131w_bottom_r_full_weighted_rams_dh0m.txt
+err = 1.11947e-11, parameters :
+c_b = 1720
+tau = 0
+rho_b = 1.72
+R = 6990
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1131wu_bottom_r_full_uniform_rams_dh0m.txt
+err = 0.00489097, parameters :
+c_b = 1714
+tau = 0
+rho_b = 1.8
+R = 6990
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1132_bottom_r_full_weighted_rams_dh0m.txt
+err = 2.65421e-07, parameters :
+c_b = 1759
+tau = 0
+rho_b = 1.18
+R = 6980
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1132u_bottom_r_full_uniform_rams_dh0m.txt
+err = 0.00550628, parameters :
+c_b = 1762
+tau = 0
+rho_b = 1.1
+R = 6980
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1132w_bottom_r_full_weighted_rams_dh0m.txt
+err = 1.109e-11, parameters :
+c_b = 1719
+tau = 0
+rho_b = 1.74
+R = 6980
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1132wu_bottom_r_full_uniform_rams_dh0m.txt
+err = 0.00487895, parameters :
+c_b = 1716
+tau = 0
+rho_b = 1.78
+R = 6980
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1133_bottom_r_full_weighted_rams_dh0m.txt
+err = 3.9839e-07, parameters :
+c_b = 1782
+tau = 0
+rho_b = 1.1
+R = 6970
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1133u_bottom_r_full_uniform_rams_dh0m.txt
+err = 0.00890417, parameters :
+c_b = 1794
+tau = 0
+rho_b = 1.1
+R = 6970
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1133w_bottom_r_full_weighted_rams_dh0m.txt
+err = 1.10008e-11, parameters :
+c_b = 1721
+tau = 0
+rho_b = 1.72
+R = 6970
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 30
+
+*** scenario 1133wu_bottom_r_full_uniform_rams_dh0m.txt
+err = 0.00486896, parameters :
+c_b = 1717
+tau = 0
+rho_b = 1.78
+R = 6970
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1134_bottom_r_full_weighted_rams_dh0m.txt
+err = 6.11009e-07, parameters :
+c_b = 1800
+tau = 0
+rho_b = 1.1
+R = 6960
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1134u_bottom_r_full_uniform_rams_dh0m.txt
+err = 0.0139606, parameters :
+c_b = 1800
+tau = 0
+rho_b = 1.1
+R = 6960
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1134w_bottom_r_full_weighted_rams_dh0m.txt
+err = 1.09195e-11, parameters :
+c_b = 1722
+tau = 0
+rho_b = 1.72
+R = 6960
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1134wu_bottom_r_full_uniform_rams_dh0m.txt
+err = 0.00486214, parameters :
+c_b = 1719
+tau = 0
+rho_b = 1.76
+R = 6960
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1135_bottom_r_full_weighted_rams_dh0m.txt
+err = 9.09004e-07, parameters :
+c_b = 1800
+tau = 0
+rho_b = 1.1
+R = 6950
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1135u_bottom_r_full_uniform_rams_dh0m.txt
+err = 0.0202171, parameters :
+c_b = 1800
+tau = 0
+rho_b = 1.1
+R = 6950
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1135w_bottom_r_full_weighted_rams_dh0m.txt
+err = 1.08406e-11, parameters :
+c_b = 1721
+tau = 0
+rho_b = 1.74
+R = 6950
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1135wu_bottom_r_full_uniform_rams_dh0m.txt
+err = 0.00485794, parameters :
+c_b = 1717
+tau = 0
+rho_b = 1.8
+R = 6950
 cws :
 1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
 depths :
@@ -689,4 +911,444 @@ R = 7006
 cws :
 1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
 depths
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1170
+err = 1.44415e-07, parameters :
+c_b = 1697
+tau = 0
+rho_b = 1.96
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1170u
+err = 0.00353668, parameters :
+c_b = 1704
+tau = 0
+rho_b = 1.84
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1170w
+err = 1.13114e-11, parameters :
+c_b = 1718
+tau = 0
+rho_b = 1.74
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1170wu
+err = 0.00490566, parameters :
+c_b = 1715
+tau = 0
+rho_b = 1.78
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1171
+err = 1.41234e-07, parameters :
+c_b = 1700
+tau = 0
+rho_b = 1.92
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1171u
+err = 0.00384954, parameters :
+c_b = 1705
+tau = 0
+rho_b = 1.88
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1171w
+err = 1.06906e-11, parameters :
+c_b = 1717
+tau = 0
+rho_b = 1.76
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1171wu
+err = 0.00756091, parameters :
+c_b = 1704
+tau = 0
+rho_b = 1.98
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1172
+err = 1.46468e-07, parameters :
+c_b = 1701
+tau = 0
+rho_b = 1.96
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1172u
+err = 0.00356924, parameters :
+c_b = 1707
+tau = 0
+rho_b = 1.88
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1172w
+err = 1.2809e-11, parameters :
+c_b = 1709
+tau = 0
+rho_b = 1.98
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1172wu
+err = 0.00614652, parameters :
+c_b = 1707
+tau = 0
+rho_b = 2
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1174
+err = 1.46708e-07, parameters :
+c_b = 1707
+tau = 0
+rho_b = 1.86
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1174u
+err = 0.00275336, parameters :
+c_b = 1713
+tau = 0
+rho_b = 1.84
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1174w
+err = 1.2448e-11, parameters :
+c_b = 1726
+tau = 0
+rho_b = 1.82
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1174wu
+err = 0.00416432, parameters :
+c_b = 1715
+tau = 0
+rho_b = 1.98
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1175
+err = 1.6198e-07, parameters :
+c_b = 1711
+tau = 0
+rho_b = 1.82
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1175u
+err = 0.00306513, parameters :
+c_b = 1719
+tau = 0
+rho_b = 1.8
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1175w
+err = 1.09226e-11, parameters :
+c_b = 1717
+tau = 0
+rho_b = 1.96
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1175wu
+err = 0.00386958, parameters :
+c_b = 1715
+tau = 0
+rho_b = 2
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1176
+err = 1.68708e-07, parameters :
+c_b = 1716
+tau = 0
+rho_b = 1.76
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1176u
+err = 0.00315172, parameters :
+c_b = 1724
+tau = 0
+rho_b = 1.74
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1176w
+err = 1.08844e-11, parameters :
+c_b = 1717
+tau = 0
+rho_b = 1.94
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1176wu
+err = 0.00452041, parameters :
+c_b = 1727
+tau = 0
+rho_b = 1.84
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1177
+err = 1.93095e-07, parameters :
+c_b = 1723
+tau = 0
+rho_b = 1.68
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1177u
+err = 0.00390288, parameters :
+c_b = 1736
+tau = 0
+rho_b = 1.68
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1177w
+err = 1.16768e-11, parameters :
+c_b = 1707
+tau = 0
+rho_b = 2.06
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1177wu
+err = 0.0059502, parameters :
+c_b = 1710
+tau = 0
+rho_b = 2.14
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1178
+err = 2.14897e-07, parameters :
+c_b = 1729
+tau = 0
+rho_b = 1.62
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1178u
+err = 0.00425482, parameters :
+c_b = 1743
+tau = 0
+rho_b = 1.64
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1178w
+err = 1.15263e-11, parameters :
+c_b = 1689
+tau = 0
+rho_b = 2.38
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1178wu
+err = 0.00620862, parameters :
+c_b = 1724
+tau = 0
+rho_b = 1.96
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1179
+err = 2.47287e-07, parameters :
+c_b = 1737
+tau = 0
+rho_b = 1.52
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1179u
+err = 0.00484054, parameters :
+c_b = 1750
+tau = 0
+rho_b = 1.54
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1179w
+err = 1.19384e-11, parameters :
+c_b = 1679
+tau = 0
+rho_b = 2.6
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 1179wu
+err = 0.00684291, parameters :
+c_b = 1717
+tau = 0
+rho_b = 2.04
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 11710
+err = 2.78259e-07, parameters :
+c_b = 1747
+tau = 0
+rho_b = 1.46
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 11710u
+err = 0.00575219, parameters :
+c_b = 1759
+tau = 0
+rho_b = 1.48
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 11710w
+err = 1.2864e-11, parameters :
+c_b = 1667
+tau = 0
+rho_b = 3
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
+5 10 15 20 25 30 35 40 45 50 300
+
+*** scenario 11710wu
+err = 0.00849207, parameters :
+c_b = 1672
+tau = 0
+rho_b = 3
+R = 7000
+cws :
+1500 1500 1498 1496 1493 1487 1472 1466 1462 1462
+depths :
 5 10 15 20 25 30 35 40 45 50 300
