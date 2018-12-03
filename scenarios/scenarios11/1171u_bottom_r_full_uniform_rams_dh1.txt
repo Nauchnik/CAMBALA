@@ -1,0 +1,20 @@
+dtimes_file rams_zr50m_R7km_dtimes_dh1.txt
+spmag_file(string|no) no
+function_type uniform
+h 50
+H 300
+% variable parameters
+cw0 1500
+cw1 1500
+cw2 1498
+cw3 1496
+cw4 1493
+cw5 1487
+cw6 1472
+cw7 1466
+cw8 1462
+cw9 1462
+R 7000
+rhob 1.1:0.02:2
+cb 1650:1:1800
+tau 0
