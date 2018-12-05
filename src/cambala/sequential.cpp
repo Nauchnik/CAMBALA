@@ -192,7 +192,8 @@ vector<vector<double>> CAMBALA_sequential::createDepthsArray()
 		for (auto depth : depths_vec)
 			total_depths_vec.push_back(depth);
 	}
-	cout << skipped_depths_count << " depths combinations were skipped \n";
+	if (skipped_depths_count)
+		cout << skipped_depths_count << " depths combinations were skipped \n";
 	
 	ofstream ofile(depths_filename);
 	for (auto &x : total_depths_vec) {
@@ -626,11 +627,11 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 {
 // read constant and variable values from a scenario file
 	if ( (!rank) && (verbosity > 0) )
-		cout << "scenario file " << scenarioFileName << endl;
+		cout << "scenario file name " << scenarioFileName << endl;
 	ifstream scenarioFile(scenarioFileName.c_str());
 
 	if (!scenarioFile.is_open()) {
-		cerr << "scenarioFile with the name " << scenarioFileName << " wasn't openend" << endl;
+		cerr << "scenario file with the name " << scenarioFileName << " wasn't opened" << endl;
 		return -1;
 	}
 
