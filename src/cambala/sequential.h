@@ -14,6 +14,7 @@ using namespace std;
 using namespace CAMBALA_point;
 
 const unsigned MAX_DEPTHS_VECTORS = 1000000;
+const unsigned REPORT_EVERY_PROCESSED_POINTS = 100;
 
 struct depth
 {
@@ -55,11 +56,10 @@ public:
 	string spmagFileName;
 	int rank;
 	bool isTimeDelayPrinting;
-	string launch_type; // bruteforce | ils
+	string launch_type; // brute_force | ils
 	stringstream input_params_sstream;
 	string output_filename;
 	string depths_filename;
-	bool is_mpi;
 	vector<vector<double>> search_space; // values of variables which form a search space
 
 	int readScenario(string scenarioFileName);
@@ -79,7 +79,7 @@ public:
 	search_space_point fromPointIndexesToPoint(vector<unsigned> cur_point_indexes, vector<double> depths);
 	vector<unsigned> fromPointToPointIndexes(search_space_point point);
 	void findGlobalMinBruteForce(vector<double> depths);
-	void reportFinalResult();
+	void reportCurrentResult(bool is_final);
 	void reduceSearchSpace(reduced_search_space_attribute &reduced_s_s_a);
 	double directPointCalc( search_space_point point );
 

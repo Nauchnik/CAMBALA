@@ -26,7 +26,7 @@ void CAMBALA_parallel::MPI_main()
 		else if (rank > 0)
 			computingProcessIls();
 	}
-	else if (launch_type == "bruteforce") {
+	else if (launch_type == "brute_force") {
 		if (rank == 0)
 			controlProcessBruteforce();
 		else if (rank > 0)

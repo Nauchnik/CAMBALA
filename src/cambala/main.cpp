@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 	if (argc > 1)
 		scenarioFileName = argv[1];
 	else {
-		cout << "Usage : scenarioFileName [verbosity] [-test]" << endl;
+		cout << "Usage : scenario [verbosity] [-test]" << endl;
 		exit(1);
 	}
 	if (argc >= 3)
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 	CAMBALA_seq.readInputDataFromFiles();
 	
 	CAMBALA_seq.solve();
-	CAMBALA_seq.reportFinalResult();
+	CAMBALA_seq.reportCurrentResult(true); // true to report about the end of the search
 
 #else
 	int rank = 0;
