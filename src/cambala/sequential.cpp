@@ -19,12 +19,11 @@ CAMBALA_sequential::CAMBALA_sequential() :
 	H(0),
 	n_layers_w(1),
 	iterated_local_search_runs(10),
-	init_iterated_local_search_runs(10),
 	verbosity(1),
 	N_total(1),
 	isTimeDelayPrinting(false),
 	ppm(0),
-	rank(0)
+	rank(1)
 {
 	record_point.cb       = START_HUGE_VALUE;
 	record_point.rhob     = START_HUGE_VALUE;
@@ -426,8 +425,10 @@ search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> d
 		else
 			break;
 	}
+	u_val = (u_val == 0) ? 1 : u_val;
+	u_val *= (rank + 1); // for parallel solving rank varies from 1 to n-1
 	srand(u_val); // own random numbers for each hill climbing
-
+	
 	// choose random point in the search space
 	vector<unsigned> local_record_point_indexes;
 	local_record_point_indexes.resize(search_space.size());
@@ -436,6 +437,10 @@ search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> d
 
 	search_space_point local_record_point = fromPointIndexesToPoint(local_record_point_indexes, depths);
 	fillDataComputeResidual(local_record_point); // calculated residual is written to cur_point
+	if ((verbosity > 2) && (rank == 1)) {
+		cout << "random start point : \n";
+		cout << strPointData(local_record_point);
+	}
 
 	bool isCheckRequired = false;
 	for (unsigned i = 0; i < search_space.size(); i++) { // i stands for variable_index
@@ -582,14 +587,14 @@ search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> d
 		local_record_point = cur_point;
 		local_record_point_indexes = cur_point_indexes;
 
-		if (verbosity > 0) {
+		if (verbosity > 1) {
 			cout << "checked_points size " << checked_points.size() << endl;
 			cout << "skipped_points " << skipped_points << endl;
 			reportCurrentResult();
 		}
 	}
 
-	return local_record_point;
+	return record_point;
 }
 
 search_space_point CAMBALA_sequential::fromPointIndexesToPoint( vector<unsigned> cur_point_indexes,
@@ -758,7 +763,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 		else if (word == "ppm")
 			sstream >> ppm;
 		else if (word == "ils_iterations")
-			sstream >> init_iterated_local_search_runs;
+			sstream >> iterated_local_search_runs;
 		else if (word == "verbosity")
 			sstream >> verbosity;
 		sstream.str(""); sstream.clear();
@@ -788,7 +793,7 @@ int CAMBALA_sequential::readScenario(string scenarioFileName)
 	input_params_sstream << "launch_type " << launch_type << endl;
 	input_params_sstream << "object_function_type " << object_function_type << endl;
 	input_params_sstream << "ppm " << ppm << endl;
-	input_params_sstream << "init_iterated_local_search_runs " << init_iterated_local_search_runs << endl;
+	input_params_sstream << "iterated_local_search_runs " << iterated_local_search_runs << endl;
 	input_params_sstream << "h_vec :" << endl;
 	input_params_sstream << doubleVecToStr(h_vec) << endl;
 	input_params_sstream << "cw_init_vec_vec :" << endl;
@@ -949,7 +954,6 @@ void CAMBALA_sequential::solve()
 			cout << "*** processing depths combination # " << j + 1 << " /  " << depths_vec.size() << endl;
 			init(depths_vec[j]);
 			//CAMBALA_seq.findGlobalMinBruteForce(depths_vec[i]);
-			iterated_local_search_runs = init_iterated_local_search_runs;
 			findLocalMinHillClimbing(depths_vec[j]);
 		}
 	}

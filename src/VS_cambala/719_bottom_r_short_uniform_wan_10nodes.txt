@@ -5,6 +5,7 @@
 dtimes_file ac_modes_zr50m_R7km_dtimes_avdtau.txt
 spmag_file(string|no) no
 function_type Wan_uniform
+launch_type ils
 h 50
 H 300
 % variable parameters
