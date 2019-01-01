@@ -192,7 +192,6 @@ void CAMBALA_parallel::computingProcessIls()
 		
 		init(depths);
 		double processing_time = MPI_Wtime();
-		//iterated_local_search_runs = init_iterated_local_search_runs * depths.size();
 		if ((rank == 1) && (verbosity > 0)) {
 			cout << "depths size " << depths.size() << endl;
 			cout << "iterated_local_search_runs " << iterated_local_search_runs << endl;
@@ -269,7 +268,7 @@ void CAMBALA_parallel::controlProcessBruteforce()
 		MPI_Send(&stop_message, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
 	main_sstream_out << "stop-messages were sent" << endl;
 	writeOutputData(main_sstream_out);
-	reportFinalResult();
+	reportCurrentResult(true);
 	MPI_Finalize();
 #endif
 }
@@ -406,11 +405,9 @@ void CAMBALA_parallel::controlProcessFixedDepths(const vector<double> depths, co
 		}
 	}
 	
-	if ((!is_mpi) || (verbosity > 0)) {
-		sstream_out << endl << "SEARCH ENDED" << endl;
-		sstream_out << strPointData(record_point);
-		sstream_out << "final time " << MPI_Wtime() - mpi_start_time << " s" << endl;
-	}
+	sstream_out << endl << "SEARCH ENDED" << endl;
+	sstream_out << strPointData(record_point);
+	sstream_out << "final time " << MPI_Wtime() - mpi_start_time << " s" << endl;
 
 	writeOutputData(sstream_out);
 
