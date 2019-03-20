@@ -136,6 +136,7 @@
     <ClCompile Include="..\cambala\main.cpp" />
     <ClCompile Include="..\cambala\parallel.cpp" />
     <ClCompile Include="..\cambala\sequential.cpp" />
+    <ClCompile Include="mode_numbers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\alglib\alglibinternal.h" />
@@ -156,6 +157,7 @@
     <ClInclude Include="..\cambala\point.h" />
     <ClInclude Include="..\cambala\sequential.h" />
     <ClInclude Include="..\cambala\utils.h" />
+    <ClInclude Include="mode_numbers.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\cambala\Makefile" />
