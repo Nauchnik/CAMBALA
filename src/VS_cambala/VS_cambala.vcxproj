@@ -134,9 +134,9 @@
     <ClCompile Include="..\..\..\alglib\specialfunctions.cpp" />
     <ClCompile Include="..\..\..\alglib\statistics.cpp" />
     <ClCompile Include="..\cambala\main.cpp" />
+    <ClCompile Include="..\cambala\normal_modes.cpp" />
     <ClCompile Include="..\cambala\parallel.cpp" />
     <ClCompile Include="..\cambala\sequential.cpp" />
-    <ClCompile Include="mode_numbers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\alglib\alglibinternal.h" />
@@ -153,11 +153,11 @@
     <ClInclude Include="..\..\..\alglib\specialfunctions.h" />
     <ClInclude Include="..\..\..\alglib\statistics.h" />
     <ClInclude Include="..\cambala\compute.h" />
+    <ClInclude Include="..\cambala\normal_modes.h" />
     <ClInclude Include="..\cambala\parallel.h" />
     <ClInclude Include="..\cambala\point.h" />
     <ClInclude Include="..\cambala\sequential.h" />
     <ClInclude Include="..\cambala\utils.h" />
-    <ClInclude Include="mode_numbers.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\cambala\Makefile" />

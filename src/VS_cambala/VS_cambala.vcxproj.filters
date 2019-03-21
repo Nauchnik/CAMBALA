@@ -66,7 +66,7 @@
     <ClCompile Include="..\..\..\alglib\statistics.cpp">
       <Filter>alglib</Filter>
     </ClCompile>
-    <ClCompile Include="mode_numbers.cpp">
+    <ClCompile Include="..\cambala\normal_modes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -125,7 +125,7 @@
     <ClInclude Include="..\..\..\alglib\statistics.h">
       <Filter>alglib</Filter>
     </ClInclude>
-    <ClInclude Include="mode_numbers.h">
+    <ClInclude Include="..\cambala\normal_modes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

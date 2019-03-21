@@ -4,7 +4,11 @@
 #include <iostream>
 #include <fstream>
 #include <complex>
+#include <algorithm>
+#include <vector>
 #include "linalg.h"
+
+using namespace std;
 
 const double LOCAL_M_PI = 3.14159265358979323846;
 const complex<double> Iu(0.0, 1.0);
@@ -1234,7 +1238,7 @@ void compute_mfunctions_zr(double &omeg, // sound frequency
         double zp;
         unsigned cur_layer = 0;
         unsigned cur_points = 0;
-        unsigned nzr = zr.size();
+        size_t nzr = zr.size();
         unsigned i_inside_l = 0;
 
 
@@ -1313,13 +1317,13 @@ vector<complex<double>> compute_cpl_pressure(double f,
 
         double omeg = 2 * LOCAL_M_PI*f;
         double R;
-        unsigned nzr = zr.size();
+        size_t nzr = zr.size();
         complex<double> Prc;
 
 
         khs = compute_wnumbers_extrap_lin_dz(omeg, depths, c1s, c2s, rhos, Ns_points, iModesSubset, ordRich);
 
-        unsigned nmod = khs.size();
+        size_t nmod = khs.size();
 
 
 //        // TEST
