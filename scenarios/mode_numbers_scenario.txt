@@ -5,7 +5,6 @@
 dtimes_file 50_ac_modes_R7km_dtimes.txt
 spmag_file(string|no) no
 function_type uniform
-launch_type brute_force
 h 50
 H 300
 % variable parameters

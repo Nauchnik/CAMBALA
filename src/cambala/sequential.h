@@ -9,6 +9,7 @@
 #include <math.h>
 #include "linalg.h"
 #include "point.h"
+#include "normal_modes.h"
 
 using namespace std;
 using namespace CAMBALA_point;
@@ -45,10 +46,12 @@ public:
 	vector<unsigned> mode_numbers;
 	vector<vector<double>> modal_delays;
 	vector<double> freqs;
+	// TODO: move to the mode_numbers class
 	vector<double> c1s;
 	vector<double> c2s;
 	vector<double> rhos;
 	vector<unsigned> Ns_points;
+	
 	vector<vector<double>> weight_coeffs;
 	int verbosity;
 	string dtimesFileName;
