@@ -462,7 +462,6 @@ double compute_modal_delays_residual_LWan1(vector<double> &freqs,
 	//2016.04.27:Pavel: now we use RMS as the residual
     unsigned nRes = 0;
 
-
 	vector<vector<double>> modal_group_velocities;
 	vector<unsigned> mode_numbers;
 
