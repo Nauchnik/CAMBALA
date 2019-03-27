@@ -7,7 +7,7 @@ NormalModes::NormalModes():
 	iModesSubset(-1.0)
 {}
 
-vector<double> NormalModes::compute_wnumbers_extrap_lin_dz()
+vector<double> NormalModes::compute_wnumbers_extrap_lin_dz(double &omeg)
 	/*  subroutine for computing wavenumbers for a given waveguide structure
 	the computation is performed by the FD method for certain meshsize,
 	Richardson extrapolation is used to improve the
@@ -117,7 +117,7 @@ vector<double> NormalModes::compute_wnumbers_extrap_lin_dz()
 
 		//        cout << "rr=" << rr << endl;
 
-		out_wnum2 = compute_wnumbers(input_c, input_rho, input_interf_idcs, input_mesh);
+		out_wnum2 = compute_wnumbers(omeg, input_c, input_rho, input_interf_idcs, input_mesh);
 		m_wnum = min(m_wnum, (unsigned)out_wnum2.size());
 
 		if (rr == 1) { wnum_extrapR.assign(m_wnum, 0); }
@@ -141,6 +141,7 @@ vector<double> NormalModes::compute_wnumbers_extrap_lin_dz()
 
 
 vector<double> NormalModes::compute_wnumbers(
+	double &omeg,
 	vector<double> &c,
 	vector<double> &rho,
 	vector<unsigned> &interface_idcs,
@@ -287,5 +288,279 @@ vector<double> NormalModes::compute_wnumbers(
 	return wnumbers2;
 }
 
+double NormalModes::RK4(double omeg2, // sound frequency
+	double kh2,
+	double deltah,
+	double c1,
+	double c2,
+	unsigned Np,
+	vector<double> &phi0,
+	vector<double> &dphi0)
+{
+
+	double f11, f12, f21, f22, f31, f32, f41, f42, cc;
+	double h = deltah / Np;
+	double layer_int = 0.0;
 
 
+	for (unsigned kk = 0; kk < Np; kk++) {
+
+		layer_int = layer_int + 0.5*h*phi0.back()*phi0.back();
+
+		f11 = dphi0.back();
+		cc = c1 + (c2 - c1)*kk*h / deltah;
+		cc = cc * cc;
+		f12 = (kh2 - omeg2 / cc)*phi0.back();
+
+		f21 = dphi0.back() + 0.5*f12*h;
+		cc = c1 + (c2 - c1)*(kk + 0.5)*h / deltah;
+		cc = cc * cc;
+		f22 = (kh2 - omeg2 / cc)*(phi0.back() + 0.5*f11*h);
+
+		f31 = dphi0.back() + 0.5*f22*h;
+		cc = c1 + (c2 - c1)*(kk + 0.5)*h / deltah;
+		cc = cc * cc;
+		f32 = (kh2 - omeg2 / cc)*(phi0.back() + 0.5*f21*h);
+
+		f41 = dphi0.back() + f32 * h;
+		cc = c1 + (c2 - c1)*(kk + 1)*h / deltah;
+		cc = cc * cc;
+		f42 = (kh2 - omeg2 / cc)*(phi0.back() + f31 * h);
+
+		phi0.push_back(phi0.back() + h * (f11 + 2 * f21 + 2 * f31 + f41) / 6);
+		dphi0.push_back(dphi0.back() + h * (f12 + 2 * f22 + 2 * f32 + f42) / 6);
+
+		layer_int = layer_int + 0.5*h*phi0.back()*phi0.back();
+
+	}
+
+	return layer_int;
+}
+
+double NormalModes::Layer_an_exp(double omeg2, // sound frequency
+	double kh2,
+	double deltah,
+	double c,
+	unsigned Np,
+	vector<double> &phi0,
+	vector<double> &dphi0)
+{
+
+	double c1, c2, kv;
+	double h = deltah / Np;
+	double layer_int = 0.0;
+
+	kv = sqrt(kh2 - omeg2 / (c*c));
+	c1 = 0.5*(phi0.back() - dphi0.back() / kv);
+	c2 = 0.5*(phi0.back() + dphi0.back() / kv);
+	c2 = 0;
+
+
+	/*
+		cout << "kv c1 c2" << endl;
+		cout << kv << endl;
+		cout << c1 << endl;
+		cout << c2 << endl;
+		cout << h << endl;
+		cout << "-----" << endl;
+		cout << phi0.back() << endl;
+		cout << dphi0.back()/kv << endl;
+	*/
+	for (unsigned kk = 0; kk < Np; kk++) {
+
+		layer_int = layer_int + 0.5*h*phi0.back()*phi0.back();
+
+
+
+		phi0.push_back(c1*exp(-kv * ((kk + 1)*h)) + c2 * exp(kv*((kk + 1)*h)));
+		dphi0.push_back(-c1 * kv*exp(-kv * ((kk + 1)*h)) + c2 * kv*exp(kv*((kk + 1)*h)));
+
+		layer_int = layer_int + 0.5*h*phi0.back()*phi0.back();
+		//cout << layer_int << endl;
+	}
+
+	return layer_int;
+}
+
+/*
+A routine for computing delay residual.
+
+Arguments:
+1) Environment: five arrays of the same length: depth, c1s, c2s, rhos, Ns_points;
+(each entry describes one layer as described in the comments to compute_wnumbers_extrap() )
+
+2) Source-receive distance: R -- distance from the source to the receiver;
+
+3) Experimental data: modal delays:
+-- experimental_mode_numbers: number of modes for each frequency in the recorded signal
+-- experimental_delays: experimental_delays[ii][jj] is the delay of jj+1-th mode for the frequency freqs[ii]
+
+The routine computes the (uniform) residual (misfit) of experimental data and the "theoretical" delays for a given environment model.
+
+It should be used as follows: for a set of environment models the residual should be computed. The minimal value of the residual indicates
+the most "adequate" model.
+*/
+
+void NormalModes::load_layers_data(string LayersFName)
+{
+	ifstream Myfile(LayersFName);
+	double d, c1, c2, rho;
+	unsigned nsp;
+
+	M_depths.clear();
+	M_c1s.clear();
+	M_c2s.clear();
+	M_rhos.clear();
+	M_Ns_points.clear();
+
+	while (!(Myfile.eof()))
+	{
+		Myfile >> d;
+		Myfile >> c1;
+		Myfile >> c2;
+		Myfile >> rho;
+		Myfile >> nsp;
+
+		M_depths.push_back(d);
+		M_c1s.push_back(c1);
+		M_c2s.push_back(c2);
+		M_rhos.push_back(rho);
+		M_Ns_points.push_back(nsp);
+
+	}
+	Myfile.close();
+}
+
+void NormalModes::load_profile_deep_water(string ProfileFName, const unsigned ppm)
+{
+	ifstream Myfile(ProfileFName);
+	double cp, cc, dc, dp;
+
+	Myfile >> dp;
+	Myfile >> cp;
+
+	unsigned npc;
+
+	while (!(Myfile.eof()))
+	{
+		Myfile >> dc;
+		Myfile >> cc;
+
+		M_depths.push_back(dc);
+		M_c1s.push_back(cp);
+		M_c2s.push_back(cc);
+		M_rhos.push_back(1);
+
+		npc = (unsigned)abs(ppm*(dc - dp));
+		M_Ns_points.push_back(npc);
+
+		cp = cc;
+		dp = dc;
+
+	}
+	Myfile.close();
+}
+
+double NormalModes::compute_modal_delays_residual_uniform(
+	double R,
+	double tau,
+	vector<vector<double>> &experimental_delays,
+	vector<unsigned> &experimental_mode_numbers
+)
+{
+	unsigned rord = 3;
+
+	double iModesSubset = -1.0;
+	double deltaf = 0.05;
+
+	double residual = 0;
+	unsigned mnumb;
+	double mdelay;
+	//2016.04.27:Pavel: now we use RMS as the residual
+	unsigned nRes = 0;
+
+	vector<vector<double>> modal_group_velocities;
+	vector<unsigned> mode_numbers;
+
+	compute_modal_grop_velocities(deltaf, modal_group_velocities, mode_numbers);
+
+	for (unsigned ii = 0; ii < freqs.size(); ii++) {
+		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
+		mnumb = experimental_mode_numbers.at(ii);
+		for (unsigned jj = 0; jj < mnumb; jj++) {
+			if (experimental_delays[ii][jj] > 0) {
+				nRes = nRes + 1;
+				//2016.04.27:Pavel:
+				if (jj < mode_numbers.at(ii)) {
+					mdelay = R / modal_group_velocities[ii][jj];
+				}
+				else if ((ii + 1 < freqs.size()) && (jj < mode_numbers.at(ii + 1))) {
+					mdelay = R / modal_group_velocities[ii + 1][jj];
+				}
+				else {
+					mdelay = 0;
+				}
+				//tau_comment: this is the very place where it comes into play in the computation
+				//please check the search block!
+				residual = residual + pow(experimental_delays[ii][jj] + tau - mdelay, 2);
+			}
+		}
+	}
+	//2016.04.27:Pavel: RMS
+	residual = sqrt(residual / nRes);
+
+	//if (isTimeDelayPrinting)
+	//	printDelayTime(R, freqs, mode_numbers, modal_group_velocities);
+
+	return residual;
+}
+
+int NormalModes::compute_modal_grop_velocities(
+	double deltaf,
+	vector<vector<double>> &modal_group_velocities,
+	vector<unsigned> &mode_numbers
+)
+{
+	mode_numbers.clear();
+	modal_group_velocities.clear();
+
+	vector<double> out_wnum1;
+	vector<double> out_wnum2;
+	vector<double> mgv_ii;
+	unsigned nwnum;
+	unsigned nfr = (unsigned)freqs.size();
+	double omeg1, omeg2;
+
+	for (unsigned ii = 0; ii < nfr; ii++) {
+		out_wnum1.clear();
+		out_wnum2.clear();
+		mgv_ii.clear();
+		omeg1 = 2 * M_PI*(freqs.at(ii) + deltaf);
+		out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1);
+		nwnum = (unsigned)out_wnum1.size();
+
+		/*
+		cout << "f=" << freqs.at(ii) << "Hz" << endl;
+
+		for (unsigned jj=0; jj < nwnum; jj++ )
+		{
+		cout << "k_" << jj+1 << "=" << out_wnum1.at(jj) << endl;
+		}
+		*/
+
+		omeg2 = 2 * M_PI*(freqs.at(ii));
+		out_wnum2 = compute_wnumbers_extrap_lin_dz(omeg2);
+		//nwnum = min(nwnum, (unsigned)out_wnum2.size());
+		nwnum = (unsigned)out_wnum2.size();
+
+		for (unsigned jj = 0; jj < nwnum; jj++)
+		{
+			mgv_ii.push_back((omeg1 - omeg2) / (out_wnum1.at(jj) - out_wnum2.at(jj)));
+		}
+
+		modal_group_velocities.push_back(mgv_ii);
+		mode_numbers.push_back(nwnum);
+	}
+
+	return 0;
+}
