@@ -28,41 +28,54 @@ public:
 
 	// source/receiver parameters
 	vector<double> zr;
-	vector<double> R;
+	vector<double> R_vec;
 	vector<double> freqs;
+
+
+	// parameters of wave numbers and mode functions
+	vector<double> khs;
+	vector<vector<double>> mfunctions_zr;
+	vector<vector<double>> modal_group_velocities;
+	vector<unsigned> mode_numbers;
 
 	//
 	double iModesSubset;
 	unsigned ordRich;
-	double omeg; // sound frequency
-
+	vector<vector<double>> weight_coeffs;
+	
 	// input functions
 	
 
 	// output functions
 	
-
+	
 	// main computation functions
+
 	vector<double> compute_wnumbers_extrap_lin_dz(double &omeg);
 	vector<double> compute_wnumbers(double &omeg, vector<double> &c, vector<double> &rho,
 								    vector<unsigned> &interface_idcs, vector<double> &meshsizes);
-	double compute_modal_delays_residual_uniform(double R, double tau, vector<vector<double>> &experimental_delays, 
+	vector<double> compute_wnumbers_extrap2(double &omeg);
+	double compute_modal_delays_residual_uniform(const double R, const double tau, vector<vector<double>> &experimental_delays,
 		                            vector<unsigned> &experimental_mode_numbers);
-	
-private:
-	// parameters of wave numbers and mode functions
-	vector<double> khs;
-	vector<vector<double>> mfunctions_zr;
+	int compute_modal_grop_velocities(const double deltaf);
+	int compute_modal_grop_velocities2(const double deltaf);
+	double compute_modal_delays_residual_LWan1(const double R, const double tau, 
+		vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
+	double compute_modal_delays_residual_LWan(const double R, const double tau,
+		vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
+	double compute_modal_delays_residual_LWan_weighted(const double R, const double tau, 
+		vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
+	double compute_modal_delays_residual_uniform2(const double R, const double tau,
+		vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
 
+private:
 	// additional computation functions
-	double RK4(double omeg2, double kh2, double deltah, double c1, double c2, unsigned Np,
+	double RK4(const double omeg2, const double kh2, const double deltah, const double c1, const double c2, const unsigned Np,
 		vector<double> &phi0, vector<double> &dphi0);
-	double Layer_an_exp(double omeg2, double kh2, double deltah, double c, unsigned Np,
+	double Layer_an_exp(const double omeg2, const double kh2, const double deltah, const double c, const unsigned Np,
 		vector<double> &phi0, vector<double> &dphi0);
-	void load_layers_data(string LayersFName);
-	void load_profile_deep_water(string ProfileFName, const unsigned ppm);
-	int compute_modal_grop_velocities(double deltaf, vector<vector<double>> &modal_group_velocities,
-		vector<unsigned> &mode_numbers);
+	void load_layers_data(const string LayersFName);
+	void load_profile_deep_water(const string ProfileFName, const unsigned ppm);
 };
 
 #endif
