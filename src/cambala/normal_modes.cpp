@@ -975,6 +975,11 @@ the most "adequate" model.
 void NormalModes::load_layers_data(const string LayersFName)
 {
 	ifstream Myfile(LayersFName);
+	if (!Myfile.is_open()) {
+		cerr << "Error. File " << LayersFName << " was not opened\n";
+		exit(-1);
+	}
+
 	double d, c1, c2, rho;
 	unsigned nsp;
 
@@ -1005,6 +1010,11 @@ void NormalModes::load_layers_data(const string LayersFName)
 void NormalModes::load_profile_deep_water(const string ProfileFName, const unsigned ppm)
 {
 	ifstream Myfile(ProfileFName);
+	if (!Myfile.is_open()) {
+		cerr << "Error. File " << ProfileFName << " was not opened\n";
+		exit(-1);
+	}
+	
 	double cp, cc, dc, dp;
 
 	Myfile >> dp;
@@ -1039,7 +1049,7 @@ double NormalModes::compute_modal_delays_residual_uniform(
 	vector<unsigned> &experimental_mode_numbers
 )
 {
-	// double iModesSubset = -1.0; // check
+	iModesSubset = -1.0;
 	double deltaf = 0.05;
 
 	double residual = 0;
@@ -1159,10 +1169,10 @@ int NormalModes::compute_modal_grop_velocities2(const double deltaf)
 
 		for (unsigned jj = 0; jj < nwnum; jj++)
 		{
-			// TODO
-			/*compute_wmode1(omeg, depths, c1s, c2s, rhos, Ns_points_m, out_wnum.at(jj), phi, dphi);
+			
+			compute_wmode1(omeg, Ns_points_m, out_wnum.at(jj), phi, dphi);
 
-			vgc = compute_wmode_vg(omeg, depths, c1s, c2s, rhos, Ns_points_m, out_wnum.at(jj), phi);*/
+			vgc = compute_wmode_vg(omeg, Ns_points_m, out_wnum.at(jj), phi);
 			mgv_ii.push_back(vgc);
 		}
 
@@ -1171,4 +1181,657 @@ int NormalModes::compute_modal_grop_velocities2(const double deltaf)
 	}
 
 	return 0;
+}
+
+
+/*
+
+compute_wmode1() computs the mode function "phi" and its derivative "dphi" for media parameters described by
+the arrays [depths,c1s,c2s,rhos,Ns_points] and for a given horizontal wavenumber "kh". The functions are normalized in
+the standard way (using inverse density as a weight function). The Runge-Kutta (4th order) scheme is used for solving the
+ODE in the matrix formulation.
+
+The parallel shooting is used in this version. For the discrete spectrum modes (refracted-refracted modes). We find the last layer L
+(from the bottom) where k(z) <  kh  (hence we have the decaying exponent). Starting from the bottom layer we solve the ODE to L-1 th layer
+going in the negative direction of z axis. Then we match the solutions coming from the top and the bottom.
+
+*/
+
+void NormalModes::compute_wmode1(double &omeg, // sound frequency
+	vector<unsigned> &Ns_points_m,
+	const double kh,
+	vector<double> &phi,
+	vector<double> &dphi)
+{
+	double deltah, phiNorm;
+	double phi2int = 0.0;
+	double bphi2int = 0.0;
+
+	double layer_int = 0.0;
+
+	vector<double> bphi, bdphi;
+
+	phi.clear();
+	dphi.clear();
+
+	phi.push_back(0.0);
+	dphi.push_back(1.0);
+
+
+
+
+	unsigned n_layers = (unsigned)M_depths.size();
+	unsigned L = n_layers;
+
+	while ((kh > omeg / (min(M_c1s.at(L - 1), M_c2s.at(L - 1)))) && (L > 1)) {
+		L = L - 1;
+	}
+
+
+
+	// shooting from the surface
+	for (unsigned ll = 0; ll < L; ll++) {
+
+		if (ll == 0) { deltah = M_depths.at(0); }
+		else {
+			deltah = M_depths.at(ll) - M_depths.at(ll - 1);
+			dphi.back() = M_rhos.at(ll)*dphi.back() / M_rhos.at(ll - 1);
+		}
+
+		layer_int = RK4(omeg*omeg, kh*kh, deltah, M_c1s.at(ll), M_c2s.at(ll), Ns_points_m.at(ll), phi, dphi);
+
+		phi2int = phi2int + layer_int / M_rhos.at(ll);
+
+		//TEST --> overflow problem
+		if (phi2int > 1.0e+50) {
+			for (unsigned qq = 0; qq < phi.size(); qq++) {
+				phi.at(qq) = phi.at(qq) / (1.0e+20);
+				dphi.at(qq) = dphi.at(qq) / (1.0e+20);
+			}
+			phi2int = phi2int / (1.0e+40);
+		}
+
+	}
+
+	// shooting from the bottom
+
+	if (L < n_layers) {
+
+		bphi.push_back(0.0);
+		bdphi.push_back(1.0);
+
+		for (unsigned ll = n_layers - 1; ll >= L; ll--) {
+
+			deltah = M_depths.at(ll) - M_depths.at(ll - 1);
+
+			layer_int = RK4(omeg*omeg, kh*kh, deltah, M_c2s.at(ll), M_c1s.at(ll), Ns_points_m.at(ll), bphi, bdphi);
+			bphi2int = bphi2int + layer_int / M_rhos.at(ll);
+
+
+			//            //TEST
+			//            cout  << "ll="<< ll <<" bphi2int " << bphi2int  << endl;
+			//            cout  << "ll="<< ll <<" layer_int " << layer_int  << endl;
+			//            cout  << "ll="<< ll <<" deltah " << deltah  << endl;
+			//            cout  << "ll="<< ll <<" kh " << kh  << endl;
+			//            cout  << "ll="<< ll <<" c2 " << c2s.at(ll)  << endl;
+			//            cout  << "ll="<< ll <<" c1 " << c1s.at(ll)  << endl;
+			//            cout  << "ll="<< ll <<" nsp " << Ns_points_m.at(ll)  << endl;
+			//            cout  << "ll="<< ll <<" nsp-1 " << Ns_points_m.at(ll-1)  << endl;
+			//            cout  << "ll="<< ll <<" nsp-2 " << Ns_points_m.at(ll-2)  << endl;
+			//            for (unsigned qq=0; qq<bphi.size(); qq++  ){
+			//                cout  << "qq="<< qq <<" bphi " << bphi.at(qq) <<" bdphi " << bdphi.at(qq)  << endl;
+			//            }
+
+			bdphi.back() = M_rhos.at(ll - 1)*bdphi.back() / M_rhos.at(ll);
+
+			//TEST --> overflow problem
+			if (bphi2int > 1.0e+50) {
+
+				for (unsigned qq = 0; qq < bphi.size(); qq++) {
+					bphi.at(qq) = bphi.at(qq) / (1.0e+20);
+					bdphi.at(qq) = bdphi.at(qq) / (1.0e+20);
+				}
+				bphi2int = bphi2int / (1.0e+40);
+			}
+
+		}
+
+		// matching the shooting solutions
+
+		double cmatching = phi.back() / bphi.back();
+
+
+
+		for (int ll = bphi.size() - 2; ll >= 0; ll--) {
+
+			phi.push_back(cmatching*bphi.at(ll));
+			dphi.push_back(cmatching*bdphi.at(ll));
+
+
+		}
+
+		cmatching = cmatching * cmatching;
+		phiNorm = sqrt(phi2int + bphi2int * cmatching);
+
+	}
+	else {
+
+		phiNorm = sqrt(phi2int);
+
+	}
+	//    //TEST
+	//    cout  << " phiNorm " << phiNorm  << endl;
+	//    cout  << " phi2int " << phi2int  << endl;
+	//    cout  << " bphi2int " << bphi2int  << endl;
+	//    cout  << " cmatching " << phi.back()/bphi.back()  << endl;
+	//    cout  << " L " << L  << endl;
+	//    cout  << " n_layers " << n_layers  << endl;
+	//
+	//    throw invalid_argument("Ururu");
+
+	//        // TEST
+	//        for (unsigned qq=0; qq<nmod; qq++){
+	//
+	//            cout  << " kh" << qq <<" = " << khs.at(qq) << endl;
+	//
+	//        }
+
+
+	unsigned nz = (unsigned)phi.size();
+
+
+
+	for (unsigned ll = 0; ll < nz; ll++) {
+		phi.at(ll) = phi.at(ll) / phiNorm;
+		dphi.at(ll) = dphi.at(ll) / phiNorm;
+	}
+
+}
+
+
+
+double NormalModes::compute_wmode_vg(double &omeg, // sound frequency
+	vector<unsigned> &Ns_points_m,
+	const double kh,
+	vector<double> &phi)
+{
+	double deltah, h, cc, termc, vg;
+	double vg_int = 0.0;
+	double layer_int;
+	unsigned Np, nc;
+
+	unsigned n_layers = (unsigned)M_depths.size();
+
+	nc = 0;
+
+	for (unsigned ll = 0; ll < n_layers; ll++) {
+
+		if (ll == 0) { deltah = M_depths.at(0); }
+		else {
+			deltah = M_depths.at(ll) - M_depths.at(ll - 1);
+		}
+
+		Np = Ns_points_m.at(ll);
+		h = deltah / Np;
+
+		cc = M_c1s.at(ll);
+		layer_int = 0.0;
+
+		termc = phi.at(nc)*phi.at(nc) / (cc*cc);
+
+		for (unsigned jj = 0; jj < Np; jj++) {
+			layer_int = layer_int + termc;
+			nc = nc + 1;
+			cc = M_c1s.at(ll) + (M_c2s.at(ll) - M_c1s.at(ll))*(jj + 1)*h / deltah;
+			termc = phi.at(nc)*phi.at(nc) / (cc*cc);
+			layer_int = layer_int + termc;
+		}
+
+		layer_int = 0.5*layer_int*h / M_rhos.at(ll);
+
+		vg_int = vg_int + layer_int;
+
+
+	}
+
+	vg = 1 / (omeg*vg_int / kh);
+
+	return vg;
+}
+
+
+//2016.12.31:Pavel: a residual functions where the "experimental" spectrogram modulud is taken as the weight coefficients
+//this is a simplest nonuniform residual function
+
+double NormalModes::compute_modal_delays_residual_weighted(
+	const double R,
+	const double tau,
+	vector<vector<double>> &experimental_delays,
+	vector<unsigned> &experimental_mode_numbers
+)
+{
+	iModesSubset = -1.0;
+	double deltaf = 0.05;
+	double residual = 0;
+	unsigned mnumb;
+	double mdelay;
+	//2016.04.27:Pavel: now we use RMS as the residual
+	unsigned nRes = 0;
+
+	compute_modal_grop_velocities(deltaf);
+
+	for (unsigned ii = 0; ii < freqs.size(); ii++) {
+		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
+		mnumb = experimental_mode_numbers.at(ii);
+		for (unsigned jj = 0; jj < mnumb; jj++) {
+			if (experimental_delays[ii][jj] > 0) {
+				nRes = nRes + 1;
+				//2016.04.27:Pavel:
+				if (jj < mode_numbers.at(ii)) {
+					mdelay = R / modal_group_velocities[ii][jj];
+				}
+				else if ((ii + 1 < freqs.size()) && (jj < mode_numbers.at(ii + 1))) {
+					mdelay = R / modal_group_velocities[ii + 1][jj];
+				}
+				else {
+					mdelay = 0;
+				}
+				//tau_comment: this is the very place where it comes into play in the computation
+				//please check the search block!
+								//2016.12.31:Pavel: weight coefficients are included
+				residual = residual + weight_coeffs[ii][jj] * pow(experimental_delays[ii][jj] + tau - mdelay, 2);
+			}
+		}
+	}
+	//2016.04.27:Pavel: RMS
+	double d = (double)(residual / (double)nRes);
+	residual = sqrt(d);
+
+	//if (isTimeDelayPrinting)
+	//	printDelayTime(R, freqs, mode_numbers, modal_group_velocities);
+
+	return residual;
+}
+
+
+//2017.08.23:Pavel: a residual functions where the "experimental" spectrogram modulus is taken as the weight coefficients
+//this is a simplest nonuniform residual function
+//in this version (counterpart of _uniform2) the _extrap2 function is used for the computation of eigenvalues
+
+double NormalModes::compute_modal_delays_residual_weighted2(
+	const double R,
+	const double tau,
+	vector<vector<double>> &experimental_delays,
+	vector<unsigned> &experimental_mode_numbers
+)
+{
+	//residual = residual + weight_coeffs[ii][jj]*pow(experimental_delays[ii][jj] + tau - mdelay, 2);
+
+	iModesSubset = 1 / sqrt(2);
+	double deltaf = 0.05;
+	double residual = 0;
+	unsigned mnumb;
+	double mdelay;
+	//2016.04.27:Pavel: now we use RMS as the residual
+	unsigned nRes = 0;
+
+	compute_modal_grop_velocities2(deltaf);
+
+	for (unsigned ii = 0; ii < freqs.size(); ii++) {
+		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
+		mnumb = experimental_mode_numbers.at(ii);
+		for (unsigned jj = 0; jj < mnumb; jj++) {
+			if (experimental_delays[ii][jj] > 0) {
+				nRes = nRes + 1;
+				//2016.04.27:Pavel:
+				if (jj < mode_numbers.at(ii)) {
+					mdelay = R / modal_group_velocities[ii][jj];
+				}
+				else {
+					mdelay = R / modal_group_velocities[ii][mode_numbers.at(ii) - 1];
+				}
+				//tau_comment: this is the very place where it comes into play in the computation
+				//please check the search block!
+				residual = residual + weight_coeffs[ii][jj] * pow(experimental_delays[ii][jj] + tau - mdelay, 2);
+			}
+		}
+	}
+	//2016.04.27:Pavel: RMS
+	residual = sqrt(residual / nRes);
+
+	//if (isTimeDelayPrinting)
+	//	printDelayTime(R, freqs, mode_numbers, modal_group_velocities);
+
+	return residual;
+}
+
+
+/*
+
+compute_wmode() computs the mode function "phi" and its derivative "dphi" for media parameters described by
+the arrays [depths,c1s,c2s,rhos,Ns_points] and for a given horizontal wavenumber "kh". The functions are normalized in
+the standard way (using inverse density as a weight function). The Runge-Kutta (4th order) scheme is used for solving the
+ODE in the matrix formulation. Due to the round-off errors it is unstable in the bottom for the discrete spectrum modes, as
+the ODE is stiff there (solution involves a decaying exponential).
+
+*/
+
+void NormalModes::compute_wmode(double &omeg, // sound frequency
+	const double kh,
+	vector<double> &phi,
+	vector<double> &dphi)
+{
+	double deltah;
+	double phi2int = 0;
+	double layer_int = 0;
+
+	phi.clear();
+	dphi.clear();
+
+	phi.push_back(0.0);
+	dphi.push_back(1.0);
+
+
+	unsigned n_layers = (unsigned)M_depths.size();
+
+	for (unsigned ll = 0; ll < n_layers; ll++) {
+
+		if (ll == 0) { deltah = M_depths.at(0); }
+		else {
+			deltah = M_depths.at(ll) - M_depths.at(ll - 1);
+			dphi.back() = M_rhos.at(ll)*dphi.back() / M_rhos.at(ll - 1);
+		}
+
+		if ((ll == n_layers - 1) && (omeg / M_c1s.at(ll) < kh)) {
+			// in the bottom layer where the mode functions exhibits decay use
+			layer_int = Layer_an_exp(omeg*omeg, kh*kh, deltah, M_c1s.at(ll), M_Ns_points.at(ll), phi, dphi);
+		}
+		else {
+			// use the Runge-Kutta 4th order scheme in regular layers
+			layer_int = RK4(omeg*omeg, kh*kh, deltah, M_c1s.at(ll), M_c2s.at(ll), M_Ns_points.at(ll), phi, dphi);
+		}
+
+		phi2int = phi2int + layer_int / M_rhos.at(ll);
+
+		// TEST
+		//cout << layer_int << endl;
+		// TEST
+	}
+
+	double phiNorm = sqrt(phi2int);
+	unsigned nz = (unsigned)phi.size();
+
+	// TEST
+
+	//cout << phi2int << endl;
+	//cout << phiNorm << endl;
+	// TEST
+
+	for (unsigned ll = 0; ll < nz; ll++) {
+		phi.at(ll) = phi.at(ll) / phiNorm;
+		dphi.at(ll) = dphi.at(ll) / phiNorm;
+	}
+
+}
+
+vector<complex<double>> NormalModes::compute_cpl_pressure( const double f, vector<double> &Rr )
+{
+
+	vector<vector<double>> modefunctions;
+	vector<complex<double>> PHelm;
+
+
+	double omeg = 2 * M_PI*f;
+	double R;
+	size_t nzr = zr.size();
+	complex<double> Prc;
+
+
+	khs = compute_wnumbers_extrap_lin_dz(omeg);
+
+	size_t nmod = khs.size();
+
+
+	//        // TEST
+	//        cout << nmod << " modes " << endl;
+	//
+	//        // TEST
+	//        //for (unsigned qq=0; qq<nmod; qq++){
+	//        for (unsigned qq=0; qq<20; qq++){
+	//
+	//            cout  << " kh" << qq <<" = " << khs.at(qq) << endl;
+	//
+	//        }
+
+
+	if (nmod > 0) {
+
+		compute_mfunctions_zr(omeg, modefunctions);
+
+		//            // TEST
+		//            for (unsigned ss=0; ss<20; ss++){
+		//            //for (unsigned ss=0; ss<nmod; ss++){
+		//
+		//                    cout  << " mf" << ss << " = " << modefunctions.at(ss).at(0) << endl;
+		//
+		//            }
+
+
+					//PHelm(1:nr) = PHelm(1:nr) + psiz*psizs*(1i*exp(-1i*pi/4)./sqrt(8*pi*R) ).*exp(1i*wnum(mm)*R)/sqrt(wnum(mm));
+
+					//modefunctions -- vector of vectors, that represent the values of certain mode at all zr
+		for (unsigned ii = 1; ii < nzr; ii++) {
+			Prc = complex<double>(0.0, 0.0);
+			R = Rr.at(ii);
+
+			for (unsigned jj = 0; jj < nmod; jj++) {
+				//PHelm.back() = PHelm.back() +
+
+				/*
+				//TEST
+				cout << "phi1zr=" << modefunctions.at(jj).at(ii) << endl;
+				cout << "phi1zs=" << modefunctions.at(jj).at(0) << endl;
+				cout << "R=" << R << endl;
+				cout << "k=" << khs.at(jj) << endl;
+				cout << "exp=" << exp( Iu*khs.at(jj)*R ) << endl;
+				*/
+
+				Prc = Prc + exp(M_Iu*khs.at(jj)*R)*modefunctions.at(jj).at(ii)*modefunctions.at(jj).at(0) / sqrt(khs.at(jj));
+			}
+			Prc = M_Iu * exp(-M_Iu * M_PI / 4.0)*Prc / sqrt(8 * M_PI*R);
+			PHelm.push_back(Prc);
+		}
+
+	}
+	else {
+		// TEST
+		cout << 0 << " modes " << endl;
+
+		Prc = complex<double>(0.0, 0.0);
+		for (unsigned ii = 1; ii < nzr; ii++) {
+			PHelm.push_back(Prc);
+		}
+	}
+
+
+	return PHelm;
+
+}
+
+
+/*
+
+compute_mfunctions_zr() computs the mode functions corresponding to the media parameters described by
+the arrays [depths,c1s,c2s,rhos,Ns_points] for a given set of the wavenumbers (e.g. obtained from the function
+compute_wnumbers_extrap() ). The functions are computed at the receiver depths from the array "zr". The values in zr are assumed to be
+sorted in ascending order
+
+*/
+void NormalModes::compute_mfunctions_zr(double &omeg, vector<vector<double>> &mfunctions_zr)
+{
+	vector<double> phi;
+	vector<double> dphi;
+
+	vector<unsigned> i_zr;
+	vector<double> t_zr;
+
+
+	vector<double> z, phim_zr;
+
+	double zp;
+	unsigned cur_layer = 0;
+	unsigned cur_points = 0;
+	size_t nzr = zr.size();
+	unsigned i_inside_l = 0;
+
+
+
+	mfunctions_zr.clear();
+
+	zp = 0;
+
+	for (unsigned jj = 0; jj < nzr; jj++) {
+
+		while (M_depths.at(cur_layer) < zr.at(jj)) {
+			cur_points = cur_points + M_Ns_points.at(cur_layer);
+			zp = M_depths.at(cur_layer);
+			cur_layer = cur_layer + 1;
+		}
+
+		i_inside_l = (unsigned)((zr.at(jj) - zp)*M_Ns_points.at(cur_layer) / (M_depths.at(cur_layer) - zp));
+		i_inside_l = min(i_inside_l, M_Ns_points.at(cur_layer));
+		i_zr.push_back(cur_points + i_inside_l);
+		t_zr.push_back((zr.at(jj) - zp)*M_Ns_points.at(cur_layer) / (M_depths.at(cur_layer) - zp) - i_inside_l);
+
+
+
+		// For non-ordered set of zr!!!! Slows the interpolation down!
+		cur_layer = 0;
+		cur_points = 0;
+	}
+
+
+	for (unsigned ii = 0; ii < khs.size(); ii++) {
+		double kh = khs.at(ii);
+		compute_wmode1(omeg, M_Ns_points, kh, phi, dphi);
+
+		phim_zr.clear();
+		for (unsigned jj = 0; jj < nzr; jj++) {
+
+			phim_zr.push_back((1 - t_zr.at(jj))*phi.at(i_zr.at(jj)) + t_zr.at(jj)*phi.at(i_zr.at(jj) + 1));
+
+		}
+
+		mfunctions_zr.push_back(phim_zr);
+	}
+
+	//    //mfunctions output to a file
+	//    ofstream ofile("mfunctionszr.txt");
+	//
+	//    for (unsigned jj = 0; jj < nzr; jj++) {
+	//			ofile << zr.at(jj) << " ";
+	//	}
+	//	ofile << endl;
+	//
+	//	for (unsigned ii = 0; ii < khs.size(); ii++) {
+	//		for (unsigned jj = 0; jj < nzr; jj++)
+	//			ofile << mfunctions_zr[ii][jj] << " ";
+	//		ofile << endl;
+	//	}
+	//	ofile.close();
+}
+
+/*
+
+compute_all_mfunctions() computs the mode functions corresponding to the media parameters described by
+the arrays [depths,c1s,c2s,rhos,Ns_points] for a given set of the wavenumbers (e.g. obtained from the function
+compute_wnumbers_extrap() ). The functions are written to the file "mfunctions.txt" line-by-line, the first line contains
+the values of depth
+
+*/
+void NormalModes::compute_all_mfunctions(double &omeg)
+{
+	vector<double> phi;
+	vector<double> dphi;
+
+	vector<double> z;
+	double h, z0;
+
+
+	ofstream ofile("mfunctions.txt");
+
+
+	for (unsigned ii = 0; ii < M_depths.size(); ii++) {
+
+		if (ii > 0) {
+			h = (M_depths.at(ii) - M_depths.at(ii - 1)) / M_Ns_points.at(ii);
+			z0 = M_depths.at(ii - 1);
+		}
+		else {
+			h = (M_depths.at(ii)) / M_Ns_points.at(ii);
+			z0 = 0;
+		}
+
+		for (unsigned jj = 0; jj < M_Ns_points.at(ii); jj++) {
+			z.push_back(z0 + h * jj);
+			ofile << z.back() << " ";
+		}
+	}
+	z.push_back(M_depths.back());
+	ofile << z.back() << endl;
+	ofile << endl;
+
+	for (unsigned i = 0; i < khs.size(); i++) {
+		double kh = khs[i];
+		compute_wmode1(omeg, M_Ns_points, kh, phi, dphi);
+		for (unsigned j = 0; j < phi.size(); j++)
+			ofile << phi[j] << " ";
+		ofile << endl;
+	}
+	ofile.close();
+}
+
+int NormalModes::compute_wnumbers_bb(const double deltaf, const unsigned flOnlyTrapped)
+{
+	mode_numbers.clear();
+	modal_group_velocities.clear();
+
+	vector<double> out_wnum1;
+	vector<double> mgv_ii;
+	unsigned nwnum;
+	unsigned nfr = (unsigned)freqs.size();
+	double omeg1;
+
+	for (unsigned ii = 0; ii < nfr; ii++) {
+		out_wnum1.clear();
+		mgv_ii.clear();
+		omeg1 = 2 * M_PI*(freqs.at(ii) + deltaf / 2);
+		iModesSubset = -1.0; // check
+		out_wnum1 = compute_wnumbers_extrap_lin_dz(omeg1);
+		nwnum = (unsigned)out_wnum1.size();
+
+		for (unsigned jj = 0; jj < nwnum; jj++)
+		{
+			mgv_ii.push_back(out_wnum1.at(jj));
+		}
+
+		modal_group_velocities.push_back(mgv_ii);
+		mode_numbers.push_back(nwnum);
+	}
+
+	return 0;
+}
+
+void NormalModes::printDelayTime(const double R)
+{
+	string ofile_name = "delayTimeOutput.txt";
+	ofstream ofile(ofile_name);
+	for (unsigned ii = 0; ii < freqs.size(); ii++) {
+		unsigned mnumb = mode_numbers.at(ii);
+		ofile << freqs.at(ii) << "\t";
+		for (unsigned jj = 0; jj < mnumb; jj++)
+			ofile << R / modal_group_velocities[ii][jj] << "\t";
+		ofile << endl;
+	}
+	ofile.close();
 }

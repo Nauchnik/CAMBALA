@@ -1390,7 +1390,7 @@ vector<complex<double>> compute_cpl_pressure(double f,
 
         return PHelm;
 
-	}
+}
 
 
 
@@ -1451,7 +1451,7 @@ void compute_all_mfunctions(double &omeg, // sound frequency
 	ofile.close();
 
 
-	}
+}
 
 
 /*
