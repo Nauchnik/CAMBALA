@@ -62,16 +62,16 @@ public:
 		vector<unsigned> &experimental_mode_numbers
 	);
 
-	vector<double> compute_wnumbers(double &omeg, vector<double> &c, vector<double> &rho,
+	vector<double> compute_wnumbers(const double omeg, vector<double> &c, vector<double> &rho,
 		vector<unsigned> &interface_idcs, vector<double> &meshsizes);
-	vector<double> compute_wnumbers_extrap2(double &omeg);
-	vector<double> compute_wnumbers_extrap_lin_dz(double &omeg);
-	void compute_wmode1(double &omeg, vector<unsigned> &Ns_points_m, const double kh, vector<double> &phi, vector<double> &dphi);
-	double compute_wmode_vg(double &omeg, vector<unsigned> &Ns_points_m, const double kh, vector<double> &phi);
-	void compute_wmode(double &omeg, const double kh, vector<double> &phi, vector<double> &dphi);
+	vector<double> compute_wnumbers_extrap2(const double omeg);
+	vector<double> compute_wnumbers_extrap_lin_dz(const double omeg);
+	void compute_wmode1(const double omeg, const double kh, vector<double> &phi, vector<double> &dphi);
+	double compute_wmode_vg(const double omeg, const double kh, vector<double> &phi);
+	void compute_wmode(const double omeg, const double kh, vector<double> &phi, vector<double> &dphi);
 	vector<complex<double>> compute_cpl_pressure(const double f, vector<double> &Rr);
-	void compute_mfunctions_zr(double &omeg, vector<vector<double>> &mfunctions_zr);
-	void compute_all_mfunctions(double &omeg);
+	void compute_mfunctions_zr(const double omeg, vector<vector<double>> &mfunctions_zr);
+	void compute_all_mfunctions(const double omeg);
 	int compute_modal_grop_velocities(const double deltaf);
 	int compute_modal_grop_velocities2(const double deltaf);
 	int compute_wnumbers_bb(const double deltaf, const unsigned flOnlyTrapped);

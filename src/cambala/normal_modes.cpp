@@ -8,7 +8,7 @@ NormalModes::NormalModes():
 	ordRich(3)
 {}
 
-vector<double> NormalModes::compute_wnumbers_extrap_lin_dz(double &omeg)
+vector<double> NormalModes::compute_wnumbers_extrap_lin_dz(const double omeg)
 	/*  subroutine for computing wavenumbers for a given waveguide structure
 	the computation is performed by the FD method for certain meshsize,
 	Richardson extrapolation is used to improve the
@@ -142,7 +142,7 @@ vector<double> NormalModes::compute_wnumbers_extrap_lin_dz(double &omeg)
 
 
 vector<double> NormalModes::compute_wnumbers(
-	double &omeg,
+	const double omeg,
 	vector<double> &c,
 	vector<double> &rho,
 	vector<unsigned> &interface_idcs,
@@ -289,7 +289,7 @@ vector<double> NormalModes::compute_wnumbers(
 	return wnumbers2;
 }
 
-vector<double> NormalModes::compute_wnumbers_extrap2(double &omeg)
+vector<double> NormalModes::compute_wnumbers_extrap2(const double omeg)
 	/*
 	14.05.17 Pavel
 	subroutine for computing wavenumbers for a given waveguide structure
@@ -424,6 +424,7 @@ double NormalModes::compute_modal_delays_residual_LWan1(
 	unsigned SomeBigNumber = 100000;
 
 	double deltaf = 0.05;
+	iModesSubset = -1.0;
 
 	double residual = 0;
 	unsigned mnumb;
@@ -549,6 +550,7 @@ double NormalModes::compute_modal_delays_residual_LWan(
 	vector<unsigned> &experimental_mode_numbers
 )
 {
+	iModesSubset = -1.0;
 	unsigned SomeBigNumber = 100000;
 
 	double deltaf = 0.05;
@@ -681,6 +683,7 @@ double NormalModes::compute_modal_delays_residual_LWan_weighted(
 	vector<unsigned> &experimental_mode_numbers
 )
 {
+	iModesSubset = -1.0;
 	unsigned SomeBigNumber = 100000;
 
 	double deltaf = 0.05;
@@ -1146,15 +1149,15 @@ int NormalModes::compute_modal_grop_velocities2(const double deltaf)
 	vector<double> out_wnum;
 
 	vector<double> mgv_ii, phi, dphi;
-	unsigned nwnum, Ns_mult;
+	unsigned nwnum;
 	unsigned nfr = (unsigned)freqs.size();
 	double omeg, vgc;
-	vector<unsigned> Ns_points_m;
 
-	Ns_mult = 1 << (ordRich - 1);
-
+	// Oleg, 3.04.2019. Make local changes in M_Ns_points and then undo changes
+	vector<unsigned> M_Ns_points_default = M_Ns_points; // save default state
+	unsigned Ns_mult = 1 << (ordRich - 1);
 	for (unsigned ss = 0; ss < M_Ns_points.size(); ss++) {
-		Ns_points_m.push_back(Ns_mult*M_Ns_points.at(ss));
+		M_Ns_points.push_back(Ns_mult*M_Ns_points.at(ss));
 	}
 
 	for (unsigned ii = 0; ii < nfr; ii++) {
@@ -1170,15 +1173,17 @@ int NormalModes::compute_modal_grop_velocities2(const double deltaf)
 		for (unsigned jj = 0; jj < nwnum; jj++)
 		{
 			
-			compute_wmode1(omeg, Ns_points_m, out_wnum.at(jj), phi, dphi);
+			compute_wmode1(omeg, out_wnum.at(jj), phi, dphi);
 
-			vgc = compute_wmode_vg(omeg, Ns_points_m, out_wnum.at(jj), phi);
+			vgc = compute_wmode_vg(omeg, out_wnum.at(jj), phi);
 			mgv_ii.push_back(vgc);
 		}
 
 		modal_group_velocities.push_back(mgv_ii);
 		mode_numbers.push_back(nwnum);
 	}
+
+	M_Ns_points = M_Ns_points_default; // undo changes
 
 	return 0;
 }
@@ -1197,8 +1202,7 @@ going in the negative direction of z axis. Then we match the solutions coming fr
 
 */
 
-void NormalModes::compute_wmode1(double &omeg, // sound frequency
-	vector<unsigned> &Ns_points_m,
+void NormalModes::compute_wmode1(const double omeg, // sound frequency
 	const double kh,
 	vector<double> &phi,
 	vector<double> &dphi)
@@ -1238,7 +1242,7 @@ void NormalModes::compute_wmode1(double &omeg, // sound frequency
 			dphi.back() = M_rhos.at(ll)*dphi.back() / M_rhos.at(ll - 1);
 		}
 
-		layer_int = RK4(omeg*omeg, kh*kh, deltah, M_c1s.at(ll), M_c2s.at(ll), Ns_points_m.at(ll), phi, dphi);
+		layer_int = RK4(omeg*omeg, kh*kh, deltah, M_c1s.at(ll), M_c2s.at(ll), M_Ns_points.at(ll), phi, dphi);
 
 		phi2int = phi2int + layer_int / M_rhos.at(ll);
 
@@ -1264,7 +1268,7 @@ void NormalModes::compute_wmode1(double &omeg, // sound frequency
 
 			deltah = M_depths.at(ll) - M_depths.at(ll - 1);
 
-			layer_int = RK4(omeg*omeg, kh*kh, deltah, M_c2s.at(ll), M_c1s.at(ll), Ns_points_m.at(ll), bphi, bdphi);
+			layer_int = RK4(omeg*omeg, kh*kh, deltah, M_c2s.at(ll), M_c1s.at(ll), M_Ns_points.at(ll), bphi, bdphi);
 			bphi2int = bphi2int + layer_int / M_rhos.at(ll);
 
 
@@ -1350,8 +1354,7 @@ void NormalModes::compute_wmode1(double &omeg, // sound frequency
 
 
 
-double NormalModes::compute_wmode_vg(double &omeg, // sound frequency
-	vector<unsigned> &Ns_points_m,
+double NormalModes::compute_wmode_vg(const double omeg, // sound frequency
 	const double kh,
 	vector<double> &phi)
 {
@@ -1371,7 +1374,7 @@ double NormalModes::compute_wmode_vg(double &omeg, // sound frequency
 			deltah = M_depths.at(ll) - M_depths.at(ll - 1);
 		}
 
-		Np = Ns_points_m.at(ll);
+		Np = M_Ns_points.at(ll);
 		h = deltah / Np;
 
 		cc = M_c1s.at(ll);
@@ -1516,7 +1519,7 @@ the ODE is stiff there (solution involves a decaying exponential).
 
 */
 
-void NormalModes::compute_wmode(double &omeg, // sound frequency
+void NormalModes::compute_wmode(const double omeg, // sound frequency
 	const double kh,
 	vector<double> &phi,
 	vector<double> &dphi)
@@ -1667,7 +1670,7 @@ compute_wnumbers_extrap() ). The functions are computed at the receiver depths f
 sorted in ascending order
 
 */
-void NormalModes::compute_mfunctions_zr(double &omeg, vector<vector<double>> &mfunctions_zr)
+void NormalModes::compute_mfunctions_zr(const double omeg, vector<vector<double>> &mfunctions_zr)
 {
 	vector<double> phi;
 	vector<double> dphi;
@@ -1713,7 +1716,7 @@ void NormalModes::compute_mfunctions_zr(double &omeg, vector<vector<double>> &mf
 
 	for (unsigned ii = 0; ii < khs.size(); ii++) {
 		double kh = khs.at(ii);
-		compute_wmode1(omeg, M_Ns_points, kh, phi, dphi);
+		compute_wmode1(omeg, kh, phi, dphi);
 
 		phim_zr.clear();
 		for (unsigned jj = 0; jj < nzr; jj++) {
@@ -1749,7 +1752,7 @@ compute_wnumbers_extrap() ). The functions are written to the file "mfunctions.t
 the values of depth
 
 */
-void NormalModes::compute_all_mfunctions(double &omeg)
+void NormalModes::compute_all_mfunctions(const double omeg)
 {
 	vector<double> phi;
 	vector<double> dphi;
@@ -1783,7 +1786,7 @@ void NormalModes::compute_all_mfunctions(double &omeg)
 
 	for (unsigned i = 0; i < khs.size(); i++) {
 		double kh = khs[i];
-		compute_wmode1(omeg, M_Ns_points, kh, phi, dphi);
+		compute_wmode1(omeg, kh, phi, dphi);
 		for (unsigned j = 0; j < phi.size(); j++)
 			ofile << phi[j] << " ";
 		ofile << endl;
