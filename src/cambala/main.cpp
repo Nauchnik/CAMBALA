@@ -26,13 +26,13 @@ int main(int argc, char **argv)
 {
 	unsigned ncpl = 0; // search mesh within each water layer
 
-	std::string scenarioFileName = "";
+	string scenarioFileName = "";
 	CAMBALA_sequential CAMBALA_seq;
 	int verbosity = 0;
 
 #ifdef _DEBUG
 	argc = 3;
-	scenarioFileName = "719_bottom_r_short_uniform_wan_10nodes.txt";
+	scenarioFileName = "test_scenario.txt";
 	//argv[1] = "./boinc_CAMBALA_app/in";
 	//argv[1] = "39_hydro_r_uniform260.txt";
 	//argv[1] = "true_scenario_2.txt";

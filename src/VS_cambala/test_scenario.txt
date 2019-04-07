@@ -6,6 +6,7 @@
 % specified in "spmag.txt"
 dtimes_file dtimes.txt
 spmag_file(string|no) spmag.txt
+function_type weighted
 h 100:10:150
 H 500
 % variable parameters
