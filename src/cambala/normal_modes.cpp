@@ -1,12 +1,14 @@
 ﻿#include "normal_modes.h"
 #include "linalg.h"
+#include <iomanip>
 
 //using namespace CAMBALA_compute;
 
 NormalModes::NormalModes():
 	iModesSubset(-1.0),
 	ordRich(3),
-	ppm(2)
+	ppm(2),
+	f(0)
 {}
 
 void NormalModes::read_data(const string scenarioFileName)
@@ -34,12 +36,12 @@ void NormalModes::read_data(const string scenarioFileName)
 			sstream >> ppm;
 		if (word.find("ordRich") != string::npos)
 			sstream >> ordRich;
+		if (word.find("f") != string::npos)
+			sstream >> f;
 		else if (word == "R")
 			Rs = parseVector(sstream);
 		else if (word == "zr")
 			zr = parseVector(sstream);
-		else if (word == "f")
-			freqs = parseVector(sstream);
 		else if (word == "c1s")
 			M_c1s = parseVector(sstream);
 		else if (word == "c2s")
@@ -73,9 +75,11 @@ void NormalModes::write_result(const string resultFileName)
 	}
 	
 	stringstream sstream;
+	// scalars
 	sstream << "iModesSubset " << iModesSubset << endl;
 	sstream << "ppm " << ppm << endl;
 	sstream << "ordRich " << ordRich << endl;
+	sstream << "f " << f << endl;
 	// 1-dim arrays
 	sstream << "R ";
 	for (auto x : Rs)
@@ -83,10 +87,6 @@ void NormalModes::write_result(const string resultFileName)
 	sstream << endl;
 	sstream << "zr ";
 	for (auto x : zr)
-		sstream << x << " ";
-	sstream << endl;
-	sstream << "f ";
-	for (auto x : freqs)
 		sstream << x << " ";
 	sstream << endl;
 	sstream << "c1s ";
@@ -131,13 +131,39 @@ void NormalModes::write_result(const string resultFileName)
 	ofile.close();
 }
 
+void NormalModes::print_khs()
+{
+	cout << "khs : ";
+	cout << setprecision(11) << fixed;
+	for (auto x : khs)
+		cout << x << " ";
+	cout << endl;
+}
+
+void NormalModes::print_mfunctions_zr()
+{
+	cout << "mfunctions_zr : \n";
+	for (auto x : mfunctions_zr) {
+		for (auto y : x)
+			cout << y << " ";
+		cout << endl;
+	}
+}
+
 vector<double> NormalModes::parseVector(stringstream &sstream)
 {
 	string word;
 	sstream >> word;
 	vector<double> vec;
-	if (word[0] != '[')
-		vec = fillArrayStep(word);
+	if (word[0] != '[') {
+		if (word.find(':') == string::npos) { // no [, no :, then 1-elem array
+			double dval;
+			istringstream(word) >> dval;
+			vec.push_back(dval);
+		}
+		else
+			vec = fillArrayStep(word);
+	}
 	else {
 		string val_str = word;
 		while (sstream >> word)
@@ -191,6 +217,7 @@ vector<double> NormalModes::parseArrayBrackets(string str)
 {
 	str.erase(remove(str.begin(), str.end(), '['), str.end());
 	str.erase(remove(str.begin(), str.end(), ']'), str.end());
+	str.erase(remove(str.begin(), str.end(), ';'), str.end());
 	stringstream sstream;
 	sstream << str;
 	double val;
@@ -238,7 +265,15 @@ vector<double> NormalModes::compute_wnumbers_extrap_lin_dz(const double omeg)
 	unsigned n_layers = (unsigned)M_depths.size();
 	unsigned n_points_total = 0;
 	unsigned n_points_layer = 0;
-
+	
+	// check sized of main arrays
+	if ((M_Ns_points.size() == 0) || (M_c1s.size() == 0) || (M_c2s.size() == 0) ||
+		(M_rhos.size() == 0) || (M_depths.size() == 0)) 
+	{
+		cerr << "Error. In NormalModes::compute_wnumbers_extrap_lin_dz() one of the main arrays is empty";
+		exit(-1);
+	}
+	
 	vector<double> coeff_extrap;
 	switch (ordRich) {
 	case 1:
@@ -609,6 +644,7 @@ vector<double> NormalModes::compute_wnumbers_extrap2(const double omeg)
 double NormalModes::compute_modal_delays_residual_LWan1(
 	const double R,
 	const double tau,
+	vector<double> freqs,
 	vector<vector<double>> &experimental_delays,
 	vector<unsigned> &experimental_mode_numbers
 )
@@ -631,7 +667,7 @@ double NormalModes::compute_modal_delays_residual_LWan1(
 
 	mode_cut_off_exp_idx.clear();
 
-	compute_modal_grop_velocities(deltaf);
+	compute_modal_grop_velocities(deltaf, freqs);
 
 	for (unsigned ii = 0; ii < freqs.size(); ii++) {
 
@@ -738,6 +774,7 @@ double NormalModes::compute_modal_delays_residual_LWan1(
 double NormalModes::compute_modal_delays_residual_LWan(
 	const double R,
 	const double tau,
+	vector<double> freqs,
 	vector<vector<double>> &experimental_delays,
 	vector<unsigned> &experimental_mode_numbers
 )
@@ -760,7 +797,7 @@ double NormalModes::compute_modal_delays_residual_LWan(
 
 	mode_cut_off_exp_idx.clear();
 
-	compute_modal_grop_velocities(deltaf);
+	compute_modal_grop_velocities(deltaf, freqs);
 
 	for (unsigned ii = 0; ii < freqs.size(); ii++) {
 
@@ -870,6 +907,7 @@ double NormalModes::compute_modal_delays_residual_LWan(
 double NormalModes::compute_modal_delays_residual_LWan_weighted(
 	const double R,
 	const double tau,
+	vector<double> freqs,
 	vector<vector<double>> &experimental_delays,
 	vector<unsigned> &experimental_mode_numbers,
 	vector<vector<double>> weight_coeffs
@@ -893,7 +931,7 @@ double NormalModes::compute_modal_delays_residual_LWan_weighted(
 
 	mode_cut_off_exp_idx.clear();
 
-	compute_modal_grop_velocities(deltaf);
+	compute_modal_grop_velocities(deltaf, freqs);
 
 	for (unsigned ii = 0; ii < freqs.size(); ii++) {
 
@@ -1005,6 +1043,7 @@ double NormalModes::compute_modal_delays_residual_LWan_weighted(
 double NormalModes::compute_modal_delays_residual_uniform2(
 	const double R,
 	const double tau,
+	vector<double> freqs,
 	vector<vector<double>> &experimental_delays,
 	vector<unsigned> &experimental_mode_numbers
 )
@@ -1017,7 +1056,7 @@ double NormalModes::compute_modal_delays_residual_uniform2(
 	//2016.04.27:Pavel: now we use RMS as the residual
 	unsigned nRes = 0;
 
-	compute_modal_grop_velocities2(deltaf);
+	compute_modal_grop_velocities2(deltaf, freqs);
 	/*cout << "iModesSubset " << iModesSubset << endl;
 	cout << "freqs" << endl;
 	for (unsigned i = 0; i < 100; i++)
@@ -1151,6 +1190,7 @@ double NormalModes::Layer_an_exp(const double omeg2, // sound frequency
 double NormalModes::compute_modal_delays_residual_uniform(
 	const double R,
 	const double tau,
+	vector<double> freqs,
 	vector<vector<double>> &experimental_delays,
 	vector<unsigned> &experimental_mode_numbers
 )
@@ -1164,7 +1204,7 @@ double NormalModes::compute_modal_delays_residual_uniform(
 	//2016.04.27:Pavel: now we use RMS as the residual
 	unsigned nRes = 0;
 
-	compute_modal_grop_velocities(deltaf);
+	compute_modal_grop_velocities(deltaf, freqs);
 
 	for (unsigned ii = 0; ii < freqs.size(); ii++) {
 		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
@@ -1197,7 +1237,7 @@ double NormalModes::compute_modal_delays_residual_uniform(
 	return residual;
 }
 
-int NormalModes::compute_modal_grop_velocities(	const double deltaf )
+int NormalModes::compute_modal_grop_velocities(	const double deltaf, vector<double> freqs )
 {
 	mode_numbers.clear();
 	modal_group_velocities.clear();
@@ -1244,7 +1284,7 @@ int NormalModes::compute_modal_grop_velocities(	const double deltaf )
 }
 
 
-int NormalModes::compute_modal_grop_velocities2(const double deltaf)
+int NormalModes::compute_modal_grop_velocities2( const double deltaf, vector<double> freqs )
 {
 	mode_numbers.clear();
 	modal_group_velocities.clear();
@@ -1511,6 +1551,7 @@ double NormalModes::compute_wmode_vg(const double omeg, // sound frequency
 double NormalModes::compute_modal_delays_residual_weighted(
 	const double R,
 	const double tau,
+	vector<double> freqs,
 	vector<vector<double>> &experimental_delays,
 	vector<unsigned> &experimental_mode_numbers,
 	vector<vector<double>> weight_coeffs
@@ -1524,7 +1565,7 @@ double NormalModes::compute_modal_delays_residual_weighted(
 	//2016.04.27:Pavel: now we use RMS as the residual
 	unsigned nRes = 0;
 
-	compute_modal_grop_velocities(deltaf);
+	compute_modal_grop_velocities(deltaf, freqs);
 
 	for (unsigned ii = 0; ii < freqs.size(); ii++) {
 		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
@@ -1566,6 +1607,7 @@ double NormalModes::compute_modal_delays_residual_weighted(
 double NormalModes::compute_modal_delays_residual_weighted2(
 	const double R,
 	const double tau,
+	vector<double> freqs,
 	vector<vector<double>> &experimental_delays,
 	vector<unsigned> &experimental_mode_numbers,
 	vector<vector<double>> weight_coeffs
@@ -1581,7 +1623,7 @@ double NormalModes::compute_modal_delays_residual_weighted2(
 	//2016.04.27:Pavel: now we use RMS as the residual
 	unsigned nRes = 0;
 
-	compute_modal_grop_velocities2(deltaf);
+	compute_modal_grop_velocities2(deltaf, freqs);
 
 	for (unsigned ii = 0; ii < freqs.size(); ii++) {
 		//2016.04.27:Pavel: mnumb = min(mode_numbers.at(ii), experimental_mode_numbers.at(ii));
@@ -1680,6 +1722,13 @@ void NormalModes::compute_wmode(const double omeg, // sound frequency
 
 }
 
+void NormalModes::compute_khs(double omeg)
+{
+	if (omeg == -1) // if omeg is not given, calculate it based on the class' frequency
+		omeg = 2 * M_PI * f;
+	khs = compute_wnumbers_extrap_lin_dz(omeg);
+}
+
 vector<complex<double>> NormalModes::compute_cpl_pressure( const double f, vector<double> &Rr )
 {
 	vector<complex<double>> PHelm;
@@ -1690,8 +1739,8 @@ vector<complex<double>> NormalModes::compute_cpl_pressure( const double f, vecto
 	size_t nzr = zr.size();
 	complex<double> Prc;
 
-
-	khs = compute_wnumbers_extrap_lin_dz(omeg);
+	compute_khs(omeg);
+	//khs = compute_wnumbers_extrap_lin_dz(omeg);
 
 	size_t nmod = khs.size();
 
@@ -1771,8 +1820,11 @@ compute_wnumbers_extrap() ). The functions are computed at the receiver depths f
 sorted in ascending order
 
 */
-void NormalModes::compute_mfunctions_zr(const double omeg)
+void NormalModes::compute_mfunctions_zr(double omeg)
 {
+	if (omeg == -1) // if omeg is not given, then calculate it based on the class' frequency
+		omeg = 2 * M_PI * f;
+
 	vector<double> phi;
 	vector<double> dphi;
 
@@ -1894,7 +1946,7 @@ void NormalModes::compute_all_mfunctions(const double omeg)
 	ofile.close();
 }
 
-int NormalModes::compute_wnumbers_bb(const double deltaf, const unsigned flOnlyTrapped)
+int NormalModes::compute_wnumbers_bb(const double deltaf, const unsigned flOnlyTrapped, vector<double> freqs)
 {
 	mode_numbers.clear();
 	modal_group_velocities.clear();

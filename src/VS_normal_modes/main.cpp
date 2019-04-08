@@ -6,7 +6,8 @@ int main(int argc, char ** argv)
 {
 	string scenarioFileName = "";
 #ifdef _DEBUG
-	scenarioFileName = "normal_modes_scenario.txt";
+	//scenarioFileName = "normal_modes_scenario.txt";
+	scenarioFileName = "../../scenarios/CambalaNormalModes//test2_scenario.txt";
 #else
 	if (argc < 2) {
 		cout << "Usage: program normal_modes_scenario_name\n";
@@ -18,6 +19,10 @@ int main(int argc, char ** argv)
 
 	NormalModes n_m;
 	n_m.read_data(scenarioFileName);
+	n_m.compute_khs();
+	n_m.print_khs();
+	n_m.compute_mfunctions_zr();
+	n_m.print_mfunctions_zr();
 
 	return 0;
 }

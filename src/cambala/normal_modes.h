@@ -28,7 +28,7 @@ public:
 	// source/receiver parameters
 	vector<double> zr;
 	vector<double> Rs;
-	vector<double> freqs;
+	double f; // frequency
 
 	// parameters of wave numbers and mode functions
 	double iModesSubset;
@@ -42,6 +42,8 @@ public:
 	// input/output functions
 	void read_data(const string scenarioFileName);
 	void write_result(const string resultFileName);
+	void print_khs();
+	void print_mfunctions_zr();
 	
 	// main computation functions
 	vector<double> compute_wnumbers(const double omeg, vector<double> &c, vector<double> &rho,
@@ -52,27 +54,29 @@ public:
 	double compute_wmode_vg(const double omeg, const double kh, vector<double> &phi);
 	void compute_wmode(const double omeg, const double kh, vector<double> &phi, vector<double> &dphi);
 	vector<complex<double>> compute_cpl_pressure(const double f, vector<double> &Rr);
-	void compute_mfunctions_zr(const double omeg);
+	void compute_mfunctions_zr(double omeg = -1);
 	void compute_all_mfunctions(const double omeg);
-	int compute_modal_grop_velocities(const double deltaf);
-	int compute_modal_grop_velocities2(const double deltaf);
-	int compute_wnumbers_bb(const double deltaf, const unsigned flOnlyTrapped);
+	void compute_khs(double omeg = -1);
+	int compute_modal_grop_velocities(const double deltaf, vector<double> freqs);
+	int compute_modal_grop_velocities2(const double deltaf, vector<double> freqs);
+	int compute_wnumbers_bb(const double deltaf, const unsigned flOnlyTrapped, vector<double> freqs);
 	
 	// inversion functions
-	double compute_modal_delays_residual_uniform(const double R, const double tau, vector<vector<double>> &experimental_delays,
-		                            vector<unsigned> &experimental_mode_numbers);
-	double compute_modal_delays_residual_uniform2(const double R, const double tau,
+	double compute_modal_delays_residual_uniform(const double R, const double tau, vector<double> freqs,
 		vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
-	double compute_modal_delays_residual_LWan1(const double R, const double tau, 
+	double compute_modal_delays_residual_uniform2(const double R, const double tau, vector<double> freqs,
 		vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
-	double compute_modal_delays_residual_LWan(const double R, const double tau,
+	double compute_modal_delays_residual_LWan1(const double R, const double tau, vector<double> freqs,
 		vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
-	double compute_modal_delays_residual_weighted(const double R, const double tau, 
+	double compute_modal_delays_residual_LWan(const double R, const double tau, vector<double> freqs,
+		vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers);
+	double compute_modal_delays_residual_weighted(const double R, const double tau, vector<double> freqs,
 		vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers,
 		vector<vector<double>> weight_coeffs);
-	double compute_modal_delays_residual_weighted2(const double R, const double tau, vector<vector<double>> &experimental_delays, 
-		vector<unsigned> &experimental_mode_numbers, vector<vector<double>> weight_coeffs);
-	double compute_modal_delays_residual_LWan_weighted(const double R, const double tau,
+	double compute_modal_delays_residual_weighted2(const double R, const double tau, vector<double> freqs,
+		vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers, 
+		vector<vector<double>> weight_coeffs);
+	double compute_modal_delays_residual_LWan_weighted(const double R, const double tau, vector<double> freqs,
 		vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers,
 		vector<vector<double>> weight_coeffs);
 	
