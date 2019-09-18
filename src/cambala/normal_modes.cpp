@@ -1,6 +1,8 @@
 ﻿#include "normal_modes.h"
 #include "linalg.h"
 #include <iomanip>
+#include <cmath>
+#include <functional>
 
 //using namespace CAMBALA_compute;
 
@@ -1960,6 +1962,229 @@ void NormalModes::compute_mattenuation(double omeg)
 	for (unsigned i = 0; i < khs.size(); ++i)
 		mattenuation.emplace_back(omeg2 * as[i] / khs[i]);
 }
+
+double airy_ai(const double& x) {
+    constexpr double v = 1. / 3;
+    if (std::abs(x) < 1e-10)
+        return 1 / (std::pow(3., 2 * v) * std::tgamma(2 * v));
+    if (x < 0) {
+        const auto px = -x;
+        const auto sx = std::sqrt(px);
+        const auto u = 2 * v * px * sx;
+        return sx / 3 * (
+                (1 + std::cos(v * M_PI)) * std::cyl_bessel_j(v, u)
+                   - std::sin(v * M_PI)  * std::cyl_neumann(v, u));
+    }
+    return std::sqrt(x / 3) / M_PI * std::cyl_bessel_k(v, 2 * v * x * std::sqrt(x));
+}
+
+double airy_ai_prime(const double& x) {
+    constexpr double v = 2. / 3;
+    if (std::abs(x) < 1e-10)
+        return -1 / (std::cbrt(3.) * std::tgamma(v / 2));
+    if (x < 0) {
+        const auto px = -x;
+        const auto u = v * px * std::sqrt(px);
+        return px / 3 * (
+                (1 - std::cos(v * M_PI)) * std::cyl_bessel_j(v, u)
+                   + std::sin(v * M_PI)  * std::cyl_neumann(v, u));
+    }
+    return -x / (M_PI * std::sqrt(3)) * std::cyl_bessel_k(v, v * x * std::sqrt(x));
+}
+
+double airy_bi(const double& x) {
+    constexpr double v = 1. / 3;
+    if (std::abs(x) < 1e-10)
+        return 1 / (std::sqrt(std::cbrt(3.)) * std::tgamma(2 * v));
+    if (x < 0) {
+        const auto px = -x;
+        const auto u = 2 * v * px * std::sqrt(px);
+        return std::sqrt(px / 3) * (
+                (std::cos(v * M_PI) - 1) * std::cyl_bessel_j(v, u)
+                -std::sin(v * M_PI)      * std::cyl_neumann(v, u));
+    }
+    const double u = 2 * v * x * std::sqrt(x);
+    return std::sqrt(x / 3) * (
+            2 * std::cyl_bessel_i(v, u) +
+            2 / M_PI * std::sin(v * M_PI) * std::cyl_bessel_k(v, u));
+}
+
+double airy_bi_prime(const double& x) {
+    constexpr double v = 2. / 3;
+    if (std::abs(x) < 1e-10)
+        return std::sqrt(std::cbrt(3.)) / std::tgamma(v / 2);
+    if (x < 0) {
+        const auto px = -x;
+        const auto u = v * px * std::sqrt(px);
+        return px / std::sqrt(3.) * (
+                (1 + std::cos(v * M_PI)) * std::cyl_bessel_j(v, u)
+                   - std::sin(v * M_PI)  * std::cyl_neumann(v, u));
+    }
+    const double u = v * x * std::sqrt(x);
+    return x / std::sqrt(3.) * (
+            2 * std::cyl_bessel_i(v, u) +
+            2 / M_PI * std::sin(v * M_PI) * std::cyl_bessel_k(v, u));
+}
+
+void NormalModes::compute_mfunctions_airy(double omeg, double eps)
+{
+    if (omeg == -1) // if omeg is not given, then calculate it based on the class' frequency
+        omeg = 2 * M_PI * f;
+
+    const auto omeg2 = omeg * omeg;
+    const auto eta = 1 / (40 * M_PI * std::log10(std::exp(1)));
+
+    vector<double> ts(khs.size(), 0), norm(khs.size(), 0), dp(khs.size(), 1), ck(khs.size(), 0);
+	vector<vector<function<double(const double&)>>> fs(M_depths.size(), vector<function<double(const double&)>>(khs.size()));
+
+    for (unsigned i = 0; i < M_depths.size(); ++i) {
+        const auto z1 = i == 0 ? 0. : M_depths[i - 1];
+        const auto z2 = M_depths[i];
+        const auto dz = z2 - z1;
+        const auto c1 = M_c1s[i];
+        const auto c2 = M_c2s[i];
+        const auto rho = M_rhos[i];
+        const auto beta = M_betas[i];
+		const auto k1 = omeg2 / c1 / c1;
+		double q, p;
+		if (std::abs(c2 - c1) < eps || i == M_depths.size() - 1) {
+		    for (unsigned j = 0; j < khs.size(); ++j) {
+		        const auto k = k1 - khs[j] * khs[j];
+                const auto sk = sqrt(abs(k));
+                double pint;
+		        if (k < -eps) {
+		            if (i == M_depths.size() - 1) {
+		                p = ts[j];
+                        q = 0;
+                        pint = p * p / (2 * sk * rho);
+		            } else {
+                        p = (ts[j] - dp[j] / sk) / 2;
+                        q = (ts[j] + dp[j] / sk) / 2;
+
+                        const auto exp0 = std::exp(-sk * dz);
+                        const auto exp1 = std::exp( sk * dz);
+
+                        ts[j] = p * exp0 + q * exp1;
+                        dp[j] = sk * M_rhos[i + 1] * (q * exp1 - p * exp0) / rho;
+                        pint = (
+                                 4 * dz * sk       * p * q +
+                                 (exp1 * exp1 - 1) * q * q -
+                                 (exp0 * exp0 - 1) * p * p
+                               ) / (2 * sk * rho);
+		            }
+
+                    fs[i][j] = [p, q, z1, sk](const double& z) -> double {
+                        return p * std::exp(-sk * (z - z1)) + q * std::exp(sk * (z - z1));
+                    };
+		        } else if (k > eps) {
+                    if (i == M_depths.size() - 1) {
+                        p = ts[j] / std::pow(std::sin(-dz) * sk, 2);
+                        q = 0;
+                        pint = p * p * (2 * dz + std::sin(2 * dz * sk) / sk) / (4 * rho);
+
+                        fs[i][j] = [p, z2, sk](const double& z) -> double {
+                            return p * std::sin(sk * (z - z2));
+                        };
+                    } else {
+                        p = ts[j];
+                        q = dp[j] / sk;
+                        ts[j] = p * std::cos(dz * sk) + q * std::sin(dz * sk);
+                        dp[j] = sk * M_rhos[i + 1] * (q * std::cos(dz * sk) - p * std::sin(dz * sk)) / rho;
+                        pint = (
+                                p * q * (1 - std::cos(2 * dz * sk)) +
+                                dz * sk * (p * p + q * q) +
+                                (p * p - q * q) * std::sin(2 * dz * sk) / 2
+                        ) / (2 * sk * rho);
+
+                        fs[i][j] = [p, q, z1, sk](const double& z) -> double {
+                            return p * std::cos(sk * (z - z1)) + q * std::sin(sk * (z - z1));
+                        };
+                    }
+                } else {
+                    p = ts[j];
+                    q = dp[j];
+                    pint = (std::pow(ts[j], 3) - std::pow(p, 3)) / (3 * q * rho);
+
+                    if (i != M_depths.size() - 1) {
+                        ts[j] = p + q * dz;
+                        dp[j] *= M_rhos[i + 1] / rho;
+                    }
+
+                    fs[i][j] = [p, q, z1](const double& z) -> double {
+                        return p + (z - z1) * q;
+                    };
+                }
+                norm[j] += pint;
+		        ck[j] += omeg2 * beta * pint / (c1 * c1);
+		    }
+		} else {
+            const auto k2 = omeg * omeg / c2 / c2;
+            const auto a = (k2 - k1) / (z2 - z1);
+            const auto a13 = std::cbrt(a);
+            const auto a23 = std::cbrt(a * a);
+            vector<double> phi(M_Ns_points[i]);
+            const auto h = dz / (M_Ns_points[i] - 1);
+            for (unsigned j = 0; j < khs.size(); ++j) {
+                const auto arg0 = (khs[j] * khs[j] - k1) / a23;
+                const auto arg1 = (khs[j] * khs[j] - k2) / a23;
+
+                const auto ai0  = airy_ai(arg0);
+                const auto ai1  = airy_ai(arg1);
+                const auto aip0 = airy_ai_prime(arg0);
+                const auto aip1 = airy_ai_prime(arg1);
+                const auto bi0  = airy_bi(arg0);
+                const auto bi1  = airy_bi(arg1);
+                const auto bip0 = airy_bi_prime(arg0);
+                const auto bip1 = airy_bi_prime(arg1);
+
+                p =  (dp[j] * bi0 / a13 + ts[j] * bip0) * M_PI;
+                q = -(dp[j] * ai0 / a13 + ts[j] * aip0) * M_PI;
+
+                const auto v = p * ai1  + q * bi1;
+				const auto w = p * aip0 + q * bip0;
+                const auto d = p * aip1 + q * bip1;
+
+                norm[j] += (d * d - arg1 * v * v - w * w + arg0 * ts[j] * ts[j]) / (a13 * rho);
+
+                ts[j] = v;
+                dp[j] = -a13 * d * M_rhos[i + 1] / rho;
+
+                fs[i][j] = [p, q, k2=khs[j] * khs[j], k1, a, a23, z1](const double& z) -> double {
+                    const auto arg = (k2 - a * (z - z1) - k1) / a23;
+                    return p * airy_ai(arg) + q * airy_bi(arg);
+                };
+
+                if (abs(beta) > eps) {
+                    for (unsigned l = 0; l < M_Ns_points[i]; ++l)
+                        phi[l] = pow(fs[i][j](z1 + l * h), 2) * (k1 + a * l * h);
+                    ck[j] += beta * integrate(phi, h, 0, static_cast<unsigned>(phi.size() - 1)) / rho;
+                }
+            }
+        }
+    }
+
+    mattenuation.clear();
+    mattenuation.reserve(khs.size());
+    for (unsigned i = 0; i < khs.size(); ++i)
+        mattenuation.emplace_back(eta * ck[i] / (khs[i] * norm[i]));
+
+    for (auto& it : norm)
+        it = sqrt(it);
+
+    vector<unsigned> ind(zr.size());
+    for (unsigned i = 0, j = 0; i < ind.size(); ++i) {
+        while (M_depths[j] < zr[i] && j < M_depths.size() - 1)
+            ++j;
+        ind[i] = j;
+    }
+
+    mfunctions_zr.clear();
+    mfunctions_zr.resize(khs.size(), vector<double>(zr.size()));
+    for (unsigned i = 0; i < khs.size(); ++i)
+        for (unsigned j = 0 ; j < zr.size(); ++j)
+            mfunctions_zr[i][j] = fs[ind[j]][i](zr[j]) / norm[i];
+}
+
 /*
 
 compute_all_mfunctions() computs the mode functions corresponding to the media parameters described by

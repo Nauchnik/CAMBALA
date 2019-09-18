@@ -63,6 +63,7 @@ public:
 	int compute_modal_grop_velocities(const double deltaf, vector<double> freqs);
 	int compute_modal_grop_velocities2(const double deltaf, vector<double> freqs);
 	int compute_wnumbers_bb(const double deltaf, const unsigned flOnlyTrapped, vector<double> freqs);
+	void compute_mfunctions_airy(double omeg = -1, double eps = 1e-10);
 	
 	// inversion functions
 	double compute_modal_delays_residual_uniform(const double R, const double tau, vector<double> freqs,
