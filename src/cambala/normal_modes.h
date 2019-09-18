@@ -22,6 +22,7 @@ public:
 	vector<double> M_c1s;
 	vector<double> M_c2s;
 	vector<double> M_rhos;
+	vector<double> M_betas;
 	vector<double> M_depths;
 	vector<unsigned> M_Ns_points;
 
@@ -38,6 +39,7 @@ public:
 	vector<vector<double>> modal_group_velocities;
 	vector<double> khs;
 	vector<vector<double>> mfunctions_zr;
+	vector<double> mattenuation;
 	
 	// input/output functions
 	void read_data(const string scenarioFileName);
@@ -57,6 +59,7 @@ public:
 	void compute_mfunctions_zr(double omeg = -1);
 	void compute_all_mfunctions(const double omeg);
 	void compute_khs(double omeg = -1);
+	void compute_mattenuation(double omeg = -1);
 	int compute_modal_grop_velocities(const double deltaf, vector<double> freqs);
 	int compute_modal_grop_velocities2(const double deltaf, vector<double> freqs);
 	int compute_wnumbers_bb(const double deltaf, const unsigned flOnlyTrapped, vector<double> freqs);
@@ -90,6 +93,7 @@ private:
 	void getThreeValuesFromStr(string str, double &val1, double &val2, double &val3);
 	vector<double> parseArrayBrackets(string word);
 	vector<double> parseVector(stringstream &sstream);
+	double integrate(const vector<double>&, const double&, unsigned, unsigned);
 };
 
 #endif

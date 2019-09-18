@@ -50,6 +50,8 @@ void NormalModes::read_data(const string scenarioFileName)
 			M_rhos = parseVector(sstream);
 		else if (word == "depths")
 			M_depths = parseVector(sstream);
+		else if (word == "bs")
+			M_betas = parseVector(sstream);
 		sstream.str(""); sstream.clear();
 	}
 	scenarioFile.close();
@@ -1896,6 +1898,68 @@ void NormalModes::compute_mfunctions_zr(double omeg)
 	//	ofile.close();
 }
 
+double NormalModes::integrate(const vector<double>& data, const double& h, unsigned i, const unsigned j)
+{
+	double res = 0;
+	while (i < j) {
+		const auto pl = min(j - i, 4u);
+		if (pl == 4)
+			res += 2 * h / 45 * (7 * (data[i] + data[i + 4]) + 32 * (data[i + 1] + data[i + 3]) + 12 * data[i + 2]);
+		else if (pl == 3)
+			res += 3 * h / 8 * (data[i] + 3 * (data[i + 1] + data[i + 2]) + data[i + 3]);
+		else if (pl == 2)
+			res += h / 3 * (data[i] + 4 * data[i + 1] + data[i + 2]);
+		else
+			res += h / 2 * (data[i] + data[i + 1]);
+		i += pl;
+	}
+	return res;
+}
+
+void NormalModes::compute_mattenuation(double omeg)
+{
+	if (omeg == -1) // if omeg is not given, then calculate it based on the class' frequency
+		omeg = 2 * M_PI * f;
+
+	vector<double> phi;
+	vector<double> dphi;
+	vector<double> as(khs.size(), 0);
+	vector<double> hzs(M_Ns_points.size());
+	vector<double> hcs(M_Ns_points.size());
+	vector<double> betas(M_Ns_points.size());
+
+	for (unsigned i = 0; i < M_Ns_points.size(); ++i) {
+		const auto n = M_Ns_points[i];
+		hzs[i] = (i ? M_depths[i] - M_depths[i - 1] : M_depths[0]) / (n - 1);
+		hcs[i] = (M_c2s[i] - M_c1s[i]) / (n - 1);
+		betas[i] = M_betas[i] / M_rhos[i];
+	}
+
+	for (unsigned i = 0; i < khs.size(); ++i) {
+		unsigned l = 0;
+		unsigned lj = 0;
+		unsigned count = M_Ns_points[l];
+		double c = M_c1s[l];
+		compute_wmode1(omeg, khs[i], phi, dphi);
+		for (unsigned j = 0; j < phi.size(); ++j) {
+			phi[j] = pow(phi[j] / c, 2);
+			c += hcs[l];
+			if (!--count) {
+				as[i] += betas[l] * integrate(phi, hzs[l], lj, j);
+				lj = j + 1;
+				l += 1;
+				c = M_c1s[l];
+				count = M_Ns_points[l];
+			}
+		}
+	}
+
+    const auto omeg2 = omeg * omeg / (40 * M_PI * std::log10(std::exp(1)));
+
+	mattenuation.reserve(khs.size());
+	for (unsigned i = 0; i < khs.size(); ++i)
+		mattenuation.emplace_back(omeg2 * as[i] / khs[i]);
+}
 /*
 
 compute_all_mfunctions() computs the mode functions corresponding to the media parameters described by
