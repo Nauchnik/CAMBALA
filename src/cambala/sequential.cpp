@@ -552,7 +552,8 @@ search_space_point CAMBALA_sequential::findLocalMinHillClimbing(vector<double> d
 			// randomly choose indexes for which new random values will be set
 			// if there are only 1 or 2 indexes, change them, otherwise change 2/3 of indexes
 			if (multivalue_indexes_vec.size() > 2) {
-				random_shuffle(multivalue_indexes_vec.begin(), multivalue_indexes_vec.end());
+				unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+				shuffle(multivalue_indexes_vec.begin(), multivalue_indexes_vec.end(), default_random_engine(seed));
 				multivalue_indexes_vec.resize(multivalue_indexes_vec.size()*2/3);
 			}
 			

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <chrono>
 #include <math.h>
+#include <random>
 #include "linalg.h"
 #include "point.h"
 #include "normal_modes.h"
