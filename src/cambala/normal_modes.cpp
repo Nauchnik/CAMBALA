@@ -10,7 +10,8 @@ NormalModes::NormalModes():
 	iModesSubset(-1.0),
 	ordRich(3),
 	ppm(2),
-	f(0)
+	f(0),
+	isSpectra(false)
 {}
 
 void NormalModes::read_data(const string scenarioFileName)
@@ -511,7 +512,11 @@ vector<double> NormalModes::compute_wnumbers(
 			}
 			myFile1.close();
 	*/
-	alglib::smatrixtdevdr(main_diag, second_diag, N_points - 2, 0, kappamin*kappamin, kappamax*kappamax, eigen_count, eigenvectors);
+	if (!isSpectra)
+		alglib::smatrixtdevdr(main_diag, second_diag, N_points - 2, 0, kappamin*kappamin, kappamax*kappamax, eigen_count, eigenvectors);
+	else {
+		
+	}
 
 	for (int ii = 0; ii < eigen_count; ii++) {
 		wnumbers2.push_back(main_diag[eigen_count - ii - 1]);

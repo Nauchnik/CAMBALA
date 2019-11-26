@@ -40,6 +40,9 @@ public:
 	vector<double> khs;
 	vector<vector<double>> mfunctions_zr;
 	vector<double> mattenuation;
+
+	// eigenvalues parameters
+	bool isSpectra;
 	
 	// input/output functions
 	void read_data(const string scenarioFileName);
