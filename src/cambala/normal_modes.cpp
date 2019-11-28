@@ -3,6 +3,12 @@
 #include <iomanip>
 #include <cmath>
 #include <functional>
+#include <Eigen/Core>
+#include <Eigen/SparseCore>
+#include <Spectra/MatOp/SparseSymMatProd.h>
+#include <Spectra/SymEigsSolver.h>
+
+using namespace Spectra;
 
 //using namespace CAMBALA_compute;
 
@@ -11,7 +17,7 @@ NormalModes::NormalModes():
 	ordRich(3),
 	ppm(2),
 	f(0),
-	isSpectra(false)
+	isSpectra(true)
 {}
 
 void NormalModes::read_data(const string scenarioFileName)
@@ -486,18 +492,19 @@ vector<double> NormalModes::compute_wnumbers(
 
 	alglib::real_2d_array eigenvectors; // V - ñîáñòâ âåêòîð
 	alglib::real_1d_array eigenvalues; // Lm -ñîáñòâ çíà÷
-	eigenvalues.setlength(N_points - 2);
+	int matrix_size = N_points - 2;
+	eigenvalues.setlength(matrix_size);
 	alglib::ae_int_t eigen_count = 0;
-
+	
 	alglib::real_1d_array main_diag, second_diag;
-	main_diag.setlength(N_points - 2);
-	second_diag.setlength(N_points - 3);
+	main_diag.setlength(matrix_size);
+	second_diag.setlength(matrix_size - 1);
 
-	for (int ii = 0; ii < N_points - 3; ii++) {
+	for (int ii = 0; ii < matrix_size - 1; ii++) {
 		second_diag[ii] = sqrt(ud.at(ii)*ld.at(ii + 1));
 		main_diag[ii] = md.at(ii);
 	}
-	main_diag[N_points - 3] = md.at(N_points - 3);
+	main_diag[matrix_size - 1] = md.at(matrix_size - 1);
 
 	/* TEST: the sparse matrix diagonals output
 			ofstream myFile("thematrixdiags.txt");
@@ -512,11 +519,43 @@ vector<double> NormalModes::compute_wnumbers(
 			}
 			myFile1.close();
 	*/
-	if (!isSpectra)
-		alglib::smatrixtdevdr(main_diag, second_diag, N_points - 2, 0, kappamin*kappamin, kappamax*kappamax, eigen_count, eigenvectors);
-	else {
-		
+
+	// use Spectra to calculate the largest eigenvalues
+	if (isSpectra) {
+		//cout << "Spectra mode" << endl;
+		//cout << "matrix_size " << matrix_size << endl;
+		Eigen::SparseMatrix<double> M(matrix_size, matrix_size);
+		M.reserve(Eigen::VectorXi::Constant(matrix_size, 3));
+		for (int i = 0; i < matrix_size; i++) {
+			M.insert(i, i) = main_diag[i];
+			if (i > 0)
+				M.insert(i - 1, i) = second_diag[i - 1];
+			if (i < matrix_size - 1) {
+				M.insert(i + 1, i) = second_diag[i];
+			}
+		}
+
+		SparseSymMatProd<double> op(M);
+		// Construct eigen solver object, requesting the largest three eigenvalues
+		SymEigsSolver<double, LARGEST_ALGE, SparseSymMatProd<double>> eigs(&op, 3, 18);
+		// Initialize and compute
+		eigs.init();
+		eigs.compute();
+		// Retrieve results
+		Eigen::VectorXcd evalues;
+		if (eigs.info() == SUCCESSFUL) {
+			//cout << "SUCCESSFUL" << endl;
+			evalues = eigs.eigenvalues();
+		}
+		else {
+			cerr << "error in calculatig eigen values by Spectra";
+			exit(-1);
+		}
+		//cout << "evalues size " << evalues.size() << endl;
+		//cout << "Eigenvalues found:\n" << evalues << endl;
 	}
+
+	alglib::smatrixtdevdr(main_diag, second_diag, matrix_size, 0, kappamin*kappamin, kappamax*kappamax, eigen_count, eigenvectors);
 
 	for (int ii = 0; ii < eigen_count; ii++) {
 		wnumbers2.push_back(main_diag[eigen_count - ii - 1]);
