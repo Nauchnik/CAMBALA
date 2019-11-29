@@ -10,8 +10,13 @@
 
 using namespace std;
 
+#ifndef M_PI
 const double M_PI = 3.14159265358979323846;
+#endif
+
+#ifndef M_Iu
 const complex<double> M_Iu(0.0, 1.0);
+#endif
 
 class NormalModes
 {

@@ -1,11 +1,10 @@
-CPP = g++
+CPP = mpicxx
 ALGLIBDIR = ../../../alglib
-SPECTRADIR = ../../../spectra
-INCDIRS = -I${ALGLIBDIR} -I${SPECTRADIR}
-CPPFLAGS = -O3 -std=c++17 ${INCDIRS}
+INCDIRS = -I${ALGLIBDIR}
+CPPFLAGS = -O3 -std=c++0x ${INCDIRS} -D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -D _MPI
 
-cambala: main.o normal_modes.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sequential.o
-	${CPP} ${CPPFLAGS} main.o normal_modes.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sequential.o -o cambala
+cambala-parallel: main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sequential.o parallel.o
+	${CPP} ${CPPFLAGS} main.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sequential.o parallel.o -o cambala_parallel
 
 specialfunctions.o: ${ALGLIBDIR}/specialfunctions.cpp 
 	${CPP} ${CPPFLAGS} ${ALGLIBDIR}/specialfunctions.cpp -c
@@ -22,16 +21,16 @@ alglibmisc.o: ${ALGLIBDIR}/alglibmisc.cpp
 alglibinternal.o: ${ALGLIBDIR}/alglibinternal.cpp 
 	${CPP} ${CPPFLAGS} ${ALGLIBDIR}/alglibinternal.cpp -c
 
+parallel.o: parallel.cpp
+	${CPP} ${CPPFLAGS} parallel.cpp -c
+
 sequential.o: sequential.cpp
 	${CPP} ${CPPFLAGS} sequential.cpp -c
-	
-normal_modes.o: normal_modes.cpp
-	${CPP} ${CPPFLAGS} normal_modes.cpp -c
-	
+
 main.o: main.cpp
 	${CPP} ${CPPFLAGS} main.cpp -c
 	
 clean:
 	rm -rf *.o
-	rm cambala
+	rm cambala_parallel
 	clear
