@@ -1,7 +1,7 @@
 CPP = g++
 ALGLIBDIR = ../../../alglib
-SPECTRADIR = ../../../spectra
-INCDIRS = -I${ALGLIBDIR} -I${SPECTRADIR}
+EIGENVALUESDIR = ../../../Eigenvalues
+INCDIRS = -I${ALGLIBDIR} -I${EIGENVALUESDIR}
 CPPFLAGS = -O3 -std=c++17 ${INCDIRS}
 
 cambala: main.o normal_modes.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o sequential.o
