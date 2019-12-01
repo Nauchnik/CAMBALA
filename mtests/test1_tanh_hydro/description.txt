@@ -1,0 +1,23 @@
+Test problem for normal mode computation codes
+
+Two-layer problem
+
+1) bottom:
+
+rhob = 3; % density
+cb = 2000;  % sound speed
+
+2) water column
+
+rhow = 1; % density
+
+c0 = 1490; % sound speed profile
+z0 = 25;
+dc = 30;
+sigma = 10;
+
+c(z) = c0 - dc*tanh( (z-z0)/sigma );
+
+3) sound frequencies f = 50, 100, 200 Hz
+
+4) water depth: varies from 50 to 55 m
