@@ -18,7 +18,7 @@ int main(int argc, char ** argv)
 	cout << "scenarioFileName " << scenarioFileName << endl;
 
 	NormalModes n_m;
-	n_m.read_data(scenarioFileName);
+	n_m.read_scenario(scenarioFileName);
 	n_m.compute_khs();
 	n_m.print_khs();
 	n_m.compute_mfunctions_zr();

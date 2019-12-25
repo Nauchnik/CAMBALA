@@ -45,12 +45,9 @@ public:
 	vector<double> khs;
 	vector<vector<double>> mfunctions_zr;
 	vector<double> mattenuation;
-
-	// eigenvalues parameters
-	bool isSpectra;
 	
 	// input/output functions
-	void read_data(const string scenarioFileName);
+	void read_scenario(const string scenarioFileName);
 	void write_result(const string resultFileName);
 	void print_khs();
 	void print_mfunctions_zr();
@@ -103,6 +100,9 @@ private:
 	vector<double> parseArrayBrackets(string word);
 	vector<double> parseVector(stringstream &sstream);
 	double integrate(const vector<double>&, const double&, unsigned, unsigned);
+	//
+	string eigen_type; // 0 - alglib, 1 - arpack
+	int verbosity; // 0 - silent, 1- short, 2 - full
 };
 
 #endif

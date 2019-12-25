@@ -17,10 +17,11 @@ NormalModes::NormalModes():
 	ordRich(3),
 	ppm(2),
 	f(0),
-	isSpectra(true)
+	eigen_type("alglib"),
+	verbosity(1)
 {}
 
-void NormalModes::read_data(const string scenarioFileName)
+void NormalModes::read_scenario(const string scenarioFileName)
 {
 	cout << "scenario file name " << scenarioFileName << endl;
 
@@ -61,9 +62,26 @@ void NormalModes::read_data(const string scenarioFileName)
 			M_depths = parseVector(sstream);
 		else if (word == "bs")
 			M_betas = parseVector(sstream);
+		if (word.find("eigen_type") != string::npos)
+			sstream >> eigen_type;
+		if (word.find("verbosity") != string::npos)
+			sstream >> verbosity;
 		sstream.str(""); sstream.clear();
 	}
 	scenarioFile.close();
+
+	if (verbosity > 0) {
+		cout << "iModesSubset : " << iModesSubset << endl;
+		cout << "ppm : " << ppm << endl;
+		cout << "ordRich : " << ordRich << endl;
+		cout << "f : " << f << endl;
+		/*cout << "Rs : " << endl;
+		for (auto R : Rs)
+			cout << R << " ";
+		cout << endl;*/
+		cout << "eigen_type : " << eigen_type << endl;
+		cout << "verbosity : " << verbosity << endl;
+	}
 	
 	size_t n_layers_w = M_depths.size() - 1;
 	if (!n_layers_w) {
@@ -520,8 +538,14 @@ vector<double> NormalModes::compute_wnumbers(
 			myFile1.close();
 	*/
 
-	// use Spectra to calculate the largest eigenvalues
-	if (isSpectra) {
+	if (eigen_type == "alglib") {
+		// result of main_diag are eigen values
+		alglib::smatrixtdevdr(main_diag, second_diag, matrix_size, 0, kappamin*kappamin, kappamax*kappamax, eigen_count, eigenvectors);
+		for (int ii = 0; ii < eigen_count; ii++)
+			wnumbers2.push_back(main_diag[eigen_count - ii - 1]);
+	}
+	else if (eigen_type == "arpack") {
+		// use Spectra to calculate the largest eigenvalues
 		//cout << "Spectra mode" << endl;
 		//cout << "matrix_size " << matrix_size << endl;
 		Eigen::SparseMatrix<double> M(matrix_size, matrix_size);
@@ -530,9 +554,8 @@ vector<double> NormalModes::compute_wnumbers(
 			M.insert(i, i) = main_diag[i];
 			if (i > 0)
 				M.insert(i - 1, i) = second_diag[i - 1];
-			if (i < matrix_size - 1) {
+			if (i < matrix_size - 1)
 				M.insert(i + 1, i) = second_diag[i];
-			}
 		}
 
 		SparseSymMatProd<double> op(M);
@@ -553,14 +576,17 @@ vector<double> NormalModes::compute_wnumbers(
 		}
 		//cout << "evalues size " << evalues.size() << endl;
 		//cout << "Eigenvalues found:\n" << evalues << endl;
+		for (int ii = 0; ii < evalues.size(); ii++)
+			wnumbers2.push_back(main_diag[evalues.size() - ii - 1]);
 	}
 
-	alglib::smatrixtdevdr(main_diag, second_diag, matrix_size, 0, kappamin*kappamin, kappamax*kappamax, eigen_count, eigenvectors);
-
-	for (int ii = 0; ii < eigen_count; ii++) {
-		wnumbers2.push_back(main_diag[eigen_count - ii - 1]);
+	if (verbosity > 1) {
+		cout << "wnumbers2 :\n";
+		for (auto x : wnumbers2)
+			cout << x << " ";
+		cout << endl;
 	}
-
+	
 	return wnumbers2;
 }
 
