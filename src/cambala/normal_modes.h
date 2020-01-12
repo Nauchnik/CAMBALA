@@ -18,6 +18,8 @@ const double M_PI = 3.14159265358979323846;
 const complex<double> M_Iu(0.0, 1.0);
 #endif
 
+const int NCV_COEF = 6; // coef for ncv - parameter that controls the convergence speed of arpack
+
 class NormalModes
 {
 public:
@@ -101,8 +103,9 @@ private:
 	vector<double> parseVector(stringstream &sstream);
 	double integrate(const vector<double>&, const double&, unsigned, unsigned);
 	//
-	string eigen_type; // 0 - alglib, 1 - arpack
-	int verbosity; // 0 - silent, 1- short, 2 - full
+	string eigen_type;                // "alglib" or "arpack"
+	int verbosity;                    // 0 - silent, 1- short, 2 - full
+	int arpack_required_eigen_values; // number of eigen values required by arpack
 };
 
 #endif

@@ -18,6 +18,7 @@ NormalModes::NormalModes():
 	ppm(2),
 	f(0),
 	eigen_type("alglib"),
+	arpack_required_eigen_values(3),
 	verbosity(1)
 {}
 
@@ -66,6 +67,8 @@ void NormalModes::read_scenario(const string scenarioFileName)
 			sstream >> eigen_type;
 		if (word.find("verbosity") != string::npos)
 			sstream >> verbosity;
+		if (word.find("arpack_required_eigen_values") != string::npos)
+			sstream >> arpack_required_eigen_values;
 		sstream.str(""); sstream.clear();
 	}
 	scenarioFile.close();
@@ -80,7 +83,10 @@ void NormalModes::read_scenario(const string scenarioFileName)
 			cout << R << " ";
 		cout << endl;*/
 		cout << "eigen_type : " << eigen_type << endl;
+		if (eigen_type == "arpack")
+			cout << "arpack_required_eigen_values : " << arpack_required_eigen_values << endl;
 		cout << "verbosity : " << verbosity << endl;
+		cout << endl;
 	}
 	
 	size_t n_layers_w = M_depths.size() - 1;
@@ -163,6 +169,10 @@ void NormalModes::write_result(const string resultFileName)
 void NormalModes::print_khs()
 {
 	cout << "khs : ";
+	if (khs.empty()) {
+		cerr << "khs is empty" << endl;
+		exit(-1);
+	}
 	cout << setprecision(11) << fixed;
 	for (auto x : khs)
 		cout << x << " ";
@@ -172,6 +182,10 @@ void NormalModes::print_khs()
 void NormalModes::print_mfunctions_zr()
 {
 	cout << "mfunctions_zr : \n";
+	if (mfunctions_zr.empty()) {
+		cerr << "mfunctions_zr is empty" << endl;
+		exit(-1);
+	}
 	for (auto x : mfunctions_zr) {
 		for (auto y : x)
 			cout << y << " ";
@@ -538,6 +552,18 @@ vector<double> NormalModes::compute_wnumbers(
 			myFile1.close();
 	*/
 
+	if (verbosity > 1) {
+		cout << "matrix_size : " << matrix_size << endl;
+		/*cout << "main_diag :" << endl;
+		for (int i=0; i<matrix_size; i++)
+			cout << main_diag[i] << " ";`
+		cout << endl;
+		cout << "second_diag :" << endl;
+		for (int i = 0; i < matrix_size; i++)
+			cout << second_diag[i] << " ";
+		cout << endl << endl;*/
+	}
+
 	if (eigen_type == "alglib") {
 		// result of main_diag are eigen values
 		alglib::smatrixtdevdr(main_diag, second_diag, matrix_size, 0, kappamin*kappamin, kappamax*kappamax, eigen_count, eigenvectors);
@@ -557,13 +583,19 @@ vector<double> NormalModes::compute_wnumbers(
 			if (i < matrix_size - 1)
 				M.insert(i + 1, i) = second_diag[i];
 		}
-
+		
 		SparseSymMatProd<double> op(M);
 		// Construct eigen solver object, requesting the largest three eigenvalues
-		SymEigsSolver<double, LARGEST_ALGE, SparseSymMatProd<double>> eigs(&op, 3, 18);
+		SymEigsSolver< double, LARGEST_ALGE, SparseSymMatProd<double> > eigs(&op, arpack_required_eigen_values, arpack_required_eigen_values * NCV_COEF);
+		
 		// Initialize and compute
 		eigs.init();
-		eigs.compute();
+		int nconv = eigs.compute();
+		if (nconv < arpack_required_eigen_values) {
+			cerr << "nconv < arpack_required_eigen_values" << endl;
+			cerr << nconv << " < " << arpack_required_eigen_values << endl;
+			exit(-1);
+		}
 		// Retrieve results
 		Eigen::VectorXcd evalues;
 		if (eigs.info() == SUCCESSFUL) {
@@ -571,13 +603,15 @@ vector<double> NormalModes::compute_wnumbers(
 			evalues = eigs.eigenvalues();
 		}
 		else {
-			cerr << "error in calculatig eigen values by Spectra";
+			cerr << "error in calculatig eigen values by Spectra, nconv : " << nconv;
 			exit(-1);
 		}
-		//cout << "evalues size " << evalues.size() << endl;
-		//cout << "Eigenvalues found:\n" << evalues << endl;
+		if (verbosity > 1) {
+			cout << "evalues size " << evalues.size() << endl;
+			cout << "Eigenvalues found:\n" << evalues << endl;
+		}
 		for (int ii = 0; ii < evalues.size(); ii++)
-			wnumbers2.push_back(main_diag[evalues.size() - ii - 1]);
+			wnumbers2.push_back(evalues[ii].real());
 	}
 
 	if (verbosity > 1) {
@@ -1896,6 +1930,9 @@ sorted in ascending order
 */
 void NormalModes::compute_mfunctions_zr(double omeg)
 {
+	if (verbosity > 1)
+		cout << "compute_mfunctions_zr()" << endl;
+
 	if (omeg == -1) // if omeg is not given, then calculate it based on the class' frequency
 		omeg = 2 * M_PI * f;
 
@@ -1953,6 +1990,9 @@ void NormalModes::compute_mfunctions_zr(double omeg)
 
 		mfunctions_zr.push_back(phim_zr);
 	}
+
+	if (verbosity > 0)
+		cout << "mfunctions_zr size : " << mfunctions_zr.size() << endl;
 
 	//    //mfunctions output to a file
 	//    ofstream ofile("mfunctionszr.txt");
