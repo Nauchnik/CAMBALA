@@ -89,7 +89,7 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		cout << endl;
 	}
 	
-	size_t n_layers_w = M_depths.size() - 1;
+	int n_layers_w = M_depths.size() - 1;
 	if (!n_layers_w) {
 		cerr << "n_layers_w == 0" << endl;
 		exit(-1);
@@ -1557,8 +1557,9 @@ void NormalModes::compute_wmode1(const double omeg, // sound frequency
 
 
 
-		for (size_t ll = bphi.size() - 2; ll >= 0; ll--) {
-
+		for (int ll = bphi.size() - 2; ll >= 0; ll--) {
+			if (ll == 0)
+				cout << '1';
 			phi.push_back(cmatching*bphi.at(ll));
 			dphi.push_back(cmatching*bdphi.at(ll));
 
@@ -1844,13 +1845,13 @@ vector<complex<double>> NormalModes::compute_cpl_pressure( const double f, vecto
 
 	double omeg = 2 * M_PI*f;
 	double R;
-	size_t nzr = zr.size();
+	int nzr = zr.size();
 	complex<double> Prc;
 
 	compute_khs(omeg);
 	//khs = compute_wnumbers_extrap_lin_dz(omeg);
 
-	size_t nmod = khs.size();
+	int nmod = khs.size();
 
 
 	//        // TEST
@@ -1947,7 +1948,7 @@ void NormalModes::compute_mfunctions_zr(double omeg)
 	double zp;
 	unsigned cur_layer = 0;
 	unsigned cur_points = 0;
-	size_t nzr = zr.size();
+	int nzr = zr.size();
 	unsigned i_inside_l = 0;
 
 

@@ -9,5 +9,5 @@ c1s [1500 1700]
 c2s [1500 1700];
 rhos [1 1.5]
 depths [200 500]
-eigen_type arpack
+eigen_type alglib
 arpack_required_eigen_values 3
