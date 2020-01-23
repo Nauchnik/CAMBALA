@@ -179,6 +179,19 @@ void NormalModes::print_khs()
 	cout << endl;
 }
 
+void NormalModes::print_mattenuation()
+{
+	cout << "mattenuation : ";
+	if (khs.empty()) {
+		cerr << "mattenuation is empty" << endl;
+		exit(-1);
+	}
+	cout << setprecision(11) << fixed;
+	for (auto x : mattenuation)
+		cout << x << " ";
+	cout << endl;
+}
+
 void NormalModes::print_mfunctions_zr()
 {
 	cout << "mfunctions_zr : \n";
@@ -1558,12 +1571,8 @@ void NormalModes::compute_wmode1(const double omeg, // sound frequency
 
 
 		for (int ll = bphi.size() - 2; ll >= 0; ll--) {
-			if (ll == 0)
-				cout << '1';
 			phi.push_back(cmatching*bphi.at(ll));
 			dphi.push_back(cmatching*bdphi.at(ll));
-
-
 		}
 
 		cmatching = cmatching * cmatching;
@@ -1925,8 +1934,8 @@ vector<complex<double>> NormalModes::compute_cpl_pressure( const double f, vecto
 
 compute_mfunctions_zr() computs the mode functions corresponding to the media parameters described by
 the arrays [depths,c1s,c2s,rhos,Ns_points] for a given set of the wavenumbers (e.g. obtained from the function
-compute_wnumbers_extrap() ). The functions are computed at the receiver depths from the array "zr". The values in zr are assumed to be
-sorted in ascending order
+compute_wnumbers_extrap() ). The functions are computed at the receiver depths from the array "zr". 
+The values in zr are assumed to be sorted in ascending order
 
 */
 void NormalModes::compute_mfunctions_zr(double omeg)

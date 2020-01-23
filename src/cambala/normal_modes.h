@@ -52,6 +52,7 @@ public:
 	void read_scenario(const string scenarioFileName);
 	void write_result(const string resultFileName);
 	void print_khs();
+	void print_mattenuation();
 	void print_mfunctions_zr();
 	
 	// main computation functions
