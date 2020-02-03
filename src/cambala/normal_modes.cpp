@@ -59,8 +59,10 @@ void NormalModes::read_scenario(const string scenarioFileName)
 			M_c2s = parseVector(sstream);
 		else if (word == "rhos")
 			M_rhos = parseVector(sstream);
-		else if (word == "depths")
-			M_depths = parseVector(sstream);
+		else if (word == "depths") {
+			all_depths = parseTwoDimVector(sstream);
+			M_depths = all_depths[0];
+		}
 		else if (word == "bs")
 			M_betas = parseVector(sstream);
 		if (word.find("eigen_type") != string::npos)
@@ -86,6 +88,14 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		if (eigen_type == "arpack")
 			cout << "arpack_required_eigen_values : " << arpack_required_eigen_values << endl;
 		cout << "verbosity : " << verbosity << endl;
+		cout << endl;
+		cout << all_depths.size() << " variants of depths : \n";
+		for (int i = all_depths.size() - 1; i >= 0; i--) {
+			cout << "(";
+			for (auto d : all_depths[i])
+				cout << d << " ";
+			cout << "), ";
+		}
 		cout << endl;
 	}
 	
@@ -166,29 +176,16 @@ void NormalModes::write_result(const string resultFileName)
 	ofile.close();
 }
 
-void NormalModes::print_khs()
+void NormalModes::print_wnumbers()
 {
-	cout << "khs : ";
+	cout << "wave numbers : ";
 	if (khs.empty()) {
 		cerr << "khs is empty" << endl;
 		exit(-1);
 	}
 	cout << setprecision(11) << fixed;
-	for (auto x : khs)
-		cout << x << " ";
-	cout << endl;
-}
-
-void NormalModes::print_mattenuation()
-{
-	cout << "mattenuation : ";
-	if (khs.empty()) {
-		cerr << "mattenuation is empty" << endl;
-		exit(-1);
-	}
-	cout << setprecision(11) << fixed;
-	for (auto x : mattenuation)
-		cout << x << " ";
+	for (unsigned i=0;i<khs.size();i++)
+		cout << khs[i] << "+" << mattenuation[i];
 	cout << endl;
 }
 
@@ -200,6 +197,20 @@ void NormalModes::print_mfunctions_zr()
 		exit(-1);
 	}
 	for (auto x : mfunctions_zr) {
+		for (auto y : x)
+			cout << y << " ";
+		cout << endl;
+	}
+}
+
+void NormalModes::print_modal_group_velocities()
+{
+	cout << "modal_group_velocities : \n";
+	if (modal_group_velocities.empty()) {
+		cerr << "modal_group_velocities is empty" << endl;
+		exit(-1);
+	}
+	for (auto x : modal_group_velocities) {
 		for (auto y : x)
 			cout << y << " ";
 		cout << endl;
@@ -227,6 +238,49 @@ vector<double> NormalModes::parseVector(stringstream &sstream)
 		vec = parseArrayBrackets(val_str);
 	}
 	return vec;
+}
+
+vector<vector<double>> NormalModes::parseTwoDimVector(stringstream &sstream)
+{
+	vector<vector<double>> vec_vec;
+	string word;
+	sstream >> word;
+
+	vector<double> vec;
+	if ((word.find('[') != string::npos) && (word.find(':') != string::npos)) {
+		word.erase(remove(word.begin(), word.end(), '['), word.end());
+		vec = fillArrayStep(word);
+		sstream >> word;
+		word.erase(remove(word.begin(), word.end(), ']'), word.end());
+		double dval;
+		istringstream(word) >> dval;
+		for (auto v : vec) {
+			vector<double> new_v;
+			new_v.push_back(v);
+			new_v.push_back(dval);
+			vec_vec.push_back(new_v);
+		}
+	}
+	else {
+		if (word[0] != '[') {
+			if (word.find(':') == string::npos) { // no [, no :, then 1-elem array
+				double dval;
+				istringstream(word) >> dval;
+				vec.push_back(dval);
+			}
+			else
+				vec = fillArrayStep(word);
+		}
+		else {
+			string val_str = word;
+			while (sstream >> word)
+				val_str += " " + word;
+			vec = parseArrayBrackets(val_str);
+		}
+		vec_vec.push_back(vec);
+	}
+
+	return vec_vec;
 }
 
 void NormalModes::getThreeValuesFromStr(string str, double &val1, double &val2, double &val3)
@@ -423,6 +477,71 @@ vector<double> NormalModes::compute_wnumbers_extrap_lin_dz(const double omeg)
 	return wnum_extrapR;
 }
 
+void NormalModes::compute_for_all_depths()
+{
+	// clear out files
+	ofstream wnumbers_out_file(wnumbers_out_file_name, ios_base::out);
+	wnumbers_out_file.close();
+	ofstream mfunctions_out_file(mfunctions_out_file_name, ios_base::out);
+	mfunctions_out_file.close();
+	ofstream modal_group_velocities_out_file(modal_group_velocities_out_file_name, ios_base::out);
+	modal_group_velocities_out_file.close();
+
+	cout << all_depths.size() << " variants of depths in total\n";
+	unsigned processed_depths = 0;
+	for (int i = all_depths.size() - 1; i >= 0; i--) {
+		M_depths = all_depths[i];
+		compute_khs();
+		compute_mfunctions_zr();
+		compute_mattenuation();
+		compute_modal_group_velocities_fixed_freq();
+		// write computed results
+		write_wnumbers();
+		write_mfunctions_zr();
+		write_modal_group_velocities();
+		processed_depths++;
+		cout << "processed " << processed_depths << " variants of depths\n";
+	}
+}
+
+void NormalModes::write_wnumbers()
+{
+	ofstream wnumbers_out_file(wnumbers_out_file_name, ios_base::app);
+	wnumbers_out_file << M_depths[0] << '\t';
+	wnumbers_out_file << setprecision(12);
+	for (unsigned i = 0; i < khs.size(); i++) {
+		wnumbers_out_file << fixed << setw(12);
+		wnumbers_out_file << khs[i] << "+";
+		wnumbers_out_file << scientific;
+		wnumbers_out_file << mattenuation[i] << "i ";
+	}
+	wnumbers_out_file << endl;
+	wnumbers_out_file.close();
+}
+
+void NormalModes::write_mfunctions_zr()
+{
+	ofstream mfunctions_out_file(mfunctions_out_file_name, ios_base::app);
+	mfunctions_out_file << M_depths[0] << '\t';
+	mfunctions_out_file << fixed << setprecision(12) << setw(12);
+	for (unsigned i = 0; i < mfunctions_zr.size(); i++)
+		for (unsigned j = 0; j < mfunctions_zr[i].size(); j++)
+			mfunctions_out_file << mfunctions_zr[i][j] << " ";
+	mfunctions_out_file << endl;
+	mfunctions_out_file.close();
+}
+
+void NormalModes::write_modal_group_velocities()
+{
+	ofstream modal_group_velocities_out_file(modal_group_velocities_out_file_name, ios_base::app);
+	modal_group_velocities_out_file << M_depths[0] << '\t';
+	modal_group_velocities_out_file << fixed << setprecision(6) << setw(12);
+	for (unsigned i = 0; i < modal_group_velocities.size(); i++)
+		for (unsigned j = 0; j < modal_group_velocities[i].size(); j++)
+			modal_group_velocities_out_file << modal_group_velocities[i][j] << " ";
+	modal_group_velocities_out_file << endl;
+	modal_group_velocities_out_file.close();
+}
 
 vector<double> NormalModes::compute_wnumbers(
 	const double omeg,
@@ -2001,8 +2120,8 @@ void NormalModes::compute_mfunctions_zr(double omeg)
 		mfunctions_zr.push_back(phim_zr);
 	}
 
-	if (verbosity > 0)
-		cout << "mfunctions_zr size : " << mfunctions_zr.size() << endl;
+	//if (verbosity > 0)
+	//	cout << "mfunctions_zr size : " << mfunctions_zr.size() << endl;
 
 	//    //mfunctions output to a file
 	//    ofstream ofile("mfunctionszr.txt");
@@ -2069,7 +2188,9 @@ void NormalModes::compute_mattenuation(double omeg)
 			if (!--count) {
 				as[i] += betas[l] * integrate(phi, hzs[l], lj, j);
 				lj = j + 1;
-				l += 1;
+				++l;
+				if (l >= M_c1s.size())
+					break;
 				c = M_c1s[l];
 				count = M_Ns_points[l];
 			}
@@ -2081,6 +2202,14 @@ void NormalModes::compute_mattenuation(double omeg)
 	mattenuation.reserve(khs.size());
 	for (unsigned i = 0; i < khs.size(); ++i)
 		mattenuation.emplace_back(omeg2 * as[i] / khs[i]);
+}
+
+void NormalModes::compute_modal_group_velocities_fixed_freq()
+{
+	double deltaf = 0.05;
+	vector<double> freqs;
+	freqs.push_back(f);
+	compute_modal_grop_velocities(deltaf, freqs);
 }
 
 double airy_ai(const double& x) {

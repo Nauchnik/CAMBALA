@@ -48,12 +48,18 @@ public:
 	vector<vector<double>> mfunctions_zr;
 	vector<double> mattenuation;
 	
-	// input/output functions
+	// input/output
+	string wnumbers_out_file_name = "kj_wedge_att.txt";
+	string mfunctions_out_file_name = "phizr_wedge.txt";
+	string modal_group_velocities_out_file_name = "vgr.txt";
 	void read_scenario(const string scenarioFileName);
 	void write_result(const string resultFileName);
-	void print_khs();
-	void print_mattenuation();
+	void write_wnumbers();
+	void write_mfunctions_zr();
+	void write_modal_group_velocities();
+	void print_wnumbers();
 	void print_mfunctions_zr();
+	void print_modal_group_velocities();
 	
 	// main computation functions
 	vector<double> compute_wnumbers(const double omeg, vector<double> &c, vector<double> &rho,
@@ -68,6 +74,7 @@ public:
 	void compute_all_mfunctions(const double omeg);
 	void compute_khs(double omeg = -1);
 	void compute_mattenuation(double omeg = -1);
+	void compute_modal_group_velocities_fixed_freq();
 	int compute_modal_grop_velocities(const double deltaf, vector<double> freqs);
 	int compute_modal_grop_velocities2(const double deltaf, vector<double> freqs);
 	int compute_wnumbers_bb(const double deltaf, const unsigned flOnlyTrapped, vector<double> freqs);
@@ -91,6 +98,10 @@ public:
 	double compute_modal_delays_residual_LWan_weighted(const double R, const double tau, vector<double> freqs,
 		vector<vector<double>> &experimental_delays, vector<unsigned> &experimental_mode_numbers,
 		vector<vector<double>> weight_coeffs);
+
+	// meta data and functions
+	vector<vector<double>> all_depths;
+	void compute_for_all_depths();
 	
 private:
 	// additional computation functions
@@ -102,6 +113,7 @@ private:
 	void getThreeValuesFromStr(string str, double &val1, double &val2, double &val3);
 	vector<double> parseArrayBrackets(string word);
 	vector<double> parseVector(stringstream &sstream);
+	vector<vector<double>> parseTwoDimVector(stringstream &sstream);
 	double integrate(const vector<double>&, const double&, unsigned, unsigned);
 	//
 	string eigen_type;                // "alglib" or "arpack"

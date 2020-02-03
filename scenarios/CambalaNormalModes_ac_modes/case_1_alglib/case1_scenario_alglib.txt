@@ -4,6 +4,6 @@ zr 30
 c1s [1500 1700]
 c2s [1500 1700]
 rhos [1 1.5]
-depths [34 1000]
-bs [0.5 0.5]
-
+depths [34:2:380 1000]
+bs [0 0.5]
+eigen_type alglib
