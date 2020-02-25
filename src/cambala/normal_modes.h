@@ -18,7 +18,7 @@ const double M_PI = 3.14159265358979323846;
 const complex<double> M_Iu(0.0, 1.0);
 #endif
 
-const int NCV_COEF = 6; // coef for ncv - parameter that controls the convergence speed of arpack
+const int NCV_COEF = 6; // coef for ncv - parameter that controls the convergence speed of spectra
 
 class NormalModes
 {
@@ -47,11 +47,13 @@ public:
 	vector<double> khs;
 	vector<vector<double>> mfunctions_zr;
 	vector<double> mattenuation;
+	vector<double> err_pek;
 	
 	// input/output
 	string wnumbers_out_file_name = "kj_wedge_att.txt";
 	string mfunctions_out_file_name = "phizr_wedge.txt";
 	string modal_group_velocities_out_file_name = "vgr.txt";
+	string err_pek_file_name = "err_pek.txt";
 	void read_scenario(const string scenarioFileName);
 	void write_result(const string resultFileName);
 	void write_wnumbers();
@@ -60,6 +62,7 @@ public:
 	void print_wnumbers();
 	void print_mfunctions_zr();
 	void print_modal_group_velocities();
+	void write_err_pek();
 	
 	// main computation functions
 	vector<double> compute_wnumbers(const double omeg, vector<double> &c, vector<double> &rho,
@@ -79,6 +82,7 @@ public:
 	int compute_modal_grop_velocities2(const double deltaf, vector<double> freqs);
 	int compute_wnumbers_bb(const double deltaf, const unsigned flOnlyTrapped, vector<double> freqs);
 	void compute_mfunctions_airy(double omeg = -1, double eps = 1e-10);
+	void compute_err_pek(double omeg = -1);
 	
 	// inversion functions
 	double compute_modal_delays_residual_uniform(const double R, const double tau, vector<double> freqs,
@@ -102,7 +106,7 @@ public:
 	// meta data and functions
 	vector<vector<double>> all_depths;
 	void compute_for_all_depths();
-	
+	double elapsed_time;
 private:
 	// additional computation functions
 	double RK4(const double omeg2, const double kh2, const double deltah, const double c1, const double c2, const unsigned Np,
@@ -116,9 +120,9 @@ private:
 	vector<vector<double>> parseTwoDimVector(stringstream &sstream);
 	double integrate(const vector<double>&, const double&, unsigned, unsigned);
 	//
-	string eigen_type;                // "alglib" or "arpack"
+	string eigen_type;                // "alglib" or "spectra"
 	int verbosity;                    // 0 - silent, 1- short, 2 - full
-	int arpack_required_eigen_values; // number of eigen values required by arpack
+	int required_eigen_values; // number of eigen values required by spectra
 };
 
 #endif

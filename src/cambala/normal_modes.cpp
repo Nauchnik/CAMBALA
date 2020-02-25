@@ -2,6 +2,7 @@
 #include "linalg.h"
 #include <iomanip>
 #include <cmath>
+#include <chrono>
 #include <functional>
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
@@ -18,8 +19,9 @@ NormalModes::NormalModes():
 	ppm(2),
 	f(0),
 	eigen_type("alglib"),
-	arpack_required_eigen_values(3),
-	verbosity(1)
+	required_eigen_values(3),
+	verbosity(1),
+	elapsed_time(0.0)
 {}
 
 void NormalModes::read_scenario(const string scenarioFileName)
@@ -69,8 +71,8 @@ void NormalModes::read_scenario(const string scenarioFileName)
 			sstream >> eigen_type;
 		if (word.find("verbosity") != string::npos)
 			sstream >> verbosity;
-		if (word.find("arpack_required_eigen_values") != string::npos)
-			sstream >> arpack_required_eigen_values;
+		if (word.find("required_eigen_values") != string::npos)
+			sstream >> required_eigen_values;
 		sstream.str(""); sstream.clear();
 	}
 	scenarioFile.close();
@@ -85,8 +87,8 @@ void NormalModes::read_scenario(const string scenarioFileName)
 			cout << R << " ";
 		cout << endl;*/
 		cout << "eigen_type : " << eigen_type << endl;
-		if (eigen_type == "arpack")
-			cout << "arpack_required_eigen_values : " << arpack_required_eigen_values << endl;
+		if (eigen_type == "spectra")
+			cout << "required_eigen_values : " << required_eigen_values << endl;
 		cout << "verbosity : " << verbosity << endl;
 		cout << endl;
 		cout << all_depths.size() << " variants of depths : \n";
@@ -486,21 +488,35 @@ void NormalModes::compute_for_all_depths()
 	mfunctions_out_file.close();
 	ofstream modal_group_velocities_out_file(modal_group_velocities_out_file_name, ios_base::out);
 	modal_group_velocities_out_file.close();
-
+	ofstream err_pek_out_file(err_pek_file_name, ios_base::out);
+	err_pek_out_file.close();
+	
 	cout << all_depths.size() << " variants of depths in total\n";
 	unsigned processed_depths = 0;
 	for (int i = all_depths.size() - 1; i >= 0; i--) {
 		M_depths = all_depths[i];
+		// measure elapsed time
+		chrono::high_resolution_clock::time_point start_t = chrono::high_resolution_clock::now();
+
 		compute_khs();
 		compute_mfunctions_zr();
 		compute_mattenuation();
 		compute_modal_group_velocities_fixed_freq();
+		compute_err_pek();
+
+		chrono::high_resolution_clock::time_point cur_t = chrono::high_resolution_clock::now();
+		chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(cur_t - start_t);
+		elapsed_time += time_span.count();
+
 		// write computed results
 		write_wnumbers();
 		write_mfunctions_zr();
 		write_modal_group_velocities();
+		write_err_pek();
 		processed_depths++;
+
 		cout << "processed " << processed_depths << " variants of depths\n";
+		cout << "elapsed_time : " << elapsed_time << endl;
 	}
 }
 
@@ -517,6 +533,17 @@ void NormalModes::write_wnumbers()
 	}
 	wnumbers_out_file << endl;
 	wnumbers_out_file.close();
+}
+
+void NormalModes::write_err_pek()
+{
+	ofstream err_pek_out_file(err_pek_file_name, ios_base::app);
+	err_pek_out_file << M_depths[0] << '\t';
+	err_pek_out_file << setprecision(12) << fixed << setw(12);
+	for (unsigned i = 0; i < err_pek.size(); i++)
+		err_pek_out_file << err_pek[i] << " ";
+	err_pek_out_file << endl;
+	err_pek_out_file.close();
 }
 
 void NormalModes::write_mfunctions_zr()
@@ -654,8 +681,8 @@ vector<double> NormalModes::compute_wnumbers(
 	//input: diagonals ld, md, ud + interval [0 k_max]
 	//output: wnumbers2 = wave numbers squared
 
-	alglib::real_2d_array eigenvectors; // V - ñîáñòâ âåêòîð
-	alglib::real_1d_array eigenvalues; // Lm -ñîáñòâ çíà÷
+	alglib::real_2d_array eigenvectors;
+	alglib::real_1d_array eigenvalues;
 	int matrix_size = N_points - 2;
 	eigenvalues.setlength(matrix_size);
 	alglib::ae_int_t eigen_count = 0;
@@ -670,20 +697,6 @@ vector<double> NormalModes::compute_wnumbers(
 	}
 	main_diag[matrix_size - 1] = md.at(matrix_size - 1);
 
-	/* TEST: the sparse matrix diagonals output
-			ofstream myFile("thematrixdiags.txt");
-			for (int ii=0; ii<N_points-2; ii++){
-				myFile << fixed  << ld.at(ii) << "  " << md.at(ii) << "  " << ud.at(ii) << endl;
-			}
-			myFile.close();
-
-			ofstream myFile1("thematrixdiags_sym.txt");
-			for (int ii=0; ii<N_points-3; ii++){
-				myFile1 << fixed  << main_diag[ii] << "  " << second_diag[ii] << endl;
-			}
-			myFile1.close();
-	*/
-
 	if (verbosity > 1) {
 		cout << "matrix_size : " << matrix_size << endl;
 		/*cout << "main_diag :" << endl;
@@ -697,12 +710,28 @@ vector<double> NormalModes::compute_wnumbers(
 	}
 
 	if (eigen_type == "alglib") {
-		// result of main_diag are eigen values
-		alglib::smatrixtdevdr(main_diag, second_diag, matrix_size, 0, kappamin*kappamin, kappamax*kappamax, eigen_count, eigenvectors);
-		for (int ii = 0; ii < eigen_count; ii++)
-			wnumbers2.push_back(main_diag[eigen_count - ii - 1]);
+		alglib::real_1d_array tmp_main_diag, tmp_second_diag;
+		double left_border = kappamin * kappamin;
+		double right_border = kappamax * kappamax;
+		do {
+			// result of main_diag are eigen values
+			//cout << "left_border " << left_border << endl;
+			//cout << "right border " << right_border << endl;
+			eigen_count = 0;
+			tmp_main_diag = main_diag;
+			tmp_second_diag = second_diag;
+			alglib::smatrixtdevdr(tmp_main_diag, tmp_second_diag, matrix_size, 0, left_border, right_border, eigen_count, eigenvectors);
+			//cout << "eigen_count " << eigen_count << endl;
+			for (int ii = 0; ii < eigen_count; ii++)
+				wnumbers2.push_back(tmp_main_diag[eigen_count - ii - 1]);
+			// set new interval
+			right_border = left_border;
+			left_border /= sqrt(2);
+		} while (wnumbers2.size() < required_eigen_values);
+		if (wnumbers2.size() > required_eigen_values)
+			wnumbers2.resize(required_eigen_values);
 	}
-	else if (eigen_type == "arpack") {
+	else if (eigen_type == "spectra") {
 		// use Spectra to calculate the largest eigenvalues
 		//cout << "Spectra mode" << endl;
 		//cout << "matrix_size " << matrix_size << endl;
@@ -718,14 +747,15 @@ vector<double> NormalModes::compute_wnumbers(
 		
 		SparseSymMatProd<double> op(M);
 		// Construct eigen solver object, requesting the largest three eigenvalues
-		SymEigsSolver< double, LARGEST_ALGE, SparseSymMatProd<double> > eigs(&op, arpack_required_eigen_values, arpack_required_eigen_values * NCV_COEF);
+		SymEigsSolver< double, LARGEST_ALGE, SparseSymMatProd<double> > eigs(&op, required_eigen_values, required_eigen_values * NCV_COEF);
 		
 		// Initialize and compute
 		eigs.init();
+		//int nconv = eigs.compute(1000, 1e-9, LARGEST_ALGE);
 		int nconv = eigs.compute();
-		if (nconv < arpack_required_eigen_values) {
-			cerr << "nconv < arpack_required_eigen_values" << endl;
-			cerr << nconv << " < " << arpack_required_eigen_values << endl;
+		if (nconv < required_eigen_values) {
+			cerr << "nconv < required_eigen_values" << endl;
+			cerr << nconv << " < " << required_eigen_values << endl;
 			exit(-1);
 		}
 		// Retrieve results
@@ -1964,6 +1994,24 @@ void NormalModes::compute_khs(double omeg)
 	if (omeg == -1) // if omeg is not given, calculate it based on the class' frequency
 		omeg = 2 * M_PI * f;
 	khs = compute_wnumbers_extrap_lin_dz(omeg);
+}
+
+void NormalModes::compute_err_pek(double omeg)
+{
+	if (omeg == -1) // if omeg is not given, calculate it based on the frequency
+		omeg = 2 * M_PI * f;
+	double cw = M_c1s[0];
+	double cb = M_c1s[1];
+	double rhow = M_rhos[0];
+	double rhob = M_rhos[1];
+	double H = M_depths[1];
+	err_pek.clear();
+	for (auto wnum : khs) {
+		double kvw = sqrt(pow((omeg/cw),2.0) - pow(wnum,2.0));
+		double kvb = sqrt(pow(wnum,2.0) - pow((omeg / cb),2.0));
+		double err = tan(kvw*H) + rhob * kvw / (rhow*kvb);
+		err_pek.push_back(err);
+	}
 }
 
 vector<complex<double>> NormalModes::compute_cpl_pressure( const double f, vector<double> &Rr )
