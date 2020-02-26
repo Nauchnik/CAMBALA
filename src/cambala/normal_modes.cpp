@@ -2004,7 +2004,7 @@ void NormalModes::compute_err_pek(double omeg)
 	double cb = M_c1s[1];
 	double rhow = M_rhos[0];
 	double rhob = M_rhos[1];
-	double H = M_depths[1];
+	double H = M_depths[0];
 	err_pek.clear();
 	for (auto wnum : khs) {
 		double kvw = sqrt(pow((omeg/cw),2.0) - pow(wnum,2.0));
