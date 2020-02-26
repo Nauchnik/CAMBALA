@@ -106,10 +106,9 @@ public:
 	// meta data and functions
 	vector<vector<double>> all_depths;
 	void compute_for_all_depths();
-	double elapsed_time;
 	string eigen_type;                // "alglib" or "spectra"
 	int verbosity;                    // 0 - silent, 1- short, 2 - full
-	int required_eigen_values;		  // number of eigen values required by spectra
+	int required_eigen_values;		  // number of required eigen values
 private:
 	// additional computation functions
 	double RK4(const double omeg2, const double kh2, const double deltah, const double c1, const double c2, const unsigned Np,
@@ -122,6 +121,8 @@ private:
 	vector<double> parseVector(stringstream &sstream);
 	vector<vector<double>> parseTwoDimVector(stringstream &sstream);
 	double integrate(const vector<double>&, const double&, unsigned, unsigned);
+
+	double elapsed_time; // time (in seconds) elapsed since start
 };
 
 #endif
