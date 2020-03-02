@@ -11,15 +11,14 @@
 
 using namespace Spectra;
 
-//using namespace CAMBALA_compute;
-
 NormalModes::NormalModes():
 	iModesSubset(-1.0),
 	ordRich(3),
 	ppm(2),
 	f(0),
+	nmod(0),
+	alpha(0.0),
 	eigen_type("alglib"),
-	required_eigen_values(3),
 	verbosity(1),
 	elapsed_time(0.0)
 {}
@@ -43,14 +42,18 @@ void NormalModes::read_scenario(const string scenarioFileName)
 			continue;
 		sstream << str;
 		sstream >> word;
-		if (word.find("iModesSubset") != string::npos)
+		if (word == "iModesSubset")
 			sstream >> iModesSubset;
-		if (word.find("ppm") != string::npos)
+		if (word == "ppm")
 			sstream >> ppm;
-		if (word.find("ordRich") != string::npos)
+		if (word == "ordRich")
 			sstream >> ordRich;
-		if (word.find("f") != string::npos)
+		if (word == "f")
 			sstream >> f;
+		if (word == "nmod")
+			sstream >> nmod;
+		if (word == "alpha")
+			sstream >> alpha;
 		else if (word == "R")
 			Rs = parseVector(sstream);
 		else if (word == "zr")
@@ -67,12 +70,10 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		}
 		else if (word == "bs")
 			M_betas = parseVector(sstream);
-		if (word.find("eigen_type") != string::npos)
+		if (word == "eigen_type")
 			sstream >> eigen_type;
-		if (word.find("verbosity") != string::npos)
+		if (word == "verbosity")
 			sstream >> verbosity;
-		if (word.find("required_eigen_values") != string::npos)
-			sstream >> required_eigen_values;
 		sstream.str(""); sstream.clear();
 	}
 	scenarioFile.close();
@@ -82,14 +83,28 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		cout << "ppm : " << ppm << endl;
 		cout << "ordRich : " << ordRich << endl;
 		cout << "f : " << f << endl;
-		/*cout << "Rs : " << endl;
-		for (auto R : Rs)
-			cout << R << " ";
-		cout << endl;*/
+		cout << "nmod : " << nmod << endl;
+		cout << "alpha : " << alpha << endl;
 		cout << "eigen_type : " << eigen_type << endl;
-		if (eigen_type == "spectra")
-			cout << "required_eigen_values : " << required_eigen_values << endl;
 		cout << "verbosity : " << verbosity << endl;
+		cout << "zr : " << endl;
+		for (auto z : zr)
+			cout << z << " ";
+		cout << endl;
+		cout << "Rs : " << endl;
+		for (auto rs : Rs)
+			cout << rs << " ";
+		cout << endl;
+		cout << "c1s : " << endl;
+		for (auto x : M_c1s)
+			cout << x << " ";
+		cout << "c2s : " << endl;
+		for (auto x : M_c2s)
+			cout << x << " ";
+		cout << endl;
+		cout << "rhos : " << endl;
+		for (auto x : M_rhos)
+			cout << x << " ";
 		cout << endl;
 		cout << all_depths.size() << " variants of depths : \n";
 		for (int i = all_depths.size() - 1; i >= 0; i--) {
@@ -711,25 +726,41 @@ vector<double> NormalModes::compute_wnumbers(
 
 	if (eigen_type == "alglib") {
 		alglib::real_1d_array tmp_main_diag, tmp_second_diag;
-		double left_border = kappamin * kappamin;
-		double right_border = kappamax * kappamax;
+
+		double left_border; // kappamin * kappamin;
+		double right_border;
+		double cur_alpha = alpha;
+		if (nmod == 0) {
+			left_border = kappamin * kappamin;
+			right_border = kappamax * kappamax;
+			if (cur_alpha != 0.0)
+				left_border *= cos(cur_alpha) * cos(cur_alpha);
+		}
+		else if (nmod > 0) {
+			if (cur_alpha == 0.0)
+				cur_alpha = acos(kappamin / kappamax);
+			cout << "alpha " << cur_alpha << endl;
+		}
+		
 		do {
-			// result of main_diag are eigen values
-			//cout << "left_border " << left_border << endl;
-			//cout << "right border " << right_border << endl;
 			eigen_count = 0;
 			tmp_main_diag = main_diag;
 			tmp_second_diag = second_diag;
 			alglib::smatrixtdevdr(tmp_main_diag, tmp_second_diag, matrix_size, 0, left_border, right_border, eigen_count, eigenvectors);
-			//cout << "eigen_count " << eigen_count << endl;
 			for (int ii = 0; ii < eigen_count; ii++)
 				wnumbers2.push_back(tmp_main_diag[eigen_count - ii - 1]);
+			if (nmod == 0)
+				break;
 			// set new interval
 			right_border = left_border;
-			left_border /= sqrt(2);
-		} while (wnumbers2.size() < required_eigen_values);
-		if (wnumbers2.size() > required_eigen_values)
-			wnumbers2.resize(required_eigen_values);
+			cur_alpha += 0.0174533;
+			cout << "alpha " << cur_alpha << endl;
+			if (cur_alpha <= 0.0) {
+				cerr << "alpha <= 0" << endl;
+				exit(1);
+			}
+			left_border = cos(cur_alpha) * cos(cur_alpha) * kappamin * kappamin;
+		} while (wnumbers2.size() < nmod);
 	}
 	else if (eigen_type == "spectra") {
 		// use Spectra to calculate the largest eigenvalues
@@ -747,15 +778,15 @@ vector<double> NormalModes::compute_wnumbers(
 		
 		SparseSymMatProd<double> op(M);
 		// Construct eigen solver object, requesting the largest three eigenvalues
-		SymEigsSolver< double, LARGEST_ALGE, SparseSymMatProd<double> > eigs(&op, required_eigen_values, required_eigen_values * NCV_COEF);
+		SymEigsSolver< double, LARGEST_ALGE, SparseSymMatProd<double> > eigs(&op, nmod, nmod * NCV_COEF);
 		
 		// Initialize and compute
 		eigs.init();
 		//int nconv = eigs.compute(1000, 1e-9, LARGEST_ALGE);
 		int nconv = eigs.compute();
-		if (nconv < required_eigen_values) {
-			cerr << "nconv < required_eigen_values" << endl;
-			cerr << nconv << " < " << required_eigen_values << endl;
+		if (nconv < nmod) {
+			cerr << "nconv < nmod" << endl;
+			cerr << nconv << " < " << nmod << endl;
 			exit(-1);
 		}
 		// Retrieve results
@@ -776,8 +807,14 @@ vector<double> NormalModes::compute_wnumbers(
 			wnumbers2.push_back(evalues[ii].real());
 	}
 
+	// get the largest nmod eigen values
+	if (wnumbers2.size() > nmod) {
+		sort(wnumbers2.rbegin(), wnumbers2.rend());
+		wnumbers2.resize(nmod); 
+	}
+
 	if (verbosity > 1) {
-		cout << "wnumbers2 :\n";
+		cout << wnumbers2.size() << " eigen values :\n";
 		for (auto x : wnumbers2)
 			cout << x << " ";
 		cout << endl;

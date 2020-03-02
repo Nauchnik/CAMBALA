@@ -48,6 +48,8 @@ public:
 	vector<vector<double>> mfunctions_zr;
 	vector<double> mattenuation;
 	vector<double> err_pek;
+	int nmod; // required amount of modes
+	double alpha; // for interative changing of the left border in alglib
 	
 	// input/output
 	string wnumbers_out_file_name = "kj_wedge_att.txt";
@@ -108,7 +110,6 @@ public:
 	void compute_for_all_depths();
 	string eigen_type;                // "alglib" or "spectra"
 	int verbosity;                    // 0 - silent, 1- short, 2 - full
-	int required_eigen_values;		  // number of required eigen values
 private:
 	// additional computation functions
 	double RK4(const double omeg2, const double kh2, const double deltah, const double c1, const double c2, const unsigned Np,
