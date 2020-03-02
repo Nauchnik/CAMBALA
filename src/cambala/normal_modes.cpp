@@ -728,18 +728,17 @@ vector<double> NormalModes::compute_wnumbers(
 		alglib::real_1d_array tmp_main_diag, tmp_second_diag;
 
 		double left_border; // kappamin * kappamin;
-		double right_border;
+		double right_border = kappamax * kappamax;
 		double cur_alpha = alpha;
 		if (nmod == 0) {
 			left_border = kappamin * kappamin;
-			right_border = kappamax * kappamax;
 			if (cur_alpha != 0.0)
 				left_border *= cos(cur_alpha) * cos(cur_alpha);
 		}
 		else if (nmod > 0) {
 			if (cur_alpha == 0.0)
 				cur_alpha = acos(kappamin / kappamax);
-			cout << "alpha " << cur_alpha << endl;
+			left_border = kappamin * kappamin * cos(cur_alpha) * cos(cur_alpha);
 		}
 		
 		do {
@@ -753,10 +752,11 @@ vector<double> NormalModes::compute_wnumbers(
 				break;
 			// set new interval
 			right_border = left_border;
-			cur_alpha += 0.0174533;
-			cout << "alpha " << cur_alpha << endl;
-			if (cur_alpha <= 0.0) {
-				cerr << "alpha <= 0" << endl;
+			//left_border /= sqrt(2);
+			cur_alpha += 0.0174533; // 1 degree per iteration
+			//cout << "alpha " << cur_alpha << endl;
+			if (cos(cur_alpha) <= 0.0) { // error if 90 degrees
+				cerr << "cos(alpha) <= 0" << endl;
 				exit(1);
 			}
 			left_border = cos(cur_alpha) * cos(cur_alpha) * kappamin * kappamin;
