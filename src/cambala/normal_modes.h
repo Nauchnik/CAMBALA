@@ -34,6 +34,7 @@ public:
 	vector<unsigned> M_Ns_points;
 
 	// source/receiver parameters
+	vector<double> all_zr; // all values of zr
 	vector<double> zr;
 	vector<double> Rs;
 	double f; // frequency
@@ -108,6 +109,7 @@ public:
 	// meta data and functions
 	vector<vector<double>> all_depths;
 	void compute_for_all_depths();
+	void compute_for_all_zr();
 	string eigen_type;                // "alglib" or "spectra"
 	int verbosity;                    // 0 - silent, 1- short, 2 - full
 private:

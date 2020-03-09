@@ -57,7 +57,7 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		else if (word == "R")
 			Rs = parseVector(sstream);
 		else if (word == "zr")
-			zr = parseVector(sstream);
+			all_zr = parseVector(sstream);
 		else if (word == "c1s")
 			M_c1s = parseVector(sstream);
 		else if (word == "c2s")
@@ -494,6 +494,25 @@ vector<double> NormalModes::compute_wnumbers_extrap_lin_dz(const double omeg)
 	return wnum_extrapR;
 }
 
+void NormalModes::compute_for_all_zr()
+{
+	zr.resize(1);
+	for (unsigned i = 0; i < all_zr.size(); i++) {
+		zr[0] = all_zr[i];
+		if (i == 0)
+			mfunctions_out_file_name = "phizr_wedge.txt";
+		else if (i==1)
+			mfunctions_out_file_name = "phizs_wedge.txt";
+		else {
+			stringstream sstream;
+			sstream << "phiz" << i << "_wedge.txt";
+			mfunctions_out_file_name = sstream.str();
+		}
+		cout << "processing zr number " << i << "with value " << zr[0] << endl;
+		compute_for_all_depths();
+	}
+}
+
 void NormalModes::compute_for_all_depths()
 {
 	// clear out files
@@ -806,9 +825,9 @@ vector<double> NormalModes::compute_wnumbers(
 		for (int ii = 0; ii < evalues.size(); ii++)
 			wnumbers2.push_back(evalues[ii].real());
 	}
-
+	
 	// get the largest nmod eigen values
-	if (wnumbers2.size() > nmod) {
+	if ((nmod > 0) && (wnumbers2.size() > nmod)) {
 		sort(wnumbers2.rbegin(), wnumbers2.rend());
 		wnumbers2.resize(nmod); 
 	}

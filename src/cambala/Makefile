@@ -3,8 +3,8 @@ ALGLIBDIR = ../../../alglib
 SPECTRADIR = ../../../Eigenvalues
 CPPFLAGS = -O3 -std=c++17 -static
 
-cambala: main.o sequential.o normal_modes.a
-	${CPP} ${CPPFLAGS} -I${ALGLIBDIR} main.o sequential.o normal_modes.a -o cambala
+cambala: main.o sequential.o libnormal_modes.a
+	${CPP} ${CPPFLAGS} -I${ALGLIBDIR} main.o sequential.o libnormal_modes.a -o cambala
 
 main.o: main.cpp
 	${CPP} ${CPPFLAGS} -I${ALGLIBDIR} main.cpp -c
@@ -30,11 +30,11 @@ alglibmisc.o: ${ALGLIBDIR}/alglibmisc.cpp
 alglibinternal.o: ${ALGLIBDIR}/alglibinternal.cpp 
 	${CPP} ${CPPFLAGS} -I${ALGLIBDIR} ${ALGLIBDIR}/alglibinternal.cpp -c
 
-normal_modes.a: alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o normal_modes.o
-	ar rcs normal_modes.a alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o normal_modes.o
+libnormal_modes.a: alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o normal_modes.o
+	ar rcs libnormal_modes.a alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o normal_modes.o
 
 clean:
 	rm -rf *.o
 	rm cambala
-	rm normal_modes.a
+	rm libnormal_modes.a
 	clear

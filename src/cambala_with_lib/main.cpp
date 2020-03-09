@@ -21,7 +21,7 @@ int main(int argc, char ** argv)
 
 	NormalModes n_m;
 	n_m.read_scenario(scenarioFileName);
-	n_m.compute_for_all_depths();
+	n_m.compute_for_all_zr();
 
 	chrono::high_resolution_clock::time_point cur_t = chrono::high_resolution_clock::now();
 	chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(cur_t - start_t);

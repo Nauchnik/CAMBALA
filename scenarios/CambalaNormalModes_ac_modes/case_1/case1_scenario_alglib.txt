@@ -1,6 +1,6 @@
 % ac_modes case 1
 f 25
-zr 30
+zr [30 100]
 c1s [1500 1700]
 c2s [1500 1700]
 rhos [1 1.5]
@@ -8,3 +8,4 @@ depths [34:2:380 1000]
 bs [0 0.5]
 eigen_type alglib
 nmod 8
+% alpha 0.5
