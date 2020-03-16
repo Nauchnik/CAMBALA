@@ -88,8 +88,8 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		cout << "eigen_type : " << eigen_type << endl;
 		cout << "verbosity : " << verbosity << endl;
 		cout << "zr : " << endl;
-		for (auto z : zr)
-			cout << z << " ";
+		for (auto zr : all_zr)
+			cout << zr << " ";
 		cout << endl;
 		cout << "Rs : " << endl;
 		for (auto rs : Rs)
@@ -98,6 +98,7 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		cout << "c1s : " << endl;
 		for (auto x : M_c1s)
 			cout << x << " ";
+		cout << endl;
 		cout << "c2s : " << endl;
 		for (auto x : M_c2s)
 			cout << x << " ";
@@ -557,7 +558,8 @@ void NormalModes::compute_for_all_depths()
 void NormalModes::write_wnumbers()
 {
 	ofstream wnumbers_out_file(wnumbers_out_file_name, ios_base::app);
-	wnumbers_out_file << M_depths[0] << '\t';
+	if (all_depths.size() > 1)
+		wnumbers_out_file << M_depths[0] << '\t';
 	wnumbers_out_file << setprecision(12);
 	for (unsigned i = 0; i < khs.size(); i++) {
 		wnumbers_out_file << fixed << setw(12);
@@ -572,7 +574,8 @@ void NormalModes::write_wnumbers()
 void NormalModes::write_err_pek()
 {
 	ofstream err_pek_out_file(err_pek_file_name, ios_base::app);
-	err_pek_out_file << M_depths[0] << '\t';
+	if (all_depths.size() > 1)
+		err_pek_out_file << M_depths[0] << '\t';
 	err_pek_out_file << setprecision(12) << fixed << setw(12);
 	for (unsigned i = 0; i < err_pek.size(); i++)
 		err_pek_out_file << err_pek[i] << " ";
@@ -583,7 +586,8 @@ void NormalModes::write_err_pek()
 void NormalModes::write_mfunctions_zr()
 {
 	ofstream mfunctions_out_file(mfunctions_out_file_name, ios_base::app);
-	mfunctions_out_file << M_depths[0] << '\t';
+	if (all_depths.size() > 1)
+		mfunctions_out_file << M_depths[0] << '\t';
 	mfunctions_out_file << fixed << setprecision(12) << setw(12);
 	for (unsigned i = 0; i < mfunctions_zr.size(); i++)
 		for (unsigned j = 0; j < mfunctions_zr[i].size(); j++)
@@ -595,7 +599,8 @@ void NormalModes::write_mfunctions_zr()
 void NormalModes::write_modal_group_velocities()
 {
 	ofstream modal_group_velocities_out_file(modal_group_velocities_out_file_name, ios_base::app);
-	modal_group_velocities_out_file << M_depths[0] << '\t';
+	if (all_depths.size() > 1)
+		modal_group_velocities_out_file << M_depths[0] << '\t';
 	modal_group_velocities_out_file << fixed << setprecision(6) << setw(12);
 	for (unsigned i = 0; i < modal_group_velocities.size(); i++)
 		for (unsigned j = 0; j < modal_group_velocities[i].size(); j++)
