@@ -1518,6 +1518,49 @@ double NormalModes::Layer_an_exp(const double omeg2, // sound frequency
 	return layer_int;
 }
 
+double NormalModes::Layer_an_exp_up(const double omeg2, // sound frequency
+	const double kh2,
+	const double deltah,
+	const double c,
+	const unsigned Np,
+	vector<double>& phi0,
+	vector<double>& dphi0)
+{
+
+	double c1, c2, kv;
+	double h = deltah / Np;
+	double layer_int = 0.0;
+
+	kv = sqrt(kh2 - omeg2 / (c * c));
+
+
+	/*
+		cout << "kv c1 c2" << endl;
+		cout << kv << endl;
+		cout << c1 << endl;
+		cout << c2 << endl;
+		cout << h << endl;
+		cout << "-----" << endl;
+		cout << phi0.back() << endl;
+		cout << dphi0.back()/kv << endl;
+	*/
+	for (int kk = Np-1; kk >= 0; kk--) {
+
+		layer_int = layer_int + 0.5 * h * phi0.back() * phi0.back();
+
+
+
+		phi0.push_back(exp(-kv * kk * h) );
+		dphi0.push_back( - kv * exp(-kv * kk * h));
+
+		layer_int = layer_int + 0.5 * h * phi0.back() * phi0.back();
+		//cout << layer_int << endl;
+	}
+
+	return layer_int;
+}
+
+
 double NormalModes::compute_modal_delays_residual_uniform(
 	const double R,
 	const double tau,
@@ -1664,164 +1707,7 @@ int NormalModes::compute_modal_grop_velocities2( const double deltaf, vector<dou
 	return 0;
 }
 
-/*
-compute_wmode1() computs the mode function "phi" and its derivative "dphi" for media parameters described by
-the arrays [depths,c1s,c2s,rhos,Ns_points] and for a given horizontal wavenumber "kh". The functions are normalized in
-the standard way (using inverse density as a weight function). The Runge-Kutta (4th order) scheme is used for solving the
-ODE in the matrix formulation.
 
-The parallel shooting is used in this version. For the discrete spectrum modes (refracted-refracted modes). We find the last layer L
-(from the bottom) where k(z) <  kh  (hence we have the decaying exponent). Starting from the bottom layer we solve the ODE to L-1 th layer
-going in the negative direction of z axis. Then we match the solutions coming from the top and the bottom.
-
-*/
-
-void NormalModes::compute_wmode1(const double omeg, // sound frequency
-	const double kh,
-	vector<double> &phi,
-	vector<double> &dphi)
-{
-	double deltah, phiNorm;
-	double phi2int = 0.0;
-	double bphi2int = 0.0;
-
-	double layer_int = 0.0;
-
-	vector<double> bphi, bdphi;
-
-	phi.clear();
-	dphi.clear();
-
-	phi.push_back(0.0);
-	dphi.push_back(1.0);
-
-
-
-
-	unsigned n_layers = (unsigned)M_depths.size();
-	unsigned L = n_layers;
-
-	while ((kh > omeg / (min(M_c1s.at(L - 1), M_c2s.at(L - 1)))) && (L > 1)) {
-		L = L - 1;
-	}
-
-
-
-	// shooting from the surface
-	for (unsigned ll = 0; ll < L; ll++) {
-
-		if (ll == 0) { deltah = M_depths.at(0); }
-		else {
-			deltah = M_depths.at(ll) - M_depths.at(ll - 1);
-			dphi.back() = M_rhos.at(ll)*dphi.back() / M_rhos.at(ll - 1);
-		}
-
-		layer_int = RK4(omeg*omeg, kh*kh, deltah, M_c1s.at(ll), M_c2s.at(ll), M_Ns_points.at(ll), phi, dphi);
-
-		phi2int = phi2int + layer_int / M_rhos.at(ll);
-
-		//TEST --> overflow problem
-		if (phi2int > 1.0e+50) {
-			for (unsigned qq = 0; qq < phi.size(); qq++) {
-				phi.at(qq) = phi.at(qq) / (1.0e+20);
-				dphi.at(qq) = dphi.at(qq) / (1.0e+20);
-			}
-			phi2int = phi2int / (1.0e+40);
-		}
-
-	}
-
-	// shooting from the bottom
-
-	if (L < n_layers) {
-
-		bphi.push_back(0.0);
-		bdphi.push_back(1.0);
-
-		for (unsigned ll = n_layers - 1; ll >= L; ll--) {
-
-			deltah = M_depths.at(ll) - M_depths.at(ll - 1);
-
-			layer_int = RK4(omeg*omeg, kh*kh, deltah, M_c2s.at(ll), M_c1s.at(ll), M_Ns_points.at(ll), bphi, bdphi);
-			bphi2int = bphi2int + layer_int / M_rhos.at(ll);
-
-
-			//            //TEST
-			//            cout  << "ll="<< ll <<" bphi2int " << bphi2int  << endl;
-			//            cout  << "ll="<< ll <<" layer_int " << layer_int  << endl;
-			//            cout  << "ll="<< ll <<" deltah " << deltah  << endl;
-			//            cout  << "ll="<< ll <<" kh " << kh  << endl;
-			//            cout  << "ll="<< ll <<" c2 " << c2s.at(ll)  << endl;
-			//            cout  << "ll="<< ll <<" c1 " << c1s.at(ll)  << endl;
-			//            cout  << "ll="<< ll <<" nsp " << Ns_points_m.at(ll)  << endl;
-			//            cout  << "ll="<< ll <<" nsp-1 " << Ns_points_m.at(ll-1)  << endl;
-			//            cout  << "ll="<< ll <<" nsp-2 " << Ns_points_m.at(ll-2)  << endl;
-			//            for (unsigned qq=0; qq<bphi.size(); qq++  ){
-			//                cout  << "qq="<< qq <<" bphi " << bphi.at(qq) <<" bdphi " << bdphi.at(qq)  << endl;
-			//            }
-
-			bdphi.back() = M_rhos.at(ll - 1)*bdphi.back() / M_rhos.at(ll);
-
-			//TEST --> overflow problem
-			if (bphi2int > 1.0e+50) {
-
-				for (unsigned qq = 0; qq < bphi.size(); qq++) {
-					bphi.at(qq) = bphi.at(qq) / (1.0e+20);
-					bdphi.at(qq) = bdphi.at(qq) / (1.0e+20);
-				}
-				bphi2int = bphi2int / (1.0e+40);
-			}
-
-		}
-
-		// matching the shooting solutions
-
-		double cmatching = phi.back() / bphi.back();
-
-
-
-		for (int ll = bphi.size() - 2; ll >= 0; ll--) {
-			phi.push_back(cmatching*bphi.at(ll));
-			dphi.push_back(cmatching*bdphi.at(ll));
-		}
-
-		cmatching = cmatching * cmatching;
-		phiNorm = sqrt(phi2int + bphi2int * cmatching);
-
-	}
-	else {
-
-		phiNorm = sqrt(phi2int);
-
-	}
-	//    //TEST
-	//    cout  << " phiNorm " << phiNorm  << endl;
-	//    cout  << " phi2int " << phi2int  << endl;
-	//    cout  << " bphi2int " << bphi2int  << endl;
-	//    cout  << " cmatching " << phi.back()/bphi.back()  << endl;
-	//    cout  << " L " << L  << endl;
-	//    cout  << " n_layers " << n_layers  << endl;
-	//
-	//    throw invalid_argument("Ururu");
-
-	//        // TEST
-	//        for (unsigned qq=0; qq<nmod; qq++){
-	//
-	//            cout  << " kh" << qq <<" = " << khs.at(qq) << endl;
-	//
-	//        }
-
-
-	unsigned nz = (unsigned)phi.size();
-
-
-
-	for (unsigned ll = 0; ll < nz; ll++) {
-		phi.at(ll) = phi.at(ll) / phiNorm;
-		dphi.at(ll) = dphi.at(ll) / phiNorm;
-	}
-
-}
 
 
 
@@ -2049,6 +1935,190 @@ void NormalModes::compute_wmode(const double omeg, // sound frequency
 	}
 
 }
+
+
+/*
+compute_wmode1() computs the mode function "phi" and its derivative "dphi" for media parameters described by
+the arrays [depths,c1s,c2s,rhos,Ns_points] and for a given horizontal wavenumber "kh". The functions are normalized in
+the standard way (using inverse density as a weight function). The Runge-Kutta (4th order) scheme is used for solving the
+ODE in the matrix formulation.
+
+The parallel shooting is used in this version. For the discrete spectrum modes (refracted-refracted modes). We find the last layer L
+(from the bottom) where k(z) <  kh  (hence we have the decaying exponent). Starting from the bottom layer we solve the ODE to L-1 th layer
+going in the negative direction of z axis. Then we match the solutions coming from the top and the bottom.
+
+*/
+
+void NormalModes::compute_wmode1(const double omeg, // sound frequency
+	const double kh,
+	vector<double>& phi,
+	vector<double>& dphi)
+{
+	double deltah, phiNorm;
+	double phi2int = 0.0;
+	double bphi2int = 0.0;
+
+	double layer_int = 0.0;
+
+	vector<double> bphi, bdphi;
+
+	phi.clear();
+	dphi.clear();
+
+	phi.push_back(0.0);
+	dphi.push_back(1.0);
+
+
+
+
+	unsigned n_layers = (unsigned)M_depths.size();
+	unsigned L = n_layers;
+
+	while ((kh > omeg / (min(M_c1s.at(L - 1), M_c2s.at(L - 1)))) && (L > 1)) {
+		L = L - 1;
+	}
+
+
+
+	// shooting from the surface
+	for (unsigned ll = 0; ll < L; ll++) {
+
+		if (ll == 0) { deltah = M_depths.at(0); }
+		else {
+			deltah = M_depths.at(ll) - M_depths.at(ll - 1);
+			dphi.back() = M_rhos.at(ll) * dphi.back() / M_rhos.at(ll - 1);
+		}
+
+		layer_int = RK4(omeg * omeg, kh * kh, deltah, M_c1s.at(ll), M_c2s.at(ll), M_Ns_points.at(ll), phi, dphi);
+
+		phi2int = phi2int + layer_int / M_rhos.at(ll);
+
+		//TEST --> overflow problem
+		if (phi2int > 1.0e+10) {
+			for (unsigned qq = 0; qq < phi.size(); qq++) {
+				phi.at(qq) = phi.at(qq) / (sqrt(phi2int));
+				dphi.at(qq) = dphi.at(qq) / (sqrt(phi2int));
+			}
+			phi2int = phi2int / (phi2int);
+		}
+
+	}
+
+	// shooting from the bottom
+
+	if (L < n_layers) {
+
+		if (omeg / M_c1s.at(n_layers - 1) < kh) {
+			bphi.push_back(0.0);
+			bdphi.push_back(0.0);
+		}
+		else {
+			bphi.push_back(0.0);
+			bdphi.push_back(1.0);
+
+		}
+
+
+
+		for (unsigned ll = n_layers - 1; ll >= L; ll--) {
+
+			deltah = M_depths.at(ll) - M_depths.at(ll - 1);
+
+			if ((ll == n_layers - 1) && (omeg / M_c1s.at(ll) < kh)) {
+				// in the bottom layer where the mode functions exhibits decay use
+				layer_int = Layer_an_exp_up(omeg * omeg, kh * kh, deltah, M_c1s.at(ll), M_Ns_points.at(ll), bphi, bdphi);
+			}
+			else {
+				layer_int = RK4(omeg * omeg, kh * kh, deltah, M_c2s.at(ll), M_c1s.at(ll), M_Ns_points.at(ll), bphi, bdphi);
+			}
+
+
+			bphi2int = bphi2int + layer_int / M_rhos.at(ll);
+
+
+			//            //TEST
+			//            cout  << "ll="<< ll <<" bphi2int " << bphi2int  << endl;
+			//            cout  << "ll="<< ll <<" layer_int " << layer_int  << endl;
+			//            cout  << "ll="<< ll <<" deltah " << deltah  << endl;
+			//            cout  << "ll="<< ll <<" kh " << kh  << endl;
+			//            cout  << "ll="<< ll <<" c2 " << c2s.at(ll)  << endl;
+			//            cout  << "ll="<< ll <<" c1 " << c1s.at(ll)  << endl;
+			//            cout  << "ll="<< ll <<" nsp " << Ns_points_m.at(ll)  << endl;
+			//            cout  << "ll="<< ll <<" nsp-1 " << Ns_points_m.at(ll-1)  << endl;
+			//            cout  << "ll="<< ll <<" nsp-2 " << Ns_points_m.at(ll-2)  << endl;
+			//            for (unsigned qq=0; qq<bphi.size(); qq++  ){
+			//                cout  << "qq="<< qq <<" bphi " << bphi.at(qq) <<" bdphi " << bdphi.at(qq)  << endl;
+			//            }
+
+			bdphi.back() = M_rhos.at(ll - 1) * bdphi.back() / M_rhos.at(ll);
+
+			//TEST --> overflow problem
+			if (bphi2int > 1.0e+10) {
+				cout << "overflow for kj="  << kh << endl;
+				cout << "layer=" << ll  << endl;
+				cout << "norm=" << bphi2int << endl << endl;
+
+
+				for (unsigned qq = 0; qq < bphi.size(); qq++) {
+					bphi.at(qq) = bphi.at(qq) / (sqrt(bphi2int));
+					bdphi.at(qq) = bdphi.at(qq) / (sqrt(bphi2int));
+				}
+				bphi2int = bphi2int / (bphi2int);
+			}
+
+		}
+
+		// matching the shooting solutions
+
+		double cmatching = phi.back() / bphi.back();
+
+
+
+		for (int ll = bphi.size() - 2; ll >= 0; ll--) {
+			phi.push_back(cmatching * bphi.at(ll));
+			dphi.push_back(cmatching * bdphi.at(ll));
+		}
+
+		cmatching = cmatching * cmatching;
+		phiNorm = sqrt(phi2int + bphi2int * cmatching);
+
+	}
+	else {
+
+		phiNorm = sqrt(phi2int);
+
+	}
+	//    //TEST
+	//    cout  << " phiNorm " << phiNorm  << endl;
+	//    cout  << " phi2int " << phi2int  << endl;
+	//    cout  << " bphi2int " << bphi2int  << endl;
+	//    cout  << " cmatching " << phi.back()/bphi.back()  << endl;
+	//    cout  << " L " << L  << endl;
+	//    cout  << " n_layers " << n_layers  << endl;
+	//
+	//    throw invalid_argument("Ururu");
+
+	//        // TEST
+	//        for (unsigned qq=0; qq<nmod; qq++){
+	//
+	//            cout  << " kh" << qq <<" = " << khs.at(qq) << endl;
+	//
+	//        }
+
+
+	unsigned nz = (unsigned)phi.size();
+
+
+
+	for (unsigned ll = 0; ll < nz; ll++) {
+		phi.at(ll) = phi.at(ll) / phiNorm;
+		dphi.at(ll) = dphi.at(ll) / phiNorm;
+	}
+
+}
+
+
+
 
 void NormalModes::compute_khs(double omeg)
 {

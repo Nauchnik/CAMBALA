@@ -118,6 +118,9 @@ private:
 		vector<double> &phi0, vector<double> &dphi0);
 	double Layer_an_exp(const double omeg2, const double kh2, const double deltah, const double c, const unsigned Np,
 		vector<double> &phi0, vector<double> &dphi0);
+        double Layer_an_exp_up(const double omeg2, const double kh2, const double deltah, const double c, const unsigned Np,
+		vector<double>& phi0, vector<double>& dphi0);
+
 	vector<double> fillArrayStep(const string word);
 	void getThreeValuesFromStr(string str, double &val1, double &val2, double &val3);
 	vector<double> parseArrayBrackets(string word);
