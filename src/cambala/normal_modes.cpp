@@ -2054,9 +2054,9 @@ void NormalModes::compute_wmode1(const double omeg, // sound frequency
 
 			//TEST --> overflow problem
 			if (bphi2int > 1.0e+10) {
-				cout << "overflow for kj="  << kh << endl;
+				/*cout << "overflow for kj="  << kh << endl;
 				cout << "layer=" << ll  << endl;
-				cout << "norm=" << bphi2int << endl << endl;
+				cout << "norm=" << bphi2int << endl << endl;*/
 
 
 				for (unsigned qq = 0; qq < bphi.size(); qq++) {
