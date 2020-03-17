@@ -1,0 +1,11 @@
+% ac_modes case 1
+f 400
+zr [10 38]
+c1s [ 1514.44 1470.19 1700 ]
+c2s [ 1470.19 1461.9 1700 ]
+rhos [1 1 1.5]
+depths [19.4054 38.8108 538.811]
+bs [0 0 0.5]
+eigen_type alglib
+nmod 8
+% alpha 0.5
