@@ -57,7 +57,7 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		else if (word == "R")
 			Rs = parseVector(sstream);
 		else if (word == "zr")
-			all_zr = parseVector(sstream);
+			zr = parseVector(sstream);
 		else if (word == "c1s")
 			M_c1s = parseVector(sstream);
 		else if (word == "c2s")
@@ -88,8 +88,8 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		cout << "eigen_type : " << eigen_type << endl;
 		cout << "verbosity : " << verbosity << endl;
 		cout << "zr : " << endl;
-		for (auto zr : all_zr)
-			cout << zr << " ";
+		for (auto z : zr)
+			cout << z << " ";
 		cout << endl;
 		cout << "Rs : " << endl;
 		for (auto rs : Rs)
@@ -126,6 +126,19 @@ void NormalModes::read_scenario(const string scenarioFileName)
 	M_Ns_points[0] = (unsigned)round(ppm*M_depths[0]);
 	for (unsigned i = 1; i < M_depths.size(); i++)
 		M_Ns_points[i] = (unsigned)round(ppm*(M_depths[i] - M_depths[i - 1]));
+
+	if (zr.size() <= 2) {
+		wnumbers_out_file_name = "kj_wedge_att.txt";
+		modal_group_velocities_out_file_name = "vgr.txt";
+		//err_pek_file_name = "err_pek.txt";
+	}
+	else if (zr.size() > 2) {
+		stringstream sstream; // phij_f_100Hz_h_50m.txt
+		sstream << f << "Hz.txt";
+		wnumbers_out_file_name = "kj_f_" + sstream.str();
+		modal_group_velocities_out_file_name = "vgj_f" + sstream.str();
+		//err_pek_file_name = "err_pek.txt";
+	}
 }
 
 void NormalModes::write_result(const string resultFileName)
@@ -495,36 +508,17 @@ vector<double> NormalModes::compute_wnumbers_extrap_lin_dz(const double omeg)
 	return wnum_extrapR;
 }
 
-void NormalModes::compute_for_all_zr()
-{
-	zr.resize(1);
-	for (unsigned i = 0; i < all_zr.size(); i++) {
-		zr[0] = all_zr[i];
-		if (i == 0)
-			mfunctions_out_file_name = "phizr_wedge.txt";
-		else if (i==1)
-			mfunctions_out_file_name = "phizs_wedge.txt";
-		else {
-			stringstream sstream;
-			sstream << "phiz" << i << "_wedge.txt";
-			mfunctions_out_file_name = sstream.str();
-		}
-		cout << "processing zr number " << i << "with value " << zr[0] << endl;
-		compute_for_all_depths();
-	}
-}
-
 void NormalModes::compute_for_all_depths()
 {
 	// clear out files
 	ofstream wnumbers_out_file(wnumbers_out_file_name, ios_base::out);
 	wnumbers_out_file.close();
-	ofstream mfunctions_out_file(mfunctions_out_file_name, ios_base::out);
+	ofstream mfunctions_out_file;
 	mfunctions_out_file.close();
 	ofstream modal_group_velocities_out_file(modal_group_velocities_out_file_name, ios_base::out);
 	modal_group_velocities_out_file.close();
-	ofstream err_pek_out_file(err_pek_file_name, ios_base::out);
-	err_pek_out_file.close();
+	//ofstream err_pek_out_file(err_pek_file_name, ios_base::out);
+	//err_pek_out_file.close();
 	
 	cout << all_depths.size() << " variants of depths in total\n";
 	unsigned processed_depths = 0;
@@ -537,7 +531,7 @@ void NormalModes::compute_for_all_depths()
 		compute_mfunctions_zr();
 		compute_mattenuation();
 		compute_modal_group_velocities_fixed_freq();
-		compute_err_pek();
+		//compute_err_pek();
 
 		chrono::high_resolution_clock::time_point cur_t = chrono::high_resolution_clock::now();
 		chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(cur_t - start_t);
@@ -547,7 +541,7 @@ void NormalModes::compute_for_all_depths()
 		write_wnumbers();
 		write_mfunctions_zr();
 		write_modal_group_velocities();
-		write_err_pek();
+		//write_err_pek();
 		processed_depths++;
 
 		cout << "processed " << processed_depths << " variants of depths\n";
@@ -561,11 +555,17 @@ void NormalModes::write_wnumbers()
 	if (all_depths.size() > 1)
 		wnumbers_out_file << M_depths[0] << '\t';
 	wnumbers_out_file << setprecision(12);
+	//cout << "khs size " << khs.size() << endl;
 	for (unsigned i = 0; i < khs.size(); i++) {
 		wnumbers_out_file << fixed << setw(12);
-		wnumbers_out_file << khs[i] << "+";
-		wnumbers_out_file << scientific;
-		wnumbers_out_file << mattenuation[i] << "i ";
+		wnumbers_out_file << khs[i]; 
+		if (all_depths.size() > 1) {
+			wnumbers_out_file << "+";
+			wnumbers_out_file << scientific;
+			wnumbers_out_file << mattenuation[i] << "i ";
+		}
+		else
+			wnumbers_out_file << endl;
 	}
 	wnumbers_out_file << endl;
 	wnumbers_out_file.close();
@@ -585,15 +585,47 @@ void NormalModes::write_err_pek()
 
 void NormalModes::write_mfunctions_zr()
 {
-	ofstream mfunctions_out_file(mfunctions_out_file_name, ios_base::app);
-	if (all_depths.size() > 1)
-		mfunctions_out_file << M_depths[0] << '\t';
-	mfunctions_out_file << fixed << setprecision(12) << setw(12);
-	for (unsigned i = 0; i < mfunctions_zr.size(); i++)
-		for (unsigned j = 0; j < mfunctions_zr[i].size(); j++)
-			mfunctions_out_file << mfunctions_zr[i][j] << " ";
-	mfunctions_out_file << endl;
-	mfunctions_out_file.close();
+	ofstream mfunctions_out_file;
+	if (all_depths.size() == 1) {
+		stringstream sstream; // example : phij_f_100Hz.txt
+		sstream << f << "Hz.txt";
+		string mfunctions_out_file_name = "phij_f_" + sstream.str();
+		mfunctions_out_file.open(mfunctions_out_file_name, ios_base::out);
+		mfunctions_out_file << fixed << setprecision(12) << setw(12);
+		for (unsigned i = 0; i < mfunctions_zr.size(); i++) {
+			mfunctions_out_file << zr[i] << '\t';
+			for (unsigned j = 0; j < mfunctions_zr[i].size(); j++)
+				mfunctions_out_file << mfunctions_zr[i][j] << " ";
+			mfunctions_out_file << endl;
+		}
+		mfunctions_out_file.close();
+	}
+	else {
+		// transpose mfunctions_zr to write it
+		vector<vector<double>> transposed_mfunctions_zr;
+		transposed_mfunctions_zr.resize(mfunctions_zr[0].size());
+		for (unsigned i = 0; i < transposed_mfunctions_zr.size(); i++)
+			transposed_mfunctions_zr[i].resize(mfunctions_zr.size());
+		for (unsigned i = 0; i < mfunctions_zr.size(); i++)
+			for (unsigned j = 0; j < mfunctions_zr[i].size(); j++)
+				transposed_mfunctions_zr[j][i] = mfunctions_zr[i][j];
+		for (unsigned i = 0; i < transposed_mfunctions_zr.size(); i++) {
+			if (i == 0)
+				mfunctions_out_file.open("phizr_wedge.txt", ios_base::app);
+			else if (i == 1)
+				mfunctions_out_file.open("phizs_wedge.txt", ios_base::app);
+			else {
+				stringstream sstream;
+				sstream << i;
+				mfunctions_out_file.open("phi_" + sstream.str() + "_wedge.txt", ios_base::app);
+			}
+			mfunctions_out_file << M_depths[0] << '\t';
+			for (unsigned j = 0; j < transposed_mfunctions_zr[i].size(); j++)
+				mfunctions_out_file << transposed_mfunctions_zr[i][j] << " ";
+			mfunctions_out_file << endl;
+			mfunctions_out_file.close();
+		}
+	}
 }
 
 void NormalModes::write_modal_group_velocities()
@@ -2284,21 +2316,17 @@ void NormalModes::compute_mfunctions_zr(double omeg)
 		cur_points = 0;
 	}
 
-
 	for (unsigned ii = 0; ii < khs.size(); ii++) {
 		double kh = khs.at(ii);
 		compute_wmode1(omeg, kh, phi, dphi);
-
 		phim_zr.clear();
 		for (unsigned jj = 0; jj < nzr; jj++) {
 
 			phim_zr.push_back((1 - t_zr.at(jj))*phi.at(i_zr.at(jj)) + t_zr.at(jj)*phi.at(i_zr.at(jj) + 1));
 
 		}
-
 		mfunctions_zr.push_back(phim_zr);
 	}
-
 	//if (verbosity > 0)
 	//	cout << "mfunctions_zr size : " << mfunctions_zr.size() << endl;
 
