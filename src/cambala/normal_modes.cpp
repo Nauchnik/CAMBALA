@@ -2316,16 +2316,35 @@ void NormalModes::compute_mfunctions_zr(double omeg)
 		cur_points = 0;
 	}
 
+	
+
 	for (unsigned ii = 0; ii < khs.size(); ii++) {
 		double kh = khs.at(ii);
+
+	
+
 		compute_wmode1(omeg, kh, phi, dphi);
+
+	
+
 		phim_zr.clear();
 		for (unsigned jj = 0; jj < nzr; jj++) {
+			
+			if ( (i_zr.at(jj)+1) < phi.size()) {
+				phim_zr.push_back((1 - t_zr.at(jj)) * phi.at(i_zr.at(jj)) + t_zr.at(jj) * phi.at(i_zr.at(jj) + 1));
+			}
+			else {
 
-			phim_zr.push_back((1 - t_zr.at(jj))*phi.at(i_zr.at(jj)) + t_zr.at(jj)*phi.at(i_zr.at(jj) + 1));
+				phim_zr.push_back(phi.at(i_zr.at(jj)));
+
+			}
+
 
 		}
 		mfunctions_zr.push_back(phim_zr);
+
+		
+
 	}
 	//if (verbosity > 0)
 	//	cout << "mfunctions_zr size : " << mfunctions_zr.size() << endl;
