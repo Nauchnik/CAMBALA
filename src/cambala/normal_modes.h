@@ -1,6 +1,10 @@
 #ifndef NORMAL_MODES_H
 #define NORMAL_MODES_H
 
+#ifdef _WIN32
+#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <complex>
