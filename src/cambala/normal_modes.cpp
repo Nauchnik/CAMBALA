@@ -78,6 +78,15 @@ void NormalModes::read_scenario(const string scenarioFileName)
 	}
 	scenarioFile.close();
 
+	if (M_betas.empty()) {
+		cerr << "M_betas is empty" << endl;
+		exit(-1);
+	}
+	if (M_rhos.empty()) {
+		cerr << "M_rhos is empty" << endl;
+		exit(-1);
+	}
+
 	if (verbosity > 0) {
 		cout << "iModesSubset : " << iModesSubset << endl;
 		cout << "ppm : " << ppm << endl;
@@ -115,6 +124,10 @@ void NormalModes::read_scenario(const string scenarioFileName)
 			cout << "), ";
 		}
 		cout << endl;
+		cout << "betas : " << endl;
+		for (auto x : M_betas)
+			cout << x << " ";
+		cout << endl;
 	}
 	
 	int n_layers_w = M_depths.size() - 1;
@@ -136,7 +149,7 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		stringstream sstream; // phij_f_100Hz_h_50m.txt
 		sstream << f << "Hz.txt";
 		wnumbers_out_file_name = "kj_f_" + sstream.str();
-		modal_group_velocities_out_file_name = "vgj_f" + sstream.str();
+		modal_group_velocities_out_file_name = "vgj_f_" + sstream.str();
 		//err_pek_file_name = "err_pek.txt";
 	}
 }
@@ -557,7 +570,7 @@ void NormalModes::write_wnumbers()
 	wnumbers_out_file << setprecision(12);
 	//cout << "khs size " << khs.size() << endl;
 	for (unsigned i = 0; i < khs.size(); i++) {
-		wnumbers_out_file << fixed << setw(12);
+		wnumbers_out_file << fixed;
 		wnumbers_out_file << khs[i]; 
 		if (all_depths.size() > 1) {
 			wnumbers_out_file << "+";
@@ -576,56 +589,67 @@ void NormalModes::write_err_pek()
 	ofstream err_pek_out_file(err_pek_file_name, ios_base::app);
 	if (all_depths.size() > 1)
 		err_pek_out_file << M_depths[0] << '\t';
-	err_pek_out_file << setprecision(12) << fixed << setw(12);
+	err_pek_out_file << setprecision(12) << fixed;
 	for (unsigned i = 0; i < err_pek.size(); i++)
 		err_pek_out_file << err_pek[i] << " ";
 	err_pek_out_file << endl;
 	err_pek_out_file.close();
 }
 
+void NormalModes::write_zr_string(ofstream &ofile, const double first_word, const vector<double> vec)
+{
+	ofile << fixed << setprecision(3);
+	ofile << first_word << '\t';
+	for (unsigned j = 0; j < vec.size(); j++) {
+		if (vec[j] >= 0.000000000001)
+			ofile << fixed << setprecision(12);
+		else
+			ofile << scientific;
+		ofile << vec[j] << " ";
+	}
+	ofile << endl;
+}
+
 void NormalModes::write_mfunctions_zr()
 {
-	ofstream mfunctions_out_file;
+	// transpose mfunctions_zr to write it
+	vector<vector<double>> transposed_mfunctions_zr;
+	transposed_mfunctions_zr.resize(mfunctions_zr[0].size());
+	for (unsigned i = 0; i < transposed_mfunctions_zr.size(); i++)
+		transposed_mfunctions_zr[i].resize(mfunctions_zr.size());
+	for (unsigned i = 0; i < mfunctions_zr.size(); i++)
+		for (unsigned j = 0; j < mfunctions_zr[i].size(); j++)
+			transposed_mfunctions_zr[j][i] = mfunctions_zr[i][j];
+	// write to a file 
+	ofstream mfunctions_out_file, mfunctions_out_file_0, mfunctions_out_file_1;
 	if (all_depths.size() == 1) {
 		stringstream sstream; // example : phij_f_100Hz.txt
 		sstream << f << "Hz.txt";
 		string mfunctions_out_file_name = "phij_f_" + sstream.str();
 		mfunctions_out_file.open(mfunctions_out_file_name, ios_base::out);
-		mfunctions_out_file << fixed << setprecision(12) << setw(12);
-		for (unsigned i = 0; i < mfunctions_zr.size(); i++) {
-			mfunctions_out_file << zr[i] << '\t';
-			for (unsigned j = 0; j < mfunctions_zr[i].size(); j++)
-				mfunctions_out_file << mfunctions_zr[i][j] << " ";
-			mfunctions_out_file << endl;
-		}
-		mfunctions_out_file.close();
 	}
 	else {
-		// transpose mfunctions_zr to write it
-		vector<vector<double>> transposed_mfunctions_zr;
-		transposed_mfunctions_zr.resize(mfunctions_zr[0].size());
-		for (unsigned i = 0; i < transposed_mfunctions_zr.size(); i++)
-			transposed_mfunctions_zr[i].resize(mfunctions_zr.size());
-		for (unsigned i = 0; i < mfunctions_zr.size(); i++)
-			for (unsigned j = 0; j < mfunctions_zr[i].size(); j++)
-				transposed_mfunctions_zr[j][i] = mfunctions_zr[i][j];
-		for (unsigned i = 0; i < transposed_mfunctions_zr.size(); i++) {
+		mfunctions_out_file_0.open("phizr_wedge.txt", ios_base::app);
+		mfunctions_out_file_1.open("phizs_wedge.txt", ios_base::app);
+	}
+	
+	for (unsigned i = 0; i < transposed_mfunctions_zr.size(); i++) {
+		if (all_depths.size() == 1)
+			write_zr_string(mfunctions_out_file, zr[i], transposed_mfunctions_zr[i]);
+		else if (all_depths.size() > 1) {
 			if (i == 0)
-				mfunctions_out_file.open("phizr_wedge.txt", ios_base::app);
+				write_zr_string(mfunctions_out_file_0, M_depths[0], transposed_mfunctions_zr[i]);
 			else if (i == 1)
-				mfunctions_out_file.open("phizs_wedge.txt", ios_base::app);
-			else {
-				stringstream sstream;
-				sstream << i;
-				mfunctions_out_file.open("phi_" + sstream.str() + "_wedge.txt", ios_base::app);
-			}
-			mfunctions_out_file << M_depths[0] << '\t';
-			for (unsigned j = 0; j < transposed_mfunctions_zr[i].size(); j++)
-				mfunctions_out_file << transposed_mfunctions_zr[i][j] << " ";
-			mfunctions_out_file << endl;
-			mfunctions_out_file.close();
+				write_zr_string(mfunctions_out_file_1, M_depths[0], transposed_mfunctions_zr[i]);
 		}
 	}
+	
+	if (mfunctions_out_file.is_open())
+		mfunctions_out_file.close();
+	if (mfunctions_out_file_0.is_open())
+		mfunctions_out_file_0.close();
+	if (mfunctions_out_file_1.is_open())
+		mfunctions_out_file_1.close();
 }
 
 void NormalModes::write_modal_group_velocities()
@@ -633,11 +657,17 @@ void NormalModes::write_modal_group_velocities()
 	ofstream modal_group_velocities_out_file(modal_group_velocities_out_file_name, ios_base::app);
 	if (all_depths.size() > 1)
 		modal_group_velocities_out_file << M_depths[0] << '\t';
-	modal_group_velocities_out_file << fixed << setprecision(6) << setw(12);
+	modal_group_velocities_out_file << fixed << setprecision(6);
 	for (unsigned i = 0; i < modal_group_velocities.size(); i++)
-		for (unsigned j = 0; j < modal_group_velocities[i].size(); j++)
-			modal_group_velocities_out_file << modal_group_velocities[i][j] << " ";
-	modal_group_velocities_out_file << endl;
+		for (unsigned j = 0; j < modal_group_velocities[i].size(); j++) {
+			modal_group_velocities_out_file << modal_group_velocities[i][j];
+			if (all_depths.size() > 1)
+				modal_group_velocities_out_file << " ";
+			else if (all_depths.size() == 1)
+				modal_group_velocities_out_file << endl;
+		}
+	if (all_depths.size() > 1)
+		modal_group_velocities_out_file << endl;
 	modal_group_velocities_out_file.close();
 }
 

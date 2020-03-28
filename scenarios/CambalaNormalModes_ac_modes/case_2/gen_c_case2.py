@@ -4,12 +4,12 @@
 import numpy as np 
 import math 
 
-zr = [i for i in range(5,51) if i % 5 == 0]
-print(zr)
-print(len(zr))
-reduced_zr = [(x-25)/10 for x in zr]
-print(reduced_zr)
-tanh_val = np.tanh(reduced_zr)
+depths = [i for i in range(0,51) if i % 5 == 0]
+print(depths)
+print(len(depths))
+reduced_depths = [(x-25)/10 for x in depths]
+print(reduced_depths)
+tanh_val = np.tanh(reduced_depths)
 print(tanh_val)
 c=[round(1490-30*x,2) for x in tanh_val]
 print(c)

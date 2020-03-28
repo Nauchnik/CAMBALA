@@ -64,6 +64,7 @@ public:
 	void write_result(const string resultFileName);
 	void write_wnumbers();
 	void write_mfunctions_zr();
+	void write_zr_string(ofstream& ofile, const double first_word, const vector<double> vec);
 	void write_modal_group_velocities();
 	void print_wnumbers();
 	void print_mfunctions_zr();
