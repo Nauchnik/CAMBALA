@@ -129,17 +129,23 @@ void NormalModes::read_scenario(const string scenarioFileName)
 			cout << x << " ";
 		cout << endl;
 	}
-	
-	int n_layers_w = M_depths.size() - 1;
-	if (!n_layers_w) {
-		cerr << "n_layers_w == 0" << endl;
-		exit(-1);
-	}
-	M_Ns_points.resize(n_layers_w + 1);
-	M_Ns_points[0] = (unsigned)round(ppm*M_depths[0]);
-	for (unsigned i = 1; i < M_depths.size(); i++)
-		M_Ns_points[i] = (unsigned)round(ppm*(M_depths[i] - M_depths[i - 1]));
 
+	all_ns_points.resize(all_depths.size());
+	for (int i = 0; i < all_depths.size(); i++) {
+		int n_layers_w = all_depths[i].size() - 1;
+		if (!n_layers_w) {
+			cerr << "n_layers_w == 0" << endl;
+			exit(-1);
+		}
+		vector<unsigned> ns_points;
+		ns_points.resize(all_depths[i].size());
+		ns_points[0] = (unsigned)round(ppm * all_depths[i][0]);
+		for (unsigned j = 1; j < all_depths[i].size(); j++)
+			ns_points[j] = (unsigned)round(ppm * (all_depths[i][j] - all_depths[i][j - 1]));
+		all_ns_points[i] = ns_points;
+	}
+	M_Ns_points = all_ns_points[0]; // default
+	
 	if (zr.size() <= 2) {
 		wnumbers_out_file_name = "kj_wedge_att.txt";
 		modal_group_velocities_out_file_name = "vgr.txt";
@@ -537,6 +543,7 @@ void NormalModes::compute_for_all_depths()
 	unsigned processed_depths = 0;
 	for (int i = all_depths.size() - 1; i >= 0; i--) {
 		M_depths = all_depths[i];
+		M_Ns_points = all_ns_points[i];
 		// measure elapsed time
 		chrono::high_resolution_clock::time_point start_t = chrono::high_resolution_clock::now();
 
@@ -2455,6 +2462,7 @@ void NormalModes::compute_mattenuation(double omeg)
 
     const auto omeg2 = omeg * omeg / (40 * M_PI * log10(exp(1)));
 
+	mattenuation.clear();
 	mattenuation.reserve(khs.size());
 	for (unsigned i = 0; i < khs.size(); ++i)
 		mattenuation.emplace_back(omeg2 * as[i] / khs[i]);

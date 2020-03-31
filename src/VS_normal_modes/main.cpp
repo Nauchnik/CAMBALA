@@ -8,7 +8,7 @@ int main(int argc, char ** argv)
 	string scenarioFileName = "";
 #ifdef _DEBUG
 	//scenarioFileName = "../../scenarios/CambalaNormalModes/test1_scenario.txt";
-	scenarioFileName = "../../scenarios/CambalaNormalModes_ac_modes/case_2/case2_scenario_100Hz.txt";
+	scenarioFileName = "../../scenarios/CambalaNormalModes_ac_modes/case_1/case1_scenario_alglib.txt";
 #else
 	if (argc < 2) {
 		cout << "Usage: program normal_modes_scenario_name\n";

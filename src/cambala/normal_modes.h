@@ -112,6 +112,7 @@ public:
 
 	// meta data and functions
 	vector<vector<double>> all_depths;
+	vector<vector<unsigned>> all_ns_points;
 	void compute_for_all_depths();
 	string eigen_type;                // "alglib" or "spectra"
 	int verbosity;                    // 0 - silent, 1- short, 2 - full
