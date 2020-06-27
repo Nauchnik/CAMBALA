@@ -1596,7 +1596,7 @@ double NormalModes::Layer_an_exp_up(const double omeg2, // sound frequency
 	vector<double>& dphi0)
 {
 
-	double c1, c2, kv;
+	double kv;
 	double h = deltah / Np;
 	double layer_int = 0.0;
 
