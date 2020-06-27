@@ -46,6 +46,8 @@ with open('ephij.txt', 'w') as ofile:
 	mod_numbers = len(phij_reference[0])
 	print('mod_numbers : %d' % mod_numbers)
 	for i in range(mod_numbers):
+		if i != 1:
+			continue
 		reference_mods_all_depths = [float(x[i]) for x in phij_reference]
 		abs_reference_mods_all_depths = [abs(x) for x in reference_mods_all_depths]
 		max_reference_mod_all_depths = max(abs_reference_mods_all_depths)

@@ -1,0 +1,2 @@
+mode max|phi_cambala-phi_ref|/max|phi_ref| max|phi_cambala-phi_ref| max|phi_ref| 
+1 0.108368 0.012348 0.113942 
