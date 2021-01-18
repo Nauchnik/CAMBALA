@@ -10,7 +10,6 @@
 #include <random>
 #include "linalg.h"
 #include "point.h"
-#include "normal_modes.h"
 
 using namespace std;
 using namespace CAMBALA_point;

@@ -22,32 +22,32 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{471493CC-6372-4F7F-ACA5-F47F4E62FA45}</ProjectGuid>
     <RootNamespace>VScambala</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -138,8 +138,6 @@
     <ClCompile Include="..\..\..\alglib\specialfunctions.cpp" />
     <ClCompile Include="..\..\..\alglib\statistics.cpp" />
     <ClCompile Include="..\cambala\main.cpp" />
-    <ClCompile Include="..\cambala\normal_modes.cpp" />
-    <ClCompile Include="..\cambala\parallel.cpp" />
     <ClCompile Include="..\cambala\sequential.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -157,8 +155,6 @@
     <ClInclude Include="..\..\..\alglib\specialfunctions.h" />
     <ClInclude Include="..\..\..\alglib\statistics.h" />
     <ClInclude Include="..\cambala\compute.h" />
-    <ClInclude Include="..\cambala\normal_modes.h" />
-    <ClInclude Include="..\cambala\parallel.h" />
     <ClInclude Include="..\cambala\point.h" />
     <ClInclude Include="..\cambala\sequential.h" />
     <ClInclude Include="..\cambala\utils.h" />

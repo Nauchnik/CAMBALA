@@ -126,7 +126,7 @@ private:
 		vector<double>& phi0, vector<double>& dphi0);
 
 	vector<double> fillArrayStep(const string word);
-	void getThreeValuesFromStr(string str, double &val1, double &val2, double &val3);
+	void getThreeValuesFromStr(const string str, double &val1, double &val2, double &val3);
 	vector<double> parseArrayBrackets(string word);
 	vector<double> parseVector(stringstream &sstream);
 	vector<vector<double>> parseTwoDimVector(stringstream &sstream);

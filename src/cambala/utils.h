@@ -18,12 +18,12 @@ namespace CAMBALA_utils{
 		return true;
 	}
 
-	inline void getThreeValuesFromStr(string str, double &val1, double &val2, double &val3)
+	inline void getThreeValuesFromStr(const string str, double &val1, double &val2, double &val3)
 	{
 		val1 = val3 = -1;
 		val2 = 1;
-		string word1, word2, word3;
-		for (auto &x : str)
+		string mod_str = str, word1 = "", word2 = "", word3 = "";
+		for (auto &x : mod_str)
 			if (x == ':')
 				x = ' ';
 		stringstream sstream;
