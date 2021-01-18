@@ -6,6 +6,7 @@ Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory SB RAS, I
 Andrey Tyshchenko (Il'ichev Pacific Oceanological Institute FEB RAS, Far Eastern Federal University)
 
 ================
+
 DESCRIPTION
 
 CAMBALA is aimed at solving computationally hard inverse problems in underwater
@@ -14,6 +15,7 @@ parameters in a shallow-water waveguide using a dispersion-based geoacoustic
 inversion scheme.
 
 ================
+
 HOW TO BUILD
 
 Windows (only sequential version):
@@ -45,12 +47,14 @@ Linux (only MPI version):
 - > make
 
 ================
+
 HOW TO CREATE INVERTION SCENARIOS
 
 A manual on creating inversion scenarios is located in
 \doc\Creating_an_inversion_scenario_file.pdf
 
 ================
+
 HOW TO RUN
 
 > VS_cambala.exe scenario_file_name verbosity
@@ -60,6 +64,7 @@ Possible verbosity values: 0, 1, 2.
 NB! All additional files specified in a scenario file must be in the folder where a program is launched. 
 
 ================
+
 EXAMPLES
 
 Example 1. Invert bottom parameters and the range correction.
