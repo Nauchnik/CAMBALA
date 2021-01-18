@@ -38,11 +38,17 @@ Windows (only sequential version):
 
 > VS_cambala.exe will appear either in \Acoustics-at-home\src\VS_cambala\x64\Release\
 
-Linux (only MPI version):
+Linux:
 
 - > git clone https://github.com/Nauchnik/Acoustics-at-home.git
 
-- > cd /src/cambala
+- > cd /src/cambala/
+
+- > make
+
+Linux (parallel MPI version):
+
+- > cd /src/cambala_parallel/
 
 - > make
 
