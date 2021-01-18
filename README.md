@@ -48,10 +48,10 @@ Linux (only MPI version):
 HOW TO CREATE INVERTION SCENARIOS
 
 A manual on creating inversion scenarios is located in
-\doc\Creating_an_inversion_scenario_file.docx
+\doc\Creating_an_inversion_scenario_file.pdf
 
-================================================================================
-HOW TO LAUNCH
+================
+HOW TO RUN
 
 > VS_cambala.exe scenario_file_name verbosity
 
@@ -59,7 +59,7 @@ Possible verbosity values: 0, 1, 2.
 
 NB! All additional files specified in a scenario file must be in the folder where a program is launched. 
 
-================================================================================
+================
 EXAMPLES
 
 Example 1. Invert bottom parameters and the range correction.
