@@ -2,8 +2,8 @@ CPP = g++
 ALGLIBDIR = ../../../alglib
 CPPFLAGS = -O3 -std=c++17 -static
 
-cambala: main.o sequential.o
-	${CPP} ${CPPFLAGS} -I${ALGLIBDIR} main.o sequential.o -o cambala
+cambala: main.o sequential.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o
+	${CPP} ${CPPFLAGS} -I${ALGLIBDIR} main.o sequential.o alglibinternal.o alglibmisc.o ap.o linalg.o specialfunctions.o -o cambala
 
 main.o: main.cpp
 	${CPP} ${CPPFLAGS} -I${ALGLIBDIR} main.cpp -c

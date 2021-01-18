@@ -2310,5 +2310,3 @@ vector<double> compute_wnumbers(double &omeg, // sound frequency
 }
 
 #endif
-
-
