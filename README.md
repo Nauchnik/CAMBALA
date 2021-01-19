@@ -40,13 +40,19 @@ subfolder \alglib-3.17.0.cpp.gpl\cpp\src
 
 Windows:
 
-> Open a Visual Studio solution \Acoustics-at-home\src\VS_cambala\VS_cambala.sln
+> To build the normal_modes library, use \Acoustics-at-home\src\VS_normal_modes_static\VS_normal_modes_static.sln
 
-> Compile and build an .exe file in Visual Studio (in the Release mode)
-
-> CAMBALA.exe will appear, e.g., in \Acoustics-at-home\src\VS_cambala\x64\Release\
+> To build CAMBALA.exe, use \Acoustics-at-home\src\VS_normal_modes\VS_normal_modes.sln
 
 Linux:
+
+> To build the normal_modes library:
+
+- > cd ./Acoustics-at-home/src/normal_modes/
+
+- > make
+
+> To build the CAMBALA binary:
 
 - > cd ./Acoustics-at-home/src/cambala/
 
