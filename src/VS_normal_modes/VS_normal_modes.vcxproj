@@ -19,10 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\normal_modes\example.cpp" />
+    <ClInclude Include="..\normal_modes\normal_modes.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\normal_modes\normal_modes.h" />
+    <ClCompile Include="..\normal_modes\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\normal_modes\Makefile" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

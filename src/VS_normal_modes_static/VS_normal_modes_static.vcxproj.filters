@@ -102,7 +102,7 @@
       <Filter>alglib</Filter>
     </ClInclude>
     <ClInclude Include="..\normal_modes\normal_modes.h">
-      <Filter>Исходные файлы</Filter>
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
