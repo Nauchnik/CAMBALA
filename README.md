@@ -34,11 +34,11 @@ subfolder \alglib-3.17.0.cpp.gpl\cpp\src
 
 > Download sources of Spectra from https://github.com/yixuan/spectra.git
 
-> Copy the folder Spectra\include\Spectra to the created folder \Eigenvalues
+> Copy the folder \Spectra from Spectra\include to the created folder \Eigenvalues
 
 > Download sources of Eigen from https://gitlab.com/libeigen/eigen.git
 
-> Copy the folder eigen\Eigen to \Eigenvalues
+> Copy the folder \Eigen from \eigen to the created folder \Eigenvalues
 
 Windows:
 
