@@ -1,13 +1,15 @@
-﻿#include "normal_modes.h"
-#include "linalg.h"
-#include <iomanip>
+﻿#include <iomanip>
 #include <cmath>
 #include <chrono>
 #include <functional>
+
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 #include <Spectra/MatOp/SparseSymMatProd.h>
 #include <Spectra/SymEigsSolver.h>
+
+#include "normal_modes.h"
+#include "linalg.h"
 
 using namespace Spectra;
 

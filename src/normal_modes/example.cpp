@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <chrono>
+
 #include "normal_modes.h"
 
 int main(int argc, char ** argv)
