@@ -69,7 +69,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>CAMBALA</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>CAMBALA</TargetName>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -138,6 +143,7 @@
     <ClCompile Include="..\..\..\alglib\specialfunctions.cpp" />
     <ClCompile Include="..\..\..\alglib\statistics.cpp" />
     <ClCompile Include="..\cambala\main.cpp" />
+    <ClCompile Include="..\cambala\parallel.cpp" />
     <ClCompile Include="..\cambala\sequential.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +161,7 @@
     <ClInclude Include="..\..\..\alglib\specialfunctions.h" />
     <ClInclude Include="..\..\..\alglib\statistics.h" />
     <ClInclude Include="..\cambala\compute.h" />
+    <ClInclude Include="..\cambala\parallel.h" />
     <ClInclude Include="..\cambala\point.h" />
     <ClInclude Include="..\cambala\sequential.h" />
     <ClInclude Include="..\cambala\utils.h" />

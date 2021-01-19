@@ -27,7 +27,7 @@ namespace CAMBALA_utils{
 			if (x == ':')
 				x = ' ';
 		stringstream sstream;
-		sstream << str;
+		sstream << mod_str;
 		sstream >> word1 >> word2 >> word3;
 		istringstream(word1) >> val1;
 		istringstream(word2) >> val2;

@@ -136,10 +136,10 @@ void CAMBALA_parallel::controlProcessIls()
 
 void CAMBALA_parallel::sendTaskIls(double *task, int task_index, const unsigned process_index, const vector<double> depths)
 {
-	unsigned cur_depths_size = depths.size();
+	size_t cur_depths_size = depths.size();
 	for (unsigned j = 0; j < cur_depths_size; j++)
 		task[j] = depths[j];
-	for (unsigned j = cur_depths_size; j < ILS_TASK_LEN; j++)
+	for (size_t j = cur_depths_size; j < ILS_TASK_LEN; j++)
 		task[j] = -1;
 #ifdef _MPI
 	MPI_Send( &task_index, 1,            MPI_INT,      process_index, 0, MPI_COMM_WORLD);

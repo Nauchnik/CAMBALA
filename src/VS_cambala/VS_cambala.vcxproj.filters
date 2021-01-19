@@ -63,6 +63,9 @@
     <ClCompile Include="..\..\..\alglib\statistics.cpp">
       <Filter>alglib</Filter>
     </ClCompile>
+    <ClCompile Include="..\cambala\parallel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cambala\sequential.h">
@@ -115,6 +118,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\alglib\statistics.h">
       <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cambala\parallel.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

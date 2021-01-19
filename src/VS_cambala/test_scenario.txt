@@ -1,25 +1,20 @@
-% Florida data
-% we invert bottom parameters and the range correction
-% we allow range to vary by +/-20 from the given value
-% some limits are set for the parameters values
-% this scenarion uses weighted function, the weights are
-% specified in "spmag.txt"
-dtimes_file dtimes.txt
-spmag_file(string|no) spmag.txt
-function_type weighted
-h 100:10:150
-H 500
+% SSPEMDD scenario № 33
+% inverting for bottom and R,
+% sound speed in water is considered known
+% constant parameters
+dtimes_file 50_ac_modes_R7km_dtimes.txt
+spmag_file(string|no) no
+function_type uniform
+launch_type brute_force
+h 50
+H 300
 % variable parameters
-R 4850:1:4900
-rhob 1.2:0.1:2.2
-cb 1600:10:1900
+cw0 1500
+cw1 1500
+cw2 1498
+cw3 1496
+cw4 1493
+R 6995:5:7005
+rhob 1.6:0.1:1.8
+cb 1700
 tau 0
-cw0 1539
-cw1 1539
-cw2 1535
-cw3 1540
-cw4 1545
-d1 40
-d2 50:1:60
-d3 h-30
-d4 90:1:h-10
