@@ -4,6 +4,7 @@ Authors:
 Pavel Petrov, Andrey Tyshchenko (Il'ichev Pacific Oceanological Institute FEB RAS) 
 Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory SB RAS)
 
+
 ================
 
 DESCRIPTION
@@ -12,6 +13,7 @@ CAMBALA is aimed at solving computationally hard inverse problems in underwater
 acoustics. In particular, it can reconstruct the sound speed profile or seabed
 parameters in a shallow-water waveguide using a dispersion-based geoacoustic 
 inversion scheme.
+
 
 ================
 
@@ -58,12 +60,14 @@ Linux:
 
 - > make
 
+
 ================
 
 HOW TO CREATE INVERTION SCENARIOS
 
 A manual on creating inversion scenarios is located in
 \doc\Creating_an_inversion_scenario_file.pdf
+
 
 ================
 
@@ -74,6 +78,7 @@ HOW TO RUN
 Possible verbosity values: 0, 1, 2.
 
 NB! All additional files specified in a scenario file must be in the folder where a program is launched. 
+
 
 ================
 
@@ -90,3 +95,23 @@ Example 2. Invert bottom parameters and the sound speed profile.
 > Copy CAMBALA.exe to the folder \scenarios\Example_2_cb_rhob_ssp\
 
 > CAMBALA.exe scenario2 1
+
+
+================
+
+CITATION
+
+CAMBALA can be cited as follows:
+
+```
+@article{ZaikinP2016-OIDP,
+author="Oleg Zaikin
+and Pavel Petrov",
+title="Algorithm of reconstruction of the sound speed profile in a shallow-water geoacoustic waveguide from modal dispersion data",
+journal="Optoelectronics, Instrumentation and Data Processing",
+year="2016",
+volume="52",
+number="3",
+pages="259--265"
+}
+
