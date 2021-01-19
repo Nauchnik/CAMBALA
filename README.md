@@ -105,13 +105,12 @@ CAMBALA can be cited as follows:
 
 ```
 @article{ZaikinP2016-OIDP,
-author="Oleg Zaikin
-and Pavel Petrov",
-title="Algorithm of reconstruction of the sound speed profile in a shallow-water geoacoustic waveguide from modal dispersion data",
-journal="Optoelectronics, Instrumentation and Data Processing",
-year="2016",
-volume="52",
-number="3",
-pages="259--265"
+  author="Oleg Zaikin and Pavel Petrov",
+  title="Algorithm of reconstruction of the sound speed profile in a shallow-water geoacoustic waveguide from modal dispersion data",
+  journal="Optoelectronics, Instrumentation and Data Processing",
+  year="2016",
+  volume="52",
+  number="3",
+  pages="259--265"
 }
 
