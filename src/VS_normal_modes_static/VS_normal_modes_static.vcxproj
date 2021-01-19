@@ -32,7 +32,7 @@
     <ClCompile Include="..\..\..\alglib\solvers.cpp" />
     <ClCompile Include="..\..\..\alglib\specialfunctions.cpp" />
     <ClCompile Include="..\..\..\alglib\statistics.cpp" />
-    <ClCompile Include="..\cambala\normal_modes.cpp" />
+    <ClCompile Include="..\normal_modes\normal_modes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\alglib\alglibinternal.h" />
@@ -48,7 +48,7 @@
     <ClInclude Include="..\..\..\alglib\solvers.h" />
     <ClInclude Include="..\..\..\alglib\specialfunctions.h" />
     <ClInclude Include="..\..\..\alglib\statistics.h" />
-    <ClInclude Include="..\cambala\normal_modes.h" />
+    <ClInclude Include="..\normal_modes\normal_modes.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -158,7 +158,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\..\..\alglib;..\..\src\cambala;..\..\..\Eigenvalues;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\alglib;..\..\src\normal_modes;..\..\..\Eigenvalues;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -178,7 +178,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>..\..\..\alglib;..\..\src\cambala;..\..\..\Eigenvalues;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\alglib;..\..\src\normal_modes;..\..\..\Eigenvalues;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>

@@ -18,9 +18,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\cambala\normal_modes.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\alglib\alglibinternal.cpp">
       <Filter>alglib</Filter>
     </ClCompile>
@@ -60,11 +57,11 @@
     <ClCompile Include="..\..\..\alglib\statistics.cpp">
       <Filter>alglib</Filter>
     </ClCompile>
+    <ClCompile Include="..\normal_modes\normal_modes.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\cambala\normal_modes.h">
-      <Filter>Исходные файлы</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\alglib\alglibinternal.h">
       <Filter>alglib</Filter>
     </ClInclude>
@@ -103,6 +100,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\alglib\statistics.h">
       <Filter>alglib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\normal_modes\normal_modes.h">
+      <Filter>Исходные файлы</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
