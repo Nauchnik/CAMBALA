@@ -17,13 +17,11 @@ inversion scheme.
 
 HOW TO BUILD
 
-Windows:
+> Get sources of CAMBALA https://github.com/Nauchnik/Acoustics-at-home/archive/master.zip
 
-> Download sources of from CAMBALA https://github.com/Nauchnik/Acoustics-at-home/archive/master.zip
+> Suppose that the sources are in the folder \Acoustics-at-home
 
-> Unzip the sources to the folder \Acoustics-at-home
-
-> Download a zip-archive with ALGLIB C++ sources from http://www.alglib.net/download.php
+> Download a zip-archive with the last version of the ALGLIB C++ sources from http://www.alglib.net/download.php
 
 > Unzip the archive to a default folder, e.g. \alglib-3.17.0.cpp.gpl. 
 
@@ -34,7 +32,13 @@ subfolder \alglib-3.17.0.cpp.gpl\cpp\src
 
 > Download sources of Spectra from https://github.com/yixuan/spectra.git
 
-> Unzip the sources, copy the folder \include\Spectra to the created folder \Eigenvalues
+> Copy the folder Spectra\include\Spectra to the created folder \Eigenvalues
+
+> Download sources of Eigen from https://gitlab.com/libeigen/eigen.git
+
+> Copy the folder eigen\Eigen to \Eigenvalues
+
+Windows:
 
 > Open a Visual Studio solution \Acoustics-at-home\src\VS_cambala\VS_cambala.sln
 
@@ -44,9 +48,7 @@ subfolder \alglib-3.17.0.cpp.gpl\cpp\src
 
 Linux:
 
-- > git clone https://github.com/Nauchnik/Acoustics-at-home.git
-
-- > cd /src/cambala/
+- > cd ./Acoustics-at-home/src/cambala/
 
 - > make
 
