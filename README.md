@@ -1,9 +1,8 @@
 CAMBALA: Coupled Acoustic Modes
 
 Authors:
-Pavel Petrov (Il'ichev Pacific Oceanological Institute FEB RAS, Far Eastern Federal University) 
-Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory SB RAS, ITMO University)
-Andrey Tyshchenko (Il'ichev Pacific Oceanological Institute FEB RAS, Far Eastern Federal University)
+Pavel Petrov, Andrey Tyshchenko (Il'ichev Pacific Oceanological Institute FEB RAS) 
+Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory SB RAS)
 
 ================
 
@@ -18,37 +17,36 @@ inversion scheme.
 
 HOW TO BUILD
 
-Windows (only sequential version):
+Windows:
 
-> Download CAMBALA zip-archive https://github.com/Nauchnik/Acoustics-at-home/archive/master.zip
+> Download sources of from CAMBALA https://github.com/Nauchnik/Acoustics-at-home/archive/master.zip
 
-> Unzip the archive to the folder \Acoustics-at-home
+> Unzip the sources to the folder \Acoustics-at-home
 
 > Download a zip-archive with ALGLIB C++ sources from http://www.alglib.net/download.php
 
 > Unzip the archive to a default folder, e.g. \alglib-3.17.0.cpp.gpl. 
 
-> make a new folder \alglib, copy to it all files from the subfolder \alglib-3.17.0.cpp.gpl\cpp\src\
+> Make a new folder \alglib on the same level as \Acoustics-at-home, copy to it all files from the
+subfolder \alglib-3.17.0.cpp.gpl\cpp\src
 
-> NB! Folders \Acoustics-at-home and \alglib should be on the same level
+> Make a new folder \Eigenvalues on the same level as \Acoustics-at-home
 
-> Launch a Visual Studio 2019 solution \Acoustics-at-home\src\VS_cambala\VS_cambala.sln
+> Download sources of Spectra from https://github.com/yixuan/spectra.git
+
+> Unzip the sources, copy the folder \include\Spectra to the created folder \Eigenvalues
+
+> Open a Visual Studio solution \Acoustics-at-home\src\VS_cambala\VS_cambala.sln
 
 > Compile and build an .exe file in Visual Studio (in the Release mode)
 
-> VS_cambala.exe will appear either in \Acoustics-at-home\src\VS_cambala\x64\Release\
+> CAMBALA.exe will appear, e.g., in \Acoustics-at-home\src\VS_cambala\x64\Release\
 
 Linux:
 
 - > git clone https://github.com/Nauchnik/Acoustics-at-home.git
 
 - > cd /src/cambala/
-
-- > make
-
-Linux (parallel MPI version):
-
-- > cd /src/cambala_parallel/
 
 - > make
 
@@ -63,7 +61,7 @@ A manual on creating inversion scenarios is located in
 
 HOW TO RUN
 
-> VS_cambala.exe scenario_file_name verbosity
+> CAMBALA.exe scenario_file_name verbosity
 
 Possible verbosity values: 0, 1, 2.
 
@@ -75,12 +73,12 @@ EXAMPLES
 
 Example 1. Invert bottom parameters and the range correction.
 
-> Copy VS_cambala.exe to the folder \scenarios\Example_1_range_cb_rhob\
+> Copy CAMBALA.exe to the folder \scenarios\Example_1_range_cb_rhob\
 
-> VS_cambala.exe scenario1 1
+> CAMBALA.exe scenario1 1
 
 Example 2. Invert bottom parameters and the sound speed profile.
 
-> Copy VS_cambala.exe to the folder \scenarios\Example_2_cb_rhob_ssp\
+> Copy CAMBALA.exe to the folder \scenarios\Example_2_cb_rhob_ssp\
 
-> VS_cambala.exe scenario2 1
+> CAMBALA.exe scenario2 1
