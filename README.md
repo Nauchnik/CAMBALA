@@ -1,4 +1,4 @@
-CAMBALA: Coupled Acoustic Modes
+CAMBALA: Coupled Acoustic Modes with Bottom Attenuation in Linear Acoustics
 
 Authors:
 Pavel Petrov, Andrey Tyshchenko (Il'ichev Pacific Oceanological Institute FEB RAS) 
