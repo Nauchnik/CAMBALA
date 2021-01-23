@@ -12,6 +12,7 @@
 #include "linalg.h"
 
 using namespace Spectra;
+using namespace Errors;
 
 NormalModes::NormalModes():
 	iModesSubset(-1.0),
@@ -33,7 +34,7 @@ void NormalModes::read_scenario(const string scenarioFileName)
 
 	if (!scenarioFile.is_open()) {
 		cerr << "scenario file with the name " << scenarioFileName << " wasn't opened" << endl;
-		exit(-1);
+		exit(int(Errors::scenario_open));
 	}
 
 	string str, word, tmp_word;
@@ -82,11 +83,11 @@ void NormalModes::read_scenario(const string scenarioFileName)
 
 	if (M_betas.empty()) {
 		cerr << "M_betas is empty" << endl;
-		exit(-1);
+		exit(int(Errors::empty_betas));
 	}
 	if (M_rhos.empty()) {
 		cerr << "M_rhos is empty" << endl;
-		exit(-1);
+		exit(int(Errors::empty_rhos));
 	}
 
 	if (verbosity > 0) {
@@ -137,7 +138,7 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		int n_layers_w = all_depths[i].size() - 1;
 		if (!n_layers_w) {
 			cerr << "n_layers_w == 0" << endl;
-			exit(-1);
+			exit(int(Error::zero_layers_w));
 		}
 		vector<unsigned> ns_points;
 		ns_points.resize(all_depths[i].size());
@@ -168,7 +169,7 @@ void NormalModes::write_result(const string resultFileName)
 
 	if (!ofile.is_open()) {
 		cerr << "Error while opening the result file " << resultFileName << endl;
-		exit(-1);
+		exit(int(Errors::result_open));
 	}
 	
 	stringstream sstream;
@@ -233,7 +234,7 @@ void NormalModes::print_wnumbers()
 	cout << "wave numbers : ";
 	if (khs.empty()) {
 		cerr << "khs is empty" << endl;
-		exit(-1);
+		exit(int(Errors::empty_khs));
 	}
 	cout << setprecision(11) << fixed;
 	for (unsigned i=0;i<khs.size();i++)
@@ -246,7 +247,7 @@ void NormalModes::print_mfunctions_zr()
 	cout << "mfunctions_zr : \n";
 	if (mfunctions_zr.empty()) {
 		cerr << "mfunctions_zr is empty" << endl;
-		exit(-1);
+		exit(int(Errors::empty_mfunctions_zr));
 	}
 	for (auto x : mfunctions_zr) {
 		for (auto y : x)
@@ -260,7 +261,7 @@ void NormalModes::print_modal_group_velocities()
 	cout << "modal_group_velocities : \n";
 	if (modal_group_velocities.empty()) {
 		cerr << "modal_group_velocities is empty" << endl;
-		exit(-1);
+		exit(int(Errors::empty_modal_group_velocities));
 	}
 	for (auto x : modal_group_velocities) {
 		for (auto y : x)
@@ -361,7 +362,7 @@ vector<double> NormalModes::fillArrayStep(const string word)
 	vec.push_back(left_bound_val);
 	if (left_bound_val == right_bound_val) {
 		cerr << "left_bound_val == right_bound_val" << endl;
-		exit(-1);
+		exit(int(Errors::equal_bounds));
 	}
 	double val = left_bound_val;
 	for (;;) {
@@ -433,7 +434,7 @@ vector<double> NormalModes::compute_wnumbers_extrap_lin_dz(const double omeg)
 		(M_rhos.size() == 0) || (M_depths.size() == 0)) 
 	{
 		cerr << "Error. In NormalModes::compute_wnumbers_extrap_lin_dz() one of the main arrays is empty";
-		exit(-1);
+		exit(int(Errors::empty_array));
 	}
 	
 	vector<double> coeff_extrap;
@@ -795,7 +796,7 @@ vector<double> NormalModes::compute_wnumbers(
 	alglib::real_1d_array eigenvalues;
 	int matrix_size = N_points - 2;
 	eigenvalues.setlength(matrix_size);
-	alglib::ae_int_t eigen_count = 0;
+	alglib::ae_int_t eigen_num = 0;
 	
 	alglib::real_1d_array main_diag, second_diag;
 	main_diag.setlength(matrix_size);
@@ -837,12 +838,16 @@ vector<double> NormalModes::compute_wnumbers(
 		}
 		
 		do {
-			eigen_count = 0;
+			eigen_num = 0;
 			tmp_main_diag = main_diag;
 			tmp_second_diag = second_diag;
-			alglib::smatrixtdevdr(tmp_main_diag, tmp_second_diag, matrix_size, 0, left_border, right_border, eigen_count, eigenvectors);
-			for (int ii = 0; ii < eigen_count; ii++)
-				wnumbers2.push_back(tmp_main_diag[eigen_count - ii - 1]);
+			alglib::smatrixtdevdr(tmp_main_diag, tmp_second_diag, matrix_size, 0, left_border, right_border, eigen_num, eigenvectors);
+			if (eigen_num == 0) {
+				cerr << "0 eigen values by ALGLIB" << endl;
+				exit(int(Errors::alglib_zero_eigen_num));
+			}
+			for (int ii = 0; ii < eigen_num; ii++)
+				wnumbers2.push_back(tmp_main_diag[eigen_num - ii - 1]);
 			if (nmod == 0)
 				break;
 			// set new interval
@@ -852,7 +857,7 @@ vector<double> NormalModes::compute_wnumbers(
 			//cout << "alpha " << cur_alpha << endl;
 			if (cos(cur_alpha) <= 0.0) { // error if 90 degrees
 				cerr << "cos(alpha) <= 0" << endl;
-				exit(1);
+				exit(int(Errors::nonpositiv_cosofalpha));
 			}
 			left_border = cos(cur_alpha) * cos(cur_alpha) * kappamin * kappamin;
 		} while (wnumbers2.size() < nmod);
@@ -882,7 +887,7 @@ vector<double> NormalModes::compute_wnumbers(
 		if (nconv < nmod) {
 			cerr << "nconv < nmod" << endl;
 			cerr << nconv << " < " << nmod << endl;
-			exit(-1);
+			exit(int(Errors::nconv_less_nmod));
 		}
 		// Retrieve results
 		Eigen::VectorXcd evalues;
@@ -891,9 +896,15 @@ vector<double> NormalModes::compute_wnumbers(
 			evalues = eigs.eigenvalues();
 		}
 		else {
-			cerr << "error in calculatig eigen values by Spectra, nconv : " << nconv;
-			exit(-1);
+			cerr << "error in calculatig eigen values by Spectra, nconv : " << nconv << endl;
+			exit(int(Errors::spectra_eigen));
 		}
+
+		if (evalues.size() == 0) {
+			cerr << "0 eigen values by Spectra" << endl;
+			exit(int(Errors::spectra_zero_eigen_num));
+		}
+
 		if (verbosity > 1) {
 			cout << "evalues size " << evalues.size() << endl;
 			cout << "Eigenvalues found:\n" << evalues << endl;

@@ -24,6 +24,26 @@ const complex<double> M_Iu(0.0, 1.0);
 
 const int NCV_COEF = 6; // coef for ncv - parameter that controls the convergence speed of spectra
 
+namespace Errors {
+	enum Error {
+		scenario_open = 11,
+		empty_betas = 12,
+		empty_rhos = 13,
+		zero_layers_w = 14,
+		result_open = 15,
+		empty_khs = 16,
+		empty_mfunctions_zr = 17,
+		empty_modal_group_velocities = 18,
+		equal_bounds = 19,
+		empty_array = 20,
+		alglib_zero_eigen_num = 21,
+		nonpositiv_cosofalpha = 22,
+		nconv_less_nmod = 23,
+		spectra_eigen = 24,
+		spectra_zero_eigen_num = 25
+	};
+}
+
 class NormalModes
 {
 public:
