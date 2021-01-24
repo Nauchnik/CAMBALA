@@ -252,3 +252,4 @@ scenarios/scenarios_7/cambala_depths_out
 scenarios/scenarios_7/cambala_out
 *.db-shm
 src/VS_normal_modes_static/.vs/VS_normal_modes_static/v16/Browse.VC.db-wal
+src/VS_normal_modes/.vs/VS_normal_modes/v16/Browse.VC.db-wal
