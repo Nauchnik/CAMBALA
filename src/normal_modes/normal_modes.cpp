@@ -2234,13 +2234,13 @@ vector<complex<double>> NormalModes::compute_cpl_pressure( const double f, vecto
 
 	double omeg = 2 * M_PI*f;
 	double R;
-	int nzr = zr.size();
+	unsigned nzr = zr.size();
 	complex<double> Prc;
 
 	compute_khs(omeg);
 	//khs = compute_wnumbers_extrap_lin_dz(omeg);
 
-	int nmod = khs.size();
+	unsigned nmod = khs.size();
 
 
 	//        // TEST
@@ -2337,7 +2337,7 @@ void NormalModes::compute_mfunctions_zr(double omeg)
 	double zp;
 	unsigned cur_layer = 0;
 	unsigned cur_points = 0;
-	int nzr = zr.size();
+	unsigned nzr = zr.size();
 	unsigned i_inside_l = 0;
 
 
