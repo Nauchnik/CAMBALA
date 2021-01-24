@@ -250,3 +250,5 @@ Release x64/out
 scenarios/scenarios_7/VS_cambala.exe
 scenarios/scenarios_7/cambala_depths_out
 scenarios/scenarios_7/cambala_out
+*.db-shm
+src/VS_normal_modes_static/.vs/VS_normal_modes_static/v16/Browse.VC.db-wal
