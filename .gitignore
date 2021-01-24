@@ -240,16 +240,16 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-sspemdd*.exe
+*.ipdb
+*.tlog
+*.db-shm
+*.db-wal
+
+# Release temp files
 Release x64/SSPEMDD.iobj
 Release x64/260_dtimes.txt
-*.ipdb
 Release x64/SSPEMDD.tlog/CL.command.1.tlog
-*.tlog
 Release x64/out
-scenarios/scenarios_7/VS_cambala.exe
-scenarios/scenarios_7/cambala_depths_out
-scenarios/scenarios_7/cambala_out
-*.db-shm
-src/VS_normal_modes_static/.vs/VS_normal_modes_static/v16/Browse.VC.db-wal
-src/VS_normal_modes/.vs/VS_normal_modes/v16/Browse.VC.db-wal
+
+# Unignore bin
+!/bin
