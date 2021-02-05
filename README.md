@@ -42,19 +42,23 @@ subfolder \alglib-3.17.0.cpp.gpl\cpp\src
 
 Windows:
 
-> To build the normal_modes library, use \Acoustics-at-home\src\VS_normal_modes_static\VS_normal_modes_static.sln
+To build the normal_modes library, use 
 
-> To build CAMBALA.exe, use \Acoustics-at-home\src\VS_normal_modes\VS_normal_modes.sln
+- > \Acoustics-at-home\src\VS_normal_modes_static\VS_normal_modes_static.sln
+
+To build CAMBALA.exe, use 
+
+- > \Acoustics-at-home\src\VS_normal_modes\VS_normal_modes.sln
 
 Linux:
 
-> To build the normal_modes library:
+To build the normal_modes library:
 
 - > cd ./Acoustics-at-home/src/normal_modes/
 
 - > make
 
-> To build the CAMBALA binary:
+To build the CAMBALA binary:
 
 - > cd ./Acoustics-at-home/src/cambala/
 
@@ -96,21 +100,4 @@ Example 2. Invert bottom parameters and the sound speed profile.
 
 > CAMBALA.exe scenario2 1
 
-
-================
-
-CITATION
-
-CAMBALA can be cited as follows:
-
-```
-@article{ZaikinP2016-OIDP,
-  author="Oleg Zaikin and Pavel Petrov",
-  title="Algorithm of reconstruction of the sound speed profile in a shallow-water geoacoustic waveguide from modal dispersion data",
-  journal="Optoelectronics, Instrumentation and Data Processing",
-  year="2016",
-  volume="52",
-  number="3",
-  pages="259--265"
-}
 
