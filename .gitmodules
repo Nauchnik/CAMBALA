@@ -1,0 +1,6 @@
+[submodule "third_party/spectra"]
+	path = third_party/spectra
+	url = https://github.com/yixuan/spectra.git
+[submodule "third_party/eigen"]
+	path = third_party/eigen
+	url = https://gitlab.com/libeigen/eigen.git

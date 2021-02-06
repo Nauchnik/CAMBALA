@@ -1,0 +1,44 @@
+cmake_minimum_required(VERSION 3.12)
+project(alglib)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+
+if (NOT DEFINED ALGLIB_URL)
+    set(ALGLIB_URL https://www.alglib.net/translator/re/alglib-3.17.0.cpp.gpl.zip)
+endif()
+
+if (NOT DEFINED ALGLIB_HASH)
+    set(ALGLIB_HASH 96d61e8ad68e715dfada6aa25eef014eb14d59573809b84e3e393dbf896d40a7)
+endif()
+
+set(ALGLIB_CURRENT_HASH "")
+set(ALGLIB_PATH ${CMAKE_CURRENT_BINARY_DIR}/alglib)
+set(ALGLIB_ARCHIVE_PATH ${ALGLIB_PATH}.zip)
+set(ALGLIB_HASHFILE_PATH ${ALGLIB_PATH}.hash)
+
+if (EXISTS ${ALGLIB_HASHFILE_PATH})
+    file(READ ${ALGLIB_HASHFILE_PATH} ALGLIB_CURRENT_HASH)
+endif()
+
+if (NOT (${ALGLIB_CURRENT_HASH} MATCHES ${ALGLIB_HASH} AND EXISTS ${ALGLIB_PATH}))
+    message(STATUS "Downloading alglib sources from ${ALGLIB_URL}")
+
+    file(DOWNLOAD ${ALGLIB_URL} ${ALGLIB_ARCHIVE_PATH} TIMEOUT 60 EXPECTED_HASH SHA256=${ALGLIB_HASH} TLS_VERIFY ON)
+    file(WRITE ${ALGLIB_HASHFILE_PATH} ${ALGLIB_HASH})
+    file(ARCHIVE_EXTRACT INPUT ${ALGLIB_ARCHIVE_PATH} DESTINATION ${ALGLIB_PATH})
+    file(REMOVE ${ALGLIB_ARCHIVE_PATH})
+endif()
+
+set(ALGLIB_SOURCE_DIR ${ALGLIB_PATH}/cpp/src)
+
+add_library(alglib.o OBJECT
+    ${ALGLIB_SOURCE_DIR}/alglibinternal.cpp
+    ${ALGLIB_SOURCE_DIR}/alglibmisc.cpp
+    ${ALGLIB_SOURCE_DIR}/ap.cpp
+    ${ALGLIB_SOURCE_DIR}/linalg.cpp
+    ${ALGLIB_SOURCE_DIR}/specialfunctions.cpp
+)
+
+add_library(alglib $<TARGET_OBJECTS:alglib.o>)
