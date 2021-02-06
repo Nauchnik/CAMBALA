@@ -878,12 +878,13 @@ vector<double> NormalModes::compute_wnumbers(
 		
 		SparseSymMatProd<double> op(M);
 		// Construct eigen solver object, requesting the largest three eigenvalues
-		SymEigsSolver< double, LARGEST_ALGE, SparseSymMatProd<double> > eigs(&op, nmod, nmod * NCV_COEF);
+		SymEigsSolver<SparseSymMatProd<double>> eigs(op, nmod, NCV_COEF);
 		
 		// Initialize and compute
 		eigs.init();
-		//int nconv = eigs.compute(1000, 1e-9, LARGEST_ALGE);
-		int nconv = eigs.compute();
+
+		int nconv = eigs.compute(SortRule::LargestMagn, 1000, 1e-9, SortRule::LargestAlge);
+		// int nconv = eigs.compute();
 		if (nconv < nmod) {
 			cerr << "nconv < nmod" << endl;
 			cerr << nconv << " < " << nmod << endl;
@@ -891,7 +892,7 @@ vector<double> NormalModes::compute_wnumbers(
 		}
 		// Retrieve results
 		Eigen::VectorXcd evalues;
-		if (eigs.info() == SUCCESSFUL) {
+		if (eigs.info() == CompInfo::Successful) {
 			//cout << "SUCCESSFUL" << endl;
 			evalues = eigs.eigenvalues();
 		}
