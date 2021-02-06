@@ -23,28 +23,29 @@ HOW TO BUILD
 
 > Get sources of CAMBALA https://github.com/Nauchnik/CAMBALA/archive/master.zip
 
-> Suppose that the sources are in the folder \Acoustics-at-home
+> Suppose that the sources are in the directory \CAMBALA
 
 > Download a zip-archive with the last version of the ALGLIB C++ sources from http://www.alglib.net/download.php
 
-> Unzip the archive to a default folder, e.g. \alglib-3.17.0.cpp.gpl. 
+> Unzip the archive to a default directory, e.g. \alglib-3.17.0.cpp.gpl. 
 
-> Make a new folder \alglib on the same level as \CAMBALA, copy to it all files from the
-subfolder \alglib-3.17.0.cpp.gpl\cpp\src
+> Make a new directory \alglib on the same level as \CAMBALA, copy to it all files from the
+subdirectory \alglib-3.17.0.cpp.gpl\cpp\src
 
-> Make a new folder \Eigenvalues on the same level as \CAMBALA
+> Make a new directory \Eigenvalues on the same level as \CAMBALA
 
 > Download sources of Spectra from https://github.com/yixuan/spectra.git
 
-> Copy the folder \Spectra from Spectra\include to the created folder \Eigenvalues
+> Copy the directory \Spectra from Spectra\include to the created directory \Eigenvalues
 
 > Download sources of Eigen from https://gitlab.com/libeigen/eigen.git
 
-> Copy the folder \Eigen from \eigen to the created folder \Eigenvalues
+> Copy the directory \Eigen from \eigen to the created 
+\Eigenvalues
 
 Windows:
 
-To build the normal_modes library, use 
+To build the CAMBALA library, use 
 
 - > \CAMBALA\src\VS_normal_modes_static\VS_normal_modes_static.sln
 
@@ -54,7 +55,7 @@ To build CAMBALA.exe, use
 
 Linux:
 
-To build the normal_modes library:
+To build the CAMBALA library:
 
 - > cd ./CAMBALA/src/normal_modes/
 
@@ -62,7 +63,7 @@ To build the normal_modes library:
 
 To build the CAMBALA binary:
 
-- > cd ./CAMBALA/src/cambala/
+- > cd ./CAMBALA/src/normal_modes/
 
 - > make
 
@@ -77,7 +78,7 @@ A manual on creating inversion scenarios is located in
 
 ================
 
-HOW TO RUN CAMBALA Inversion Tools
+HOW TO RUN CAMBALA INVERSION TOOLS
 
 > CAMBALA_Inversion_Tools.exe scenario_file_name verbosity
 
@@ -89,17 +90,17 @@ where a program is launched.
 
 ================
 
-EXAMPLES for CAMBALA Inversion Tools
+EXAMPLES for CAMBALA INVERSION TOOLS
 
 Example 1. Invert bottom parameters and the range correction.
 
-> Copy CAMBALA_Inversion_Tools.exe to the folder \scenarios\Example_1_range_cb_rhob\
+> Copy CAMBALA_Inversion_Tools.exe to the directory \scenarios\Example_1_range_cb_rhob\
 
 > CAMBALA_Inversion_Tools.exe scenario1 1
 
 Example 2. Invert bottom parameters and the sound speed profile.
 
-> Copy CAMBALA_Inversion_Tools.exe to the folder \scenarios\Example_2_cb_rhob_ssp\
+> Copy CAMBALA_Inversion_Tools.exe to the directory \scenarios\Example_2_cb_rhob_ssp\
 
 > CAMBALA_Inversion_Tools.exe scenario2 1
 
