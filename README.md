@@ -9,9 +9,11 @@ Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory SB RAS)
 
 DESCRIPTION
 
-CAMBALA is aimed at solving computationally hard inverse problems in underwater
-acoustics. In particular, it can reconstruct the sound speed profile or seabed
-parameters in a shallow-water waveguide using a dispersion-based geoacoustic 
+CAMBALA is aimed at computing sound propagation in 3D-varying shallow water waveguides.
+
+CAMBALA Inversion Tools is aimed at solving computationally hard inverse problems
+in underwater acoustics. In particular, it can reconstruct the sound speed profile
+or seabed parameters in a shallow water waveguide using a dispersion-based geoacoustic 
 inversion scheme.
 
 
@@ -19,7 +21,7 @@ inversion scheme.
 
 HOW TO BUILD
 
-> Get sources of CAMBALA https://github.com/Nauchnik/Acoustics-at-home/archive/master.zip
+> Get sources of CAMBALA https://github.com/Nauchnik/CAMBALA/archive/master.zip
 
 > Suppose that the sources are in the folder \Acoustics-at-home
 
@@ -27,10 +29,10 @@ HOW TO BUILD
 
 > Unzip the archive to a default folder, e.g. \alglib-3.17.0.cpp.gpl. 
 
-> Make a new folder \alglib on the same level as \Acoustics-at-home, copy to it all files from the
+> Make a new folder \alglib on the same level as \CAMBALA, copy to it all files from the
 subfolder \alglib-3.17.0.cpp.gpl\cpp\src
 
-> Make a new folder \Eigenvalues on the same level as \Acoustics-at-home
+> Make a new folder \Eigenvalues on the same level as \CAMBALA
 
 > Download sources of Spectra from https://github.com/yixuan/spectra.git
 
@@ -44,30 +46,30 @@ Windows:
 
 To build the normal_modes library, use 
 
-- > \Acoustics-at-home\src\VS_normal_modes_static\VS_normal_modes_static.sln
+- > \CAMBALA\src\VS_normal_modes_static\VS_normal_modes_static.sln
 
 To build CAMBALA.exe, use 
 
-- > \Acoustics-at-home\src\VS_normal_modes\VS_normal_modes.sln
+- > \CAMBALA\src\VS_normal_modes\VS_normal_modes.sln
 
 Linux:
 
 To build the normal_modes library:
 
-- > cd ./Acoustics-at-home/src/normal_modes/
+- > cd ./CAMBALA/src/normal_modes/
 
 - > make
 
 To build the CAMBALA binary:
 
-- > cd ./Acoustics-at-home/src/cambala/
+- > cd ./CAMBALA/src/cambala/
 
 - > make
 
 
 ================
 
-HOW TO CREATE INVERTION SCENARIOS
+HOW TO CREATE INVERTION SCENARIOS FOR CAMBALA INVERSION TOOLS
 
 A manual on creating inversion scenarios is located in
 \doc\Creating_an_inversion_scenario_file.pdf
@@ -75,29 +77,30 @@ A manual on creating inversion scenarios is located in
 
 ================
 
-HOW TO RUN
+HOW TO RUN CAMBALA Inversion Tools
 
-> CAMBALA.exe scenario_file_name verbosity
+> CAMBALA_Inversion_Tools.exe scenario_file_name verbosity
 
 Possible verbosity values: 0, 1, 2.
 
-NB! All additional files specified in a scenario file must be in the folder where a program is launched. 
+NB! All additional files specified in a scenario file must be in the directory
+where a program is launched. 
 
 
 ================
 
-EXAMPLES
+EXAMPLES for CAMBALA Inversion Tools
 
 Example 1. Invert bottom parameters and the range correction.
 
-> Copy CAMBALA.exe to the folder \scenarios\Example_1_range_cb_rhob\
+> Copy CAMBALA_Inversion_Tools.exe to the folder \scenarios\Example_1_range_cb_rhob\
 
-> CAMBALA.exe scenario1 1
+> CAMBALA_Inversion_Tools.exe scenario1 1
 
 Example 2. Invert bottom parameters and the sound speed profile.
 
-> Copy CAMBALA.exe to the folder \scenarios\Example_2_cb_rhob_ssp\
+> Copy CAMBALA_Inversion_Tools.exe to the folder \scenarios\Example_2_cb_rhob_ssp\
 
-> CAMBALA.exe scenario2 1
+> CAMBALA_Inversion_Tools.exe scenario2 1
 
 
