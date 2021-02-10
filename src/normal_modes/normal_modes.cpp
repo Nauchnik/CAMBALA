@@ -842,10 +842,7 @@ vector<double> NormalModes::compute_wnumbers(
 			tmp_main_diag = main_diag;
 			tmp_second_diag = second_diag;
 			alglib::smatrixtdevdr(tmp_main_diag, tmp_second_diag, matrix_size, 0, left_border, right_border, eigen_num, eigenvectors);
-			if (eigen_num == 0) {
-				cerr << "0 eigen values by ALGLIB" << endl;
-				exit(int(Errors::alglib_zero_eigen_num));
-			}
+			
 			for (int ii = 0; ii < eigen_num; ii++)
 				wnumbers2.push_back(tmp_main_diag[eigen_num - ii - 1]);
 			if (nmod == 0)
@@ -899,11 +896,6 @@ vector<double> NormalModes::compute_wnumbers(
 		else {
 			cerr << "error in calculatig eigen values by Spectra, nconv : " << nconv << endl;
 			exit(int(Errors::spectra_eigen));
-		}
-
-		if (evalues.size() == 0) {
-			cerr << "0 eigen values by Spectra" << endl;
-			exit(int(Errors::spectra_zero_eigen_num));
 		}
 
 		if (verbosity > 1) {
