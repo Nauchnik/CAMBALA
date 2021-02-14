@@ -57,8 +57,6 @@ void NormalModes::read_scenario(const string scenarioFileName)
 			sstream >> nmod;
 		if (word == "alpha")
 			sstream >> alpha;
-		else if (word == "R")
-			Rs = parseVector(sstream);
 		else if (word == "zr")
 			zr = parseVector(sstream);
 		else if (word == "c1s")
@@ -73,7 +71,7 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		}
 		else if (word == "bs")
 			M_betas = parseVector(sstream);
-		if (word == "eigen_type")
+		if ( (word == "eigen_type") or (word == "eigenType") )
 			sstream >> eigen_type;
 		if (word == "verbosity")
 			sstream >> verbosity;
@@ -102,10 +100,6 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		cout << "zr : " << endl;
 		for (auto z : zr)
 			cout << z << " ";
-		cout << endl;
-		cout << "Rs : " << endl;
-		for (auto rs : Rs)
-			cout << rs << " ";
 		cout << endl;
 		cout << "c1s : " << endl;
 		for (auto x : M_c1s)
@@ -179,10 +173,6 @@ void NormalModes::write_result(const string resultFileName)
 	sstream << "ordRich " << ordRich << endl;
 	sstream << "f " << f << endl;
 	// 1-dim arrays
-	sstream << "R ";
-	for (auto x : Rs)
-		sstream << x << " ";
-	sstream << endl;
 	sstream << "zr ";
 	for (auto x : zr)
 		sstream << x << " ";

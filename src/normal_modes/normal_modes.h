@@ -59,7 +59,6 @@ public:
 
 	// source/receiver parameters
 	vector<double> zr;
-	vector<double> Rs;
 	double f; // frequency
 
 	// parameters of wave numbers and mode functions
