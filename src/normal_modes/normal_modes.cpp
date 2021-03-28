@@ -14,6 +14,19 @@
 using namespace Spectra;
 using namespace Errors;
 
+template<typename... T>
+std::string join(const T&... values) {
+    std::ostringstream stream;
+    ((stream << values), ...);
+    return stream.str();
+}
+
+NormalModesError::NormalModesError(Error error, const std::string& what_arg) : std::logic_error(what_arg), _error(error) {}
+
+const Error& NormalModesError::error() const {
+    return _error;
+}
+
 NormalModes::NormalModes():
 	iModesSubset(-1.0),
 	ordRich(3),
@@ -32,10 +45,9 @@ void NormalModes::read_scenario(const string scenarioFileName)
 
 	ifstream scenarioFile(scenarioFileName.c_str());
 
-	if (!scenarioFile.is_open()) {
-		cerr << "scenario file with the name " << scenarioFileName << " wasn't opened" << endl;
-		exit(int(Errors::scenario_open));
-	}
+	if (!scenarioFile.is_open())
+	    throw NormalModesError(Errors::scenario_open,
+                            join("Scenario file with the name ", scenarioFileName, " wasn't opened"));
 
 	string str, word, tmp_word;
 	stringstream sstream;
@@ -79,14 +91,11 @@ void NormalModes::read_scenario(const string scenarioFileName)
 	}
 	scenarioFile.close();
 
-	if (M_betas.empty()) {
-		cerr << "M_betas is empty" << endl;
-		exit(int(Errors::empty_betas));
-	}
-	if (M_rhos.empty()) {
-		cerr << "M_rhos is empty" << endl;
-		exit(int(Errors::empty_rhos));
-	}
+	if (M_betas.empty())
+	    throw NormalModesError(Errors::empty_betas, "M_betas is empty");
+
+	if (M_rhos.empty())
+        throw NormalModesError(Errors::empty_rhos, "M_rhos is empty");
 
 	if (verbosity > 0) {
 		cout << "iModesSubset : " << iModesSubset << endl;
@@ -130,10 +139,9 @@ void NormalModes::read_scenario(const string scenarioFileName)
 	all_ns_points.resize(all_depths.size());
 	for (int i = 0; i < all_depths.size(); i++) {
 		int n_layers_w = all_depths[i].size() - 1;
-		if (!n_layers_w) {
-			cerr << "n_layers_w == 0" << endl;
-			exit(int(Error::zero_layers_w));
-		}
+		if (!n_layers_w)
+		    throw NormalModesError(Error::zero_layers_w, "n_layers_w == 0");
+
 		vector<unsigned> ns_points;
 		ns_points.resize(all_depths[i].size());
 		ns_points[0] = (unsigned)round(ppm * all_depths[i][0]);
@@ -161,10 +169,9 @@ void NormalModes::write_result(const string resultFileName)
 {
 	ofstream ofile(resultFileName);
 
-	if (!ofile.is_open()) {
-		cerr << "Error while opening the result file " << resultFileName << endl;
-		exit(int(Errors::result_open));
-	}
+	if (!ofile.is_open())
+	    throw NormalModesError(Errors::result_open,
+                            join("Error while opening the result file ", resultFileName));
 	
 	stringstream sstream;
 	// scalars
@@ -222,10 +229,9 @@ void NormalModes::write_result(const string resultFileName)
 void NormalModes::print_wnumbers()
 {
 	cout << "wave numbers : ";
-	if (khs.empty()) {
-		cerr << "khs is empty" << endl;
-		exit(int(Errors::empty_khs));
-	}
+	if (khs.empty())
+	    throw NormalModesError(Errors::empty_khs, "khs is empty");
+
 	cout << setprecision(11) << fixed;
 	for (unsigned i=0;i<khs.size();i++)
 		cout << khs[i] << "+" << mattenuation[i];
@@ -235,10 +241,9 @@ void NormalModes::print_wnumbers()
 void NormalModes::print_mfunctions_zr()
 {
 	cout << "mfunctions_zr : \n";
-	if (mfunctions_zr.empty()) {
-		cerr << "mfunctions_zr is empty" << endl;
-		exit(int(Errors::empty_mfunctions_zr));
-	}
+	if (mfunctions_zr.empty())
+	    throw NormalModesError(Errors::empty_mfunctions_zr, "mfunctions_zr is empty");
+
 	for (auto x : mfunctions_zr) {
 		for (auto y : x)
 			cout << y << " ";
@@ -249,10 +254,9 @@ void NormalModes::print_mfunctions_zr()
 void NormalModes::print_modal_group_velocities()
 {
 	cout << "modal_group_velocities : \n";
-	if (modal_group_velocities.empty()) {
-		cerr << "modal_group_velocities is empty" << endl;
-		exit(int(Errors::empty_modal_group_velocities));
-	}
+	if (modal_group_velocities.empty())
+	    throw NormalModesError(Errors::empty_modal_group_velocities, "modal_group_velocities is empty");
+
 	for (auto x : modal_group_velocities) {
 		for (auto y : x)
 			cout << y << " ";
@@ -350,10 +354,9 @@ vector<double> NormalModes::fillArrayStep(const string word)
 	double left_bound_val = 0, step = 0, right_bound_val = 0;
 	getThreeValuesFromStr(word, left_bound_val, step, right_bound_val);
 	vec.push_back(left_bound_val);
-	if (left_bound_val == right_bound_val) {
-		cerr << "left_bound_val == right_bound_val" << endl;
-		exit(int(Errors::equal_bounds));
-	}
+	if (left_bound_val == right_bound_val)
+	    throw NormalModesError(Errors::equal_bounds, "left_bound_val == right_bound_val");
+
 	double val = left_bound_val;
 	for (;;) {
 		val += step;
@@ -421,11 +424,8 @@ vector<double> NormalModes::compute_wnumbers_extrap_lin_dz(const double omeg)
 	
 	// check sized of main arrays
 	if ((M_Ns_points.size() == 0) || (M_c1s.size() == 0) || (M_c2s.size() == 0) ||
-		(M_rhos.size() == 0) || (M_depths.size() == 0)) 
-	{
-		cerr << "Error. In NormalModes::compute_wnumbers_extrap_lin_dz() one of the main arrays is empty";
-		exit(int(Errors::empty_array));
-	}
+		(M_rhos.size() == 0) || (M_depths.size() == 0))
+	    throw NormalModesError(Errors::empty_array, "Error. In NormalModes::compute_wnumbers_extrap_lin_dz() one of the main arrays is empty");
 	
 	vector<double> coeff_extrap;
 	switch (ordRich) {
@@ -842,10 +842,11 @@ vector<double> NormalModes::compute_wnumbers(
 			//left_border /= sqrt(2);
 			cur_alpha += 0.0174533; // 1 degree per iteration
 			//cout << "alpha " << cur_alpha << endl;
-			if (cos(cur_alpha) <= 0.0) { // error if 90 degrees
-				cerr << "cos(alpha) <= 0" << endl;
-				exit(int(Errors::nonpositiv_cosofalpha));
-			}
+			if (cos(cur_alpha) <= 0.0) {
+			    std::cout << wnumbers2.size() << ' ' << nmod << std::endl;
+                throw NormalModesError(Errors::nonpositiv_cosofalpha, "cos(alpha) <= 0");
+            }
+
 			left_border = cos(cur_alpha) * cos(cur_alpha) * kappamin * kappamin;
 		} while (wnumbers2.size() < nmod);
 	}
@@ -872,11 +873,9 @@ vector<double> NormalModes::compute_wnumbers(
 
 		int nconv = eigs.compute(SortRule::LargestMagn, 1000, 1e-9, SortRule::LargestAlge);
 		// int nconv = eigs.compute();
-		if (nconv < nmod) {
-			cerr << "nconv < nmod" << endl;
-			cerr << nconv << " < " << nmod << endl;
-			exit(int(Errors::nconv_less_nmod));
-		}
+		if (nconv < nmod)
+		    throw NormalModesError(Errors::nconv_less_nmod, join(nconv, " < ", nmod));
+
 		// Retrieve results
 		Eigen::VectorXcd evalues;
 		if (eigs.info() == CompInfo::Successful) {
@@ -884,8 +883,8 @@ vector<double> NormalModes::compute_wnumbers(
 			evalues = eigs.eigenvalues();
 		}
 		else {
-			cerr << "error in calculatig eigen values by Spectra, nconv : " << nconv << endl;
-			exit(int(Errors::spectra_eigen));
+		    throw NormalModesError(Errors::spectra_eigen,
+                             join("error in calculatig eigen values by Spectra, nconv : ", nconv));
 		}
 
 		if (verbosity > 1) {

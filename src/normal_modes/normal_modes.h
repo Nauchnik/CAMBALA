@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <vector>
 #include <string>
+#include <stdexcept>
 
 using namespace std;
 
@@ -42,6 +43,21 @@ namespace Errors {
 		spectra_eigen = 24,
 		spectra_zero_eigen_num = 25
 	};
+
+    class NormalModesError : public std::logic_error {
+
+    public:
+
+        NormalModesError(Error, const std::string&);
+
+        const Error& error() const;
+
+    private:
+
+        Error _error;
+
+    };
+
 }
 
 class NormalModes
