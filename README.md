@@ -51,3 +51,17 @@ Example 2. Invert bottom parameters and the sound speed profile.
 > Copy CAMBALA_Inversion_Tools.exe to the directory \scenarios\Example_2_cb_rhob_ssp\
 
 > CAMBALA_Inversion_Tools.exe scenario2 1
+
+## CITATION
+
+CAMBALA Inversion Tools can be cited as follows:
+
+@article{ZaikinP16-OIDP,
+author  = "Oleg Zaikin and Pavel Petrov",
+title   = "Algorithm of reconstruction of the sound speed profile in a shallow-water geoacoustic waveguide from modal dispersion data",
+journal = "Optoelectronics, Instrumentation and Data Processing",
+year    = "2016",
+volume  = "52",
+number  = "3",
+pages   = "259--265"
+}
