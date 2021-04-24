@@ -1,8 +1,9 @@
 CAMBALA: Coupled Acoustic Modes with Bottom Attenuation in Linear Acoustics
 
 Authors:
-Pavel Petrov, Andrey Tyshchenko (Il'ichev Pacific Oceanological Institute FEB RAS) 
-Oleg Zaikin (Matrosov Institute for System Dynamics and Control Theory SB RAS)
+Pavel Petrov*, Oleg Zaikin**, Andrey Tyshchenko*
+* Il'ichev Pacific Oceanological Institute FEB RAS
+** Matrosov Institute for System Dynamics and Control Theory SB RAS
 
 
 ================
