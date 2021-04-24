@@ -11,6 +11,7 @@ ipch/
 *.cachefile
 *.VC.db
 *.VC.VC.opendb
+.vs/
 
 # User-specific files
 *.suo

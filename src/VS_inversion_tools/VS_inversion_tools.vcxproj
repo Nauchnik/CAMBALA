@@ -21,8 +21,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{471493CC-6372-4F7F-ACA5-F47F4E62FA45}</ProjectGuid>
-    <RootNamespace>VScambala</RootNamespace>
+    <RootNamespace>VSinversiontools</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>VS_inversion_tools</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -70,10 +71,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <TargetName>CAMBALA</TargetName>
+    <TargetName>Cambala_Inversion_Tools</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TargetName>CAMBALA</TargetName>
+    <TargetName>Cambala_Inversion_Tools</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -81,7 +82,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../../alglib; ../cambala/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\alglib;..\inversion_tools\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -91,7 +92,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\alglib;..\cambala</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\alglib;..\inversion_tools\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -103,7 +104,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../../../alglib;../cambala/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\alglib;..\inversion_tools\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -119,7 +120,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\..\alglib;..\cambala</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\alglib;..\inversion_tools\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -142,9 +143,9 @@
     <ClCompile Include="..\..\..\alglib\solvers.cpp" />
     <ClCompile Include="..\..\..\alglib\specialfunctions.cpp" />
     <ClCompile Include="..\..\..\alglib\statistics.cpp" />
-    <ClCompile Include="..\cambala\main.cpp" />
-    <ClCompile Include="..\cambala\parallel.cpp" />
-    <ClCompile Include="..\cambala\sequential.cpp" />
+    <ClCompile Include="..\inversion_tools\main.cpp" />
+    <ClCompile Include="..\inversion_tools\parallel.cpp" />
+    <ClCompile Include="..\inversion_tools\sequential.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\alglib\alglibinternal.h" />
@@ -160,14 +161,11 @@
     <ClInclude Include="..\..\..\alglib\solvers.h" />
     <ClInclude Include="..\..\..\alglib\specialfunctions.h" />
     <ClInclude Include="..\..\..\alglib\statistics.h" />
-    <ClInclude Include="..\cambala\compute.h" />
-    <ClInclude Include="..\cambala\parallel.h" />
-    <ClInclude Include="..\cambala\point.h" />
-    <ClInclude Include="..\cambala\sequential.h" />
-    <ClInclude Include="..\cambala\utils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\cambala\Makefile" />
+    <ClInclude Include="..\inversion_tools\compute.h" />
+    <ClInclude Include="..\inversion_tools\parallel.h" />
+    <ClInclude Include="..\inversion_tools\point.h" />
+    <ClInclude Include="..\inversion_tools\sequential.h" />
+    <ClInclude Include="..\inversion_tools\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
