@@ -11,18 +11,20 @@ Pavel Petrov^, Oleg Zaikin^^, Andrey Tyshchenko^
 
 CAMBALA is aimed at computing sound propagation in 3D-varying shallow water waveguides.
 
-CAMBALA Inversion Tools is aimed at solving computationally hard inverse problems
+CAMBALA Inversion tools is aimed at solving computationally hard inverse problems
 in underwater acoustics. In particular, it can reconstruct the sound speed profile
 or seabed parameters in a shallow water waveguide using a dispersion-based geoacoustic 
 inversion scheme.
 
 ### HOW TO BUILD
 
-##### Windows
+#### CAMBALA
 
+##### Windows
 
 ##### Linux
 
+#### CAMBALA Inversion tools
 
 ### HOW TO CREATE INVERTION SCENARIOS FOR CAMBALA INVERSION TOOLS
 
@@ -54,7 +56,7 @@ Example 2. Invert bottom parameters and the sound speed profile.
 
 ### CITATION
 
-CAMBALA Inversion Tools can be cited as follows:
+CAMBALA Inversion tools can be cited as follows:
 
 ```
 @article{ZaikinP16-OIDP,
