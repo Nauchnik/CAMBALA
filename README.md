@@ -31,7 +31,7 @@ A manual on creating inversion scenarios is here
 
 ### HOW TO RUN CAMBALA INVERSION TOOLS
 
-> CAMBALA_Inversion_Tools.exe scenario_file_name verbosity
+> CAMBALA_inversion_tools.exe scenario_file_name verbosity
 
 Possible verbosity values: 0, 1, 2.
 
@@ -42,15 +42,15 @@ where a program is launched.
 
 Example 1. Invert bottom parameters and the range correction.
 
-> Copy CAMBALA_Inversion_Tools.exe to the directory \scenarios\Example_1_range_cb_rhob\
+> Copy CAMBALA_inversion_tools.exe to the directory \scenarios\Example_1_range_cb_rhob\
 
-> CAMBALA_Inversion_Tools.exe scenario1 1
+> CAMBALA_inversion_tools.exe scenario1 1
 
 Example 2. Invert bottom parameters and the sound speed profile.
 
-> Copy CAMBALA_Inversion_Tools.exe to the directory \scenarios\Example_2_cb_rhob_ssp\
+> Copy CAMBALA_inversion_tools.exe to the directory \scenarios\Example_2_cb_rhob_ssp\
 
-> CAMBALA_Inversion_Tools.exe scenario2 1
+> CAMBALA_inversion_tools.exe scenario2 1
 
 ### CITATION
 
