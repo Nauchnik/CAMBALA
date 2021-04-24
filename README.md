@@ -38,7 +38,7 @@ Possible verbosity values: 0, 1, 2.
 NB! All additional files specified in a scenario file must be in the directory
 where a program is launched. 
 
-## EXAMPLES FOR CAMBALA INVERSION TOOLS
+### EXAMPLES FOR CAMBALA INVERSION TOOLS
 
 Example 1. Invert bottom parameters and the range correction.
 
@@ -52,7 +52,7 @@ Example 2. Invert bottom parameters and the sound speed profile.
 
 > CAMBALA_Inversion_Tools.exe scenario2 1
 
-## CITATION
+### CITATION
 
 CAMBALA Inversion Tools can be cited as follows:
 
