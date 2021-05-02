@@ -22,9 +22,29 @@ inversion scheme.
 
 ##### Windows
 
+Use the Visual studio solution ./src/VS_normal_modes/VS_normal_modes.sln
+
 ##### Linux
 
+> cd src/normal_modes
+
+> cmake -DCMAKE_BUILD_TYPE=Release .
+
+> make
+
 #### CAMBALA Inversion tools
+
+##### Windows
+
+Use the Visual studio solution ./src/VS_inversion_tools/VS_inversion_tools.sln
+
+##### Linux
+
+> cd src/inversion_tools
+
+> cmake -DCMAKE_BUILD_TYPE=Release .
+
+> make
 
 ### HOW TO CREATE INVERTION SCENARIOS FOR CAMBALA INVERSION TOOLS
 
