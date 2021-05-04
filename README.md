@@ -62,15 +62,15 @@ where a program is launched.
 
 ### EXAMPLES FOR CAMBALA INVERSION TOOLS
 
-Example 1. Invert bottom parameters and the range correction.
+In all examples below CAMBALA_inversion_tools.exe must be first copied to the corresponding directory.
 
-> Copy CAMBALA_inversion_tools.exe to the directory \scenarios\Example_1_range_cb_rhob\
+Example 1. Invert bottom parameters and the range correction.
+Directory: \scenarios\Example_1_range_cb_rhob\
 
 > CAMBALA_inversion_tools.exe scenario1 1
 
 Example 2. Invert bottom parameters and the sound speed profile.
-
-> Copy CAMBALA_inversion_tools.exe to the directory \scenarios\Example_2_cb_rhob_ssp\
+Directory: \scenarios\Example_2_cb_rhob_ssp\
 
 > CAMBALA_inversion_tools.exe scenario2 1
 
