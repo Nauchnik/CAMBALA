@@ -26,6 +26,8 @@ Use the Visual studio solution /src/VS_normal_modes/VS_normal_modes.sln
 
 ##### Linux
 
+> git clone --recurse-submodules https://github.com/Nauchnik/CAMBALA.git
+
 > cd src/normal_modes
 
 > cmake -DCMAKE_BUILD_TYPE=Release .
@@ -39,6 +41,8 @@ Use the Visual studio solution /src/VS_normal_modes/VS_normal_modes.sln
 Use the Visual studio solution ./src/VS_inversion_tools/VS_inversion_tools.sln
 
 ##### Linux
+
+> git clone --recurse-submodules https://github.com/Nauchnik/CAMBALA.git
 
 > cd src/inversion_tools
 
