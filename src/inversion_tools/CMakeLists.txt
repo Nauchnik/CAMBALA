@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.18)
 project(inversion_tools)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -22,6 +22,6 @@ include_directories(
     ${THIRD_PARTY_DIR}/eigen
 )
 
-add_executable(cambala main.cpp sequential.cpp)
+add_executable(CAMBALA_inversion_tools main.cpp sequential.cpp)
 
-target_link_libraries(cambala alglib)
+target_link_libraries(CAMBALA_inversion_tools alglib)
