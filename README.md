@@ -22,7 +22,7 @@ inversion scheme.
 
 ##### Windows
 
-Use the Visual studio solution ./src/VS_normal_modes/VS_normal_modes.sln
+Use the Visual studio solution /src/VS_normal_modes/VS_normal_modes.sln
 
 ##### Linux
 
@@ -62,7 +62,7 @@ where a program is launched.
 
 ### EXAMPLES FOR CAMBALA INVERSION TOOLS
 
-In all examples below CAMBALA_inversion_tools.exe must be first copied to the corresponding directory.
+NB! In all examples below CAMBALA_inversion_tools.exe must be first copied to the corresponding directory.
 
 Example 1. Invert bottom parameters and the range correction.
 Directory: \scenarios\Example_1_range_cb_rhob\
