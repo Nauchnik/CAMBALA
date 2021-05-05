@@ -20,13 +20,17 @@ inversion scheme.
 
 #### CAMBALA
 
-##### Windows
+##### Preliminary Windows actions
 
-Use the Visual studio solution /src/VS_normal_modes/VS_normal_modes.sln
+Download and extract sources.
 
-##### Linux
+Visual studio solution is here /src/VS_normal_modes/VS_normal_modes.sln
+
+##### Preliminary Linux actions
 
 > git clone --recurse-submodules https://github.com/Nauchnik/CAMBALA.git
+
+##### Common actions
 
 > cd src/normal_modes
 
