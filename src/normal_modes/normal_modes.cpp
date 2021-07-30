@@ -83,7 +83,7 @@ void NormalModes::read_scenario(const string scenarioFileName)
 		}
 		else if (word == "bs")
 			M_betas = parseVector(sstream);
-		if ( (word == "eigen_type") or (word == "eigenType") )
+		if ( (word == "eigen_type") || (word == "eigenType") )
 			sstream >> eigen_type;
 		if (word == "verbosity")
 			sstream >> verbosity;
